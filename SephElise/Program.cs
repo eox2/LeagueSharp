@@ -80,7 +80,7 @@ namespace SephElise
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQHuman", "Use Q")).SetValue(true);
             Config.SubMenu("Combo").AddItem(new MenuItem("UseWHuman", "Use W")).SetValue(true);
             Config.SubMenu("Combo").AddItem(new MenuItem("UseEHuman", "Use E")).SetValue(true);
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseR", "Use R")).SetValue(true);
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQSpider", "Use Q Spider")).SetValue(true);
             Config.SubMenu("Combo").AddItem(new MenuItem("UseWSpider", "Use W Spider")).SetValue(true);
             Config.SubMenu("Combo").AddItem(new MenuItem("UseESpider", "Use E Spider")).SetValue(true);
@@ -362,11 +362,11 @@ namespace SephElise
                 if (HumanForm)
                 {
                     // Human Rotation
-                    if (Player.Distance(target) <= Q.Range && Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady()) { Q.Cast(target); }
-                    if (Player.Distance(target) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady()) { W.Cast(target); }
-                    if (Player.Distance(target) <= E.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady()) { E.Cast(target); }
+                    if (Player.Distance(target) <= Q.Range && Config.Item("UseQhuman").GetValue<bool>() && Q.IsReady()) { Q.Cast(target); }
+                    if (Player.Distance(target) <= W.Range && Config.Item("UseWhuman").GetValue<bool>() && W.IsReady()) { W.Cast(target); }
+                    if (Player.Distance(target) <= E.Range && Config.Item("UseEhuman").GetValue<bool>() && E.IsReady()) { E.Cast(target); }
                     if (!Q.IsReady() && !W.IsReady() && !E.IsReady() && Player.Distance(target) <= 750 && Config.Item("UseR").GetValue<bool>()) { R.Cast(); }
-                    if (!Q.IsReady() && !W.IsReady() && Player.Distance(target) <= 750 && Config.Item("UseQCombo").GetValue<bool>()) { R.Cast(); }
+                    if (!Q.IsReady() && !W.IsReady() && Player.Distance(target) <= 750 && Config.Item("UseQhuman").GetValue<bool>()) { R.Cast(); }
 
 
                 }
