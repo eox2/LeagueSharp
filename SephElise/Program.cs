@@ -362,11 +362,11 @@ namespace SephElise
                 if (HumanForm)
                 {
                     // Human Rotation
-                    if (Player.Distance(target) <= Q.Range && Config.Item("UseQhuman").GetValue<bool>() && Q.IsReady()) { Q.Cast(target); }
-                    if (Player.Distance(target) <= W.Range && Config.Item("UseWhuman").GetValue<bool>() && W.IsReady()) { W.Cast(target); }
-                    if (Player.Distance(target) <= E.Range && Config.Item("UseEhuman").GetValue<bool>() && E.IsReady()) { E.Cast(target); }
+                    if (Player.Distance(target) <= Q.Range && Config.Item("UseQHuman").GetValue<bool>() && Q.IsReady()) { Q.Cast(target); }
+                    if (Player.Distance(target) <= W.Range && Config.Item("UseWHuman").GetValue<bool>() && W.IsReady()) { W.Cast(target); }
+                    if (Player.Distance(target) <= E.Range && Config.Item("UseEHuman").GetValue<bool>() && E.IsReady()) { E.Cast(target); }
                     if (!Q.IsReady() && !W.IsReady() && !E.IsReady() && Player.Distance(target) <= 750 && Config.Item("UseR").GetValue<bool>()) { R.Cast(); }
-                    if (!Q.IsReady() && !W.IsReady() && Player.Distance(target) <= 750 && Config.Item("UseQhuman").GetValue<bool>()) { R.Cast(); }
+                    if (!Q.IsReady() && !W.IsReady() && Player.Distance(target) <= 750 && Config.Item("UseQHuman").GetValue<bool>()) { R.Cast(); }
 
 
                 }
