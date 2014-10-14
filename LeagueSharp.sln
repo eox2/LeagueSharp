@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephElise", "SephElise\SephElise.csproj", "{36D5B533-9C99-4EB5-8A07-31C0D5BBA38A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephKhazix", "..\..\..\Visual Studio 2013\Projects\SephKhazix\SephKhazix\SephKhazix.csproj", "{7FA713BD-10E9-419F-A118-D3BB3B922ED9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{36D5B533-9C99-4EB5-8A07-31C0D5BBA38A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36D5B533-9C99-4EB5-8A07-31C0D5BBA38A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36D5B533-9C99-4EB5-8A07-31C0D5BBA38A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FA713BD-10E9-419F-A118-D3BB3B922ED9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FA713BD-10E9-419F-A118-D3BB3B922ED9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FA713BD-10E9-419F-A118-D3BB3B922ED9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FA713BD-10E9-419F-A118-D3BB3B922ED9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

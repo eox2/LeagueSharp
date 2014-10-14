@@ -270,9 +270,9 @@ namespace SephElise
         private static void KillSteal()
         {
             var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var igniteDmg = DamageLib.getDmg(target, DamageLib.SpellType.IGNITE);
-            var QHDmg = DamageLib.getDmg(target, DamageLib.SpellType.Q);
-            var WDmg = DamageLib.getDmg(target, DamageLib.SpellType.W);
+            var igniteDmg = Damage.GetSummonerSpellDamage(Player, target, Damage.SummonerSpell.Ignite);
+            var QHDmg = Damage.GetSpellDamage(Player, target, SpellSlot.Q);
+            var WDmg = Damage.GetSpellDamage(Player, target, SpellSlot.W);
 
             if (target != null && Config.Item("UseIgnite").GetValue<bool>() && IgniteSlot != SpellSlot.Unknown &&
             Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
@@ -385,4 +385,3 @@ namespace SephElise
         }
     }
 }
-
