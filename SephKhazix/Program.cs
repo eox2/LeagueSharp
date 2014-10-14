@@ -157,7 +157,7 @@ namespace SephKhazix
             Config.SubMenu("Farm").AddItem(new MenuItem("UseWFarm", "Use W")).SetValue(true);
             Config.SubMenu("Farm").AddItem(new MenuItem("ActiveFarm", "Farm Key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             Config.SubMenu("Farm").AddItem(new MenuItem("JungleFarm", "Jungle Key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
-            Config.SubMenu("Farm").AddItem(new MenuItem("AutoSmite", "Auto Smite")).SetValue(true);
+  
 
             //Kill Steal
             Config.AddSubMenu(new Menu("KillSteal", "Ks"));
@@ -420,33 +420,7 @@ namespace SephKhazix
             }
         }
     
-        private static void CastWEnemy()
-        {
-            try
-            {
-                if (!W.IsReady())
-                    return;
-                var target = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Physical);
-                if (target == null)
-                    return;
-                if (target.IsValidTarget(W.Range) && W.GetPrediction(target).Hitchance >= HitChance.High)
-                    W.Cast(W.GetPrediction(target).CastPosition, Config.Item("usePackets").GetValue<bool>());
-                else if (W.GetPrediction(target).Hitchance == HitChance.Collision)
-                {
-                    var wCollision = W.GetPrediction(target).CollisionObjects;
-                    foreach (var wCollisionChar in wCollision.Where(wCollisionChar => wCollisionChar.Distance(target) <= 50))
-                    {
-                        W.Cast(wCollisionChar.Position, Config.Item("usePackets").GetValue<bool>());
-                        return;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Game.PrintChat(ex.Message);
-            
-            }
-        }
+     
 
 
 

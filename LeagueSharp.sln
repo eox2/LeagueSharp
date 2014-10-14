@@ -5,7 +5,7 @@ VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephElise", "SephElise\SephElise.csproj", "{36D5B533-9C99-4EB5-8A07-31C0D5BBA38A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephKhazix", "..\..\..\Visual Studio 2013\Projects\SephKhazix\SephKhazix\SephKhazix.csproj", "{7FA713BD-10E9-419F-A118-D3BB3B922ED9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephKhazix", "SephKhazix\SephKhazix.csproj", "{7FA713BD-10E9-419F-A118-D3BB3B922ED9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
