@@ -14,15 +14,7 @@ namespace SephKhazix
 {
     class Program
     {
-        // QuickSmite 
-
      
-        public readonly int Range = 750;
-        public readonly string SummonerName = "SummonerSmite";
-        public bool Available = false;
-        public SpellSlot Slot = SpellSlot.Unknown;
-
-        //Quicksmite Over
         private const string ChampionName = "Khazix";
         private static Orbwalking.Orbwalker Orbwalker;
         public static Spell Q, W, E, R, QE, WE, EE, RE, Wpred, WEpred, Wfarm, Epred, EEpred;
@@ -37,14 +29,12 @@ namespace SephKhazix
         private static SpellSlot IgniteSlot;
         private static SpellSlot SmiteSlot;
         private static Items.Item YOU;
+     
 
         private static Obj_AI_Hero Player;
         private static bool Qnorm, Qevolved, Wnorm, Wevolved, Enorm, Eevolved, Rnorm, Revolved;
         String[] monsters = { "GreatWraith", "Wraith", "AncientGolem", "GiantWolf", "LizardElder", "Golem", "Worm", "Dragon", "Wight" };
 
-
-
-        private static Menu Seph;
 
         static void Main(string[] args)
         {
@@ -58,6 +48,7 @@ namespace SephKhazix
             Player = ObjectManager.Player;
             if (Player.BaseSkinName != ChampionName) return;
 
+
             Wpred = new Spell(SpellSlot.W, 1025);
             WEpred = new Spell(SpellSlot.W, 1025);
             Wfarm = new Spell(SpellSlot.W, 1025);
@@ -68,6 +59,7 @@ namespace SephKhazix
 
             Wpred.SetSkillshot(0.25f, 70f, 828.5f, true, SkillshotType.SkillshotLine);
             WEpred.SetSkillshot(0.25f, 70f, 828.5f, true, SkillshotType.SkillshotLine);
+                
 
 
             Epred.SetSkillshot(0.25f, 300f, 1500f, false, SkillshotType.SkillshotCircle);
@@ -100,6 +92,7 @@ namespace SephKhazix
             BKR = new Items.Item(3153, 450f);
             BWC = new Items.Item(3144, 450f);
             YOU = new Items.Item(3142, 185f);
+           
 
             IgniteSlot = Player.GetSpellSlot("summonerdot");
             SmiteSlot = Player.GetSpellSlot("summonersmite");
@@ -118,13 +111,11 @@ namespace SephKhazix
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
             //config
-            var q = new Menu("Auto Harrass/Poke", "Q");
-            q.AddItem(new MenuItem("AutoHarrass", "AutoHarrass").SetValue(true));
-            q.AddItem(new MenuItem("AutoWI", "Auto-W immobile").SetValue(true));
-            q.AddItem(new MenuItem("AutoWD", "Auto-W dashing").SetValue(true));
-            q.AddItem(new MenuItem("Auto W", "Auto W").SetValue((new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle, false))));
-
-            Config.AddSubMenu(q);
+            Config.AddSubMenu(new Menu("Auto Harrass/Poke", "autopoke"));
+            Config.SubMenu("autopoke").AddItem(new MenuItem("AutoHarrass", "AutoHarrass")).SetValue(true);
+            Config.SubMenu("autopoke").AddItem(new MenuItem("AutoWI", "Auto-W immobile")).SetValue(true);
+            Config.SubMenu("autopoke").AddItem(new MenuItem("AutoWD", "Auto W")).SetValue(true);
+  
 
             //
             Config.AddSubMenu(new Menu("Packet Setting", "Packets"));
@@ -194,6 +185,7 @@ namespace SephKhazix
 
         private static void CastW(Obj_AI_Base unit, Vector2 unitPosition, int minTargets = 0)
         {
+            bool usePacket = Config.Item("usePackets").GetValue<bool>();
             var points = new List<Vector2>();
             var hitBoxes = new List<int>();
 
@@ -252,12 +244,13 @@ namespace SephKhazix
             if (bestHit + 1 <= minTargets)
                 return;
 
-            Wpred.Cast(bestPosition.To3D(), true);
+            Wpred.Cast(bestPosition.To3D(), usePacket);
 
         }
 
         private static void CastWE(Obj_AI_Base unit, Vector2 unitPosition, int minTargets = 0)
         {
+            bool usePacket = Config.Item("usePackets").GetValue<bool>();
             var points = new List<Vector2>();
             var hitBoxes = new List<int>();
 
@@ -316,7 +309,7 @@ namespace SephKhazix
             if (bestHit + 1 <= minTargets)
                 return;
 
-           WEpred.Cast(bestPosition.To3D(), true);
+           WEpred.Cast(bestPosition.To3D(), usePacket);
        
         }
 
@@ -356,7 +349,7 @@ namespace SephKhazix
 
             Player = ObjectManager.Player;
             //W = new Spell(SpellSlot.E, EE.Range);
-            Orbwalker.SetAttacks(true);
+            Orbwalker.SetAttack(true);
 
             CheckSpells();
             // var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
@@ -400,22 +393,23 @@ namespace SephKhazix
             if (target != null)
             {
 
+                bool usePacket = Config.Item("usePackets").GetValue<bool>();
                 if (Player.Distance(target) <= Q.Range && Config.Item("UseQHarass").GetValue<bool>() && Q.IsReady() && Qnorm)
                 {
-                    Q.Cast(target);
+                    Q.Cast(target, usePacket);
                 }
                 if (Player.Distance(target) <= Q.Range && Config.Item("UseQHarass").GetValue<bool>() && Q.IsReady() && Qevolved)
                 {
-                    QE.Cast(target);
+                    QE.Cast(target, usePacket);
                 }
 
                 if (Player.Distance(target) <= W.Range && Config.Item("UseWHarass").GetValue<bool>() && W.IsReady() && Wnorm)
                 {
-                    W.Cast(target);
+                    W.Cast(target, usePacket);
                 }
                 if (Player.Distance(target) <= W.Range && Config.Item("UseWHarass").GetValue<bool>() && W.IsReady() && Wevolved)
                 {
-                    WE.Cast(target);
+                    WE.Cast(target, usePacket);
                 }
             }
         }
@@ -476,12 +470,14 @@ namespace SephKhazix
                     if (HDR.IsReady() && Player.Distance(minion) <= HDR.Range)
                     {
                       
-                        HDR.Cast(minion);
+                        HDR.Cast();
+                       // Items.UseItem(3077, ObjectManager.Player);
                     }
                     if (TIA.IsReady() && Player.Distance(minion) <= TIA.Range)
                     {
                         
-                        TIA.Cast(minion);
+                        TIA.Cast();
+                     
                     }
                 }
 
@@ -570,12 +566,15 @@ namespace SephKhazix
                     if (HDR.IsReady() && Player.Distance(farmLocation.Position) <= HDR.Range && farmLocation.MinionsHit >= 2)
                 {
 
-                    HDR.Cast(farmLocation.Position);
+                    //HDR.Cast(farmLocation.Position);
+                   HDR.Cast();
                 }
                 if (TIA.IsReady() && Player.Distance(farmLocation.Position) <= TIA.Range && farmLocation.MinionsHit >= 2)
                 {
 
-                    TIA.Cast(farmLocation.Position);
+                   // TIA.Cast(farmLocation.Position);
+                    TIA.Cast();
+                   // Items.UseItem(3077, ObjectManager.Player);
                 }
             }
 
@@ -660,12 +659,14 @@ namespace SephKhazix
                 if (HDR.IsReady() && Player.Distance(farmLocation.Position) <= HDR.Range && farmLocation.MinionsHit >= 2)
                 {
 
-                    HDR.Cast(farmLocation.Position);
+                   // HDR.Cast(farmLocation.Position);
+                    HDR.Cast();
                 }
                 if (TIA.IsReady() && Player.Distance(farmLocation.Position) <= TIA.Range && farmLocation.MinionsHit >= 2)
                 {
 
-                    TIA.Cast(farmLocation.Position);
+                    //TIA.Cast(farmLocation.Position);
+                    TIA.Cast();
                 }
             }
 
@@ -680,7 +681,7 @@ namespace SephKhazix
             {
               
                 //if (minion != null) { pos.Add(minion.Position.To2D()); }
-                Orbwalker.SetAttacks(!(Q.IsReady() || W.IsReady() || E.IsReady()) || TIA.IsReady() || HDR.IsReady());
+                Orbwalker.SetAttack(!(Q.IsReady() || W.IsReady() || E.IsReady()) || TIA.IsReady() || HDR.IsReady());
                 // Normal Farms
                 if (Q.IsReady() && minion.IsValidTarget() && Qnorm && Player.Distance(minion) <= Q.Range && Config.Item("UseQFarm").GetValue<bool>() && (minion != null))
                 {
@@ -896,15 +897,15 @@ namespace SephKhazix
                if (target.Health <= QDmg + tiamatdmg)
                {
                    Q.Cast(target);
-                  TIA.Cast(target);
+                  TIA.Cast();
                }
            }
            if (Q.IsReady() &&  HDR.IsReady() && Qnorm && Player.Distance(target) <= Q.Range && target != null && Config.Item("UseQKs").GetValue<bool>())
            {
                if (target.Health <= QDmg + hydradmg)
                {
-                   Q.Cast(target);
-                   HDR.Cast(target);
+                   Q.Cast();
+                   HDR.Cast();
                }
            }
            if (Q.IsReady() && TIA.IsReady() && Qevolved && Player.Distance(target) <= QE.Range && target != null && Config.Item("UseQKs").GetValue<bool>())
@@ -919,8 +920,8 @@ namespace SephKhazix
            {
                if (target.Health <= QDmg + hydradmg)
                {
-                   Q.Cast(target);
-                   HDR.Cast(target);
+                   Q.Cast();
+                   HDR.Cast();
                }
            }
 
@@ -1051,18 +1052,20 @@ namespace SephKhazix
 
         private static void AutoHarrass()
         {
+
             if (!Config.Item("AutoHarrass").GetValue<bool>())
             {
                 return;  
             }
             var target = SimpleTs.GetTarget(1025, SimpleTs.DamageType.Physical);
+            bool usePacket = Config.Item("usePackets").GetValue<bool>();
 
             var autoWI = Config.Item("AutoWI").GetValue<bool>();
             var autoWD = Config.Item("AutoWD").GetValue<bool>();
             if ((target != null) && ((Wpred.GetPrediction(target).Hitchance >= HitChance.Medium) || Wpred.GetPrediction(target).Hitchance >= HitChance.High))
             {
 
-                if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("AutoHarrass").GetValue<bool>() && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Wpred.GetPrediction(target); Wpred.Cast(pred.CastPosition); } }
+                if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("AutoHarrass").GetValue<bool>() && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Wpred.GetPrediction(target); Wpred.Cast(pred.CastPosition, usePacket); } }
                 if (Wevolved && Player.Distance(target) <= WE.Range && Config.Item("AutoHarrass").GetValue<bool>() && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { if (enemy.IsValidTarget(WE.Range * 2)) { var pred = WEpred.GetPrediction(target); if ((pred.Hitchance == HitChance.Immobile && autoWI) || (pred.Hitchance == HitChance.Dashing && autoWD)) { CastWE(enemy, pred.UnitPosition.To2D()); } } } }
                 if (Wevolved && Player.Distance(target) <= WE.Range && Config.Item("AutoHarrass").GetValue<bool>() && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { if (enemy.IsValidTarget(WE.Range * 2)) { var pred = WEpred.GetPrediction(target); CastWE(enemy, pred.UnitPosition.To2D()); } } }
 
@@ -1075,6 +1078,7 @@ namespace SephKhazix
 
         private static void Combo()
         {
+            bool usePacket = Config.Item("usePackets").GetValue<bool>();
             var target = SimpleTs.GetTarget(1275, SimpleTs.DamageType.Physical);
 
 
@@ -1091,36 +1095,36 @@ namespace SephKhazix
                 // Normal abilities
                 if (Qnorm && Player.Distance(target) <= Q.Range && Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady()) { Q.Cast(target); }
               //  if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { if (enemy.IsValidTarget(W.Range * 2)) { var pred = Wpred.GetPrediction(enemy); if ((pred.Hitchance == HitChance.Immobile && autoQI) || (pred.Hitchance == HitChance.Dashing && autoQD)) { Wpred.Cast(pred.CastPosition); } } } }
-                if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && Wpred.GetPrediction(target).Hitchance >= HitChance.Medium) {  foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Wpred.GetPrediction(target); Wpred.Cast(pred.CastPosition); } }
-                if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && Wpred.GetPrediction(target).Hitchance >= HitChance.Collision) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var PCollision = Wpred.GetPrediction(target).CollisionObjects; foreach ( var PredCollisionChar in PCollision.Where(PredCollisionChar => PredCollisionChar.Distance(target) <= 50)) { Wpred.Cast(PredCollisionChar.Position, Config.Item("usePackets").GetValue<bool>()); } } }
-                if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && !(Wpred.GetPrediction(target).Hitchance >= HitChance.Collision) && !(Wpred.GetPrediction(target).Hitchance >= HitChance.Medium)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Wpred.GetPrediction(target); Wpred.Cast(pred.CastPosition); } } 
-                if (Enorm && Player.Distance(target) <= E.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && (target != null) && Player.Distance(target) > Q.Range) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition); } }
+                if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && Wpred.GetPrediction(target).Hitchance >= HitChance.Medium) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Wpred.GetPrediction(target); Wpred.Cast(pred.CastPosition, usePacket); } }
+                if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && Wpred.GetPrediction(target).Hitchance >= HitChance.Collision) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var PCollision = Wpred.GetPrediction(target).CollisionObjects; foreach (var PredCollisionChar in PCollision.Where(PredCollisionChar => PredCollisionChar.Distance(target) <= 50)) { Wpred.Cast(PredCollisionChar.Position, usePacket); } } }
+                if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && !(Wpred.GetPrediction(target).Hitchance >= HitChance.Collision) && !(Wpred.GetPrediction(target).Hitchance >= HitChance.Medium)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Wpred.GetPrediction(target); Wpred.Cast(pred.CastPosition, usePacket); } }
+                if (Enorm && Player.Distance(target) <= E.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && (target != null) && Player.Distance(target) > Q.Range) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition, usePacket); } }
                    
                 // Use EQ AND EW Synergy
-                if (Enorm && Qnorm && Player.Distance(target) <= E.Range + Q.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapclose").GetValue<bool>() && (target != null)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition); } }
-                if (Enorm && Wnorm && Qnorm && Player.Distance(target) <= E.Range + W.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition); } }
-                if (Enorm && Wnorm && Qevolved && Player.Distance(target) <= E.Range + W.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition); } }
+                if (Enorm && Qnorm && Player.Distance(target) <= E.Range + Q.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapclose").GetValue<bool>() && (target != null)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition, usePacket); } }
+                if (Enorm && Wnorm && Qnorm && Player.Distance(target) <= E.Range + W.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition, usePacket); } }
+                if (Enorm && Wnorm && Qevolved && Player.Distance(target) <= E.Range + W.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition, usePacket); } }
                 // Ult Usage
                 if (R.IsReady() && !Q.IsReady() && !W.IsReady() && !E.IsReady() && Config.Item("UseRCombo").GetValue<bool>()) { R.Cast(); }
                 // Evolved
                 if (Qevolved && Player.Distance(target) <= QE.Range && Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady()) { QE.Cast(target); }
               //  if (Wevolved && Player.Distance(target) <= WE.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { if (enemy.IsValidTarget(WE.Range * 2)) { var pred = WEpred.GetPrediction(target); if ((pred.Hitchance == HitChance.Immobile && autoQI) || (pred.Hitchance == HitChance.Dashing && autoQD)) { CastWE(enemy, pred.UnitPosition.To2D()); } } } }
                 if (Wevolved && Player.Distance(target) <= WE.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && Wpred.GetPrediction(target).Hitchance >= HitChance.Medium) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { if (enemy.IsValidTarget(WE.Range * 2)) { var pred = WEpred.GetPrediction(target); CastWE(enemy, pred.UnitPosition.To2D()); } } }
-                if (Wevolved && Player.Distance(target) <= WE.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && Wpred.GetPrediction(target).Hitchance >= HitChance.Collision) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var PCollision = Wpred.GetPrediction(target).CollisionObjects; foreach (var PredCollisionChar in PCollision.Where(PredCollisionChar => PredCollisionChar.Distance(target) <= 50)) { WEpred.Cast(PredCollisionChar.Position, Config.Item("usePackets").GetValue<bool>()); } } }
+                if (Wevolved && Player.Distance(target) <= WE.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && Wpred.GetPrediction(target).Hitchance >= HitChance.Collision) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var PCollision = Wpred.GetPrediction(target).CollisionObjects; foreach (var PredCollisionChar in PCollision.Where(PredCollisionChar => PredCollisionChar.Distance(target) <= 50)) { WEpred.Cast(PredCollisionChar.Position, usePacket); } } }
                 if (Wevolved && Player.Distance(target) <= WE.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && (Wpred.GetPrediction(target).Hitchance >= HitChance.Medium) && !(Wpred.GetPrediction(target).Hitchance >= HitChance.Medium)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { if (enemy.IsValidTarget(WE.Range * 2)) { var pred = WEpred.GetPrediction(target); CastWE(enemy, pred.UnitPosition.To2D()); } } }
-                if (Eevolved && Player.Distance(target) <= EE.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && !Config.Item("UseEGapclose").GetValue<bool>() && (target != null)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition); } }
+                if (Eevolved && Player.Distance(target) <= EE.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && !Config.Item("UseEGapclose").GetValue<bool>() && (target != null)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition, usePacket); } }
                 // Evolved EQ AND EW SYNERGY 
-                if (Eevolved && Qevolved && Player.Distance(target) <= EE.Range + QE.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapclose").GetValue<bool>() && (target != null)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition); } }
-                if (Eevolved && Wevolved && Qevolved && Player.Distance(target) <= EE.Range + WE.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition); } }
-                if (Eevolved && Wevolved && Qnorm && Player.Distance(target) <= EE.Range + WE.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition); } }
+                if (Eevolved && Qevolved && Player.Distance(target) <= EE.Range + QE.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapclose").GetValue<bool>() && (target != null)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition, usePacket); } }
+                if (Eevolved && Wevolved && Qevolved && Player.Distance(target) <= EE.Range + WE.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition, usePacket); } }
+                if (Eevolved && Wevolved && Qnorm && Player.Distance(target) <= EE.Range + WE.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition, usePacket); } }
                 // Use Ult When closing big gaps like E to get close for W
-                if (Eevolved && Wevolved && Qevolved && Player.Distance(target) <= EE.Range + WE.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady() && Config.Item("UseRGapcloseW").GetValue<bool>() && R.IsReady()) {  foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition); R.Cast(); } }
-                if (Eevolved && Wevolved && Qnorm && Player.Distance(target) <= EE.Range + WE.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady() && Config.Item("UseRGapcloseW").GetValue<bool>() && R.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition); R.Cast(); } }
-                if (Enorm && Wnorm && Qnorm && Player.Distance(target) <= E.Range + W.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady() && Config.Item("UseRGapcloseW").GetValue<bool>() && R.IsReady()) {  foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition); R.Cast(); } }
-                if (Enorm && Wnorm && Qevolved && Player.Distance(target) <= E.Range + W.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady() && Config.Item("UseRGapcloseW").GetValue<bool>() && R.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition); R.Cast(); } }
+                if (Eevolved && Wevolved && Qevolved && Player.Distance(target) <= EE.Range + WE.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady() && Config.Item("UseRGapcloseW").GetValue<bool>() && R.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition, usePacket); R.CastOnUnit(ObjectManager.Player); } }
+                if (Eevolved && Wevolved && Qnorm && Player.Distance(target) <= EE.Range + WE.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady() && Config.Item("UseRGapcloseW").GetValue<bool>() && R.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition, usePacket); R.CastOnUnit(ObjectManager.Player); } }
+                if (Enorm && Wnorm && Qnorm && Player.Distance(target) <= E.Range + W.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady() && Config.Item("UseRGapcloseW").GetValue<bool>() && R.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition, usePacket); R.CastOnUnit(ObjectManager.Player); } }
+                if (Enorm && Wnorm && Qevolved && Player.Distance(target) <= E.Range + W.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapcloseW").GetValue<bool>() && (target != null) && W.IsReady() && Config.Item("UseRGapcloseW").GetValue<bool>() && R.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition, usePacket); R.CastOnUnit(ObjectManager.Player); } }
                 //Mixed Evolveds
-                if (Eevolved && Qnorm && Player.Distance(target) <= EE.Range + Q.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapclose").GetValue<bool>() && (target != null)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition); } }
-                if (Enorm && Qevolved && Player.Distance(target) <= E.Range + QE.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapclose").GetValue<bool>() && (target != null)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition); } }
+                if (Eevolved && Qnorm && Player.Distance(target) <= EE.Range + Q.Range && Player.Distance(target) > Q.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapclose").GetValue<bool>() && (target != null)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = EEpred.GetPrediction(target); EEpred.Cast(pred.CastPosition, usePacket); } }
+                if (Enorm && Qevolved && Player.Distance(target) <= E.Range + QE.Range && Player.Distance(target) > QE.Range && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Config.Item("UseEGapclose").GetValue<bool>() && (target != null)) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Epred.GetPrediction(target); Epred.Cast(pred.CastPosition, usePacket); } }
 
 
 
@@ -1128,11 +1132,12 @@ namespace SephKhazix
                 {
                     if (HDR.IsReady() && Player.Distance(target) <= HDR.Range)
                     {
-                        HDR.Cast(target);
+                        HDR.Cast();
+               
                     }
                     if (TIA.IsReady() && Player.Distance(target) <= TIA.Range)
                     {
-                        TIA.Cast(target);
+                        TIA.Cast();
                     }
                     if (BKR.IsReady() && Player.Distance(target) <= BKR.Range)
                     {
