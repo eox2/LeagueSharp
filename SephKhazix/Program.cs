@@ -87,8 +87,8 @@ namespace SephKhazix
             //   EE.SetSkillshot(.250f, 100, 1000, true, SkillshotType.SkillshotCircle);
 
 
-            HDR = new Items.Item(3074, 400f);
-            TIA = new Items.Item(3077, 400f);
+            HDR = new Items.Item(3074, 225f);
+            TIA = new Items.Item(3077, 225f);
             BKR = new Items.Item(3153, 450f);
             BWC = new Items.Item(3144, 450f);
             YOU = new Items.Item(3142, 185f);
@@ -1062,8 +1062,8 @@ namespace SephKhazix
 
             var autoWI = Config.Item("AutoWI").GetValue<bool>();
             var autoWD = Config.Item("AutoWD").GetValue<bool>();
-            if ((target != null) && ((Wpred.GetPrediction(target).Hitchance >= HitChance.Medium) || Wpred.GetPrediction(target).Hitchance >= HitChance.High))
-            {
+            if ((target != null) && (W.IsReady()) && ((Wpred.GetPrediction(target).Hitchance >= HitChance.Medium) || Wpred.GetPrediction(target).Hitchance >= HitChance.High))
+            { //possible atr fix W.isready^^
 
                 if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("AutoHarrass").GetValue<bool>() && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Wpred.GetPrediction(target); Wpred.Cast(pred.CastPosition, usePacket); } }
                 if (Wevolved && Player.Distance(target) <= WE.Range && Config.Item("AutoHarrass").GetValue<bool>() && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { if (enemy.IsValidTarget(WE.Range * 2)) { var pred = WEpred.GetPrediction(target); if ((pred.Hitchance == HitChance.Immobile && autoWI) || (pred.Hitchance == HitChance.Dashing && autoWD)) { CastWE(enemy, pred.UnitPosition.To2D()); } } } }
