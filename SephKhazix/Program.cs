@@ -95,8 +95,8 @@ namespace SephKhazix
             //   EE.SetSkillshot(.250f, 100, 1000, true, SkillshotType.SkillshotCircle);
 
 
-            HDR = new Items.Item(3074, 400f);
-            TIA = new Items.Item(3077, 400f);
+            HDR = new Items.Item(3074, 225f);
+            TIA = new Items.Item(3077, 225f);
             BKR = new Items.Item(3153, 450f);
             BWC = new Items.Item(3144, 450f);
             YOU = new Items.Item(3142, 185f);
