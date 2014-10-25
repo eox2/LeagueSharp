@@ -1059,7 +1059,7 @@ namespace SephKhazix
 
             var autoWI = Config.Item("AutoWI").GetValue<bool>();
             var autoWD = Config.Item("AutoWD").GetValue<bool>();
-            if ((target != null) && ((Wpred.GetPrediction(target).Hitchance >= HitChance.Medium) || Wpred.GetPrediction(target).Hitchance >= HitChance.High))
+            if ((target != null) && (W.IsReady()) && ((Wpred.GetPrediction(target).Hitchance >= HitChance.Medium) || Wpred.GetPrediction(target).Hitchance >= HitChance.High))
             {
 
                 if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("AutoHarrass").GetValue<bool>() && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Wpred.GetPrediction(target); Wpred.Cast(pred.CastPosition); } }
