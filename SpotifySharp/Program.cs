@@ -78,39 +78,28 @@ namespace SpotSharp
 
 
             Config.AddSubMenu(new Menu("Spotify Settings", "settings"));
-            Config.SubMenu("settings").AddItem(new MenuItem("showtrack", "Show Track Name").SetValue(true));
-            Config.SubMenu("settings").AddItem(new MenuItem("showcontrls", "Show Controls").SetValue(true));
+          Config.SubMenu("settings").AddItem(new MenuItem("showtrack", "Show Track Name").SetValue(true));
 
-            Config.AddSubMenu(new Menu("Drawings", "Drawings"));
+           // Config.SubMenu("settings").AddItem(new MenuItem("showcontrls", "Show Controls").SetValue(true));
+
+          //  Config.AddSubMenu(new Menu("Drawings", "Drawings"));
 
             //   Config.SubMenu("settings").AddItem(new MenuItem("volume", "Volume %").SetValue(new Slider(40)));
 
             // var volpct = Config.Item("volume").GetValue<Slider>().Value / 100f;
             // var volpct = Config.AddItem(new MenuItem("vol%", "Volume %").SetValue(new Slider(40)));
-
+          var ChangeVolumeUp = Config.AddItem(new MenuItem("Volume", "Vol +").SetValue(new KeyBind(106, KeyBindType.Press)));
+          var ChangeVolumeDown = Config.AddItem(new MenuItem("Volume2", "Vol -").SetValue(new KeyBind(108, KeyBindType.Press)));
+          var ChangeSkipTrack = Config.AddItem(new MenuItem("skip", "Next --->").SetValue(new KeyBind(102, KeyBindType.Press)));
+          var ChangePrev = Config.AddItem(new MenuItem("prev", "Prev  <---").SetValue(new KeyBind(104, KeyBindType.Press)));
 
 
 
             Config.AddToMainMenu();
 
-
-
-            Game.PrintChat("Loaded Spotify Controller by Seph");
-            if (!isSpotifyOpen()) { Game.PrintChat("Spotify isn't running"); return; }
-            if (isSpotifyOpen()) { Game.PrintChat("::: Spotify has been detected :::"); }
-            Game.OnGameUpdate += OnGameUpdate;
-            Drawing.OnDraw += OnDraw;
-
-        }
-        private static void OnGameUpdate(EventArgs args)
-        {
-
             if (isSpotifyOpen())
             {
-                var ChangeVolumeUp = Config.AddItem(new MenuItem("Volume", "Vol+").SetValue(new KeyBind(106, KeyBindType.Press)));
-                var ChangeVolumeDown = Config.AddItem(new MenuItem("Volume2", "Vol-").SetValue(new KeyBind(108, KeyBindType.Press)));
-                var ChangeSkipTrack = Config.AddItem(new MenuItem("skip", "Next").SetValue(new KeyBind(102, KeyBindType.Press)));
-                var ChangePrev = Config.AddItem(new MenuItem("prev", "Prev").SetValue(new KeyBind(104, KeyBindType.Press)));
+                Game.PrintChat("::: Spotify has been detected :::");
 
 
                 ChangeVolumeUp.ValueChanged += delegate(object sender, OnValueChangeEventArgs EventArgs)
@@ -138,8 +127,20 @@ namespace SpotSharp
                 };
 
 
+
+                Game.PrintChat("Loaded Spotify Controller by Seph");
+                if (!isSpotifyOpen()) { Game.PrintChat("Spotify isn't running"); return; }
+
+                Game.OnGameUpdate += OnGameUpdate;
+                Drawing.OnDraw += OnDraw;
             }
         }
+        private static void OnGameUpdate(EventArgs args)
+        {
+
+
+            }
+        
 
 
 
@@ -240,9 +241,12 @@ namespace SpotSharp
 
         public static void OnDraw(EventArgs args)
         {
+            if (Config.Item("showtrack").GetValue<bool>())
+            {
 
-            Drawing.DrawText(((Drawing.Width - 150) / 2), 30, Color.White, getSongName() + " - " + getArtistName());
+                Drawing.DrawText(((Drawing.Width - 150) / 2), 30, Color.White, getSongName() + " - " + getArtistName());
 
+            }
         }
 
 
