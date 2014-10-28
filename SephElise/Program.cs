@@ -137,7 +137,7 @@ namespace SephElise
 
             Player = ObjectManager.Player;
             QS = new Spell(SpellSlot.Q, QS.Range);
-            Orbwalker.SetAttacks(true);
+            Orbwalker.SetAttack(true);
 
             CheckForm();
 

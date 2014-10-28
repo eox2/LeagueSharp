@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephElise", "SephElise\Seph
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephKhazix", "SephKhazix\SephKhazix.csproj", "{7FA713BD-10E9-419F-A118-D3BB3B922ED9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifySharp", "SpotifySharp\SpotifySharp.csproj", "{3AFAF246-F249-4068-8DB1-6C5D2D8257A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{7FA713BD-10E9-419F-A118-D3BB3B922ED9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FA713BD-10E9-419F-A118-D3BB3B922ED9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FA713BD-10E9-419F-A118-D3BB3B922ED9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AFAF246-F249-4068-8DB1-6C5D2D8257A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AFAF246-F249-4068-8DB1-6C5D2D8257A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AFAF246-F249-4068-8DB1-6C5D2D8257A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AFAF246-F249-4068-8DB1-6C5D2D8257A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
