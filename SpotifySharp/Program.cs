@@ -144,15 +144,15 @@ namespace SpotSharp
                 Game.PrintChat("::: Spotify has been detected :::");
                 // Game.PrintChat("swag" + volpct2);
                 //volpct.ValueChanged += delegate(object sender, OnValueChangeEventArgs EventArgs)
-              //  {
-                  // Game.PrintChat("swag" + volpct2 + " n" + Config.Item("vol%").GetValue<Slider>().Value / 100f);
+                //  {
+                // Game.PrintChat("swag" + volpct2 + " n" + Config.Item("vol%").GetValue<Slider>().Value / 100f);
 
-                 //  if ((Config.Item("vol%").GetValue<Slider>().Value / 100f) > 0.5f) { volumeUp(); } -- wont work because shift is also modifier key and you need it for L# menu
+                //  if ((Config.Item("vol%").GetValue<Slider>().Value / 100f) > 0.5f) { volumeUp(); } -- wont work because shift is also modifier key and you need it for L# menu
                 //   if ((Config.Item("vol%").GetValue<Slider>().Value / 100f) < 0.5f) { volumeDown(); }
                 //currvol++;
 
                 //  volumeUpkeys();
-               //  };
+                //  };
                 ChangeVolumeUp.ValueChanged += delegate(object sender, OnValueChangeEventArgs EventArgs)
                 {
                     //currvol++;
@@ -180,9 +180,9 @@ namespace SpotSharp
                     previousTrackkeys();
                 };
 
-
+            }
                 Game.PrintChat("Loaded Spotify Controller by Seph");
-                if (!isSpotifyOpen()) { Game.PrintChat("Spotify isn't running"); return; }
+                if (!isSpotifyOpen()) { Game.PrintChat("Spotify isn't running"); }
 
                 Game.OnGameUpdate += OnGameUpdate;
                 Game.OnWndProc += Game_OnWndProc;
@@ -191,7 +191,7 @@ namespace SpotSharp
 
                 //}
 
-            }
+            
         }
         // private static void Event(object sender, EventArgs e) { Game.PrintChat("Left mouse click!"); }
 
@@ -344,8 +344,7 @@ namespace SpotSharp
         {
         
              
-          
-            
+  
 
         }
 
