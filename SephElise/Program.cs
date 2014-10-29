@@ -355,7 +355,7 @@ namespace SephElise
         private static void Combo()
         {
             var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            Orbwalker.SetAttacks((!Q.IsReady() || E.IsReady() || W.IsReady()));
+            Orbwalker.SetAttack((!Q.IsReady() || E.IsReady() || W.IsReady()));
 
             if (target != null)
             {
