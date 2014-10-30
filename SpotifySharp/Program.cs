@@ -438,7 +438,7 @@ namespace SpotSharp
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
             keybd_event(CONTROL_KEY, 0x1D, 0, 0);
             PostMessage(spotifyWindow, 0x100, new IntPtr(0x26), IntPtr.Zero);
-            System.Threading.Thread.Sleep(100);
+           System.Threading.Thread.Sleep(1);
             keybd_event(CONTROL_KEY, 0x1D, 0x2, 0);
         }
         static public void volumeDownkeys()
@@ -447,7 +447,7 @@ namespace SpotSharp
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
             keybd_event(CONTROL_KEY, 0x1D, 0, 0);
             PostMessage(spotifyWindow, 0x100, new IntPtr(0x28), IntPtr.Zero);
-            System.Threading.Thread.Sleep(100);
+            System.Threading.Thread.Sleep(1);
             keybd_event(CONTROL_KEY, 0x1D, 0x2, 0);
         }
         static public void nextTrack()
@@ -468,7 +468,7 @@ namespace SpotSharp
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
             keybd_event(CONTROL_KEY, 0x1D, 0, 0);
             PostMessage(spotifyWindow, 0x100, new IntPtr(0x26), IntPtr.Zero);
-            System.Threading.Thread.Sleep(100);
+            System.Threading.Thread.Sleep(1);
             keybd_event(CONTROL_KEY, 0x1D, 0x2, 0);
         }
         static public void volumeDown()
@@ -477,7 +477,7 @@ namespace SpotSharp
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
             keybd_event(CONTROL_KEY, 0x1D, 0, 0);
             PostMessage(spotifyWindow, 0x100, new IntPtr(0x28), IntPtr.Zero);
-            System.Threading.Thread.Sleep(100);
+            System.Threading.Thread.Sleep(1);
             keybd_event(CONTROL_KEY, 0x1D, 0x2, 0);
         }
 
