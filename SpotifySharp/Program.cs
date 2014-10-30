@@ -343,17 +343,7 @@ namespace SpotSharp
 
         private static void OnGameUpdate(EventArgs args)
         {
-            if (!Config.Item("enablekeysvol").GetValue<bool>())
-            {
-
-                play = loadplay();
-                prev = loadprev();
-                next = loadnext();
-
-
-                volup1 = loadvolup();
-                voldown1 = loadvoldown();
-            }
+    
   
 
         }
