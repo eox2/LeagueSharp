@@ -142,6 +142,7 @@ namespace SpotSharp
             if (isSpotifyOpen())
             {
                 Game.PrintChat("::: Spotify has been detected :::");
+            }
                 // Game.PrintChat("swag" + volpct2);
                 //volpct.ValueChanged += delegate(object sender, OnValueChangeEventArgs EventArgs)
                 //  {
@@ -180,7 +181,7 @@ namespace SpotSharp
                     previousTrackkeys();
                 };
 
-            }
+            
                 Game.PrintChat("Loaded Spotify Controller by Seph");
                 if (!isSpotifyOpen()) { Game.PrintChat("Spotify isn't running"); }
 
@@ -342,8 +343,17 @@ namespace SpotSharp
 
         private static void OnGameUpdate(EventArgs args)
         {
-        
-             
+            if (!Config.Item("enablekeysvol").GetValue<bool>())
+            {
+
+                play = loadplay();
+                prev = loadprev();
+                next = loadnext();
+
+
+                volup1 = loadvolup();
+                voldown1 = loadvoldown();
+            }
   
 
         }
