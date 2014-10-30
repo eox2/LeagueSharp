@@ -185,7 +185,7 @@ namespace SpotSharp
                 Game.PrintChat("Loaded Spotify Controller by Seph");
                 if (!isSpotifyOpen()) { Game.PrintChat("Spotify isn't running"); }
 
-                Game.OnGameUpdate += OnGameUpdate;
+              //  Game.OnGameUpdate += OnGameUpdate;
                 Game.OnWndProc += Game_OnWndProc;
                 Drawing.OnDraw += OnDraw;
 
@@ -343,8 +343,6 @@ namespace SpotSharp
 
         private static void OnGameUpdate(EventArgs args)
         {
-    
-  
 
         }
 
