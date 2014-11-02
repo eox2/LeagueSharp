@@ -84,9 +84,6 @@
     <None Include="Resources\play.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\rewind.bmp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\rewind.png" />
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +91,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\volup.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Properties\spotify.png" />
+    <None Include="Resources\spotify.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

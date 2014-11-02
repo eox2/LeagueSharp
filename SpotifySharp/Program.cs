@@ -33,7 +33,10 @@ namespace SpotSharp
         private static Vector2 _posvolu = new Vector2(Drawing.Width / 2f - 250.5f, 15);
         private static Vector2 _posvold = new Vector2(Drawing.Width / 2f - 214.5f, 15);
 
+        private static Vector2 _posspotify = new Vector2(Drawing.Width / 2f - 500, 15);
+
         private static Render.Sprite play;
+        private static Render.Sprite spotifyicon;
          private static Render.Sprite prev;
          private static Render.Sprite next;
          private static Render.Sprite volup1;
@@ -52,6 +55,15 @@ namespace SpotSharp
 
         // Credit goes to http://code.google.com/p/spotifycontrol/source/browse/trunk/SpotifyControl/Controllers/ControllerSpotify.vb && SpotifyLib
         // for some of the key message commands, etc and Trees for helping me (used some of his sprite code too)
+        [DllImport("user32.dll")]
+        internal static extern IntPtr SetFocus(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        internal static extern bool SetForegroundWindow(IntPtr hWnd);
+
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         static extern int GetWindowTextLength(IntPtr hWnd);
@@ -90,8 +102,8 @@ namespace SpotSharp
 
         public static void Game_OnGameLoad(EventArgs args)
         {
-          
-            
+
+                spotifyicon = loadspotify();
                 play = loadplay();
                 prev = loadprev();
                 next = loadnext();
@@ -194,6 +206,17 @@ namespace SpotSharp
 
             
         }
+
+        private static void bringtofront()
+        {
+            if (isSpotifyOpen())
+            {
+                SpotifySharp.ShowWindow(SpotifySharp.FindSpotify(), 1);
+                SpotifySharp.SetForegroundWindow(SpotifySharp.FindSpotify());
+                SpotifySharp.SetFocus(SpotifySharp.FindSpotify());
+            }
+        }
+
         // private static void Event(object sender, EventArgs e) { Game.PrintChat("Left mouse click!"); }
 
         private static void Game_OnWndProc(WndEventArgs args)
@@ -213,6 +236,11 @@ namespace SpotSharp
                 songname = getSongName() + " - " + getArtistName() + " - Paused... ";
                 pausePlay();
             }
+            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonspotify())
+            {
+                bringtofront();
+              
+            } 
             if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonvolup())
             {
                 volumeUp();
@@ -225,6 +253,23 @@ namespace SpotSharp
 
         }
 
+        private static Render.Sprite loadspotify()
+        {
+
+            _posspotify = GetScaledVector(_posspotify);
+
+            var loadspotify = new Render.Sprite(Resources.spotify, _posspotify)
+            {
+                Scale = _scale,
+                Color = new ColorBGRA(255f, 255f, 255f, 20f)
+            };
+            loadspotify.Position = GetPosition(loadspotify.Width - 300);
+
+            loadspotify.Show();
+            loadspotify.Add(0);
+
+            return loadspotify;
+        }
       
 
         private static Render.Sprite loadnext()
@@ -346,6 +391,11 @@ namespace SpotSharp
 
         }
 
+
+        private static IntPtr FindSpotify()
+        {
+            return FindWindow("SpotifyMainWindow", null);
+        }
 
 
 
@@ -493,6 +543,23 @@ namespace SpotSharp
 
             return textWidth;
         }
+
+        private static bool mouseonspotify()
+        {
+            _posspotify = GetScaledVector(_posspotify);
+            var loadspotify = new Render.Sprite(Resources.spotify, _posspotify)
+            {
+                Scale = _scale,
+                Color = new ColorBGRA(255f, 255f, 255f, 20f)
+            };
+            loadspotify.Position = GetPosition(loadspotify.Width - 300);
+
+            var pos = Utils.GetCursorPos();
+            var spotbuttonpos = GetPosition(loadspotify.Width - 300);
+
+            return ((pos.X >= spotbuttonpos.X) && pos.X <= (spotbuttonpos.X + loadspotify.Width) && pos.Y >= spotbuttonpos.Y && pos.Y <= (spotbuttonpos.Y + loadspotify.Height));
+        }
+     
 
         private static bool mouseonplay()
         {
