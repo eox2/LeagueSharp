@@ -150,7 +150,7 @@ namespace SpotSharp
             var ChangePrev = Config.AddItem(new MenuItem("prev", "Prev  <---").SetValue(new KeyBind(104, KeyBindType.Press)));
             var shosprites = Config.AddItem(new MenuItem("showhide", "Hide key").SetValue(new KeyBind(9, KeyBindType.Press)));
 
-            Config.AddItem(new MenuItem("spriteshow", "Show Sprites").SetValue(new KeyBind("Y".ToCharArray()[0], KeyBindType.Toggle)));
+           // Config.AddItem(new MenuItem("spriteshow", "Show Sprites").SetValue(new KeyBind("Y".ToCharArray()[0], KeyBindType.Toggle)));
 
 
 
@@ -240,7 +240,7 @@ namespace SpotSharp
 
         private static void Game_OnWndProc(WndEventArgs args)
         {
-
+            /*
             if (Config.Item("spriteshow").GetValue<KeyBind>().Active && (!Config.Item("showhide").GetValue<KeyBind>().Active))
             {
                 spotifyicon.Show();
@@ -264,7 +264,31 @@ namespace SpotSharp
                 volup1.Hide();
                 voldown1.Hide();
             }
+            */
 
+            if  (!Config.Item("showhide").GetValue<KeyBind>().Active)
+            {
+                spotifyicon.Show();
+                play.Show();
+                prev.Show();
+                next.Show();
+
+
+                volup1.Show();
+                voldown1.Show();
+            }
+
+            if (Config.Item("showhide").GetValue<KeyBind>().Active)
+            {
+                spotifyicon.Hide();
+                play.Hide();
+                prev.Hide();
+                next.Hide();
+
+
+                volup1.Hide();
+                voldown1.Hide();
+            }
            
 
            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonnext()) 
