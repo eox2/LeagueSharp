@@ -103,9 +103,9 @@ namespace SpotSharp
         public static void Game_OnGameLoad(EventArgs args)
         {
 
-                spotifyicon = loadspotify();
-                play = loadplay();
-                prev = loadprev();
+               spotifyicon = loadspotify();
+               play = loadplay();
+               prev = loadprev();
                 next = loadnext();
           
             
@@ -121,7 +121,9 @@ namespace SpotSharp
 
             Config.AddSubMenu(new Menu("Spotify Settings", "settings"));
             Config.SubMenu("settings").AddItem(new MenuItem("showtrack", "Show Track Name").SetValue(true));
-            //Config.SubMenu("settings").AddItem(new MenuItem("showsprites", "Show Sprites").SetValue(true)); - not working for some reason 
+          //  Config.SubMenu("settings").AddItem(new MenuItem("hidespritestab", "AutoHide").SetValue(false)); //- fixed
+          //  Config.AddItem(new MenuItem("hidespritestab", "Hide Sprites on Tab").SetValue(new KeyBind(9, KeyBindType.Press)));
+
            // Config.SubMenu("settings").AddItem(new MenuItem("showsvprites", "Show Volume Sprites").SetValue(true));
             Config.SubMenu("settings").AddItem(new MenuItem("enablekeysvol", "Enable Volume Keys").SetValue(true));
             Config.SubMenu("settings").AddItem(new MenuItem("enablekeysctrl", "Enable Control Keys").SetValue(true));
@@ -146,10 +148,15 @@ namespace SpotSharp
             var ChangeVolumeDown = Config.AddItem(new MenuItem("Volume2", "Vol -").SetValue(new KeyBind(108, KeyBindType.Press)));
             var ChangeSkipTrack = Config.AddItem(new MenuItem("skip", "Next --->").SetValue(new KeyBind(102, KeyBindType.Press)));
             var ChangePrev = Config.AddItem(new MenuItem("prev", "Prev  <---").SetValue(new KeyBind(104, KeyBindType.Press)));
+            var shosprites = Config.AddItem(new MenuItem("showhide", "Hide key").SetValue(new KeyBind(9, KeyBindType.Press)));
+
+            Config.AddItem(new MenuItem("spriteshow", "Show Sprites").SetValue(new KeyBind("Y".ToCharArray()[0], KeyBindType.Toggle)));
 
 
 
             Config.AddToMainMenu();
+
+          
 
             if (isSpotifyOpen())
             {
@@ -166,12 +173,22 @@ namespace SpotSharp
 
                 //  volumeUpkeys();
                 //  };
+
+          //   shosprites.ValueChanged += delegate(object sender, OnValueChangeEventArgs EventArgs)
+           // {
+                //currvol++;
+               // if shosprites.
+
+               // volumeUpkeys();
+          //  };
                 ChangeVolumeUp.ValueChanged += delegate(object sender, OnValueChangeEventArgs EventArgs)
                 {
                     //currvol++;
 
                     volumeUpkeys();
                 };
+
+
 
 
                 ChangeVolumeDown.ValueChanged += delegate(object sender, OnValueChangeEventArgs EventArgs)
@@ -192,6 +209,8 @@ namespace SpotSharp
                     // currvol--;
                     previousTrackkeys();
                 };
+
+               
 
             
                 Game.PrintChat("Loaded Spotify Controller by Seph");
@@ -221,7 +240,33 @@ namespace SpotSharp
 
         private static void Game_OnWndProc(WndEventArgs args)
         {
-            
+
+            if (Config.Item("spriteshow").GetValue<KeyBind>().Active && (!Config.Item("showhide").GetValue<KeyBind>().Active))
+            {
+                spotifyicon.Show();
+                play.Show();
+                prev.Show();
+                next.Show();
+
+
+                volup1.Show();
+                voldown1.Show();
+            }
+
+            if ((!Config.Item("spriteshow").GetValue<KeyBind>().Active) || (Config.Item("showhide").GetValue<KeyBind>().Active))
+            {
+                spotifyicon.Hide();
+                play.Hide();
+                prev.Hide();
+                next.Hide();
+
+
+                volup1.Hide();
+                voldown1.Hide();
+            }
+
+           
+
            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonnext()) 
             {
                 nextTrack();
