@@ -18,9 +18,10 @@ using System.Windows.Input;
 
 //new
 
+/*
 using System.Speech.Synthesis;
 using System.Speech.Recognition;
-
+*/
 //new
 
 namespace SpotSharp
@@ -29,11 +30,12 @@ namespace SpotSharp
 
     internal class SpotifySharp
     {
+        /*
         static SpeechSynthesizer sSynth = new SpeechSynthesizer();
         static SpeechRecognitionEngine sRecognize = new SpeechRecognitionEngine();
         static Choices speechList = new Choices();
         static Grammar gr;
-
+        */
         private static readonly Vector2 _scale = new Vector2(1.25f, 1.25f);
         private static Vector2 _posplay = new Vector2(Drawing.Width / 2f - 286.5f, 15);
         private static Vector2 _posprev = new Vector2(Drawing.Width / 2f - 250.5f, 15);
@@ -122,10 +124,11 @@ namespace SpotSharp
                 voldown1 = loadvoldown();
 
 
-
+            /*
                 speechList.Add(new string[] { "next", "skip", "previous", "rewind", "back", "play", "pause" });
                 gr = new Grammar(new GrammarBuilder(speechList));
-
+             */
+            
             //Menu
             Config = new Menu("Spotify Controller", "Spotify", true);
 
@@ -252,6 +255,7 @@ namespace SpotSharp
 
         // private static void Event(object sender, EventArgs e) { Game.PrintChat("Left mouse click!"); }
 
+        /*
         static void sRecognize_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
             switch (e.Result.Text)
@@ -288,9 +292,11 @@ namespace SpotSharp
                     break;
             }
         }
+         * 
+         */
         private static void Game_OnWndProc(WndEventArgs args)
         {
-
+            /*
             if (Config.Item("speechkey").GetValue<KeyBind>().Active)
             {
                 try
@@ -306,7 +312,7 @@ namespace SpotSharp
                 {
                     return;
                 }
-            }
+            } */
             /*
             if (Config.Item("spriteshow").GetValue<KeyBind>().Active && (!Config.Item("showhide").GetValue<KeyBind>().Active))
             {

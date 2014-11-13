@@ -155,17 +155,23 @@ namespace EloSharp
         }
 
 
+       
 
 
         public EloSharp()
         {
+
             Ranks = new List<Info>();
             // foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>())
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
                // Game.PrintChat(hero.Name);
+                //Game.PrintChat(LeagueSharp.Game.Region);
+    
                 Info info = new Info();
+     //
                 String htmlcode = new WebClient().DownloadString("http://na.op.gg/summoner/userName=" + hero.Name);
+
                 if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
                 {
                     Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
