@@ -564,7 +564,7 @@ namespace EloSharp
                 }
                 if (Game.Region.ToLower().Contains("kr"))
                 {
-                    String htmlcode = new WebClient().DownloadString("http://na.op.gg/summoner/userName=" + hero.Name);
+                    String htmlcode = new WebClient().DownloadString("http://kr.op.gg/summoner/userName=" + hero.Name);
 
 
                     if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
