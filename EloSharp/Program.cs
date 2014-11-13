@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -120,6 +120,7 @@ namespace EloSharp
 
 
 
+
         public static float TextWidth(string text, Font f)
         {
             float textWidth = 0;
@@ -145,6 +146,7 @@ namespace EloSharp
         public static void Game_OnGameLoad(EventArgs args)
         {
             Game.PrintChat("Loaded EloSharp by Seph");
+            Game.PrintChat("Your Region is: " + Game.Region + " ; Please post this on the topic if it is not working properly for your region");
 
             new System.Threading.Thread(() =>
             {
@@ -155,7 +157,7 @@ namespace EloSharp
         }
 
 
-       
+
 
 
         public EloSharp()
@@ -165,51 +167,444 @@ namespace EloSharp
             // foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>())
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
-               // Game.PrintChat(hero.Name);
+                // Game.PrintChat(hero.Name);
                 //Game.PrintChat(LeagueSharp.Game.Region);
-    
+
                 Info info = new Info();
-     //
-                String htmlcode = new WebClient().DownloadString("http://na.op.gg/summoner/userName=" + hero.Name);
-
-                if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
+                //
+                if (Game.Region.ToLower().Contains("na"))
                 {
-                    Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                    Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
-                    Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                    Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                    rank = playerrank.ToString();
-                    info.Name = hero.Name;
-                    info.herohandle = hero;
-                    info.Ranking = rank;
-                    info.lpamount = playerlp.ToString();
-                    Ranks.Add(info);
-                }
-                if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
-                {
-                    Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                    //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
-                    Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                   // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                    rank = playerrank.ToString();
-                    info.Name = hero.Name;
-                    info.herohandle = hero;
-                    info.Ranking = "Unranked";
-                    info.lpamount = "0";
-                    Ranks.Add(info);
-                }
-                if (htmlcode.ToString().Contains("check spelling"))
-                {
-                    //Game.PrintChat("This hero is not registered");
+                    String htmlcode = new WebClient().DownloadString("http://na.op.gg/summoner/userName=" + hero.Name);
 
-                    rank = "unknown";
-                    info.Name = hero.Name;
-                    info.herohandle = hero;
-                    info.Ranking = rank;
-                    info.lpamount = "";
-                    Ranks.Add(info);
+
+                    if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = playerlp.ToString();
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "0";
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("check spelling"))
+                    {
+                        //Game.PrintChat("This hero is not registered");
+
+                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
                 }
 
+                if (Game.Region.ToLower().Contains("euw"))
+                {
+                    String htmlcode = new WebClient().DownloadString("http://euw.op.gg/summoner/userName=" + hero.Name);
+
+
+                    if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = playerlp.ToString();
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "0";
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("check spelling"))
+                    {
+                        //Game.PrintChat("This hero is not registered");
+
+                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+                }
+
+                if (Game.Region.ToLower().Contains("eune"))
+                {
+                    String htmlcode = new WebClient().DownloadString("http://eune.op.gg/summoner/userName=" + hero.Name);
+
+
+                    if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = playerlp.ToString();
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "0";
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("check spelling"))
+                    {
+                        //Game.PrintChat("This hero is not registered");
+
+                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+                }
+                if (Game.Region.ToLower().Contains("lan"))
+                {
+                    String htmlcode = new WebClient().DownloadString("http://lan.op.gg/summoner/userName=" + hero.Name);
+
+
+                    if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = playerlp.ToString();
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "0";
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("check spelling"))
+                    {
+                        //Game.PrintChat("This hero is not registered");
+
+                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+                }
+
+                if (Game.Region.ToLower().Contains("tr"))
+                {
+                    String htmlcode = new WebClient().DownloadString("http://tr.op.gg/summoner/userName=" + hero.Name);
+
+
+                    if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = playerlp.ToString();
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "0";
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("check spelling"))
+                    {
+                        //Game.PrintChat("This hero is not registered");
+
+                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+                }
+                if (Game.Region.ToLower().Contains("oce"))
+                {
+                    String htmlcode = new WebClient().DownloadString("http://oce.op.gg/summoner/userName=" + hero.Name);
+
+
+                    if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = playerlp.ToString();
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "0";
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("check spelling"))
+                    {
+                        //Game.PrintChat("This hero is not registered");
+
+                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+                }
+                if (Game.Region.ToLower().Contains("br"))
+                {
+                    String htmlcode = new WebClient().DownloadString("http://br.op.gg/summoner/userName=" + hero.Name);
+
+
+                    if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = playerlp.ToString();
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "0";
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("check spelling"))
+                    {
+                        //Game.PrintChat("This hero is not registered");
+
+                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+                }
+                if (Game.Region.ToLower().Contains("ru"))
+                {
+                    String htmlcode = new WebClient().DownloadString("http://ru.op.gg/summoner/userName=" + hero.Name);
+
+
+                    if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = playerlp.ToString();
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "0";
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("check spelling"))
+                    {
+                        //Game.PrintChat("This hero is not registered");
+
+                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+                }
+                if (Game.Region.ToLower().Contains("las"))
+                {
+                    String htmlcode = new WebClient().DownloadString("http://las.op.gg/summoner/userName=" + hero.Name);
+
+
+                    if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = playerlp.ToString();
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "0";
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("check spelling"))
+                    {
+                        //Game.PrintChat("This hero is not registered");
+
+                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+                }
+                if (Game.Region.ToLower().Contains("kr"))
+                {
+                    String htmlcode = new WebClient().DownloadString("http://na.op.gg/summoner/userName=" + hero.Name);
+
+
+                    if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = playerlp.ToString();
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "0";
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.ToString().Contains("check spelling"))
+                    {
+                        //Game.PrintChat("This hero is not registered");
+
+                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+                }
             }
         }
 
