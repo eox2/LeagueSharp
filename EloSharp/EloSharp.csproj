@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3AFAF246-F249-4068-8DB1-6C5D2D8257A3}</ProjectGuid>
+    <ProjectGuid>{EEFED276-8FDA-4A10-903A-D988412DD01C}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SpotifySharp</RootNamespace>
-    <AssemblyName>SpotifySharp</AssemblyName>
+    <RootNamespace>EloSharp</RootNamespace>
+    <AssemblyName>EloSharp</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PreBuildEvent />
@@ -44,16 +44,9 @@
     <Reference Include="SharpDX">
       <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\\System\SharpDX.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.Direct3D9, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\\System\SharpDX.Direct3D9.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Speech" />
-    <Reference Include="System.Windows" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -63,38 +56,9 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\forward.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\play.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\rewind.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\voldown.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\volup.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\spotify.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

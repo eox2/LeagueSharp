@@ -16,7 +16,12 @@ using System.Windows;
 using System.Windows.Input;
 
 
+//new
 
+using System.Speech.Synthesis;
+using System.Speech.Recognition;
+
+//new
 
 namespace SpotSharp
 {
@@ -24,6 +29,10 @@ namespace SpotSharp
 
     internal class SpotifySharp
     {
+        static SpeechSynthesizer sSynth = new SpeechSynthesizer();
+        static SpeechRecognitionEngine sRecognize = new SpeechRecognitionEngine();
+        static Choices speechList = new Choices();
+        static Grammar gr;
 
         private static readonly Vector2 _scale = new Vector2(1.25f, 1.25f);
         private static Vector2 _posplay = new Vector2(Drawing.Width / 2f - 286.5f, 15);
@@ -111,9 +120,11 @@ namespace SpotSharp
             
                 volup1 = loadvolup();
                 voldown1 = loadvoldown();
-            
 
 
+
+                speechList.Add(new string[] { "next", "skip", "previous", "rewind", "back", "play", "pause" });
+                gr = new Grammar(new GrammarBuilder(speechList));
 
             //Menu
             Config = new Menu("Spotify Controller", "Spotify", true);
@@ -127,6 +138,8 @@ namespace SpotSharp
            // Config.SubMenu("settings").AddItem(new MenuItem("showsvprites", "Show Volume Sprites").SetValue(true));
             Config.SubMenu("settings").AddItem(new MenuItem("enablekeysvol", "Enable Volume Keys").SetValue(true));
             Config.SubMenu("settings").AddItem(new MenuItem("enablekeysctrl", "Enable Control Keys").SetValue(true));
+            Config.SubMenu("settings").AddItem(new MenuItem("enablespeech", "Enable Speech").SetValue(true));
+
             // Config.SubMenu("settings").AddItem(new MenuItem("hotkey", "Modifier").SetValue(new KeyBind(32, KeyBindType.Press)));
 
             // Config.SubMenu("settings").AddItem(new MenuItem("showcontrls", "Show Controls").SetValue(true));
@@ -149,6 +162,7 @@ namespace SpotSharp
             var ChangeSkipTrack = Config.AddItem(new MenuItem("skip", "Next --->").SetValue(new KeyBind(102, KeyBindType.Press)));
             var ChangePrev = Config.AddItem(new MenuItem("prev", "Prev  <---").SetValue(new KeyBind(104, KeyBindType.Press)));
             var shosprites = Config.AddItem(new MenuItem("showhide", "Hide key").SetValue(new KeyBind(9, KeyBindType.Press)));
+            var speechkeyset = Config.AddItem(new MenuItem("speechkey", "Speech Key").SetValue(new KeyBind(9, KeyBindType.Press)));
 
            // Config.AddItem(new MenuItem("spriteshow", "Show Sprites").SetValue(new KeyBind("Y".ToCharArray()[0], KeyBindType.Toggle)));
 
@@ -238,8 +252,61 @@ namespace SpotSharp
 
         // private static void Event(object sender, EventArgs e) { Game.PrintChat("Left mouse click!"); }
 
+        static void sRecognize_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+        {
+            switch (e.Result.Text)
+            {
+                case "next":
+                case "forward":
+                case "skip":
+                    Game.PrintChat("Speech Recognizer: Next Song Selected -- >");
+                    nextTrack();
+                    break;
+                case "previous":
+                case "rewind":
+                case "back":
+                    Game.PrintChat("Speech Recognizer: Previous Song Selected < --");
+                    previousTrack();
+                    break;
+                case "pause":
+                case "play":
+                    Game.PrintChat("Speech Recognizer: Play/Pause");
+                    songname = getSongName() + " - " + getArtistName() + " - Paused... ";
+                    pausePlay();
+                    break;
+   
+  
+                case "recall":
+                    Game.PrintChat("Speech Recognizer: Recall");
+                    Spell C = new Spell(SpellSlot.Recall);
+                    C.Cast();   
+                    break;
+                case "spotify":
+                case "front":
+                case "bring to front":
+                    bringtofront();
+                    break;
+            }
+        }
         private static void Game_OnWndProc(WndEventArgs args)
         {
+
+            if (Config.Item("speechkey").GetValue<KeyBind>().Active)
+            {
+                try
+                {
+                    sRecognize.RequestRecognizerUpdate();
+                    sRecognize.LoadGrammar(gr);
+                    sRecognize.SpeechRecognized += sRecognize_SpeechRecognized;
+                    sRecognize.SetInputToDefaultAudioDevice();
+                    sRecognize.RecognizeAsync(RecognizeMode.Multiple);
+                    sRecognize.Recognize();
+                }
+                catch
+                {
+                    return;
+                }
+            }
             /*
             if (Config.Item("spriteshow").GetValue<KeyBind>().Active && (!Config.Item("showhide").GetValue<KeyBind>().Active))
             {
@@ -533,7 +600,7 @@ namespace SpotSharp
         static public void pausePlay()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            // string songname = getSongName() + " - " + getArtistName();
+             string songname = getSongName() + " - " + getArtistName();
             PostMessage(spotifyWindow, KEY_MESSAGE, IntPtr.Zero, new IntPtr(PLAYPAUSE_KEY));
 
         }
