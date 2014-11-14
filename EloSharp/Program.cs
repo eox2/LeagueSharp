@@ -519,7 +519,7 @@ namespace EloSharp
                         Ranks.Add(info);
                     }
                 }
-                if (Game.Region.ToLower().Contains("las"))
+                if (Game.Region.ToLower().Contains("la"))
                 {
                     String htmlcode = new WebClient().DownloadString("http://las.op.gg/summoner/userName=" + hero.Name);
 
