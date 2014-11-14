@@ -390,7 +390,7 @@ namespace EloSharp
                         Ranks.Add(info);
                     }
                 }
-                if (Game.Region.ToLower().Contains("oce"))
+                if (Game.Region.ToLower().Contains("oc1"))
                 {
                     String htmlcode = new WebClient().DownloadString("http://oce.op.gg/summoner/userName=" + hero.Name);
 
