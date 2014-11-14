@@ -76,15 +76,17 @@ namespace EloSharp
 
 
                    // Drawing.DrawText(wts.X, wts.Y, Color.Brown, "x");
+                    /* Unneccesary at the moment
                     if (info.Ranking.ToLower().Contains("unknown"))
                     {
                         Font font = new Font("Calibri", 13.5F);
-                        Drawing.DrawText(Xee - (TextWidth("Not Registered", font) / 2), Yee - 50, Color.SandyBrown, "Not Registered");
+                        Drawing.DrawText(Xee - (TextWidth("Not Registered", font) / 2), Yee - 50, Color.White, "Not Registered");
                     }
+                     * */
                     if (info.Ranking.ToLower().Contains("unranked"))
                     {
                         Font font = new Font("Calibri", 13.5F);
-                        Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 50, Color.SandyBrown, "Unranked");
+                        Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 50, Color.White, "Unranked");
                     }
                     if (info.Ranking.Contains("Bronze"))
                     {
@@ -213,8 +215,9 @@ namespace EloSharp
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("check spelling"))
+                    if (!htmlcode.ToString().Contains("tierRank"))
                     {
+               
                         //Game.PrintChat("This hero is not registered");
 
                         rank = "unknown";
@@ -257,7 +260,7 @@ namespace EloSharp
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("check spelling"))
+                    if (!htmlcode.ToString().Contains("tierRank"))
                     {
                         //Game.PrintChat("This hero is not registered");
 
@@ -301,7 +304,7 @@ namespace EloSharp
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("check spelling"))
+                    if (!htmlcode.ToString().Contains("tierRank"))
                     {
                         //Game.PrintChat("This hero is not registered");
 
@@ -344,7 +347,7 @@ namespace EloSharp
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("check spelling"))
+                    if (!htmlcode.ToString().Contains("tierRank"))
                     {
                         //Game.PrintChat("This hero is not registered");
 
@@ -388,7 +391,7 @@ namespace EloSharp
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("check spelling"))
+                    if (!htmlcode.ToString().Contains("tierRank"))
                     {
                         //Game.PrintChat("This hero is not registered");
 
@@ -431,7 +434,7 @@ namespace EloSharp
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("check spelling"))
+                    if (!htmlcode.ToString().Contains("tierRank"))
                     {
                         //Game.PrintChat("This hero is not registered");
 
@@ -474,7 +477,7 @@ namespace EloSharp
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("check spelling"))
+                    if (!htmlcode.ToString().Contains("tierRank"))
                     {
                         //Game.PrintChat("This hero is not registered");
 
@@ -517,7 +520,7 @@ namespace EloSharp
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("check spelling"))
+                    if (!htmlcode.ToString().Contains("tierRank"))
                     {
                         //Game.PrintChat("This hero is not registered");
 
@@ -560,7 +563,7 @@ namespace EloSharp
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("check spelling"))
+                    if (!htmlcode.ToString().Contains("tierRank"))
                     {
                         //Game.PrintChat("This hero is not registered");
 
@@ -603,7 +606,7 @@ namespace EloSharp
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("check spelling"))
+                    if (!htmlcode.ToString().Contains("tierRank"))
                     {
                         //Game.PrintChat("This hero is not registered");
 
