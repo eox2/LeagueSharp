@@ -260,7 +260,7 @@ namespace EloSharp
                     }
                 }
 
-                if (Game.Region.ToLower().Contains("eune"))
+                if (Game.Region.ToLower().Contains("eun"))
                 {
                     String htmlcode = new WebClient().DownloadString("http://eune.op.gg/summoner/userName=" + hero.Name);
 
