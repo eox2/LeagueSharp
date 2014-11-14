@@ -303,7 +303,7 @@ namespace EloSharp
                         Ranks.Add(info);
                     }
                 }
-                if (Game.Region.ToLower().Contains("lan"))
+                if (Game.Region.ToLower().Contains("la1"))
                 {
                     String htmlcode = new WebClient().DownloadString("http://lan.op.gg/summoner/userName=" + hero.Name);
 
@@ -519,7 +519,7 @@ namespace EloSharp
                         Ranks.Add(info);
                     }
                 }
-                if (Game.Region.ToLower().Contains("la"))
+                if (Game.Region.ToLower().Contains("la2"))
                 {
                     String htmlcode = new WebClient().DownloadString("http://las.op.gg/summoner/userName=" + hero.Name);
 
