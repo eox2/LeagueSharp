@@ -69,13 +69,23 @@ namespace EloSharp
 
                 if ((!info.herohandle.IsDead) && (info.herohandle.IsVisible))
                 {
-                    var wts = Drawing.WorldToScreen(info.herohandle.Position);
+                   // var wts = Drawing.WorldToScreen(info.herohandle.Position);
                     var indicator = new HpBarIndicator { Unit = info.herohandle };
                     var Xee = (int)indicator.Position.X + 80;
                     var Yee = (int)indicator.Position.Y;
 
 
-                    Drawing.DrawText(wts.X, wts.Y, Color.Brown, "x");
+                   // Drawing.DrawText(wts.X, wts.Y, Color.Brown, "x");
+                    if (info.Ranking.ToLower().Contains("unknown"))
+                    {
+                        Font font = new Font("Calibri", 13.5F);
+                        Drawing.DrawText(Xee - (TextWidth("Not Registered", font) / 2), Yee - 50, Color.SandyBrown, "Not Registered");
+                    }
+                    if (info.Ranking.ToLower().Contains("unranked"))
+                    {
+                        Font font = new Font("Calibri", 13.5F);
+                        Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 50, Color.SandyBrown, "Unranked");
+                    }
                     if (info.Ranking.Contains("Bronze"))
                     {
                         Font font = new Font("Calibri", 13.5F);
