@@ -18,9 +18,9 @@ namespace EloSharp
     public class EloSharp
     {
 
-        public static string rank = "unknown";
+        public static string rank = "";
 
-
+        private static Menu Config;
         public static List<Info> Ranks { get; set; }
 
         public class Info
@@ -61,7 +61,7 @@ namespace EloSharp
         public static void OnDraw(EventArgs args)
         {
 
-
+           if (!Config.Item("enabledrawings").GetValue<bool>()) { return; }
 
             foreach (Info info in Ranks)
             {
@@ -76,14 +76,25 @@ namespace EloSharp
 
 
                    // Drawing.DrawText(wts.X, wts.Y, Color.Brown, "x");
-                    /* Unneccesary at the moment
-                    if (info.Ranking.ToLower().Contains("unknown"))
+                    // Unneccesary at the moment
+
+                    if (info.Ranking.ToLower().Contains("unknown") && Config.Item("disableunknown").GetValue<bool>())
                     {
                         Font font = new Font("Calibri", 13.5F);
-                        Drawing.DrawText(Xee - (TextWidth("Not Registered", font) / 2), Yee - 50, Color.White, "Not Registered");
+                        Drawing.DrawText(Xee - (TextWidth("Unknown)", font) / 2), Yee - 50, Color.Yellow, "Unknown");
                     }
-                     * */
-                    if (info.Ranking.ToLower().Contains("unranked"))
+                    if (info.Ranking.ToLower().Contains("Unranked (L-30)") && Config.Item("disableunknown").GetValue<bool>())
+                    {
+                        Font font = new Font("Calibri", 13.5F);
+                        Drawing.DrawText(Xee - (TextWidth("Unranked (L-30)", font) / 2), Yee - 50, Color.Yellow, "Unranked (L-30)");
+                    }
+
+                    if (info.Ranking.ToLower().Contains("error") && Config.Item("disableunknown").GetValue<bool>())
+                    {
+                        Font font = new Font("Calibri", 13.5F);
+                        Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 50, Color.Red, info.Ranking);
+                    }
+                    if (info.Ranking.ToLower().Equals("unranked"))
                     {
                         Font font = new Font("Calibri", 13.5F);
                         Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 50, Color.White, "Unranked");
@@ -160,12 +171,22 @@ namespace EloSharp
             Game.PrintChat("Loaded EloSharp by Seph");
             Game.PrintChat("Your Region is: " + Game.Region + " ; Please post this on the topic if it is not working properly for your region");
 
+            //Menu
+            Config = new Menu("EloSharp", "elosharp", true);
+            Config.AddItem(new MenuItem("enabledrawings", "Enable Drawings").SetValue(true));
+            Config.AddItem(new MenuItem("disableunknown", "Show Unknown").SetValue(true));
+            Config.AddItem(new MenuItem("printranks", "Print at the beginning").SetValue(true));
+            Config.AddToMainMenu();
+            //
             new System.Threading.Thread(() =>
             {
                 elosharp = new EloSharp();
 
             }).Start();
+
             Drawing.OnDraw += OnDraw;
+
+            if (Config.Item("printranks").GetValue<bool>()) { }
         }
 
 
@@ -189,43 +210,80 @@ namespace EloSharp
                     String htmlcode = new WebClient().DownloadString("http://na.op.gg/summoner/userName=" + hero.Name);
 
 
+
                     if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
                     {
+                  
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
                         Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
                         rank = playerrank.ToString();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    if (htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("leaguePoints"))
                     {
+         
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //   Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
-                        info.Name = hero.Name;
-                        info.herohandle = hero;
-                        info.Ranking = "Unranked";
-                        info.lpamount = "0";
-                        Ranks.Add(info);
-                    }
-                    if (!htmlcode.ToString().Contains("tierRank"))
-                    {
-               
-                        //Game.PrintChat("This hero is not registered");
+                        //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
 
-                        rank = "unknown";
+
+                        rank = "Unranked (L-30)";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
                         Ranks.Add(info);
+                    }
+                    if ((htmlcode.ToString().Contains("ChampionBox Unranked") && !htmlcode.ToString().Contains("leaguePoints") && (!htmlcode.ToString().Contains("tierRank"))))
+                    {
+                        
+                        // Game.PrintChat("unranked found");
+                        // Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //  Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = "Unranked";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        //rank = playerrank.ToString();
+
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+                    // if (!htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("ChampionBox Unranked") && (htmlcode.ToString().Contains("spelling")))
+                    if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
+                    {
+                       
+                        //Game.PrintChat("not found");
+                        //Game.PrintChat("didnt find ranks");
+                        //Game.PrintChat("This hero is not registered");
+                        rank = "Error";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+
                     }
                 }
 
@@ -234,42 +292,80 @@ namespace EloSharp
                     String htmlcode = new WebClient().DownloadString("http://euw.op.gg/summoner/userName=" + hero.Name);
 
 
+
                     if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
                     {
+                  
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
                         Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
                         rank = playerrank.ToString();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    if (htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("leaguePoints"))
                     {
+         
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //   Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
+                        //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
+                        rank = "Unranked (L-30)";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
-                        info.Ranking = "Unranked";
+                        info.Ranking = rank;
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (!htmlcode.ToString().Contains("tierRank"))
+                    if ((htmlcode.ToString().Contains("ChampionBox Unranked") && !htmlcode.ToString().Contains("leaguePoints") && (!htmlcode.ToString().Contains("tierRank"))))
                     {
-                        //Game.PrintChat("This hero is not registered");
+                        
+                        // Game.PrintChat("unranked found");
+                        // Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //  Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = "Unranked";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        //rank = playerrank.ToString();
 
-                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+                    // if (!htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("ChampionBox Unranked") && (htmlcode.ToString().Contains("spelling")))
+                    if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
+                    {
+                       
+                        //Game.PrintChat("not found");
+                        //Game.PrintChat("didnt find ranks");
+                        //Game.PrintChat("This hero is not registered");
+                        rank = "Error";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
                         Ranks.Add(info);
+
                     }
                 }
 
@@ -278,129 +374,246 @@ namespace EloSharp
                     String htmlcode = new WebClient().DownloadString("http://eune.op.gg/summoner/userName=" + hero.Name);
 
 
+
                     if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
                     {
+                  
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
                         Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
                         rank = playerrank.ToString();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    if (htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("leaguePoints"))
                     {
+         
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //   Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
+                        //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
+                        rank = "Unranked (L-30)";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
-                        info.Ranking = "Unranked";
+                        info.Ranking = rank;
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (!htmlcode.ToString().Contains("tierRank"))
+                    if ((htmlcode.ToString().Contains("ChampionBox Unranked") && !htmlcode.ToString().Contains("leaguePoints") && (!htmlcode.ToString().Contains("tierRank"))))
                     {
-                        //Game.PrintChat("This hero is not registered");
+                        
+                        // Game.PrintChat("unranked found");
+                        // Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //  Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = "Unranked";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        //rank = playerrank.ToString();
 
-                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+                    // if (!htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("ChampionBox Unranked") && (htmlcode.ToString().Contains("spelling")))
+                    if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
+                    {
+                       
+                        //Game.PrintChat("not found");
+                        //Game.PrintChat("didnt find ranks");
+                        //Game.PrintChat("This hero is not registered");
+                        rank = "Error";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
                         Ranks.Add(info);
+
                     }
                 }
                 if (Game.Region.ToLower().Contains("la1"))
                 {
+                   // Game.PrintChat("Lan activation");
                     String htmlcode = new WebClient().DownloadString("http://lan.op.gg/summoner/userName=" + hero.Name);
+
 
 
                     if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
                     {
+                  
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
                         Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
                         rank = playerrank.ToString();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    if (htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("leaguePoints") && htmlcode.ToString().Contains("SummonerHeader"))
                     {
+         
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //   Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
-                        info.Name = hero.Name;
-                        info.herohandle = hero;
-                        info.Ranking = "Unranked";
-                        info.lpamount = "0";
-                        Ranks.Add(info);
-                    }
-                    if (!htmlcode.ToString().Contains("tierRank"))
-                    {
-                        //Game.PrintChat("This hero is not registered");
+                        //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
 
-                        rank = "unknown";
+
+                       // rank = playerrank.ToString() + "(30)";
+                        rank = "Unranked (L-30)";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
                         Ranks.Add(info);
                     }
-                }
+                    if ((htmlcode.ToString().Contains("ChampionBox Unranked") && !htmlcode.ToString().Contains("leaguePoints") && (!htmlcode.ToString().Contains("tierRank"))))
+                    {
+                        
+                        // Game.PrintChat("unranked found");
+                        // Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //  Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = "Unranked";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        //rank = playerrank.ToString();
 
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+                    // if (!htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("ChampionBox Unranked") && (htmlcode.ToString().Contains("spelling")))
+                    if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
+                    {
+                       
+                        //Game.PrintChat("not found");
+                        //Game.PrintChat("didnt find ranks");
+                        //Game.PrintChat("This hero is not registered");
+                        rank = "Error";
+                        
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+
+                    }
+                }
+                   
                 if (Game.Region.ToLower().Contains("tr"))
                 {
                     String htmlcode = new WebClient().DownloadString("http://tr.op.gg/summoner/userName=" + hero.Name);
 
 
+
                     if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
                     {
+                  
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
                         Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
                         rank = playerrank.ToString();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    if (htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("leaguePoints"))
                     {
+         
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //   Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
+                        //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
+                        rank = "Unranked (L-30)";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
-                        info.Ranking = "Unranked";
+                        info.Ranking = rank;
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (!htmlcode.ToString().Contains("tierRank"))
+                    if ((htmlcode.ToString().Contains("ChampionBox Unranked") && !htmlcode.ToString().Contains("leaguePoints") && (!htmlcode.ToString().Contains("tierRank"))))
                     {
-                        //Game.PrintChat("This hero is not registered");
+                        
+                        // Game.PrintChat("unranked found");
+                        // Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //  Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = "Unranked";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        //rank = playerrank.ToString();
 
-                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+                    // if (!htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("ChampionBox Unranked") && (htmlcode.ToString().Contains("spelling")))
+                    if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
+                    {
+                       
+                        //Game.PrintChat("not found");
+                        //Game.PrintChat("didnt find ranks");
+                        //Game.PrintChat("This hero is not registered");
+                        rank = "Error";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
                         Ranks.Add(info);
+
                     }
                 }
                 if (Game.Region.ToLower().Contains("oc1"))
@@ -408,42 +621,80 @@ namespace EloSharp
                     String htmlcode = new WebClient().DownloadString("http://oce.op.gg/summoner/userName=" + hero.Name);
 
 
+
                     if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
                     {
+                  
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
                         Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
                         rank = playerrank.ToString();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    if (htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("leaguePoints"))
                     {
+         
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //   Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
+                        //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
+                        rank = "Unranked (L-30)";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
-                        info.Ranking = "Unranked";
+                        info.Ranking = rank;
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (!htmlcode.ToString().Contains("tierRank"))
+                    if ((htmlcode.ToString().Contains("ChampionBox Unranked") && !htmlcode.ToString().Contains("leaguePoints") && (!htmlcode.ToString().Contains("tierRank"))))
                     {
-                        //Game.PrintChat("This hero is not registered");
+                        
+                        // Game.PrintChat("unranked found");
+                        // Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //  Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = "Unranked";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        //rank = playerrank.ToString();
 
-                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+                    // if (!htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("ChampionBox Unranked") && (htmlcode.ToString().Contains("spelling")))
+                    if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
+                    {
+                       
+                        //Game.PrintChat("not found");
+                        //Game.PrintChat("didnt find ranks");
+                        //Game.PrintChat("This hero is not registered");
+                        rank = "Error";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
                         Ranks.Add(info);
+
                     }
                 }
                 if (Game.Region.ToLower().Contains("br"))
@@ -451,42 +702,80 @@ namespace EloSharp
                     String htmlcode = new WebClient().DownloadString("http://br.op.gg/summoner/userName=" + hero.Name);
 
 
+
                     if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
                     {
+                  
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
                         Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
                         rank = playerrank.ToString();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    if (htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("leaguePoints"))
                     {
+         
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //   Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
+                        //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
+                        rank = "Unranked (L-30)";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
-                        info.Ranking = "Unranked";
+                        info.Ranking = rank;
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (!htmlcode.ToString().Contains("tierRank"))
+                    if ((htmlcode.ToString().Contains("ChampionBox Unranked") && !htmlcode.ToString().Contains("leaguePoints") && (!htmlcode.ToString().Contains("tierRank"))))
                     {
-                        //Game.PrintChat("This hero is not registered");
+                        
+                        // Game.PrintChat("unranked found");
+                        // Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //  Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = "Unranked";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        //rank = playerrank.ToString();
 
-                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+                    // if (!htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("ChampionBox Unranked") && (htmlcode.ToString().Contains("spelling")))
+                    if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
+                    {
+                       
+                        //Game.PrintChat("not found");
+                        //Game.PrintChat("didnt find ranks");
+                        //Game.PrintChat("This hero is not registered");
+                        rank = "Error";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
                         Ranks.Add(info);
+
                     }
                 }
                 if (Game.Region.ToLower().Contains("ru"))
@@ -494,42 +783,80 @@ namespace EloSharp
                     String htmlcode = new WebClient().DownloadString("http://ru.op.gg/summoner/userName=" + hero.Name);
 
 
+
                     if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
                     {
+                  
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
                         Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
                         rank = playerrank.ToString();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    if (htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("leaguePoints"))
                     {
+         
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //   Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
+                        //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
+                        rank = "Unranked (L-30)";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
-                        info.Ranking = "Unranked";
+                        info.Ranking = rank;
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (!htmlcode.ToString().Contains("tierRank"))
+                    if ((htmlcode.ToString().Contains("ChampionBox Unranked") && !htmlcode.ToString().Contains("leaguePoints") && (!htmlcode.ToString().Contains("tierRank"))))
                     {
-                        //Game.PrintChat("This hero is not registered");
+                        
+                        // Game.PrintChat("unranked found");
+                        // Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //  Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = "Unranked";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        //rank = playerrank.ToString();
 
-                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+                    // if (!htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("ChampionBox Unranked") && (htmlcode.ToString().Contains("spelling")))
+                    if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
+                    {
+                       
+                        //Game.PrintChat("not found");
+                        //Game.PrintChat("didnt find ranks");
+                        //Game.PrintChat("This hero is not registered");
+                        rank = "Error";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
                         Ranks.Add(info);
+
                     }
                 }
                 if (Game.Region.ToLower().Contains("la2"))
@@ -537,42 +864,80 @@ namespace EloSharp
                     String htmlcode = new WebClient().DownloadString("http://las.op.gg/summoner/userName=" + hero.Name);
 
 
+
                     if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
                     {
+                  
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
                         Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
                         rank = playerrank.ToString();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    if (htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("leaguePoints"))
                     {
+         
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //   Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
+                        //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
+                        rank = "Unranked (L-30)";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
-                        info.Ranking = "Unranked";
+                        info.Ranking = rank;
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (!htmlcode.ToString().Contains("tierRank"))
+                    if ((htmlcode.ToString().Contains("ChampionBox Unranked") && !htmlcode.ToString().Contains("leaguePoints") && (!htmlcode.ToString().Contains("tierRank"))))
                     {
-                        //Game.PrintChat("This hero is not registered");
+                        
+                        // Game.PrintChat("unranked found");
+                        // Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //  Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = "Unranked";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        //rank = playerrank.ToString();
 
-                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+                    // if (!htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("ChampionBox Unranked") && (htmlcode.ToString().Contains("spelling")))
+                    if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
+                    {
+                       
+                        //Game.PrintChat("not found");
+                        //Game.PrintChat("didnt find ranks");
+                        //Game.PrintChat("This hero is not registered");
+                        rank = "Error";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
                         Ranks.Add(info);
+
                     }
                 }
                 if (Game.Region.ToLower().Contains("kr"))
@@ -582,40 +947,77 @@ namespace EloSharp
 
                     if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
                     {
+                  
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
                         Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
                         rank = playerrank.ToString();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("unranked") && !htmlcode.ToString().Contains("leaguePoints"))
+                    if (htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("leaguePoints"))
                     {
+         
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //   Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
                         Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
+                        //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+
+
+                        rank = "Unranked (L-30)";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
                         info.herohandle = hero;
-                        info.Ranking = "Unranked";
+                        info.Ranking = rank;
                         info.lpamount = "0";
                         Ranks.Add(info);
                     }
-                    if (!htmlcode.ToString().Contains("tierRank"))
+                    if ((htmlcode.ToString().Contains("ChampionBox Unranked") && !htmlcode.ToString().Contains("leaguePoints") && (!htmlcode.ToString().Contains("tierRank"))))
                     {
-                        //Game.PrintChat("This hero is not registered");
+                        
+                        // Game.PrintChat("unranked found");
+                        // Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        //  Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        // Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = "Unranked";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        //rank = playerrank.ToString();
 
-                        rank = "unknown";
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+                    // if (!htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("ChampionBox Unranked") && (htmlcode.ToString().Contains("spelling")))
+                    if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
+                    {
+                       
+                        //Game.PrintChat("not found");
+                        //Game.PrintChat("didnt find ranks");
+                        //Game.PrintChat("This hero is not registered");
+                        rank = "Error";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
+
                         info.Name = hero.Name;
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
                         Ranks.Add(info);
+
                     }
                 }
             }
