@@ -357,7 +357,7 @@ namespace EloSharp
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("tierRank") &&  !htmlcode.ToString().Contains("leaguePoints") && !(htmlcode.ToString().Contains("ChampionBox Unranked")))
+                    if (htmlcode.ToString().Contains("tierRank") &&  !htmlcode.ToString().Contains("leaguePoints") && (htmlcode.ToString().Contains("ChampionBox Unranked")))
                     {
 
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
@@ -366,7 +366,7 @@ namespace EloSharp
                         //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
 
 
-                        rank = "Unranked (no lp found)";
+                        rank = "Unranked (L-30)";
                         if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
