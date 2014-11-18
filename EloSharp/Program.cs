@@ -107,7 +107,8 @@ namespace EloSharp
                     var indicator = new HpBarIndicator { Unit = info.herohandle };
                     var Xee = (int)indicator.Position.X + 80;
                     var Yee = (int)indicator.Position.Y;
-
+                    Font font2 = new Font("Calibri", 13.5F);
+                 
 
                    // Drawing.DrawText(wts.X, wts.Y, Color.Brown, "x");
                     // Unneccesary at the moment
@@ -156,7 +157,7 @@ namespace EloSharp
                     {
                         Font font = new Font("Calibri", 13.5F);
                         //   Drawing.DrawText(wts.X - (TextWidth(info.Ranking, font) / 2), wts.Y - 160, Color.Cyan, info.Ranking);
-                        Drawing.DrawText(Xee - (TextWidth(info.Ranking + " (" + info.lpamount + ")", font) / 2), Yee - 50, Color.Cyan, info.Ranking + " (" + info.lpamount + ")");
+                        Drawing.DrawText(Xee - (TextWidth(info.Ranking + " (" + info.lpamount + ")", font) / 2), Yee - 50, Color.LawnGreen, info.Ranking + " (" + info.lpamount + ")");
                     }
                     if (info.Ranking.Contains("Diamond"))
                     {
@@ -206,6 +207,7 @@ namespace EloSharp
 
         public static void Game_OnGameLoad(EventArgs args)
         {
+       
             Game.PrintChat("Loaded EloSharp by Seph");
             Game.PrintChat("Your Region is: " + Game.Region + " ; Please post this on the topic if it is not working properly for your region");
 
@@ -276,6 +278,7 @@ namespace EloSharp
         private void WBThread()
         {
             WebBrowser wb = new WebBrowser();
+            
             DisableClickSounds();
             wb.ScrollBarsEnabled = false;
             wb.ScriptErrorsSuppressed = true;
@@ -294,11 +297,14 @@ namespace EloSharp
            // GeneratedSource = wb.Document.Body.InnerHtml;
             htmlforgarena = wb.Document.Body.InnerHtml;
             //System.IO.File.WriteAllText(@"C:\Users\Laptop\Desktop\innit.txt", GeneratedSource);
-            wb.Dispose();
             wb.Stop();
+         
+         
+
           //  wb.Dispose(true);
            Application.ExitThread();
            Application.Exit();
+           wb.Dispose();
             Console.WriteLine("Disposed");
         }
 
@@ -314,6 +320,7 @@ namespace EloSharp
             //   System.IO.File.WriteAllText(@"C:\Users\Laptop\Desktop\swag2.txt", GeneratedSource);
         }
 
+   
 
         public EloSharp()
         {
@@ -350,7 +357,7 @@ namespace EloSharp
                         info.lpamount = playerlp.ToString();
                         Ranks.Add(info);
                     }
-                    if (htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("leaguePoints"))
+                    if (htmlcode.ToString().Contains("tierRank") &&  !htmlcode.ToString().Contains("leaguePoints") && !(htmlcode.ToString().Contains("ChampionBox Unranked")))
                     {
 
                         Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
@@ -359,7 +366,7 @@ namespace EloSharp
                         //   Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
 
 
-                        rank = "Unranked (L-30)";
+                        rank = "Unranked (no lp found)";
                         if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
                         info.Name = hero.Name;
@@ -387,6 +394,8 @@ namespace EloSharp
                         info.lpamount = "";
                         Ranks.Add(info);
                     }
+
+                    
 
                     // if (!htmlcode.ToString().Contains("tierRank") && !htmlcode.ToString().Contains("ChampionBox Unranked") && (htmlcode.ToString().Contains("spelling")))
                     if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
