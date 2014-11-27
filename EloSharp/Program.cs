@@ -1,8 +1,7 @@
 ﻿﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing.Text;
+﻿using System.Text;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -11,9 +10,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.IO;
 using Color = System.Drawing.Color;
-using System.Windows.Forms;
 using System.Threading;
-using System.Runtime.InteropServices;
 
 
 namespace EloSharp
@@ -22,9 +19,7 @@ namespace EloSharp
     {
      
         public static string rank = "";
-        private string URL { get; set; }
-        private string URL2 { get; set; }
-        private static LeagueSharp.Common.Menu Config;
+        public static LeagueSharp.Common.Menu Config;
         public static List<Info> Ranks { get; set; }
         public class Info
         {
@@ -112,15 +107,15 @@ namespace EloSharp
             else { return Color.White; }
         }
         // End Tc Crew
+
         public static void OnDraw(EventArgs args)
         {
 
             if (!Config.Item("enabledrawings").GetValue<bool>()) { return; }
-
+            
             foreach (Info info in Ranks)
             {
-
-
+     
                 if ((!info.herohandle.IsDead) && (info.herohandle.IsVisible))
                 {
                     // var wts = Drawing.WorldToScreen(info.herohandle.Position);
@@ -151,19 +146,19 @@ namespace EloSharp
                     // Unneccesary at the moment
                     if (Config.Item("enablerank").GetValue<bool>())
                     {
-                        if (info.Ranking.ToLower().Contains("not found") && Config.Item("disableunknown").GetValue<bool>())
+                        if (info.Ranking.ToLower().Contains("not found") && Config.Item("showunknown").GetValue<bool>())
                         {
                             Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 50, Color.Yellow, info.Ranking);
                         }
-                        if (info.Ranking.ToLower().Contains("unknown") && Config.Item("disableunknown").GetValue<bool>())
+                        if (info.Ranking.ToLower().Contains("unknown") && Config.Item("showunknown").GetValue<bool>())
                         {
                             Drawing.DrawText(Xee - (TextWidth("Unknown)", font) / 2), Yee - 50, Color.Yellow, "Unknown");
                         }
-                        if (info.Ranking.ToLower().Contains("Unranked (L-30)") && Config.Item("disableunknown").GetValue<bool>())
+                        if (info.Ranking.Contains("Unranked (L-30)") && Config.Item("showunknown").GetValue<bool>())
                         {
                             Drawing.DrawText(Xee - (TextWidth("Unranked (L-30)", font) / 2), Yee - 50, Color.Yellow, "Unranked (L-30)");
                         }
-                        if (info.Ranking.ToLower().Contains("error") && Config.Item("disableunknown").GetValue<bool>())
+                        if (info.Ranking.ToLower().Contains("error") && Config.Item("showunknown").GetValue<bool>())
                         {
                             Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 50, Color.Red, info.Ranking);
                         }
@@ -217,7 +212,7 @@ namespace EloSharp
             Config.AddItem(new LeagueSharp.Common.MenuItem("enablerank", "Draw Rank").SetValue(true));
             Config.AddItem(new LeagueSharp.Common.MenuItem("enablewinratio", "Draw Win Ratio").SetValue(false));
             Config.AddItem(new LeagueSharp.Common.MenuItem("enablekdaratio", "Draw KDA Ratio").SetValue(false));
-            Config.AddItem(new LeagueSharp.Common.MenuItem("disableunknown", "Show Unknown").SetValue(true));
+            Config.AddItem(new LeagueSharp.Common.MenuItem("showunknown", "Show Unknown").SetValue(true));
             Config.AddItem(new LeagueSharp.Common.MenuItem("printranks", "Print at the beginning").SetValue(true));
             Config.AddToMainMenu();
             //
@@ -877,12 +872,12 @@ namespace EloSharp
 
                 Info info = new Info();
        
-                if ((getregionurl() != "Not Supported" || getregionurl() != "Garena") && getregionurl().Contains("op.gg"))
+                if (getregionurl() != "Not Supported" && getregionurl().Contains("op.gg"))
                 {
                     //String htmlcode = new WebClient().DownloadString(getregionurl() + hero.Name);
-                    string htmlcode = "";
-                   HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/userName=" + hero.Name);
-        
+                   string htmlcode = "";
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/userName=" + hero.Name);
+                  // HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/userName=Chief%20Raydere");
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
                     if (response.StatusCode == HttpStatusCode.OK)
@@ -970,12 +965,12 @@ namespace EloSharp
 
                    if ((Config.Item("enablekdaratio").GetValue<bool>()) || (Config.Item("enablewinratio").GetValue<bool>()))
                     {
-                        //GetGenHTML("http://br.op.gg/summoner/champions/userName=" + hero.Name);
+
 
                         //Console.WriteLine("Starting Debug");
                         string data = "";
-                       request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/champions/userName=" + hero.Name);
-
+                         request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/champions/userName=" + hero.Name);
+                       // request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/champions/userName=Chief Raydere");
                         response = (HttpWebResponse)request.GetResponse();
 
                         if (response.StatusCode == HttpStatusCode.OK)
