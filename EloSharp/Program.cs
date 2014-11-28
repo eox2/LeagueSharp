@@ -166,10 +166,11 @@ namespace EloSharp
                         {
                             Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 50, Color.White, "Unranked");
                         }
-                        if (info.Ranking.Contains("Bronze") || info.Ranking.Contains("Silver") || info.Ranking.Contains("Gold") || info.Ranking.Contains("Platinum") || info.Ranking.Contains("Diamond") || info.Ranking.Contains("Master") || info.Ranking.Contains("Challenger"))
+                        if (info.Ranking.ToLower().Contains("bronze") || info.Ranking.ToLower().Contains("silver") || info.Ranking.ToLower().Contains("gold") || info.Ranking.ToLower().Contains("platinum") || info.Ranking.ToLower().Contains("diamond") || info.Ranking.ToLower().Contains("master") || info.Ranking.ToLower().Contains("challenger"))
                         {
                             Drawing.DrawText(Xee - (TextWidth(info.Ranking + " (" + info.lpamount + ")", font) / 2), Yee - 50, rankincolor(info.Ranking), info.Ranking + " (" + info.lpamount + ")");
                         }
+                        //else { Game.PrintChat }
                        
                     }
                 }
