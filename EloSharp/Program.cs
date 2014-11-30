@@ -1,69 +1,427 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
-﻿using System.Drawing.Text;
-﻿using System.Text;
+using System.Drawing;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using System.Drawing;
-using System.Net;
-using System.Text.RegularExpressions;
-using System.IO;
 using Color = System.Drawing.Color;
-using System.Threading;
-
 
 namespace EloSharp
 {
     public class EloSharp
     {
-     
         public static string rank = "";
-        public static LeagueSharp.Common.Menu Config;
-        public static List<Info> Ranks { get; set; }
-        public class Info
-        {
-            public String Name { get; set; }
-            public String Ranking { get; set; }
-            public String lpamount { get; set; }
-            public String winratio { get; set; }
-            public String kdaratio { get; set; }
-            public Color winratiocolor { get; set; }
-            public Color kdaratiocolor { get; set; }
-            public Obj_AI_Hero herohandle { get; set; }
-        }
+        public static Menu Config;
 
         public static EloSharp elosharp;
 
-
-
-        // TC-Crew Tracker code
-        internal class HpBarIndicator
+        public EloSharp()
         {
-            internal Obj_AI_Hero Unit { get; set; }
-
-            private Vector2 Offset
+            Ranks = new List<Info>();
+            foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>())
             {
-                get
+                string playername = hero.Name;
+                byte[] bytes = Encoding.UTF8.GetBytes(playername);
+                string encname = Encoding.Default.GetString(bytes);
+                var info = new Info();
+
+                if (getregionurl() != "Not Supported" && getregionurl().Contains("op.gg"))
                 {
-                    if (Unit != null)
+                    //String htmlcode = new WebClient().DownloadString(getregionurl() + hero.Name);
+                    string htmlcode = "";
+                    var request =
+                        (HttpWebRequest) WebRequest.Create(getregionurl() + "summoner/userName=" + encname);
+                    // HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/userName=Chief%20Raydere");
+                    var response = (HttpWebResponse) request.GetResponse();
+
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        return Unit.IsAlly ? new Vector2(-9, 14) : new Vector2(-9, 17);
+                        Stream receiveStream = response.GetResponseStream();
+                        StreamReader readStream = null;
+
+                        if (response.CharacterSet == null)
+                        {
+                            readStream = new StreamReader(receiveStream);
+                        }
+                        else
+                        {
+                            readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
+                        }
+
+                        htmlcode = readStream.ReadToEnd();
+
+                        response.Close();
+                        readStream.Close();
                     }
 
-                    return new Vector2();
-                }
-            }
 
-            internal Vector2 Position
-            {
-                get { return new Vector2(Unit.HPBarPosition.X + Offset.X, Unit.HPBarPosition.Y + Offset.Y); }
+                    if (htmlcode.Contains("tierRank") && htmlcode.Contains("leaguePoints"))
+                    {
+                        Match htmlmatchrank =
+                            new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match htmlmatchlp =
+                            new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                        rank = playerrank.ToString();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                        {
+                            Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
+                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                        }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                        {
+                            Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
+                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                        }
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = playerlp.ToString();
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.Contains("tierRank") && !htmlcode.Contains("leaguePoints") &&
+                        (htmlcode.Contains("ChampionBox Unranked")))
+                    {
+                        Match htmlmatchrank =
+                            new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+
+                        rank = "Unranked (L-30)";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                        {
+                            Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
+                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                        }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                        {
+                            Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
+                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                        }
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+                    if ((htmlcode.Contains("ChampionBox Unranked") &&
+                         !htmlcode.Contains("leaguePoints") && (!htmlcode.Contains("tierRank"))))
+                    {
+                        rank = "Unranked";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                        {
+                            Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
+                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                        }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                        {
+                            Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
+                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                        }
+
+
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = "Unranked";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+
+                    if (!htmlcode.Contains("ChampionBox Unranked") &&
+                        (!htmlcode.Contains("tierRank")))
+                    {
+                        rank = "Error";
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                        {
+                            Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
+                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                        }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                        {
+                            Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
+                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                        }
+
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+
+
+                    if ((Config.Item("enablekdaratio").GetValue<bool>()) ||
+                        (Config.Item("enablewinratio").GetValue<bool>()))
+                    {
+                        //Console.WriteLine("Starting Debug");
+                        string data = "";
+                        request =
+                            (HttpWebRequest)
+                                WebRequest.Create(getregionurl() + "summoner/champions/userName=" + encname);
+                        // request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/champions/userName=Chief Raydere");
+                        response = (HttpWebResponse) request.GetResponse();
+
+                        if (response.StatusCode == HttpStatusCode.OK)
+                        {
+                            Stream receiveStream = response.GetResponseStream();
+                            StreamReader readStream = null;
+
+                            if (response.CharacterSet == null)
+                            {
+                                readStream = new StreamReader(receiveStream);
+                            }
+                            else
+                            {
+                                readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
+                            }
+
+                            data = readStream.ReadToEnd();
+
+                            response.Close();
+                            readStream.Close();
+                        }
+
+
+                        if (data.Contains("__spc24 __spc24-" + championid(hero) + "\""))
+                        {
+                            //Console.WriteLine(hero.ChampionName);
+                            int index = data.IndexOf("__spc24 __spc24-" + championid(hero) + "\"");
+                            String htmlstats = data.Remove(0, index);
+                            index = htmlstats.IndexOf("gold");
+                            htmlstats = htmlstats.Substring(0, index);
+
+                            Match htmlmatchwinRatio =
+                                new Regex(@"\<span class=\""winRatio\"">(.*?)</span>").Matches(htmlstats)[0];
+                            Match htmlmatchkill =
+                                new Regex(@"\<span class=\""kill\"">(.*?)</span>").Matches(htmlstats)[0];
+                            Match htmlmatchdeath =
+                                new Regex(@"\<span class=\""death\"">(.*?)</span>").Matches(htmlstats)[0];
+                            Match htmlmatchassist =
+                                new Regex(@"\<span class=\""assist\"">(.*?)</span>").Matches(htmlstats)[0];
+                            Match htmlmatchkdaratio =
+                                new Regex(@"\<span class=\""kdaratio\"">(.*?)</span>").Matches(htmlstats)[0];
+
+                            Match winRatio = new Regex(htmlmatchwinRatio.Groups[1].ToString()).Matches(htmlstats)[0];
+                            Match kill = new Regex(htmlmatchkill.Groups[1].ToString()).Matches(htmlstats)[0];
+                            Match death = new Regex(htmlmatchdeath.Groups[1].ToString()).Matches(htmlstats)[0];
+                            Match assist = new Regex(htmlmatchassist.Groups[1].ToString()).Matches(htmlstats)[0];
+                            Match kdaratio = new Regex(htmlmatchkdaratio.Groups[1].ToString()).Matches(htmlstats)[0];
+
+                            index = htmlstats.IndexOf("wins");
+                            htmlstats = htmlstats.Remove(0, (index + 6));
+                            index = htmlstats.IndexOf("</span>");
+                            String wins = htmlstats.Substring(0, index);
+                            wins = wins.Trim();
+                            int Length = wins.Length;
+                            wins = wins.Substring(0, Length - 1);
+
+                            index = htmlstats.IndexOf("losses");
+                            htmlstats = htmlstats.Remove(0, (index + 8));
+                            index = htmlstats.IndexOf("</span>");
+                            String losses = htmlstats.Substring(0, index);
+                            losses = losses.Trim();
+                            Length = losses.Length;
+                            losses = losses.Substring(0, Length - 1);
+
+                            String winratioString = ("Win Ratio (champ) = " + winRatio + " (" + wins + "/" + losses +
+                                                     ")");
+                            // Game.PrintChat(winratioString);
+                            String kdaString = ("KDA = " + kdaratio + " (" + kill + "K + " + assist + "A / " + death +
+                                                "D)");
+
+                            //Console.WriteLine(winratioString);
+                            //Console.WriteLine(kdaString);
+
+
+                            //Console.WriteLine(kdaratio.ToString());
+                            if (kdaratio.ToString().Contains("."))
+                            {
+                                index = kdaratio.ToString().IndexOf(".");
+                            }
+                            else
+                            {
+                                index = kdaratio.ToString().IndexOf(":");
+                            }
+                            String kdaratio2 = kdaratio.ToString().Substring(0, index);
+                            int kdaratiocolor = 0;
+
+                            if (Int32.TryParse(kdaratio2, out kdaratiocolor))
+                            {
+                                //Console.WriteLine(kdaratiocolor);
+                                if (kdaratiocolor > 8)
+                                {
+                                    info.kdaratiocolor = Color.Orange; //Challenger
+                                }
+                                if (kdaratiocolor >= 6 && kdaratiocolor < 8)
+                                {
+                                    info.kdaratiocolor = Color.LimeGreen; //Master
+                                }
+                                if (kdaratiocolor >= 4 && kdaratiocolor < 6)
+                                {
+                                    info.kdaratiocolor = Color.Cyan; //Diamond
+                                }
+                                if (kdaratiocolor >= 3 && kdaratiocolor < 4)
+                                {
+                                    info.kdaratiocolor = Color.DeepSkyBlue; //Platinum
+                                }
+                                if (kdaratiocolor >= 2 && kdaratiocolor < 3)
+                                {
+                                    info.kdaratiocolor = Color.Gold; //Gold
+                                }
+                                if (kdaratiocolor >= 1 && kdaratiocolor < 2)
+                                {
+                                    info.kdaratiocolor = Color.Silver; //Silver
+                                }
+                                if (kdaratiocolor < 1)
+                                {
+                                    info.kdaratiocolor = Color.SandyBrown; //Bronze
+                                }
+                            }
+
+                            string stringwinratio = winRatio.ToString();
+                            string winrateremovepercent = stringwinratio.Replace("%", "");
+                            double winratio = Convert.ToInt32(winrateremovepercent);
+                            info.winratiocolor = colorwinratio(winratio);
+                            info.winratio = winratioString;
+                            info.kdaratio = kdaString;
+                            Ranks.Add(info);
+                        }
+                        else
+                        {
+                            info.winratio = "";
+                            info.kdaratio = "";
+                            info.winratiocolor = Color.White;
+                            Ranks.Add(info);
+                        }
+                    }
+                }
+
+
+                if (getregionurl() != "Not Supported" && getregionurl().Contains("quickfind")) // Garena lookups
+                {
+                    try
+                    {
+                        var container = new CookieContainer();
+                        var inforequest1 = (HttpWebRequest) WebRequest.Create(getregionurl() + hero.Name + "/");
+                        inforequest1.UserAgent =
+                            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36";
+                        inforequest1.KeepAlive = true;
+                        inforequest1.Accept = "*/*";
+                        inforequest1.CookieContainer = container;
+                        inforequest1.Method = "POST";
+                        inforequest1.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+                        var respo = (HttpWebResponse) inforequest1.GetResponse();
+                        container.Add(respo.Cookies);
+                        string responser = new StreamReader(respo.GetResponseStream()).ReadToEnd();
+                        string zmqid = ExtractString(responser, "QF.player =", ";").Replace("\"", "");
+                        string memcache = ExtractString(responser, "memcache: \"", "\"");
+                        string csrfToken = ExtractString(responser, "csrfToken:", "};").Replace("\"", "");
+                        string datatobeposted = "zeromq_key=" + zmqid + "&memcache=" + "&csrfToken=" + csrfToken;
+                        string referer = getregionurl() + hero.Name + "/";
+                        string useragent =
+                            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36";
+                        var requri = new Uri("http://quickfind.kassad.in/ahnlab/sg/AcquisitionServiceGate/LSP.aspx");
+                        var inforequest = (HttpWebRequest) WebRequest.Create(requri);
+                        inforequest.UserAgent = useragent;
+                        byte[] byteArray = Encoding.UTF8.GetBytes(datatobeposted);
+                        inforequest.KeepAlive = true;
+                        inforequest.CookieContainer = container;
+                        inforequest.Method = "POST";
+                        inforequest.ContentLength = byteArray.Length;
+                        inforequest.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+                        inforequest.Accept = "application/json, text/javascript, */*; q=0.01";
+                        inforequest.Referer = referer;
+                        WebHeaderCollection WebHeaders = inforequest.Headers;
+                        WebHeaders.Add("Origin: http://quickfind.kassad.in");
+                        // WebHeaders.Add("Accept-Encoding: gzip, deflate, sdch");
+                        WebHeaders.Add("X-Requested-With: XMLHttpRequest");
+                        WebHeaders.Add("Accept-Language: en-US,en;q=0.8");
+                        Stream dataStream = inforequest.GetRequestStream();
+                        dataStream.Write(byteArray, 0, byteArray.Length);
+                        dataStream.Close();
+                        var response = (HttpWebResponse) inforequest.GetResponse();
+                        Console.WriteLine(response.StatusDescription);
+                        dataStream = response.GetResponseStream();
+                        var reader = new StreamReader(dataStream);
+                        string responseFromServer = reader.ReadToEnd();
+                        // string heroName = "Faker";
+                        string getsumminfo = ExtractString(responseFromServer,
+                            "<a href='\\/profile\\/sg\\/" + hero.Name + "\\/'>" + hero.Name +
+                            "<\\/a><\\/td><td class='hide-sm'><\\/td><td>", "<a href=");
+                        string lp = ExtractString(responseFromServer,
+                            "<a href='\\/profile\\/sg\\/" + hero.Name + "\\/'>" + hero.Name +
+                            "<\\/a><\\/td><td class='hide-sm'><\\/td><td>", "<\\/td><td>");
+                        string rankedwins = ExtractString(responseFromServer,
+                            "<a href='\\/profile\\/sg\\/" + hero.Name + "\\/'>" + hero.Name +
+                            "<\\/a><\\/td><td class='hide-sm'><\\/td><td>" + lp + "<\\/td><td>", "<\\/td><\\/tr>");
+                        string rank = ExtractString(getsumminfo, "<tr class='rR '><td class='hide-sm'>", "<\\/td><td>");
+                        string rankinfosecondary = ExtractString(responseFromServer,
+                            "<span>Ranked Solo 5v5<\\/span><strong>", "<\\/strong><\\/div>");
+                        string[] rankinfo = rankinfosecondary.Split(' ');
+                        string ranksecondary = rankinfo[0] + " " + rankinfo[1];
+                        string lpsecondary = rankinfo[2] + " " + rankinfo[3];
+                        string winslosses = ExtractString(responseFromServer,
+                            "<u style='text-decoration:none;color:#444;font-weight:bold'>", "<\\/u>");
+                        Game.PrintChat(winslosses);
+
+                        string[] splitwinslosses = winslosses.Split(' ');
+                        string wins = splitwinslosses[0];
+                        string losses = splitwinslosses[2];
+                        Game.PrintChat(wins + " wins");
+                        Game.PrintChat(losses + " losses");
+
+                        int winss = Convert.ToInt32(wins);
+                        int lossess = Convert.ToInt32(losses);
+                        double winRatio = Math.Round((double) winss/(winss + lossess)*100, 0);
+
+                        // double.TryParse(wins, out winss);
+                        //  double.TryParse(losses, out lossess);
+                        //  double winRatiopercent = (winss / (winss + lossess)) * 100;
+                        String winratioString = ("Win Ratio = " + winRatio + "%% (" + wins + "/" + losses + ")");
+                            // just % causes bugsplat (thinks its modulus)
+                        reader.Close();
+                        dataStream.Close();
+                        response.Close();
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                        {
+                            Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
+                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                        }
+                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                        {
+                            Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
+                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                        }
+                        info.Name = hero.Name;
+                        info.herohandle = hero;
+                        info.Ranking = rank;
+                        info.lpamount = lp;
+                        info.winratio = winratioString;
+                        info.winratiocolor = colorwinratio(winRatio);
+                        Ranks.Add(info);
+                    }
+
+                    catch (Exception ex)
+                    {
+                        Console.Write("Error " + ex);
+                    }
+                }
             }
         }
 
+        public static List<Info> Ranks { get; set; }
+
+
+        // TC-Crew Tracker code
+
         public static Color rankcolor(string rank)
         {
-
             if (rank.ToLower().Contains("error"))
             {
                 return Color.SandyBrown;
@@ -104,31 +462,35 @@ namespace EloSharp
                 //other codes: #DB910D, #DF9B42, #12607E
                 return Color.Orange;
             }
-            else { return Color.White; }
+            return Color.White;
         }
+
         // End Tc Crew
 
         public static void OnDraw(EventArgs args)
         {
+            if (!Config.Item("enabledrawings").GetValue<bool>())
+            {
+                return;
+            }
 
-            if (!Config.Item("enabledrawings").GetValue<bool>()) { return; }
-            
             foreach (Info info in Ranks)
             {
-     
                 if ((!info.herohandle.IsDead) && (info.herohandle.IsVisible))
                 {
                     // var wts = Drawing.WorldToScreen(info.herohandle.Position);
-                    var indicator = new HpBarIndicator { Unit = info.herohandle };
-                    var Xee = (int)indicator.Position.X + 90;
-                    var Yee = (int)indicator.Position.Y + 5;
-                    Font font = new Font("Calibri", 13.5F);
+                    var indicator = new HpBarIndicator {Unit = info.herohandle};
+                    int Xee = (int) indicator.Position.X + 90;
+                    int Yee = (int) indicator.Position.Y + 5;
+                    var font = new Font("Calibri", 13.5F);
+
 
                     if (Config.Item("enablekdaratio").GetValue<bool>())
                     {
                         if (info.kdaratio.Contains("KDA")) //checking if its valid
                         {
-                            Drawing.DrawText(Xee - (TextWidth(info.kdaratio, font) / 2), Yee - 50, info.kdaratiocolor, info.kdaratio);
+                            Drawing.DrawText(Xee - (TextWidth(info.kdaratio, font)/2), Yee - 50, info.kdaratiocolor,
+                                info.kdaratio);
                             Yee = Yee - 20;
                         }
                     }
@@ -137,7 +499,8 @@ namespace EloSharp
                     {
                         if (info.winratio.Contains("Win Ratio")) //checking if its valid
                         {
-                            Drawing.DrawText(Xee - (TextWidth(info.winratio, font) / 2), Yee - 50, info.winratiocolor, info.winratio);
+                            Drawing.DrawText(Xee - (TextWidth(info.winratio, font)/2), Yee - 50, info.winratiocolor,
+                                info.winratio);
                             Yee = Yee - 20;
                         }
                     }
@@ -148,42 +511,46 @@ namespace EloSharp
                     {
                         if (info.Ranking.ToLower().Contains("not found") && Config.Item("showunknown").GetValue<bool>())
                         {
-                            Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 50, Color.Yellow, info.Ranking);
+                            Drawing.DrawText(Xee - (TextWidth(info.Ranking, font)/2), Yee - 50, Color.Yellow,
+                                info.Ranking);
                         }
                         if (info.Ranking.ToLower().Contains("unknown") && Config.Item("showunknown").GetValue<bool>())
                         {
-                            Drawing.DrawText(Xee - (TextWidth("Unknown)", font) / 2), Yee - 50, Color.Yellow, "Unknown");
+                            Drawing.DrawText(Xee - (TextWidth("Unknown)", font)/2), Yee - 50, Color.Yellow, "Unknown");
                         }
                         if (info.Ranking.Contains("Unranked (L-30)") && Config.Item("showunknown").GetValue<bool>())
                         {
-                            Drawing.DrawText(Xee - (TextWidth("Unranked (L-30)", font) / 2), Yee - 50, Color.Yellow, "Unranked (L-30)");
+                            Drawing.DrawText(Xee - (TextWidth("Unranked (L-30)", font)/2), Yee - 50, Color.Yellow,
+                                "Unranked (L-30)");
                         }
                         if (info.Ranking.ToLower().Contains("error") && Config.Item("showunknown").GetValue<bool>())
                         {
-                            Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 50, Color.Red, info.Ranking);
+                            Drawing.DrawText(Xee - (TextWidth(info.Ranking, font)/2), Yee - 50, Color.Red, info.Ranking);
                         }
                         if (info.Ranking.ToLower().Equals("unranked"))
                         {
-                            Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 50, Color.White, "Unranked");
+                            Drawing.DrawText(Xee - (TextWidth(info.Ranking, font)/2), Yee - 50, Color.White, "Unranked");
                         }
-                        if (info.Ranking.ToLower().Contains("bronze") || info.Ranking.ToLower().Contains("silver") || info.Ranking.ToLower().Contains("gold") || info.Ranking.ToLower().Contains("platinum") || info.Ranking.ToLower().Contains("diamond") || info.Ranking.ToLower().Contains("master") || info.Ranking.ToLower().Contains("challenger"))
+                        if (info.Ranking.ToLower().Contains("bronze") || info.Ranking.ToLower().Contains("silver") ||
+                            info.Ranking.ToLower().Contains("gold") || info.Ranking.ToLower().Contains("platinum") ||
+                            info.Ranking.ToLower().Contains("diamond") || info.Ranking.ToLower().Contains("master") ||
+                            info.Ranking.ToLower().Contains("challenger"))
                         {
-                            Drawing.DrawText(Xee - (TextWidth(info.Ranking + " (" + info.lpamount + ")", font) / 2), Yee - 50, rankincolor(info.Ranking), info.Ranking + " (" + info.lpamount + ")");
+                            Drawing.DrawText(Xee - (TextWidth(info.Ranking + " (" + info.lpamount + ")", font)/2),
+                                Yee - 50, rankincolor(info.Ranking), info.Ranking + " (" + info.lpamount + ")");
                         }
                         //else { Game.PrintChat }
-                       
                     }
                 }
             }
         }
 
 
-
         public static float TextWidth(string text, Font f)
         {
             float textWidth = 0;
 
-            using (Bitmap bmp = new Bitmap(1, 1))
+            using (var bmp = new Bitmap(1, 1))
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 textWidth = g.MeasureString(text, f).Width;
@@ -194,43 +561,33 @@ namespace EloSharp
 
         public static void Main(string[] args)
         {
-
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-
-
-
         }
 
         public static void Game_OnGameLoad(EventArgs args)
         {
-       
             Game.PrintChat("Loaded EloSharp by Seph");
-            Game.PrintChat("Your Region is: " + Game.Region + " ; Please post this on the topic if it is not working properly for your region");
+            Game.PrintChat("Your Region is: " + Game.Region +
+                           " ; Please post this on the topic if it is not working properly for your region");
 
             //Menu
-            Config = new LeagueSharp.Common.Menu("EloSharp", "elosharp", true);
-            Config.AddItem(new LeagueSharp.Common.MenuItem("enabledrawings", "Enable Drawings").SetValue(true));
-            Config.AddItem(new LeagueSharp.Common.MenuItem("enablerank", "Draw Rank").SetValue(true));
-            Config.AddItem(new LeagueSharp.Common.MenuItem("enablewinratio", "Draw Win Ratio").SetValue(false));
-            Config.AddItem(new LeagueSharp.Common.MenuItem("enablekdaratio", "Draw KDA Ratio").SetValue(false));
-            Config.AddItem(new LeagueSharp.Common.MenuItem("showunknown", "Show Unknown").SetValue(true));
-            Config.AddItem(new LeagueSharp.Common.MenuItem("printranks", "Print at the beginning").SetValue(true));
+            Config = new Menu("EloSharp", "elosharp", true);
+            Config.AddItem(new MenuItem("enabledrawings", "Enable Drawings").SetValue(true));
+            Config.AddItem(new MenuItem("enablerank", "Draw Rank").SetValue(true));
+            Config.AddItem(new MenuItem("enablewinratio", "Draw Win Ratio").SetValue(false));
+            Config.AddItem(new MenuItem("enablekdaratio", "Draw KDA Ratio").SetValue(false));
+            Config.AddItem(new MenuItem("showunknown", "Show Unknown").SetValue(true));
+            Config.AddItem(new MenuItem("printranks", "Print at the beginning").SetValue(true));
             Config.AddToMainMenu();
             //
 
             if (getregionurl() != "Not Supported")
             {
-                Thread thread = new System.Threading.Thread(() =>
-                {
-                    elosharp = new EloSharp();
-
-                });
+                var thread = new Thread(() => { elosharp = new EloSharp(); });
                 //  thread.SetApartmentState(ApartmentState.STA);
                 thread.Start();
             }
             Drawing.OnDraw += OnDraw;
-
-           
         }
 
 
@@ -724,46 +1081,89 @@ namespace EloSharp
             {
                 return "107";
             }
-            else { return "";  }    
-                
+            return "";
         }
 
         public static string getregionurl()
         {
-            
-            if (Game.Region.ToLower().Contains("na")) { return "http://na.op.gg/"; }
-            if (Game.Region.ToLower().Contains("euw")) { return "http://euw.op.gg/"; }
-            if (Game.Region.ToLower().Contains("eun")) { return "http://eune.op.gg/"; }
-            if (Game.Region.ToLower().Contains("la1")) { return "http://lan.op.gg/"; }
-            if (Game.Region.ToLower().Contains("la2")) { return "http://las.op.gg/"; }
-            if (Game.Region.ToLower().Contains("tr")) { return "http://tr.op.gg/"; }
-            if (Game.Region.ToLower().Contains("ru")) { return "http://ru.op.gg/"; }
-            if (Game.Region.ToLower().Contains("oc1")) { return "http://oc.op.gg/"; }
-            if (Game.Region.ToLower().Contains("br")) { return "http://br.op.gg/"; }
-            if (Game.Region.ToLower().Contains("kr")) { return "http://op.gg/"; }
+            if (Game.Region.ToLower().Contains("na"))
+            {
+                return "http://na.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("euw"))
+            {
+                return "http://euw.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("eun"))
+            {
+                return "http://eune.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("la1"))
+            {
+                return "http://lan.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("la2"))
+            {
+                return "http://las.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("tr"))
+            {
+                return "http://tr.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("ru"))
+            {
+                return "http://ru.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("oc1"))
+            {
+                return "http://oc.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("br"))
+            {
+                return "http://br.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("kr"))
+            {
+                return "http://op.gg/";
+            }
 
             //Garena lookups
-            if (Game.Region.Contains("SG")) { return "http://quickfind.kassad.in/profile/sg/"; }
-            if (Game.Region.Contains("VN")) { return "http://quickfind.kassad.in/profile/vn/"; }
-            if (Game.Region.Contains("PH")) { return "http://quickfind.kassad.in/profile/ph/"; }
-            if (Game.Region.Contains("TW")) { return "http://quickfind.kassad.in/profile/tw/"; }
-            if (Game.Region.Contains("TH")) { return "http://quickfind.kassad.in/profile/th/"; }
-            if (Game.Region.Contains("ID")) { return "http://quickfind.kassad.in/profile/id/"; }
-         
-            else { return "Not Supported";  }
-            
+            if (Game.Region.Contains("SG"))
+            {
+                return "http://quickfind.kassad.in/profile/sg/";
+            }
+            if (Game.Region.Contains("VN"))
+            {
+                return "http://quickfind.kassad.in/profile/vn/";
+            }
+            if (Game.Region.Contains("PH"))
+            {
+                return "http://quickfind.kassad.in/profile/ph/";
+            }
+            if (Game.Region.Contains("TW"))
+            {
+                return "http://quickfind.kassad.in/profile/tw/";
+            }
+            if (Game.Region.Contains("TH"))
+            {
+                return "http://quickfind.kassad.in/profile/th/";
+            }
+            if (Game.Region.Contains("ID"))
+            {
+                return "http://quickfind.kassad.in/profile/id/";
+            }
+
+            return "Not Supported";
+
 
             //return "http://kassad.in";
-           // return "http://na.op.gg/";
+            // return "http://na.op.gg/";
         }
 
-        string ExtractString(string s, string start, string end)
+        private string ExtractString(string s, string start, string end)
         {
-
-
             if (s.Contains(start) && s.Contains(end))
             {
-
                 // You should check for errors in real-world code, omitted for brevity
 
                 int startIndex = s.IndexOf(start) + start.Length;
@@ -772,15 +1172,11 @@ namespace EloSharp
                 return s.Substring(startIndex, endIndex - startIndex);
             }
 
-            else { return ""; }
-
-
-
+            return "";
         }
 
         public static Color rankincolor(string rank)
         {
-
             if (rank.ToLower().Contains("error"))
             {
                 return Color.Red;
@@ -821,388 +1217,88 @@ namespace EloSharp
                 //other codes: #DB910D, #DF9B42, #12607E
                 return Color.Orange;
             }
-            else { return Color.White; }
+            return Color.White;
         }
 
         public static Color colorwinratio(double winratiocolor)
         {
-          //  int winratiocolor = 0;
-       
-                if (winratiocolor >= 90 && winratiocolor <= 100)
-                {
-                    return Color.Orange; //Challenger
-                }
-                if (winratiocolor >= 80 && winratiocolor < 90)
-                {
-                   return  Color.LimeGreen; //Master
-                }
-                if (winratiocolor >= 70 && winratiocolor < 80)
-                {
-                   return  Color.Cyan; //Diamond
-                }
-                if (winratiocolor >= 60 && winratiocolor < 70)
-                {
-                   return  Color.DeepSkyBlue; //Platinum
-                }
-                if (winratiocolor >= 50 && winratiocolor < 60)
-                {
-                   return  Color.Gold; //Gold
-                }
-                if (winratiocolor >= 40 && winratiocolor < 50)
-                {
-                   return  Color.Silver; //Silver
-                }
-                if (winratiocolor >= 30 && winratiocolor < 40)
-                {
-                   return  Color.SandyBrown; //Bronze
-                }
-                if (winratiocolor < 30)
-                {
-                   return  Color.Red; //Red
-                }
-                else { return Color.White;  }
-            
-        }
-        
-        public EloSharp()
-        {
-            Ranks = new List<Info>();
-            // foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>())
-            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
+            //  int winratiocolor = 0;
+
+            if (winratiocolor >= 90 && winratiocolor <= 100)
             {
+                return Color.Orange; //Challenger
+            }
+            if (winratiocolor >= 80 && winratiocolor < 90)
+            {
+                return Color.LimeGreen; //Master
+            }
+            if (winratiocolor >= 70 && winratiocolor < 80)
+            {
+                return Color.Cyan; //Diamond
+            }
+            if (winratiocolor >= 60 && winratiocolor < 70)
+            {
+                return Color.DeepSkyBlue; //Platinum
+            }
+            if (winratiocolor >= 50 && winratiocolor < 60)
+            {
+                return Color.Gold; //Gold
+            }
+            if (winratiocolor >= 40 && winratiocolor < 50)
+            {
+                return Color.Silver; //Silver
+            }
+            if (winratiocolor >= 30 && winratiocolor < 40)
+            {
+                return Color.SandyBrown; //Bronze
+            }
+            if (winratiocolor < 30)
+            {
+                return Color.Red; //Red
+            }
+            return Color.White;
+        }
 
-                Info info = new Info();
-       
-                if (getregionurl() != "Not Supported" && getregionurl().Contains("op.gg"))
+        private static byte[] GetBytes(string str)
+        {
+            var bytes = new byte[str.Length*sizeof (char)];
+            Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
+            return bytes;
+        }
+
+        internal class HpBarIndicator
+        {
+            internal Obj_AI_Hero Unit { get; set; }
+
+            private Vector2 Offset
+            {
+                get
                 {
-                    //String htmlcode = new WebClient().DownloadString(getregionurl() + hero.Name);
-                   string htmlcode = "";
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/userName=" + hero.Name);
-                  // HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/userName=Chief%20Raydere");
-                    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-                    if (response.StatusCode == HttpStatusCode.OK)
+                    if (Unit != null)
                     {
-                        Stream receiveStream = response.GetResponseStream();
-                        StreamReader readStream = null;
-
-                        if (response.CharacterSet == null)
-                        {
-                            readStream = new StreamReader(receiveStream);
-                        }
-                        else
-                        {
-                            readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
-                        }
-
-                        htmlcode = readStream.ReadToEnd();
-
-                        response.Close();
-                        readStream.Close();
+                        return Unit.IsAlly ? new Vector2(-9, 14) : new Vector2(-9, 17);
                     }
 
-                   
-
-                    if (htmlcode.ToString().Contains("tierRank") && htmlcode.ToString().Contains("leaguePoints"))
-                    {
-
-                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        Match htmlmatchlp = new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
-                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
-                        info.Name = hero.Name;
-                        info.herohandle = hero;
-                        info.Ranking = rank;
-                        info.lpamount = playerlp.ToString();
-                        Ranks.Add(info);
-                    }
-                    if (htmlcode.ToString().Contains("tierRank") &&  !htmlcode.ToString().Contains("leaguePoints") && (htmlcode.ToString().Contains("ChampionBox Unranked")))
-                    {
-
-                        Match htmlmatchrank = new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-   
-                        rank = "Unranked (L-30)";
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
-                        info.Name = hero.Name;
-                        info.herohandle = hero;
-                        info.Ranking = rank;
-                        info.lpamount = "";
-                        Ranks.Add(info);
-                    }
-                    if ((htmlcode.ToString().Contains("ChampionBox Unranked") && !htmlcode.ToString().Contains("leaguePoints") && (!htmlcode.ToString().Contains("tierRank"))))
-                    {
-
-                        rank = "Unranked";
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
-
-
-                        info.Name = hero.Name;
-                        info.herohandle = hero;
-                        info.Ranking = "Unranked";
-                        info.lpamount = "";
-                        Ranks.Add(info);
-                    }
-
-
-                    if (!htmlcode.ToString().Contains("ChampionBox Unranked") && (!htmlcode.ToString().Contains("tierRank")))
-                    {
-                        rank = "Error";
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
-
-                        info.Name = hero.Name;
-                        info.herohandle = hero;
-                        info.Ranking = rank;
-                        info.lpamount = "";
-                        Ranks.Add(info);
-
-                    }
-
-                   if ((Config.Item("enablekdaratio").GetValue<bool>()) || (Config.Item("enablewinratio").GetValue<bool>()))
-                    {
-
-
-                        //Console.WriteLine("Starting Debug");
-                        string data = "";
-                         request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/champions/userName=" + hero.Name);
-                       // request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/champions/userName=Chief Raydere");
-                        response = (HttpWebResponse)request.GetResponse();
-
-                        if (response.StatusCode == HttpStatusCode.OK)
-                        {
-                            Stream receiveStream = response.GetResponseStream();
-                            StreamReader readStream = null;
-
-                            if (response.CharacterSet == null)
-                            {
-                                readStream = new StreamReader(receiveStream);
-                            }
-                            else
-                            {
-                                readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
-                            }
-
-                            data = readStream.ReadToEnd();
-
-                            response.Close();
-                            readStream.Close();
-                        }
-
-
-                        if (data.Contains("__spc24 __spc24-" + championid(hero) + "\""))
-                        {
-          
-                            //Console.WriteLine(hero.ChampionName);
-                            int index = data.IndexOf("__spc24 __spc24-" + championid(hero) + "\"");
-                            String htmlstats = data.Remove(0, index);
-                            index = htmlstats.IndexOf("gold");
-                            htmlstats = htmlstats.Substring(0, index);
-
-                            Match htmlmatchwinRatio = new Regex(@"\<span class=\""winRatio\"">(.*?)</span>").Matches(htmlstats)[0];
-                            Match htmlmatchkill = new Regex(@"\<span class=\""kill\"">(.*?)</span>").Matches(htmlstats)[0];
-                            Match htmlmatchdeath = new Regex(@"\<span class=\""death\"">(.*?)</span>").Matches(htmlstats)[0];
-                            Match htmlmatchassist = new Regex(@"\<span class=\""assist\"">(.*?)</span>").Matches(htmlstats)[0];
-                            Match htmlmatchkdaratio = new Regex(@"\<span class=\""kdaratio\"">(.*?)</span>").Matches(htmlstats)[0];
-
-                            Match winRatio = new Regex(htmlmatchwinRatio.Groups[1].ToString()).Matches(htmlstats)[0];
-                            Match kill = new Regex(htmlmatchkill.Groups[1].ToString()).Matches(htmlstats)[0];
-                            Match death = new Regex(htmlmatchdeath.Groups[1].ToString()).Matches(htmlstats)[0];
-                            Match assist = new Regex(htmlmatchassist.Groups[1].ToString()).Matches(htmlstats)[0];
-                            Match kdaratio = new Regex(htmlmatchkdaratio.Groups[1].ToString()).Matches(htmlstats)[0];
-
-                            index = htmlstats.IndexOf("wins");
-                            htmlstats = htmlstats.Remove(0, (index + 6));
-                            index = htmlstats.IndexOf("</span>");
-                            String wins = htmlstats.Substring(0, index);
-                            wins = wins.Trim();
-                            int Length = wins.Length;
-                            wins = wins.Substring(0, Length - 1);
-
-                            index = htmlstats.IndexOf("losses");
-                            htmlstats = htmlstats.Remove(0, (index + 8));
-                            index = htmlstats.IndexOf("</span>");
-                            String losses = htmlstats.Substring(0, index);
-                            losses = losses.Trim();
-                            Length = losses.Length;
-                            losses = losses.Substring(0, Length - 1);
-                   
-                            String winratioString = ("Win Ratio (champ) = " + winRatio + " (" + wins + "/" + losses + ")");
-                           // Game.PrintChat(winratioString);
-                            String kdaString = ("KDA = " + kdaratio + " (" + kill + "K + " + assist + "A / " + death + "D)");
-
-                            //Console.WriteLine(winratioString);
-                            //Console.WriteLine(kdaString);
-         
-                         
-                            //Console.WriteLine(kdaratio.ToString());
-                            if (kdaratio.ToString().Contains("."))
-                            {
-                                index = kdaratio.ToString().IndexOf(".");
-                            }
-                            else
-                            {
-                                index = kdaratio.ToString().IndexOf(":");
-                            }
-                            String kdaratio2 = kdaratio.ToString().Substring(0, index);
-                            int kdaratiocolor = 0;
-                        
-                            if (Int32.TryParse(kdaratio2, out kdaratiocolor))
-                            {
-                                //Console.WriteLine(kdaratiocolor);
-                                if (kdaratiocolor > 8)
-                                {
-                                    info.kdaratiocolor = Color.Orange; //Challenger
-                                }
-                                if (kdaratiocolor >= 6 && kdaratiocolor < 8)
-                                {
-                                    info.kdaratiocolor = Color.LimeGreen; //Master
-                                }
-                                if (kdaratiocolor >= 4 && kdaratiocolor < 6)
-                                {
-                                    info.kdaratiocolor = Color.Cyan; //Diamond
-                                }
-                                if (kdaratiocolor >= 3 && kdaratiocolor < 4)
-                                {
-                                    info.kdaratiocolor = Color.DeepSkyBlue; //Platinum
-                                }
-                                if (kdaratiocolor >= 2 && kdaratiocolor < 3)
-                                {
-                                    info.kdaratiocolor = Color.Gold; //Gold
-                                }
-                                if (kdaratiocolor >= 1 && kdaratiocolor < 2)
-                                {
-                                    info.kdaratiocolor = Color.Silver; //Silver
-                                }
-                                if (kdaratiocolor < 1)
-                                {
-                                    info.kdaratiocolor = Color.SandyBrown; //Bronze
-                                }
-                    
-                            }
-                          
-                            string stringwinratio = winRatio.ToString();
-                            string winrateremovepercent = stringwinratio.Replace("%", "");
-                            double winratio = Convert.ToInt32(winrateremovepercent);
-                            info.winratiocolor = colorwinratio(winratio);
-                            info.winratio = winratioString;
-                            info.kdaratio = kdaString.ToString();
-                            Ranks.Add(info);
-                        }
-                        else
-                        {
-                            info.winratio = "";
-                            info.kdaratio = "";
-                            info.winratiocolor = Color.White;
-                            Ranks.Add(info);
-                        }
-                    }
+                    return new Vector2();
                 }
+            }
 
-
-                if (getregionurl() != "Not Supported" && getregionurl().Contains("quickfind")) // Garena lookups
-                {
-                    try
-                    {
-          
-                        CookieContainer container = new CookieContainer();
-                        HttpWebRequest inforequest1 = (HttpWebRequest)WebRequest.Create(getregionurl() + hero.Name + "/");
-                        inforequest1.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36";
-                        inforequest1.KeepAlive = true;
-                        inforequest1.Accept = "*/*";
-                        inforequest1.CookieContainer = container;
-                        inforequest1.Method = "POST";
-                        inforequest1.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
-                        HttpWebResponse respo = (HttpWebResponse)inforequest1.GetResponse();
-                        container.Add(respo.Cookies);
-                        string responser = new StreamReader(respo.GetResponseStream()).ReadToEnd();
-                        string zmqid = ExtractString(responser, "QF.player =", ";").Replace("\"", "");
-                        string memcache = ExtractString(responser, "memcache: \"", "\"");
-                        string csrfToken = ExtractString(responser, "csrfToken:", "};").Replace("\"", "");
-                        string datatobeposted = "zeromq_key=" + zmqid + "&memcache=" + "&csrfToken=" + csrfToken;
-                        string referer = getregionurl() + hero.Name + "/";
-                        string useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36";
-                        Uri requri = new Uri("http://quickfind.kassad.in/ahnlab/sg/AcquisitionServiceGate/LSP.aspx");
-                        HttpWebRequest inforequest = (HttpWebRequest)WebRequest.Create(requri);
-                        inforequest.UserAgent = useragent;
-                        byte[] byteArray = Encoding.UTF8.GetBytes(datatobeposted);
-                        inforequest.KeepAlive = true;
-                        inforequest.CookieContainer = container;
-                        inforequest.Method = "POST";
-                        inforequest.ContentLength = byteArray.Length;
-                        inforequest.ContentType = "application/x-www-form-urlencoded; charset=UTF-8"; 
-                        inforequest.Accept = "application/json, text/javascript, */*; q=0.01";
-                        inforequest.Referer = referer;
-                        WebHeaderCollection WebHeaders = inforequest.Headers;
-                        WebHeaders.Add("Origin: http://quickfind.kassad.in");
-                        // WebHeaders.Add("Accept-Encoding: gzip, deflate, sdch");
-                        WebHeaders.Add("X-Requested-With: XMLHttpRequest");
-                        WebHeaders.Add("Accept-Language: en-US,en;q=0.8");
-                        Stream dataStream = inforequest.GetRequestStream();
-                        dataStream.Write(byteArray, 0, byteArray.Length);
-                        dataStream.Close();
-                        HttpWebResponse response = (HttpWebResponse)inforequest.GetResponse();
-                        Console.WriteLine(((HttpWebResponse)response).StatusDescription);
-                        dataStream = response.GetResponseStream();
-                        StreamReader reader = new StreamReader(dataStream);
-                        string responseFromServer = reader.ReadToEnd();
-                       // string heroName = "Faker";
-                        string getsumminfo = ExtractString(responseFromServer, "<a href='\\/profile\\/sg\\/" + hero.Name + "\\/'>" + hero.Name + "<\\/a><\\/td><td class='hide-sm'><\\/td><td>", "<a href=");
-                        string lp = ExtractString(responseFromServer, "<a href='\\/profile\\/sg\\/" + hero.Name + "\\/'>" + hero.Name + "<\\/a><\\/td><td class='hide-sm'><\\/td><td>", "<\\/td><td>");
-                        string rankedwins = ExtractString(responseFromServer, "<a href='\\/profile\\/sg\\/" + hero.Name + "\\/'>" + hero.Name + "<\\/a><\\/td><td class='hide-sm'><\\/td><td>" + lp + "<\\/td><td>", "<\\/td><\\/tr>");
-                        string rank = ExtractString(getsumminfo, "<tr class='rR '><td class='hide-sm'>", "<\\/td><td>");
-                        string rankinfosecondary = ExtractString(responseFromServer, "<span>Ranked Solo 5v5<\\/span><strong>", "<\\/strong><\\/div>");
-                        string[] rankinfo = rankinfosecondary.Split(' ');
-                        string ranksecondary = rankinfo[0] + " " + rankinfo[1];
-                        string lpsecondary = rankinfo[2] + " " + rankinfo[3];
-                        string winslosses = ExtractString(responseFromServer, "<u style='text-decoration:none;color:#444;font-weight:bold'>", "<\\/u>");
-                        Game.PrintChat(winslosses);
-
-                        string[] splitwinslosses = winslosses.Split(' ');
-                        string wins = splitwinslosses[0];
-                        string losses = splitwinslosses[2];
-                        Game.PrintChat(wins + " wins");
-                        Game.PrintChat(losses + " losses");
-                  
-                        int winss = Convert.ToInt32(wins);
-                        int lossess = Convert.ToInt32(losses);
-                        double winRatio = Math.Round((double) winss / (winss + lossess) * 100, 0);
-                        
-                        // double.TryParse(wins, out winss);
-                        //  double.TryParse(losses, out lossess);
-                        //  double winRatiopercent = (winss / (winss + lossess)) * 100;
-                        String winratioString = ("Win Ratio = " + winRatio + "%% (" + wins + "/" + losses + ")"); // just % causes bugsplat (thinks its modulus)
-                        reader.Close();
-                        dataStream.Close();
-                        response.Close();
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly) { Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy) { Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName + "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank); }
-                        info.Name = hero.Name;
-                        info.herohandle = hero;
-                        info.Ranking = rank;
-                        info.lpamount = lp;
-                        info.winratio = winratioString;
-                        info.winratiocolor = colorwinratio(winRatio);
-                        Ranks.Add(info);
-                    }
-
-                    catch (Exception ex) { Console.Write("Error " + ex);  }
-   
-                   
-                }
-            
-
+            internal Vector2 Position
+            {
+                get { return new Vector2(Unit.HPBarPosition.X + Offset.X, Unit.HPBarPosition.Y + Offset.Y); }
             }
         }
 
-
-
+        public class Info
+        {
+            public String Name { get; set; }
+            public String Ranking { get; set; }
+            public String lpamount { get; set; }
+            public String winratio { get; set; }
+            public String kdaratio { get; set; }
+            public Color winratiocolor { get; set; }
+            public Color kdaratiocolor { get; set; }
+            public Obj_AI_Hero herohandle { get; set; }
+        }
     }
 }
-
-

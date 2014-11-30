@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
-using System.Runtime.CompilerServices;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX;
+
 //using Color = System.Drawing.Color;
+
 namespace SephElise
 {
-    class Program
+    internal class Program
     {
         private const string ChampionName = "Elise";
         private static Orbwalking.Orbwalker Orbwalker;
@@ -32,15 +28,13 @@ namespace SephElise
 
         public static Menu SEPH;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
 
-        static void Game_OnGameLoad(EventArgs args)
+        private static void Game_OnGameLoad(EventArgs args)
         {
-
-
             Player = ObjectManager.Player;
             if (Player.BaseSkinName != ChampionName) return;
 
@@ -85,22 +79,27 @@ namespace SephElise
             Config.SubMenu("Combo").AddItem(new MenuItem("UseWSpider", "Use W Spider")).SetValue(true);
             Config.SubMenu("Combo").AddItem(new MenuItem("UseESpider", "Use E Spider")).SetValue(true);
             Config.SubMenu("Combo").AddItem(new MenuItem("UseItems", "Use Items")).SetValue(true);
-            Config.SubMenu("Combo").AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
-
+            Config.SubMenu("Combo")
+                .AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
 
 
             //Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q")).SetValue(true);
             Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W")).SetValue(true);
-            Config.SubMenu("Harass").AddItem(new MenuItem("ActiveHarass", "Harass key").SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("Harass")
+                .AddItem(
+                    new MenuItem("ActiveHarass", "Harass key").SetValue(new KeyBind("X".ToCharArray()[0],
+                        KeyBindType.Press)));
 
             //Farm
             Config.AddSubMenu(new Menu("Farm/Clear", "Farm"));
             Config.SubMenu("Farm").AddItem(new MenuItem("UseQFarm", "Use Q (Spider)")).SetValue(true);
             Config.SubMenu("Farm").AddItem(new MenuItem("UseSpiderEFarm", "Use E (Spider)")).SetValue(false);
             Config.SubMenu("Farm").AddItem(new MenuItem("UseWFarm", "Use W (Spider)")).SetValue(true);
-            Config.SubMenu("Farm").AddItem(new MenuItem("ActiveFarm", "Farm Key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("Farm")
+                .AddItem(
+                    new MenuItem("ActiveFarm", "Farm Key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             //Kill Steal
             Config.AddSubMenu(new Menu("KillSteal", "Ks"));
@@ -118,23 +117,20 @@ namespace SephElise
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawW", "Draw W")).SetValue(true);
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
             Config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag Free Circles").SetValue(true));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
 
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += OnGameUpdate;
             Game.PrintChat("<font color='#1d87f2'>SephElise has been Loaded.</font>");
-
-
-
         }
-
 
 
         private static void OnGameUpdate(EventArgs args)
         {
-
             Player = ObjectManager.Player;
             QS = new Spell(SpellSlot.Q, QS.Range);
             Orbwalker.SetAttack(true);
@@ -148,7 +144,6 @@ namespace SephElise
             if (Config.Item("ActiveHarass").GetValue<KeyBind>().Active)
             {
                 Harass();
-
             }
             if (Config.Item("ActiveFarm").GetValue<KeyBind>().Active)
             {
@@ -158,21 +153,21 @@ namespace SephElise
             {
                 KillSteal();
             }
-
         }
 
         private static void Harass()
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             if (target != null)
             {
-
-                if (HumanForm && Player.Distance(target) <= Q.Range && Config.Item("UseQHarass").GetValue<bool>() && Q.IsReady())
+                if (HumanForm && Player.Distance(target) <= Q.Range && Config.Item("UseQHarass").GetValue<bool>() &&
+                    Q.IsReady())
                 {
                     Q.Cast(target);
                 }
 
-                if (HumanForm && Player.Distance(target) <= W.Range && Config.Item("UseWHarass").GetValue<bool>() && W.IsReady())
+                if (HumanForm && Player.Distance(target) <= W.Range && Config.Item("UseWHarass").GetValue<bool>() &&
+                    W.IsReady())
                 {
                     W.Cast(target);
                 }
@@ -180,15 +175,15 @@ namespace SephElise
         }
 
 
-
         private static void JungleFarm()
         {
-            var target = SimpleTs.GetTarget(QS.Range, SimpleTs.DamageType.Magical);
-            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.Health);
+            Obj_AI_Hero target = SimpleTs.GetTarget(QS.Range, SimpleTs.DamageType.Magical);
+            List<Obj_AI_Base> mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range,
+                MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.Health);
 
             if (Config.Item("UseQFarm").GetValue<bool>())
             {
-                foreach (var minion in mobs)
+                foreach (Obj_AI_Base minion in mobs)
                     if (HumanForm)
                     {
                         if (QS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= Q.Range)
@@ -201,9 +196,8 @@ namespace SephElise
                         }
                         R.Cast();
                     }
-                foreach (var minion in mobs)
+                foreach (Obj_AI_Base minion in mobs)
                 {
-
                     if (QS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= QS.Range)
                     {
                         QS.Cast(minion);
@@ -212,25 +206,24 @@ namespace SephElise
                     {
                         WS.Cast();
                     }
-                    if (ES.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= ES.Range && Config.Item("UseSpiderEFarm").GetValue<bool>())
+                    if (ES.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= ES.Range &&
+                        Config.Item("UseSpiderEFarm").GetValue<bool>())
                     {
                         ES.Cast(minion);
                     }
-
-
                 }
             }
-
         }
 
         private static void Farm()
         {
-            var target = SimpleTs.GetTarget(QS.Range, SimpleTs.DamageType.Magical);
-            var allminions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.Health);
+            Obj_AI_Hero target = SimpleTs.GetTarget(QS.Range, SimpleTs.DamageType.Magical);
+            List<Obj_AI_Base> allminions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All,
+                MinionTeam.Enemy, MinionOrderTypes.Health);
 
             if (Config.Item("UseQFarm").GetValue<bool>())
             {
-                foreach (var minion in allminions)
+                foreach (Obj_AI_Base minion in allminions)
                     if (HumanForm)
                     {
                         if (QS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= Q.Range)
@@ -243,9 +236,8 @@ namespace SephElise
                         }
                         R.Cast();
                     }
-                foreach (var minion in allminions)
+                foreach (Obj_AI_Base minion in allminions)
                 {
-
                     if (QS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= QS.Range)
                     {
                         QS.Cast(minion);
@@ -254,28 +246,25 @@ namespace SephElise
                     {
                         WS.Cast();
                     }
-                    if (ES.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= ES.Range && Config.Item("UseSpiderEFarm").GetValue<bool>())
+                    if (ES.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= ES.Range &&
+                        Config.Item("UseSpiderEFarm").GetValue<bool>())
                     {
                         ES.Cast(minion);
                     }
-
-
                 }
             }
-
         }
-
 
 
         private static void KillSteal()
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var igniteDmg = Damage.GetSummonerSpellDamage(Player, target, Damage.SummonerSpell.Ignite);
-            var QHDmg = Damage.GetSpellDamage(Player, target, SpellSlot.Q);
-            var WDmg = Damage.GetSpellDamage(Player, target, SpellSlot.W);
+            Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
+            double QHDmg = Player.GetSpellDamage(target, SpellSlot.Q);
+            double WDmg = Player.GetSpellDamage(target, SpellSlot.W);
 
             if (target != null && Config.Item("UseIgnite").GetValue<bool>() && IgniteSlot != SpellSlot.Unknown &&
-            Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (igniteDmg > target.Health)
                 {
@@ -283,21 +272,24 @@ namespace SephElise
                 }
             }
 
-            if (Q.IsReady() && Player.Distance(target) <= Q.Range && target != null && Config.Item("UseQKs").GetValue<bool>())
+            if (Q.IsReady() && Player.Distance(target) <= Q.Range && target != null &&
+                Config.Item("UseQKs").GetValue<bool>())
             {
                 if (target.Health <= QHDmg)
                 {
                     Q.Cast(target);
                 }
             }
-            if (QS.IsReady() && Player.Distance(target) <= QS.Range && target != null && Config.Item("UseQKs").GetValue<bool>())
+            if (QS.IsReady() && Player.Distance(target) <= QS.Range && target != null &&
+                Config.Item("UseQKs").GetValue<bool>())
             {
                 if (target.Health <= QHDmg)
                 {
                     Q.Cast(target);
                 }
             }
-            if (W.IsReady() && Player.Distance(target) <= W.Range && target != null && Config.Item("UseWKs").GetValue<bool>() && HumanForm)
+            if (W.IsReady() && Player.Distance(target) <= W.Range && target != null &&
+                Config.Item("UseWKs").GetValue<bool>() && HumanForm)
             {
                 if (target.Health <= WDmg)
                 {
@@ -307,9 +299,7 @@ namespace SephElise
         }
 
 
-
-
-        static void Drawing_OnDraw(EventArgs args)
+        private static void Drawing_OnDraw(EventArgs args)
         {
         }
 
@@ -323,7 +313,6 @@ namespace SephElise
                 Qcd = (Player.Spellbook.GetSpell(SpellSlot.Q).Cooldown);
                 Wcd = (Player.Spellbook.GetSpell(SpellSlot.W).Cooldown);
                 Ecd = (Player.Spellbook.GetSpell(SpellSlot.E).Cooldown);
-
 
 
                 HumanForm = true;
@@ -345,16 +334,12 @@ namespace SephElise
                 HumanForm = false;
                 SpiderForm = true;
             }
-
-
         }
-
-
 
 
         private static void Combo()
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             Orbwalker.SetAttack((!Q.IsReady() || E.IsReady() || W.IsReady()));
 
             if (target != null)
@@ -362,24 +347,60 @@ namespace SephElise
                 if (HumanForm)
                 {
                     // Human Rotation
-                    if (Player.Distance(target) <= Q.Range && Config.Item("UseQHuman").GetValue<bool>() && Q.IsReady()) { Q.Cast(target); }
-                    if (Player.Distance(target) <= W.Range && Config.Item("UseWHuman").GetValue<bool>() && W.IsReady()) { W.Cast(target); }
-                    if (Player.Distance(target) <= E.Range && Config.Item("UseEHuman").GetValue<bool>() && E.IsReady()) { E.Cast(target); }
-                    if (!Q.IsReady() && !W.IsReady() && !E.IsReady() && Player.Distance(target) <= 750 && Config.Item("UseR").GetValue<bool>()) { R.Cast(); }
-                    if (!Q.IsReady() && !W.IsReady() && Player.Distance(target) <= 750 && Config.Item("UseQHuman").GetValue<bool>()) { R.Cast(); }
-
-
+                    if (Player.Distance(target) <= Q.Range && Config.Item("UseQHuman").GetValue<bool>() && Q.IsReady())
+                    {
+                        Q.Cast(target);
+                    }
+                    if (Player.Distance(target) <= W.Range && Config.Item("UseWHuman").GetValue<bool>() && W.IsReady())
+                    {
+                        W.Cast(target);
+                    }
+                    if (Player.Distance(target) <= E.Range && Config.Item("UseEHuman").GetValue<bool>() && E.IsReady())
+                    {
+                        E.Cast(target);
+                    }
+                    if (!Q.IsReady() && !W.IsReady() && !E.IsReady() && Player.Distance(target) <= 750 &&
+                        Config.Item("UseR").GetValue<bool>())
+                    {
+                        R.Cast();
+                    }
+                    if (!Q.IsReady() && !W.IsReady() && Player.Distance(target) <= 750 &&
+                        Config.Item("UseQHuman").GetValue<bool>())
+                    {
+                        R.Cast();
+                    }
                 }
                 // Spider Rotation
                 if (SpiderForm)
                 {
-                    if (Player.Distance(target) <= QS.Range && Config.Item("UseQSpider").GetValue<bool>() && QS.IsReady()) { QS.Cast(target); }
-                    if (Player.Distance(target) <= 140 && Config.Item("UseWSpider").GetValue<bool>() && WS.IsReady()) { WS.Cast(); }
-                    if (Player.Distance(target) <= ES.Range && Player.Distance(target) > QS.Range && Config.Item("UseESpider").GetValue<bool>() && ES.IsReady()) { ES.Cast(target); }
-                    if (Player.Distance(target) > QS.Range && !ES.IsReady() && R.IsReady() && Player.Distance(target) <= 1075 && Config.Item("UseR").GetValue<bool>()) { R.Cast(); }
-                    if (!QS.IsReady() && Player.Distance(target) >= 125 && !ES.IsReady() && R.IsReady() && Player.Distance(target) <= 1075 && Config.Item("UseR").GetValue<bool>()) { R.Cast(); }
-                    if (ES.IsReady() && Player.Distance(target) > QS.Range && Config.Item("UseESpider").GetValue<bool>()) { ES.Cast(target); }
-
+                    if (Player.Distance(target) <= QS.Range && Config.Item("UseQSpider").GetValue<bool>() &&
+                        QS.IsReady())
+                    {
+                        QS.Cast(target);
+                    }
+                    if (Player.Distance(target) <= 140 && Config.Item("UseWSpider").GetValue<bool>() && WS.IsReady())
+                    {
+                        WS.Cast();
+                    }
+                    if (Player.Distance(target) <= ES.Range && Player.Distance(target) > QS.Range &&
+                        Config.Item("UseESpider").GetValue<bool>() && ES.IsReady())
+                    {
+                        ES.Cast(target);
+                    }
+                    if (Player.Distance(target) > QS.Range && !ES.IsReady() && R.IsReady() &&
+                        Player.Distance(target) <= 1075 && Config.Item("UseR").GetValue<bool>())
+                    {
+                        R.Cast();
+                    }
+                    if (!QS.IsReady() && Player.Distance(target) >= 125 && !ES.IsReady() && R.IsReady() &&
+                        Player.Distance(target) <= 1075 && Config.Item("UseR").GetValue<bool>())
+                    {
+                        R.Cast();
+                    }
+                    if (ES.IsReady() && Player.Distance(target) > QS.Range && Config.Item("UseESpider").GetValue<bool>())
+                    {
+                        ES.Cast(target);
+                    }
                 }
             }
         }

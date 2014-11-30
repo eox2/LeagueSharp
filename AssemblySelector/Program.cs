@@ -1,22 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LeagueSharp;
-using LeagueSharp.Common;
-using System.Drawing;
-using SharpDX;
 using System.Runtime.InteropServices;
 using AssemblySelector.Properties;
+using LeagueSharp;
+using LeagueSharp.Common;
+using SharpDX;
 
 namespace AssemblySelector
 {
-    class Selector
+    internal class Selector
     {
         private static readonly Vector2 _scale = new Vector2(1.25f, 1.25f);
         private static Render.Sprite Leaguesharpicon;
-        private static Vector2 _posLsharp = new Vector2(Drawing.Width / 2f - 286.5f, 15);
+        private static Vector2 _posLsharp = new Vector2(Drawing.Width/2f - 286.5f, 15);
+
         [DllImport("user32.dll")]
         internal static extern IntPtr SetFocus(IntPtr hWnd);
 
@@ -27,11 +23,10 @@ namespace AssemblySelector
         internal static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [DllImport("user32.dll", SetLastError = true)]
-        static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
         [return: MarshalAs(UnmanagedType.Bool)]
-
-
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Leaguesharpicon = loadleaguesharp();
             CustomEvents.Game.OnGameLoad += onGameLoad;
@@ -40,14 +35,15 @@ namespace AssemblySelector
 
         private static void Game_OnWndProc(WndEventArgs args)
         {
-            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonlsharp())
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonlsharp())
             {
                 bringtofront();
-            } 
+            }
         }
 
-        private static void onGameLoad(EventArgs args) {
-        Game.PrintChat("Loaded AssemblySelector by Seph");
+        private static void onGameLoad(EventArgs args)
+        {
+            Game.PrintChat("Loaded AssemblySelector by Seph");
         }
 
         private static IntPtr FindLeagueSharp()
@@ -58,17 +54,14 @@ namespace AssemblySelector
 
         private static void bringtofront()
         {
-          
-                Selector.ShowWindow(FindLeagueSharp(), 1);
-                Selector.SetForegroundWindow(FindLeagueSharp());
-                Selector.SetFocus(FindLeagueSharp());
-               
-            
+            ShowWindow(FindLeagueSharp(), 1);
+            SetForegroundWindow(FindLeagueSharp());
+            SetFocus(FindLeagueSharp());
         }
 
         private static Vector2 GetPosition(int width)
         {
-            return new Vector2(Drawing.Width / 2f - width / 2f, 10);
+            return new Vector2(Drawing.Width/2f - width/2f, 10);
         }
 
         private static Vector2 GetScaledVector(Vector2 vector)
@@ -78,10 +71,9 @@ namespace AssemblySelector
 
         private static Render.Sprite loadleaguesharp()
         {
-
             _posLsharp = GetScaledVector(_posLsharp);
 
-            var loadlsharp= new Render.Sprite(Resources.lsharpicon, _posLsharp)
+            var loadlsharp = new Render.Sprite(Resources.lsharpicon, _posLsharp)
             {
                 Scale = _scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
@@ -104,14 +96,11 @@ namespace AssemblySelector
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
 
-            var pos = Utils.GetCursorPos();
-            var lsharpbutton = GetPosition(loadlsharp.Width - 700);
+            Vector2 pos = Utils.GetCursorPos();
+            Vector2 lsharpbutton = GetPosition(loadlsharp.Width - 700);
 
-            return ((pos.X >= lsharpbutton.X) && pos.X <= (lsharpbutton.X + loadlsharp.Width) && pos.Y >= lsharpbutton.Y && pos.Y <= (lsharpbutton.Y + loadlsharp.Height));
+            return ((pos.X >= lsharpbutton.X) && pos.X <= (lsharpbutton.X + loadlsharp.Width) && pos.Y >= lsharpbutton.Y &&
+                    pos.Y <= (lsharpbutton.Y + loadlsharp.Height));
         }
-
-
-
-
     }
 }

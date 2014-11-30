@@ -1,42 +1,37 @@
-﻿﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
+﻿using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Timers;
+using iTunesLib;
+using iTunesSharp.Properties;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
-using System.Reflection;
-using System.IO;
-using System.Windows;
-using System.Windows.Input;
-using iTunesLib;
-using iTunesSharp.Properties;
-using System.Timers;
-
-
 
 namespace iTunes
 {
-
-
     internal class iTunesSharp
     {
+        private const int KEY_MESSAGE = 0x319;
+        private const int CONTROL_KEY = 0x11;
+
+        private const long PLAYPAUSE_KEY = 0xE0000L;
+        private const long NEXTTRACK_KEY = 0xB0000L;
+        private const long PREVIOUS_KEY = 0xC0000L;
         private static Timer aTimer;
 
 
         private static readonly Vector2 _scale = new Vector2(1.25f, 1.25f);
-        private static Vector2 _posplay = new Vector2(Drawing.Width / 2f - 286.5f, 15);
-        private static Vector2 _posprev = new Vector2(Drawing.Width / 2f - 250.5f, 15);
-        private static Vector2 _posnext = new Vector2(Drawing.Width / 2f - 214.5f, 15);
+        private static Vector2 _posplay = new Vector2(Drawing.Width/2f - 286.5f, 15);
+        private static Vector2 _posprev = new Vector2(Drawing.Width/2f - 250.5f, 15);
+        private static Vector2 _posnext = new Vector2(Drawing.Width/2f - 214.5f, 15);
 
-        private static Vector2 _posvolu = new Vector2(Drawing.Width / 2f - 250.5f, 15);
-        private static Vector2 _posvold = new Vector2(Drawing.Width / 2f - 214.5f, 15);
+        private static Vector2 _posvolu = new Vector2(Drawing.Width/2f - 250.5f, 15);
+        private static Vector2 _posvold = new Vector2(Drawing.Width/2f - 214.5f, 15);
 
-        private static Vector2 _positunes = new Vector2(Drawing.Width / 2f - 500, 15);
+        private static Vector2 _positunes = new Vector2(Drawing.Width/2f - 500, 15);
 
         private static Render.Sprite play;
         private static Render.Sprite itunesicon;
@@ -65,44 +60,30 @@ namespace iTunes
 
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        static extern int GetWindowTextLength(IntPtr hWnd);
+        private static extern int GetWindowTextLength(IntPtr hWnd);
+
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
         [DllImport("user32.dll", SetLastError = true)]
-        static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
         [return: MarshalAs(UnmanagedType.Bool)]
         [DllImport("user32.dll", SetLastError = true)]
-        static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
         [DllImport("user32.dll")]
-        static extern void keybd_event(byte bVk, byte bScan, uint dwFlags,
-           int dwExtraInfo);
-
-        const int KEY_MESSAGE = 0x319;
-        const int CONTROL_KEY = 0x11;
-
-        const long PLAYPAUSE_KEY = 0xE0000L;
-        const long NEXTTRACK_KEY = 0xB0000L;
-        const long PREVIOUS_KEY = 0xC0000L;
-
-
-
-
-
-
-
-
+        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags,
+            int dwExtraInfo);
 
 
         public static void Main(string[] args)
         {
-
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-
         }
 
         public static void Game_OnGameLoad(EventArgs args)
         {
-
             itunesicon = loaditunes();
             play = loadplay();
             prev = loadprev();
@@ -125,15 +106,18 @@ namespace iTunes
             Config.SubMenu("settings").AddItem(new MenuItem("enablekeysctrl", "Enable Control Keys").SetValue(true));
 
 
-
-            var ChangeVolumeUp = Config.AddItem(new MenuItem("Volume", "Vol +").SetValue(new KeyBind(106, KeyBindType.Press)));
-            var ChangeVolumeDown = Config.AddItem(new MenuItem("Volume2", "Vol -").SetValue(new KeyBind(108, KeyBindType.Press)));
-            var ChangeSkipTrack = Config.AddItem(new MenuItem("skip", "Next --->").SetValue(new KeyBind(102, KeyBindType.Press)));
-            var ChangePrev = Config.AddItem(new MenuItem("prev", "Prev  <---").SetValue(new KeyBind(104, KeyBindType.Press)));
-            var shosprites = Config.AddItem(new MenuItem("showhide", "Hide key").SetValue(new KeyBind(9, KeyBindType.Press)));
+            MenuItem ChangeVolumeUp =
+                Config.AddItem(new MenuItem("Volume", "Vol +").SetValue(new KeyBind(106, KeyBindType.Press)));
+            MenuItem ChangeVolumeDown =
+                Config.AddItem(new MenuItem("Volume2", "Vol -").SetValue(new KeyBind(108, KeyBindType.Press)));
+            MenuItem ChangeSkipTrack =
+                Config.AddItem(new MenuItem("skip", "Next --->").SetValue(new KeyBind(102, KeyBindType.Press)));
+            MenuItem ChangePrev =
+                Config.AddItem(new MenuItem("prev", "Prev  <---").SetValue(new KeyBind(104, KeyBindType.Press)));
+            MenuItem shosprites =
+                Config.AddItem(new MenuItem("showhide", "Hide key").SetValue(new KeyBind(9, KeyBindType.Press)));
 
             // Config.AddItem(new MenuItem("spriteshow", "Show Sprites").SetValue(new KeyBind("Y".ToCharArray()[0], KeyBindType.Toggle)));
-
 
 
             Config.AddToMainMenu();
@@ -144,38 +128,21 @@ namespace iTunes
                 Game.PrintChat("::: iTunes has been detected :::");
             }
 
-            ChangeVolumeUp.ValueChanged += delegate(object sender, OnValueChangeEventArgs EventArgs)
-            {
+            ChangeVolumeUp.ValueChanged += delegate { volumeUpkeys(); };
 
 
-                volumeUpkeys();
-            };
+            ChangeVolumeDown.ValueChanged += delegate { volumeDownkeys(); };
 
+            ChangeSkipTrack.ValueChanged += delegate { nextTrackkeys(); };
 
-
-
-            ChangeVolumeDown.ValueChanged += delegate(object sender, OnValueChangeEventArgs EventArgs)
-            {
-
-                volumeDownkeys();
-            };
-
-            ChangeSkipTrack.ValueChanged += delegate(object sender, OnValueChangeEventArgs EventArgs)
-            {
-
-                nextTrackkeys();
-            };
-
-            ChangePrev.ValueChanged += delegate(object sender, OnValueChangeEventArgs EventArgs)
-            {
-                previousTrackkeys();
-            };
-
-
+            ChangePrev.ValueChanged += delegate { previousTrackkeys(); };
 
 
             Game.PrintChat("Loaded iTunes Controller by Seph");
-            if (!isitunesOpen()) { Game.PrintChat("iTunes isn't running"); }
+            if (!isitunesOpen())
+            {
+                Game.PrintChat("iTunes isn't running");
+            }
 
             //  Game.OnGameUpdate += OnGameUpdate;
             Game.OnWndProc += Game_OnWndProc;
@@ -184,21 +151,15 @@ namespace iTunes
             aTimer.Elapsed += OnSongCheck;
             aTimer.AutoReset = true;
             aTimer.Enabled = true;
-
-
-
-
-
-
         }
 
         private static void bringtofront()
         {
             if (isitunesOpen())
             {
-                iTunesSharp.ShowWindow(iTunesSharp.Finditunes(), 1);
-                iTunesSharp.SetForegroundWindow(iTunesSharp.Finditunes());
-                iTunesSharp.SetFocus(iTunesSharp.Finditunes());
+                ShowWindow(Finditunes(), 1);
+                SetForegroundWindow(Finditunes());
+                SetFocus(Finditunes());
             }
         }
 
@@ -256,43 +217,37 @@ namespace iTunes
             }
 
 
-            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonnext())
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonnext())
             {
                 nextTrack();
                 songname = getsongname() + " - " + getartistname();
             }
-            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonprev())
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonprev())
             {
                 previousTrack();
                 songname = getsongname() + " - " + getartistname();
             }
 
-            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonplay())
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonplay())
             {
                 pausePlay();
             }
-            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonitunes())
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonitunes())
             {
                 bringtofront();
-
             }
-            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonvolup())
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonvolup())
             {
                 volumeUp();
-
             }
-            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonvoldown())
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonvoldown())
             {
                 volumeDown();
-
             }
-
-
         }
 
         private static Render.Sprite loaditunes()
         {
-
             _positunes = GetScaledVector(_positunes);
 
             var loaditunes = new Render.Sprite(Resources.itunes, _positunes)
@@ -311,7 +266,6 @@ namespace iTunes
 
         private static Render.Sprite loadnext()
         {
-
             _posnext = GetScaledVector(_posnext);
 
             var loadnext = new Render.Sprite(Resources.forward, _posnext)
@@ -344,7 +298,6 @@ namespace iTunes
 
 
             return loadprev;
-
         }
 
         private static Render.Sprite loadvolup()
@@ -364,7 +317,6 @@ namespace iTunes
 
 
             return loadvolup;
-
         }
 
         private static Render.Sprite loadvoldown()
@@ -384,10 +336,7 @@ namespace iTunes
 
 
             return loadvoldown;
-
         }
-
-
 
 
         private static Render.Sprite loadplay()
@@ -405,14 +354,12 @@ namespace iTunes
             loadplay.Add(0);
 
 
-
-
             return loadplay;
         }
 
         private static Vector2 GetPosition(int width)
         {
-            return new Vector2(Drawing.Width / 2f - width / 2f, 15);
+            return new Vector2(Drawing.Width/2f - width/2f, 15);
         }
 
         private static Vector2 GetScaledVector(Vector2 vector)
@@ -421,26 +368,27 @@ namespace iTunes
         }
 
 
-
-
         private static void OnSongCheck(Object source, ElapsedEventArgs e)
         {
             if (isitunesOpen())
             {
-                iTunesApp app = new iTunesApp();
-                var musicplaying = app.PlayerState == ITPlayerState.ITPlayerStatePlaying;
+                var app = new iTunesApp();
+                bool musicplaying = app.PlayerState == ITPlayerState.ITPlayerStatePlaying;
                 if (musicplaying)
                 {
                     songname = getsongname() + " - " + getartistname();
                 }
-                else if (!musicplaying) { songname = getsongname() + " - " + getartistname() + " - Paused... "; }
+                else if (!musicplaying)
+                {
+                    songname = getsongname() + " - " + getartistname() + " - Paused... ";
+                }
             }
 
             if (!isitunesOpen())
             {
-                songname = "iTunes not running"; ;
+                songname = "iTunes not running";
+                ;
             }
-
         }
 
 
@@ -448,8 +396,6 @@ namespace iTunes
         {
             return FindWindow("iTunes", null);
         }
-
-
 
 
         private static String getTitle()
@@ -460,119 +406,124 @@ namespace iTunes
                 return "";
             }
             int length = GetWindowTextLength(itunesWindow);
-            StringBuilder sb = new StringBuilder(length + 1);
+            var sb = new StringBuilder(length + 1);
             GetWindowText(itunesWindow, sb, sb.Capacity);
             return sb.ToString();
         }
 
-        static public bool isitunesOpen()
+        public static bool isitunesOpen()
         {
             if (getTitle() == "")
             {
                 return false;
             }
-            else
-            {
-                return true;
-            }
+            return true;
         }
-
-
 
 
         public static string getsongname()
         {
-
-            iTunesApp app = new iTunesApp();
-            var track = app.CurrentTrack.Name;
+            var app = new iTunesApp();
+            string track = app.CurrentTrack.Name;
             app = null;
             return track;
-
         }
 
         public static string getartistname()
         {
-
-            iTunesApp app = new iTunesApp();
-            var artist = app.CurrentTrack.Artist;
+            var app = new iTunesApp();
+            string artist = app.CurrentTrack.Artist;
             app = null;
             return artist;
-
         }
 
 
-        static public void pausePlay()
+        public static void pausePlay()
         {
-            iTunesApp app = new iTunesApp();
+            var app = new iTunesApp();
             app.PlayPause();
             app = null;
         }
 
 
-        static public void nextTrackkeys()
+        public static void nextTrackkeys()
         {
-            if (!Config.Item("enablekeysctrl").GetValue<bool>()) { return; }
-            iTunesApp app = new iTunesApp();
+            if (!Config.Item("enablekeysctrl").GetValue<bool>())
+            {
+                return;
+            }
+            var app = new iTunesApp();
             app.NextTrack();
             app = null;
         }
-        static public void previousTrackkeys()
+
+        public static void previousTrackkeys()
         {
-            if (!Config.Item("enablekeysctrl").GetValue<bool>()) { return; }
-            iTunesApp app = new iTunesApp();
+            if (!Config.Item("enablekeysctrl").GetValue<bool>())
+            {
+                return;
+            }
+            var app = new iTunesApp();
             app.PreviousTrack();
             app = null;
         }
-        static public void volumeUpkeys()
+
+        public static void volumeUpkeys()
         {
-            if (!Config.Item("enablekeysvol").GetValue<bool>()) { return; }
-            iTunesApp app = new iTunesApp();
+            if (!Config.Item("enablekeysvol").GetValue<bool>())
+            {
+                return;
+            }
+            var app = new iTunesApp();
             app.SoundVolume += 5;
             app = null;
         }
-        static public void volumeDownkeys()
-        {
-            if (!Config.Item("enablekeysvol").GetValue<bool>()) { return; }
-            iTunesApp app = new iTunesApp();
-            app.SoundVolume -= 5;
-            app = null;
-        }
-        static public void nextTrack()
-        {
 
-            iTunesApp app = new iTunesApp();
-            app.NextTrack();
-            app = null;
-        }
-        static public void previousTrack()
+        public static void volumeDownkeys()
         {
-
-            iTunesApp app = new iTunesApp();
-            app.PreviousTrack();
-            app = null;
-        }
-        static public void volumeUp()
-        {
-            iTunesApp app = new iTunesApp();
-            app.SoundVolume += 5;
-            app = null;
-
-        }
-        static public void volumeDown()
-        {
-
-            iTunesApp app = new iTunesApp();
+            if (!Config.Item("enablekeysvol").GetValue<bool>())
+            {
+                return;
+            }
+            var app = new iTunesApp();
             app.SoundVolume -= 5;
             app = null;
         }
 
+        public static void nextTrack()
+        {
+            var app = new iTunesApp();
+            app.NextTrack();
+            app = null;
+        }
+
+        public static void previousTrack()
+        {
+            var app = new iTunesApp();
+            app.PreviousTrack();
+            app = null;
+        }
+
+        public static void volumeUp()
+        {
+            var app = new iTunesApp();
+            app.SoundVolume += 5;
+            app = null;
+        }
+
+        public static void volumeDown()
+        {
+            var app = new iTunesApp();
+            app.SoundVolume -= 5;
+            app = null;
+        }
 
 
         public static float TextWidth(string text, Font f)
         {
             float textWidth = 0;
 
-            using (Bitmap bmp = new Bitmap(1, 1))
+            using (var bmp = new Bitmap(1, 1))
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 textWidth = g.MeasureString(text, f).Width;
@@ -591,10 +542,11 @@ namespace iTunes
             };
             loaditunes.Position = GetPosition(loaditunes.Width - 300);
 
-            var pos = Utils.GetCursorPos();
-            var spotbuttonpos = GetPosition(loaditunes.Width - 300);
+            Vector2 pos = Utils.GetCursorPos();
+            Vector2 spotbuttonpos = GetPosition(loaditunes.Width - 300);
 
-            return ((pos.X >= spotbuttonpos.X) && pos.X <= (spotbuttonpos.X + loaditunes.Width) && pos.Y >= spotbuttonpos.Y && pos.Y <= (spotbuttonpos.Y + loaditunes.Height));
+            return ((pos.X >= spotbuttonpos.X) && pos.X <= (spotbuttonpos.X + loaditunes.Width) &&
+                    pos.Y >= spotbuttonpos.Y && pos.Y <= (spotbuttonpos.Y + loaditunes.Height));
         }
 
 
@@ -608,10 +560,11 @@ namespace iTunes
             };
             loadplay.Position = GetPosition(loadplay.Width);
 
-            var pos = Utils.GetCursorPos();
-            var playbuttonpos = GetPosition(loadplay.Width);
+            Vector2 pos = Utils.GetCursorPos();
+            Vector2 playbuttonpos = GetPosition(loadplay.Width);
 
-            return ((pos.X >= playbuttonpos.X) && pos.X <= (playbuttonpos.X + loadplay.Width) && pos.Y >= playbuttonpos.Y && pos.Y <= (playbuttonpos.Y + loadplay.Height));
+            return ((pos.X >= playbuttonpos.X) && pos.X <= (playbuttonpos.X + loadplay.Width) &&
+                    pos.Y >= playbuttonpos.Y && pos.Y <= (playbuttonpos.Y + loadplay.Height));
         }
 
 
@@ -625,11 +578,13 @@ namespace iTunes
             };
             loadprev.Position = GetPosition(loadprev.Width);
 
-            var pos = Utils.GetCursorPos();
-            var prevbuttonpos = GetPosition(loadprev.Width + 150);
+            Vector2 pos = Utils.GetCursorPos();
+            Vector2 prevbuttonpos = GetPosition(loadprev.Width + 150);
 
-            return ((pos.X >= prevbuttonpos.X) && pos.X <= (prevbuttonpos.X + loadprev.Width) && pos.Y >= prevbuttonpos.Y && pos.Y <= (prevbuttonpos.Y + loadprev.Height));
+            return ((pos.X >= prevbuttonpos.X) && pos.X <= (prevbuttonpos.X + loadprev.Width) &&
+                    pos.Y >= prevbuttonpos.Y && pos.Y <= (prevbuttonpos.Y + loadprev.Height));
         }
+
         private static bool mouseonnext()
         {
             var loadnext = new Render.Sprite(Resources.forward, _posnext)
@@ -640,14 +595,15 @@ namespace iTunes
             };
             loadnext.Position = GetPosition(loadnext.Width);
 
-            var pos = Utils.GetCursorPos();
-            var nextbuttonpos = GetPosition(loadnext.Width - 150);
+            Vector2 pos = Utils.GetCursorPos();
+            Vector2 nextbuttonpos = GetPosition(loadnext.Width - 150);
 
-            return ((pos.X >= nextbuttonpos.X) && pos.X <= (nextbuttonpos.X + loadnext.Width) && pos.Y >= nextbuttonpos.Y && pos.Y <= (nextbuttonpos.Y + loadnext.Height));
+            return ((pos.X >= nextbuttonpos.X) && pos.X <= (nextbuttonpos.X + loadnext.Width) &&
+                    pos.Y >= nextbuttonpos.Y && pos.Y <= (nextbuttonpos.Y + loadnext.Height));
         }
+
         private static bool mouseonvolup()
         {
-
             _posvolu = GetScaledVector(_posvolu);
 
 
@@ -659,15 +615,15 @@ namespace iTunes
 
             loadvolup.Position = GetPosition(loadvolup.Width);
 
-            var pos = Utils.GetCursorPos();
-            var volubuttonpos = GetPosition(loadvolup.Width + 300);
+            Vector2 pos = Utils.GetCursorPos();
+            Vector2 volubuttonpos = GetPosition(loadvolup.Width + 300);
 
-            return ((pos.X >= volubuttonpos.X) && pos.X <= (volubuttonpos.X + loadvolup.Width) && pos.Y >= volubuttonpos.Y && pos.Y <= (volubuttonpos.Y + loadvolup.Height));
+            return ((pos.X >= volubuttonpos.X) && pos.X <= (volubuttonpos.X + loadvolup.Width) &&
+                    pos.Y >= volubuttonpos.Y && pos.Y <= (volubuttonpos.Y + loadvolup.Height));
         }
 
         private static bool mouseonvoldown()
         {
-
             _posvold = GetScaledVector(_posvold);
 
 
@@ -679,10 +635,11 @@ namespace iTunes
 
             loadvoldown.Position = GetPosition(loadvoldown.Width);
 
-            var pos = Utils.GetCursorPos();
-            var voldbuttonpos = GetPosition(loadvoldown.Width + 400);
+            Vector2 pos = Utils.GetCursorPos();
+            Vector2 voldbuttonpos = GetPosition(loadvoldown.Width + 400);
 
-            return ((pos.X >= voldbuttonpos.X) && pos.X <= (voldbuttonpos.X + loadvoldown.Width) && pos.Y >= voldbuttonpos.Y && pos.Y <= (voldbuttonpos.Y + loadvoldown.Height));
+            return ((pos.X >= voldbuttonpos.X) && pos.X <= (voldbuttonpos.X + loadvoldown.Width) &&
+                    pos.Y >= voldbuttonpos.Y && pos.Y <= (voldbuttonpos.Y + loadvoldown.Height));
         }
 
         public static void OnDraw(EventArgs args)
@@ -690,32 +647,19 @@ namespace iTunes
             // try {
             if (Config.Item("showtrack").GetValue<bool>())
             {
-
-                Font font = new Font("Calibri", 12.5F);
-                Drawing.DrawText(Drawing.Width / 2f - TextWidth(songname, font) / 2f, 50, Color.White, songname);
+                var font = new Font("Calibri", 12.5F);
+                Drawing.DrawText(Drawing.Width/2f - TextWidth(songname, font)/2f, 50, Color.White, songname);
 
                 //   if (songname == null)
                 //  {
                 //    Drawing.DrawText(Drawing.Width / 2f - TextWidth("null", font) / 2f, 50, Color.White, "null");
                 // } 
-
-
-
-
-
-
-
-
             }
             //   catch {
             // Console.WriteLine("Exception in Drawing");
             // }
-
         }
     }
-
-
 }
+
 // }
-
-
