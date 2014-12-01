@@ -1120,7 +1120,7 @@ namespace EloSharp
             }
             if (Game.Region.ToLower().Contains("oc1"))
             {
-                return "http://oc.op.gg/";
+                return "http://oce.op.gg/";
             }
             if (Game.Region.ToLower().Contains("br"))
             {
