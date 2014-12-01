@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
+using System.Web;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+
 using Color = System.Drawing.Color;
 
 namespace EloSharp
@@ -26,16 +28,17 @@ namespace EloSharp
             foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>())
             {
                 string playername = hero.Name;
-                byte[] bytes = Encoding.UTF8.GetBytes(playername);
-                string encname = Encoding.Default.GetString(bytes);
+               // byte[] bytes = Encoding.UTF8.GetBytes(playername);
+                //string encname = Encoding.Default.GetString(bytes);
                 var info = new Info();
+                string playerNameEnc = HttpUtility.UrlEncode(hero.Name);
 
                 if (getregionurl() != "Not Supported" && getregionurl().Contains("op.gg"))
                 {
                     //String htmlcode = new WebClient().DownloadString(getregionurl() + hero.Name);
                     string htmlcode = "";
                     var request =
-                        (HttpWebRequest) WebRequest.Create(getregionurl() + "summoner/userName=" + encname);
+                        (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/userName=" + playerNameEnc);
                     // HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/userName=Chief%20Raydere");
                     var response = (HttpWebResponse) request.GetResponse();
 
@@ -83,7 +86,7 @@ namespace EloSharp
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = playerlp.ToString();
-                        Ranks.Add(info);
+                        //  Ranks.Add(info);
                     }
                     if (htmlcode.Contains("tierRank") && !htmlcode.Contains("leaguePoints") &&
                         (htmlcode.Contains("ChampionBox Unranked")))
@@ -107,7 +110,7 @@ namespace EloSharp
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
-                        Ranks.Add(info);
+                        //  Ranks.Add(info);
                     }
                     if ((htmlcode.Contains("ChampionBox Unranked") &&
                          !htmlcode.Contains("leaguePoints") && (!htmlcode.Contains("tierRank"))))
@@ -129,7 +132,7 @@ namespace EloSharp
                         info.herohandle = hero;
                         info.Ranking = "Unranked";
                         info.lpamount = "";
-                        Ranks.Add(info);
+                        // Ranks.Add(info);
                     }
 
 
@@ -152,18 +155,18 @@ namespace EloSharp
                         info.herohandle = hero;
                         info.Ranking = rank;
                         info.lpamount = "";
-                        Ranks.Add(info);
+                        //  Ranks.Add(info);
                     }
+                
 
-
-                    if ((Config.Item("enablekdaratio").GetValue<bool>()) ||
+                if ((Config.Item("enablekdaratio").GetValue<bool>()) ||
                         (Config.Item("enablewinratio").GetValue<bool>()))
                     {
                         //Console.WriteLine("Starting Debug");
                         string data = "";
                         request =
                             (HttpWebRequest)
-                                WebRequest.Create(getregionurl() + "summoner/champions/userName=" + encname);
+                                WebRequest.Create(getregionurl() + "summoner/champions/userName=" + playerNameEnc);
                         // request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/champions/userName=Chief Raydere");
                         response = (HttpWebResponse) request.GetResponse();
 
@@ -290,16 +293,17 @@ namespace EloSharp
                             info.winratiocolor = colorwinratio(winratio);
                             info.winratio = winratioString;
                             info.kdaratio = kdaString;
-                            Ranks.Add(info);
+                           // Ranks.Add(info);
                         }
                         else
                         {
-                            info.winratio = "";
-                            info.kdaratio = "";
+                            info.winratio = "error";
+                            info.kdaratio = "error";
                             info.winratiocolor = Color.White;
-                            Ranks.Add(info);
+                           // Ranks.Add(info);
                         }
                     }
+                    Ranks.Add(info);
                 }
 
 
@@ -308,7 +312,7 @@ namespace EloSharp
                     try
                     {
                         var container = new CookieContainer();
-                        var inforequest1 = (HttpWebRequest) WebRequest.Create(getregionurl() + hero.Name + "/");
+                        var inforequest1 = (HttpWebRequest)WebRequest.Create(getregionurl() + playerNameEnc + "/");
                         inforequest1.UserAgent =
                             "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36";
                         inforequest1.KeepAlive = true;
@@ -323,7 +327,7 @@ namespace EloSharp
                         string memcache = ExtractString(responser, "memcache: \"", "\"");
                         string csrfToken = ExtractString(responser, "csrfToken:", "};").Replace("\"", "");
                         string datatobeposted = "zeromq_key=" + zmqid + "&memcache=" + "&csrfToken=" + csrfToken;
-                        string referer = getregionurl() + hero.Name + "/";
+                        string referer = getregionurl() + playerNameEnc + "/";
                         string useragent =
                             "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36";
                         var requri = new Uri("http://quickfind.kassad.in/ahnlab/sg/AcquisitionServiceGate/LSP.aspx");
