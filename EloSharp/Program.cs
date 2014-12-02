@@ -699,7 +699,7 @@ namespace EloSharp
             Config.AddItem(new MenuItem("showunknown", "Show Unknown").SetValue(true));
           
             Config.AddItem(new MenuItem("printranks", "Print at the beginning").SetValue(true));
-            Config.AddItem(new MenuItem("enabledebug", "Enable Debug").SetValue(true));
+            Config.AddItem(new MenuItem("enabledebug", "Enable Debug").SetValue(false));
             Config.AddToMainMenu();
             //
 
