@@ -473,23 +473,23 @@ namespace EloSharp
                                 "<\\/td><td>");
                             string rankinfosecondary = ExtractString(responseFromServer,
                                 "<span>Ranked Solo 5v5<\\/span><strong>", "<\\/strong><\\/div>");
-                            string[] rankinfo = rankinfosecondary.Split(' ');
-                            string ranksecondary = rankinfo[0] + " " + rankinfo[1];
-                            string lpsecondary = rankinfo[2] + " " + rankinfo[3];
+                            //string[] rankinfo = rankinfosecondary.Split(' ');
+                           // string ranksecondary = rankinfo[0] + " " + rankinfo[1];
+                           // string lpsecondary = rankinfo[2] + " " + rankinfo[3];
                             string winslosses = ExtractString(responseFromServer,
                                 "<u style='text-decoration:none;color:#444;font-weight:bold'>", "<\\/u>");
 
-                            string[] splitwinslosses = winslosses.Split(' ');
+                           // string[] splitwinslosses = winslosses.Split(' ');
 
-                            string wins = splitwinslosses[0];
-                            string losses = splitwinslosses[2];
+                            //string wins = splitwinslosses[0];
+                           // string losses = splitwinslosses[2];
 
 
-                           int winss = Convert.ToInt32(wins);
-                            int lossess = Convert.ToInt32(losses);
-                            double winRatio = Math.Round((double) winss/(winss + lossess)*100, 0);
-                            String winratioString = ("Win Ratio = " + winRatio + "%% (" + wins + "/" + losses + ")");
-
+                         //  int winss = Convert.ToInt32(wins);
+                          //  int lossess = Convert.ToInt32(losses);
+                           // double winRatio = Math.Round((double) winss/(winss + lossess)*100, 0);
+                           // String winratioString = ("Win Ratio = " + winRatio + "%% (" + wins + "/" + losses + ")");
+                           // String winratioString = winslosses;
 
 
                             // double.TryParse(wins, out winss);
@@ -514,8 +514,9 @@ namespace EloSharp
                             info.herohandle = hero;
                             info.Ranking = ranky;
                             info.lpamount = lp;
-                            info.winratio = winratioString;
-                            info.winratiocolor = colorwinratio(winRatio);
+                          //  info.winratio = winratioString;
+                            //info.winratiocolor = colorwinratio(winRatio);
+                          //  info.winratiocolor = Color.White;
                             Ranks.Add(info);
                         }
 
