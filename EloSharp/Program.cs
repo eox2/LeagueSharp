@@ -41,7 +41,7 @@ namespace EloSharp
                         (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/userName=" + playerNameEnc);
                     // HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/userName=Chief%20Raydere");
                     var response = (HttpWebResponse) request.GetResponse();
-
+             
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         Stream receiveStream = response.GetResponseStream();
@@ -57,111 +57,212 @@ namespace EloSharp
                         }
 
                         htmlcode = readStream.ReadToEnd();
-
                         response.Close();
                         readStream.Close();
+                        Console.WriteLine("Response OK FOR: " + playerNameEnc);
+                      //  System.IO.File.WriteAllText(@"C:\Users\Laptop\Desktop\" + hero.Name + ".txt", htmlcode);
                     }
-
-
-                    if (htmlcode.Contains("tierRank") && htmlcode.Contains("leaguePoints"))
+                    else if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        Match htmlmatchrank =
-                            new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        Match htmlmatchlp =
-                            new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
-                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
-                        Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
-                        rank = playerrank.ToString();
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
-                        {
-                            Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
-                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
-                        }
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
-                        {
-                            Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
-                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
-                        }
+                        Game.PrintChat("ERROR"); //Console.WriteLine("ERROR: " + playerNameEnc);
+                        htmlcode = "ErrorHTTPSTATUS: " + playerNameEnc;
+                    }
+                    if (htmlcode.Contains("ErrorHTTPSTATUS"))
+                    {
+                        Console.WriteLine("Http Error: " + htmlcode);
                         info.Name = hero.Name;
                         info.herohandle = hero;
-                        info.Ranking = rank;
-                        info.lpamount = playerlp.ToString();
-                        //  Ranks.Add(info);
+                        info.Ranking = "HTTPERROR";
+                        info.lpamount = "";
+                        Ranks.Add(info);
+                    }
+                    if (htmlcode.Contains("tierRank") && htmlcode.Contains("leaguePoints"))
+                    {
+                        try
+                        {
+                            Match htmlmatchrank =
+                                new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                            Match htmlmatchlp =
+                                new Regex(@"\<span class=\""leaguePoints\"">(.*?)</span>").Matches(htmlcode)[0];
+                            Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                            Match playerlp = new Regex(htmlmatchlp.Groups[1].ToString()).Matches(htmlcode)[0];
+                            rank = playerrank.ToString();
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                            {
+                                Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            }
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                            {
+                                Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            }
+                            info.Name = hero.Name;
+                            info.herohandle = hero;
+                            info.Ranking = rank;
+                            info.lpamount = playerlp.ToString();
+                            Ranks.Add(info);
+                            Console.WriteLine("Added info" + hero.Name + info.Ranking);
+                        }
+                        catch (Exception ex)
+                        {
+                            info.Name = hero.Name;
+                            info.herohandle = hero;
+                            info.Ranking = "Exception";
+                            info.lpamount = "";
+                            Ranks.Add(info);
+                            Console.WriteLine("Exception in 1st"); 
+                        }
+                    }
+                    if (!htmlcode.Contains("ChampionBox Unranked") &&
+                      (htmlcode.Contains("tierRank")) && !htmlcode.Contains("leaguePoints"))
+                    {
+                        try
+                        {
+                            rank = "Unranked";
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                            {
+                                Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            }
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                            {
+                                Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            }
+
+                            info.Name = hero.Name;
+                            info.herohandle = hero;
+                            info.Ranking = rank;
+                            info.lpamount = "";
+                            Ranks.Add(info);
+                            Console.WriteLine("Added info" + hero.Name + info.Ranking);
+                        }
+                        catch (Exception ex)
+                        {
+                            info.Name = hero.Name;
+                            info.herohandle = hero;
+                            info.Ranking = "Exception";
+                            info.lpamount = "";
+                            Ranks.Add(info);
+                            Console.WriteLine("Exception in 4th");
+                        }
                     }
                     if (htmlcode.Contains("tierRank") && !htmlcode.Contains("leaguePoints") &&
                         (htmlcode.Contains("ChampionBox Unranked")))
                     {
-                        Match htmlmatchrank =
-                            new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
-                        Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
+                        try
+                        {
+                            Match htmlmatchrank =
+                                new Regex(@"\<span class=\""tierRank\"">(.*?)</span>").Matches(htmlcode)[0];
+                            Match playerrank = new Regex(htmlmatchrank.Groups[1].ToString()).Matches(htmlcode)[0];
 
-                        rank = "Unranked (L-30)";
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
-                        {
-                            Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
-                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            rank = "Unranked (L-30)";
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                            {
+                                Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            }
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                            {
+                                Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            }
+                            info.Name = hero.Name;
+                            info.herohandle = hero;
+                            info.Ranking = rank;
+                            info.lpamount = "";
+                            Ranks.Add(info);
+                            Console.WriteLine("Added info" + hero.Name + info.Ranking);
                         }
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                        catch (Exception ex)
                         {
-                            Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
-                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            info.Name = hero.Name;
+                            info.herohandle = hero;
+                            info.Ranking = "Exception";
+                            info.lpamount = "";
+                            Ranks.Add(info);
+                            Console.WriteLine("Exception in 2nd");
                         }
-                        info.Name = hero.Name;
-                        info.herohandle = hero;
-                        info.Ranking = rank;
-                        info.lpamount = "";
-                        //  Ranks.Add(info);
                     }
                     if ((htmlcode.Contains("ChampionBox Unranked") &&
                          !htmlcode.Contains("leaguePoints") && (!htmlcode.Contains("tierRank"))))
                     {
-                        rank = "Unranked";
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                        try
                         {
-                            Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
-                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
-                        }
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
-                        {
-                            Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
-                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
-                        }
+                            rank = "Unranked";
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                            {
+                                Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            }
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                            {
+                                Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            }
 
 
-                        info.Name = hero.Name;
-                        info.herohandle = hero;
-                        info.Ranking = "Unranked";
-                        info.lpamount = "";
-                        // Ranks.Add(info);
+                            info.Name = hero.Name;
+                            info.herohandle = hero;
+                            info.Ranking = "Unranked";
+                            info.lpamount = "";
+                            Ranks.Add(info);
+                            Console.WriteLine("Added info" + hero.Name + info.Ranking);
+                        }
+                        catch (Exception ex)
+                        {
+                            info.Name = hero.Name;
+                            info.herohandle = hero;
+                            info.Ranking = "Exception";
+                            info.lpamount = "";
+                            Ranks.Add(info);
+                            Console.WriteLine("Exception in 3rd");
+                        }
                     }
+
 
 
                     if (!htmlcode.Contains("ChampionBox Unranked") &&
                         (!htmlcode.Contains("tierRank")))
                     {
-                        rank = "Error";
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                        try
                         {
-                            Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
-                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
-                        }
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
-                        {
-                            Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
-                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
-                        }
+                            rank = "Error";
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                            {
+                                Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            }
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                            {
+                                Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            }
 
-                        info.Name = hero.Name;
-                        info.herohandle = hero;
-                        info.Ranking = rank;
-                        info.lpamount = "";
-                        //  Ranks.Add(info);
+                            info.Name = hero.Name;
+                            info.herohandle = hero;
+                            info.Ranking = rank;
+                            info.lpamount = "";
+                            Ranks.Add(info);
+                            Console.WriteLine("Added info" + hero.Name + info.Ranking);
+                        }
+                        catch (Exception ex)
+                        {
+                            info.Name = hero.Name;
+                            info.herohandle = hero;
+                            info.Ranking = "Exception";
+                            info.lpamount = "";
+                            Ranks.Add(info);
+                            Console.WriteLine("Exception in 4th");
+                        }
                     }
-                
+              
 
-                if ((Config.Item("enablekdaratio").GetValue<bool>()) ||
+                    if ((Config.Item("enablekdaratio").GetValue<bool>()) ||
                         (Config.Item("enablewinratio").GetValue<bool>()))
                     {
+                        
                         //Console.WriteLine("Starting Debug");
                         string data = "";
                         request =
@@ -293,128 +394,136 @@ namespace EloSharp
                             info.winratiocolor = colorwinratio(winratio);
                             info.winratio = winratioString;
                             info.kdaratio = kdaString;
-                           // Ranks.Add(info);
+                            Ranks.Add(info);
                         }
                         else
                         {
                             info.winratio = "error";
                             info.kdaratio = "error";
                             info.winratiocolor = Color.White;
-                           // Ranks.Add(info);
+                            Ranks.Add(info);
                         }
                     }
-                    Ranks.Add(info);
+                  //  Ranks.Add(info);
                 }
 
 
                 if (getregionurl() != "Not Supported" && getregionurl().Contains("quickfind")) // Garena lookups
                 {
-                    try
-                    {
-                        var container = new CookieContainer();
-                        var inforequest1 = (HttpWebRequest)WebRequest.Create(getregionurl() + playerNameEnc + "/");
-                        inforequest1.UserAgent =
-                            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36";
-                        inforequest1.KeepAlive = true;
-                        inforequest1.Accept = "*/*";
-                        inforequest1.CookieContainer = container;
-                        inforequest1.Method = "POST";
-                        inforequest1.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
-                        var respo = (HttpWebResponse) inforequest1.GetResponse();
-                        container.Add(respo.Cookies);
-                        string responser = new StreamReader(respo.GetResponseStream()).ReadToEnd();
-                        string zmqid = ExtractString(responser, "QF.player =", ";").Replace("\"", "");
-                        string memcache = ExtractString(responser, "memcache: \"", "\"");
-                        string csrfToken = ExtractString(responser, "csrfToken:", "};").Replace("\"", "");
-                        string datatobeposted = "zeromq_key=" + zmqid + "&memcache=" + "&csrfToken=" + csrfToken;
-                        string referer = getregionurl() + playerNameEnc + "/";
-                        string useragent =
-                            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36";
-                        var requri = new Uri("http://quickfind.kassad.in/ahnlab/sg/AcquisitionServiceGate/LSP.aspx");
-                        var inforequest = (HttpWebRequest) WebRequest.Create(requri);
-                        inforequest.UserAgent = useragent;
-                        byte[] byteArray = Encoding.UTF8.GetBytes(datatobeposted);
-                        inforequest.KeepAlive = true;
-                        inforequest.CookieContainer = container;
-                        inforequest.Method = "POST";
-                        inforequest.ContentLength = byteArray.Length;
-                        inforequest.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
-                        inforequest.Accept = "application/json, text/javascript, */*; q=0.01";
-                        inforequest.Referer = referer;
-                        WebHeaderCollection WebHeaders = inforequest.Headers;
-                        WebHeaders.Add("Origin: http://quickfind.kassad.in");
-                        // WebHeaders.Add("Accept-Encoding: gzip, deflate, sdch");
-                        WebHeaders.Add("X-Requested-With: XMLHttpRequest");
-                        WebHeaders.Add("Accept-Language: en-US,en;q=0.8");
-                        Stream dataStream = inforequest.GetRequestStream();
-                        dataStream.Write(byteArray, 0, byteArray.Length);
-                        dataStream.Close();
-                        var response = (HttpWebResponse) inforequest.GetResponse();
-                        Console.WriteLine(response.StatusDescription);
-                        dataStream = response.GetResponseStream();
-                        var reader = new StreamReader(dataStream);
-                        string responseFromServer = reader.ReadToEnd();
-                        // string heroName = "Faker";
-                        string getsumminfo = ExtractString(responseFromServer,
-                            "<a href='\\/profile\\/sg\\/" + hero.Name + "\\/'>" + hero.Name +
-                            "<\\/a><\\/td><td class='hide-sm'><\\/td><td>", "<a href=");
-                        string lp = ExtractString(responseFromServer,
-                            "<a href='\\/profile\\/sg\\/" + hero.Name + "\\/'>" + hero.Name +
-                            "<\\/a><\\/td><td class='hide-sm'><\\/td><td>", "<\\/td><td>");
-                        string rankedwins = ExtractString(responseFromServer,
-                            "<a href='\\/profile\\/sg\\/" + hero.Name + "\\/'>" + hero.Name +
-                            "<\\/a><\\/td><td class='hide-sm'><\\/td><td>" + lp + "<\\/td><td>", "<\\/td><\\/tr>");
-                        string rank = ExtractString(getsumminfo, "<tr class='rR '><td class='hide-sm'>", "<\\/td><td>");
-                        string rankinfosecondary = ExtractString(responseFromServer,
-                            "<span>Ranked Solo 5v5<\\/span><strong>", "<\\/strong><\\/div>");
-                        string[] rankinfo = rankinfosecondary.Split(' ');
-                        string ranksecondary = rankinfo[0] + " " + rankinfo[1];
-                        string lpsecondary = rankinfo[2] + " " + rankinfo[3];
-                        string winslosses = ExtractString(responseFromServer,
-                            "<u style='text-decoration:none;color:#444;font-weight:bold'>", "<\\/u>");
-                        Game.PrintChat(winslosses);
+                   
+                        try
+                        {
+                            var container = new CookieContainer();
+                            //playerNameEnc = "Tsu of Cat";
+                            var inforequest1 = (HttpWebRequest) WebRequest.Create(getregionurl() + playerNameEnc + "/");
 
-                        string[] splitwinslosses = winslosses.Split(' ');
-                        string wins = splitwinslosses[0];
-                        string losses = splitwinslosses[2];
-                        Game.PrintChat(wins + " wins");
-                        Game.PrintChat(losses + " losses");
+                            inforequest1.UserAgent =
+                                "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36";
+                            inforequest1.KeepAlive = true;
+                            inforequest1.Accept = "*/*";
+                            inforequest1.CookieContainer = container;
+                            inforequest1.Method = "POST";
+                            inforequest1.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+                            var respo = (HttpWebResponse) inforequest1.GetResponse();
+                            container.Add(respo.Cookies);
+                            string responser = new StreamReader(respo.GetResponseStream()).ReadToEnd();
+                            string zmqid = ExtractString(responser, "QF.player =", ";").Replace("\"", "");
+                            string memcache = ExtractString(responser, "memcache: \"", "\"");
+                            string csrfToken = ExtractString(responser, "csrfToken:", "};").Replace("\"", "");
+                            string datatobeposted = "zeromq_key=" + zmqid + "&memcache=" + "&csrfToken=" + csrfToken;
+                            string referer = getregionurl() + playerNameEnc + "/";
+                            string useragent =
+                                "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36";
+                            var requri = new Uri("http://quickfind.kassad.in/ahnlab/" + getregioncode() + "/AcquisitionServiceGate/LSP.aspx");
+                            var inforequest = (HttpWebRequest) WebRequest.Create(requri);
+                            inforequest.UserAgent = useragent;
+                            byte[] byteArray = Encoding.UTF8.GetBytes(datatobeposted);
+                            inforequest.KeepAlive = true;
+                            inforequest.CookieContainer = container;
+                            inforequest.Method = "POST";
+                            inforequest.ContentLength = byteArray.Length;
+                            inforequest.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+                            inforequest.Accept = "application/json, text/javascript, */*; q=0.01";
+                            inforequest.Referer = referer;
+                            WebHeaderCollection WebHeaders = inforequest.Headers;
+                            WebHeaders.Add("Origin: http://quickfind.kassad.in");
+                            // WebHeaders.Add("Accept-Encoding: gzip, deflate, sdch");
+                            WebHeaders.Add("X-Requested-With: XMLHttpRequest");
+                            WebHeaders.Add("Accept-Language: en-US,en;q=0.8");
+                            Stream dataStream = inforequest.GetRequestStream();
+                            dataStream.Write(byteArray, 0, byteArray.Length);
+                            dataStream.Close();
+                            var response = (HttpWebResponse) inforequest.GetResponse();
+                            Console.WriteLine(response.StatusDescription);
+                            dataStream = response.GetResponseStream();
+                            var reader = new StreamReader(dataStream);
+                            string responseFromServer = reader.ReadToEnd();
+                           // System.IO.File.WriteAllText(@"C:\Users\Laptop\Desktop\response.txt", responseFromServer);
+                            // string heroName = "Faker";
+                            string getsumminfo = ExtractString(responseFromServer,
+                                "<a href='\\/profile\\/" + getregioncode() + "\\/" + hero.Name + "\\/'>" + hero.Name +
+                                "<\\/a><\\/td><td class='hide-sm'><\\/td><td>", "<a href=");
+                            string lp = ExtractString(responseFromServer,
+                                "<a href='\\/profile\\/" + getregioncode() + "\\/" + hero.Name + "\\/'>" + hero.Name +
+                                "<\\/a><\\/td><td class='hide-sm'><\\/td><td>", "<\\/td><td>");
+                            string rankedwins = ExtractString(responseFromServer,
+                                "<a href='\\/profile\\/" + getregioncode() + "\\/" + hero.Name + "\\/'>" + hero.Name +
+                                "<\\/a><\\/td><td class='hide-sm'><\\/td><td>" + lp + "<\\/td><td>", "<\\/td><\\/tr>");
+                            string ranky = ExtractString(getsumminfo, "<tr class='rR '><td class='hide-sm'>",
+                                "<\\/td><td>");
+                            string rankinfosecondary = ExtractString(responseFromServer,
+                                "<span>Ranked Solo 5v5<\\/span><strong>", "<\\/strong><\\/div>");
+                            string[] rankinfo = rankinfosecondary.Split(' ');
+                            string ranksecondary = rankinfo[0] + " " + rankinfo[1];
+                            string lpsecondary = rankinfo[2] + " " + rankinfo[3];
+                            string winslosses = ExtractString(responseFromServer,
+                                "<u style='text-decoration:none;color:#444;font-weight:bold'>", "<\\/u>");
 
-                        int winss = Convert.ToInt32(wins);
-                        int lossess = Convert.ToInt32(losses);
-                        double winRatio = Math.Round((double) winss/(winss + lossess)*100, 0);
+                            string[] splitwinslosses = winslosses.Split(' ');
 
-                        // double.TryParse(wins, out winss);
-                        //  double.TryParse(losses, out lossess);
-                        //  double winRatiopercent = (winss / (winss + lossess)) * 100;
-                        String winratioString = ("Win Ratio = " + winRatio + "%% (" + wins + "/" + losses + ")");
+                            string wins = splitwinslosses[0];
+                            string losses = splitwinslosses[2];
+
+
+                           int winss = Convert.ToInt32(wins);
+                            int lossess = Convert.ToInt32(losses);
+                            double winRatio = Math.Round((double) winss/(winss + lossess)*100, 0);
+                            String winratioString = ("Win Ratio = " + winRatio + "%% (" + wins + "/" + losses + ")");
+
+
+
+                            // double.TryParse(wins, out winss);
+                            //  double.TryParse(losses, out lossess);
+                            //  double winRatiopercent = (winss / (winss + lossess)) * 100;
+          
                             // just % causes bugsplat (thinks its modulus)
-                        reader.Close();
-                        dataStream.Close();
-                        response.Close();
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
-                        {
-                            Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
-                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
+                            reader.Close();
+                            dataStream.Close();
+                            response.Close();
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsAlly)
+                            {
+                                Game.PrintChat("<font color=\"#FF000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + ranky);
+                            }
+                            if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
+                            {
+                                Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
+                                               "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + ranky);
+                            }
+                            info.Name = hero.Name;
+                            info.herohandle = hero;
+                            info.Ranking = ranky;
+                            info.lpamount = lp;
+                            info.winratio = winratioString;
+                            info.winratiocolor = colorwinratio(winRatio);
+                            Ranks.Add(info);
                         }
-                        if (Config.Item("printranks").GetValue<bool>() && hero.IsEnemy)
-                        {
-                            Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
-                                           "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + rank);
-                        }
-                        info.Name = hero.Name;
-                        info.herohandle = hero;
-                        info.Ranking = rank;
-                        info.lpamount = lp;
-                        info.winratio = winratioString;
-                        info.winratiocolor = colorwinratio(winRatio);
-                        Ranks.Add(info);
-                    }
 
-                    catch (Exception ex)
-                    {
-                        Console.Write("Error " + ex);
-                    }
+                        catch (Exception ex)
+                        {
+                            Console.Write("Error " + ex);
+                        }
+                 
                 }
             }
         }
@@ -488,6 +597,12 @@ namespace EloSharp
                     int Yee = (int) indicator.Position.Y + 5;
                     var font = new Font("Calibri", 13.5F);
 
+                    if (Config.Item("enabledebug").GetValue<bool>())
+                    {
+                        Drawing.DrawText(Xee - (TextWidth(info.Ranking, font) / 2), Yee - 60, Color.Yellow,
+                                  info.Ranking);
+           
+                    }
 
                     if (Config.Item("enablekdaratio").GetValue<bool>())
                     {
@@ -581,7 +696,9 @@ namespace EloSharp
             Config.AddItem(new MenuItem("enablewinratio", "Draw Win Ratio").SetValue(false));
             Config.AddItem(new MenuItem("enablekdaratio", "Draw KDA Ratio").SetValue(false));
             Config.AddItem(new MenuItem("showunknown", "Show Unknown").SetValue(true));
+          
             Config.AddItem(new MenuItem("printranks", "Print at the beginning").SetValue(true));
+            Config.AddItem(new MenuItem("enabledebug", "Enable Debug").SetValue(true));
             Config.AddToMainMenu();
             //
 
@@ -1088,8 +1205,42 @@ namespace EloSharp
             return "";
         }
 
+        public static string getregioncode()
+        {
+            if (Game.Region.Contains("NA"))
+            {
+                return "vn";
+            }
+            if (Game.Region.Contains("SG"))
+            {
+                return "sg";
+            }
+            if (Game.Region.Contains("VN"))
+            {
+                return "vn";
+            }
+            if (Game.Region.Contains("PH"))
+            {
+                return "ph";
+            }
+            if (Game.Region.Contains("TW"))
+            {
+                return "tw";
+            }
+            if (Game.Region.Contains("TH"))
+            {
+                return "th";
+            }
+            if (Game.Region.Contains("ID"))
+            {
+                return "id";
+            }
+            return "";
+        }
+
         public static string getregionurl()
         {
+            /*
             if (Game.Region.ToLower().Contains("na"))
             {
                 return "http://na.op.gg/";
@@ -1130,8 +1281,12 @@ namespace EloSharp
             {
                 return "http://op.gg/";
             }
-
+            */
             //Garena lookups
+            if (Game.Region.Contains("NA"))
+            {
+                return "http://quickfind.kassad.in/profile/vn/";
+            }
             if (Game.Region.Contains("SG"))
             {
                 return "http://quickfind.kassad.in/profile/sg/";
