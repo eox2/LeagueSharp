@@ -1208,10 +1208,12 @@ namespace EloSharp
 
         public static string getregioncode()
         {
+            /*
             if (Game.Region.Contains("NA"))
             {
                 return "vn";
             }
+             * */
             if (Game.Region.Contains("SG"))
             {
                 return "sg";
@@ -1241,7 +1243,7 @@ namespace EloSharp
 
         public static string getregionurl()
         {
-            /*
+            
             if (Game.Region.ToLower().Contains("na"))
             {
                 return "http://na.op.gg/";
@@ -1282,12 +1284,14 @@ namespace EloSharp
             {
                 return "http://op.gg/";
             }
-            */
+            
             //Garena lookups
+            /*
             if (Game.Region.Contains("NA"))
             {
                 return "http://quickfind.kassad.in/profile/vn/";
             }
+             * */
             if (Game.Region.Contains("SG"))
             {
                 return "http://quickfind.kassad.in/profile/sg/";
