@@ -702,8 +702,8 @@ namespace EloSharp
             Config.AddItem(new MenuItem("enabledebug", "Enable Debug").SetValue(false));
             Config.AddToMainMenu();
             //
-
-            if (getregionurl() != "Not Supported")
+            if (getregionurl().Contains("Disabled - for your security. More details in topic")) { Game.PrintChat("The assembly is disabled for your region for security reasons."); }
+            if (getregionurl() != "Not Supported" && !getregionurl().Contains(("Disabled")))
             {
                 var thread = new Thread(() => { elosharp = new EloSharp(); });
                 //  thread.SetApartmentState(ApartmentState.STA);
@@ -1248,6 +1248,7 @@ namespace EloSharp
             {
                 return "http://na.op.gg/";
             }
+            
             if (Game.Region.ToLower().Contains("euw"))
             {
                 return "http://euw.op.gg/";
@@ -1289,32 +1290,43 @@ namespace EloSharp
             /*
             if (Game.Region.Contains("NA"))
             {
-                return "http://quickfind.kassad.in/profile/vn/";
+               // return "http://quickfind.kassad.in/profile/vn/";
+                return "Disabled - for your security. More details in topic";
             }
-             * */
+             */
             if (Game.Region.Contains("SG"))
             {
-                return "http://quickfind.kassad.in/profile/sg/";
+               // return "http://quickfind.kassad.in/profile/sg/";
+                return "Disabled - for your security. More details in topic";
             }
             if (Game.Region.Contains("VN"))
             {
-                return "http://quickfind.kassad.in/profile/vn/";
+                //return "http://quickfind.kassad.in/profile/vn/";
+                return "Disabled - for your security. More details in topic";
+                
             }
+            /*
             if (Game.Region.Contains("PH"))
             {
-                return "http://quickfind.kassad.in/profile/ph/";
+               // return "http://quickfind.kassad.in/profile/ph/";
+                return "Disabled - for your security. More details in topic";
             }
+             * */
             if (Game.Region.Contains("TW"))
             {
-                return "http://quickfind.kassad.in/profile/tw/";
+               // return "http://quickfind.kassad.in/profile/tw/";
+                return "Disabled - for your security. More details in topic";
             }
             if (Game.Region.Contains("TH"))
             {
-                return "http://quickfind.kassad.in/profile/th/";
+                //return "http://quickfind.kassad.in/profile/th/";
+                return "Disabled - for your security. More details in topic";
             }
             if (Game.Region.Contains("ID"))
+
             {
-                return "http://quickfind.kassad.in/profile/id/";
+                return "Disabled - for your security. More details in topic";
+              //  return "http://quickfind.kassad.in/profile/id/";
             }
 
             return "Not Supported";
