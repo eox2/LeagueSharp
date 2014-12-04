@@ -472,16 +472,17 @@ namespace EloSharp
                             
 
                        //     System.IO.File.WriteAllText(@"C:\Users\Laptop\Desktop\responseswag.txt", responseFromServer);
-
+                            string lp = ExtractString(responseFromServer, "\"lp\":", ",");
                             string winrate = ExtractString(responseFromServer, "\"rate\":", ",");
                             string wins = ExtractString(responseFromServer, ",\"w\":",",");
                             string losses = ExtractString(responseFromServer, ",\"l\":", ",");
                             string totalranked = ExtractString(responseFromServer, ",\"total\":", ",");
                             string tier = ExtractString(responseFromServer, ",\"tier\":\"", "\"}");
                             //Game.PrintChat("WR: " + winrate + " Wins: " + wins + " Losses: " + losses + " Total: " + totalranked + " Tier: " + tier);
-                            string lp = ExtractString(responseFromServer,
-                                                           "<a href='\\/profile\\/" + getregioncode() + "\\/" + hero.Name + "\\/'>" + hero.Name +
-                                                           "<\\/a><\\/td><td class='hide-sm'><\\/td><td>", "<\\/td><td>");
+                          
+                            // string lp = ExtractString(responseFromServer,
+                                                         //  "<a href='\\/profile\\/" + getregioncode() + "\\/" + hero.Name + "\\/'>" + hero.Name +
+                                                          // "<\\/a><\\/td><td class='hide-sm'><\\/td><td>", "<\\/td><td>");
                             String winratioString = ("Win Ratio = " + winrate + "%% (" + wins + "/" + losses + ")");
 
                             double wr;
