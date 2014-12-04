@@ -39,23 +39,26 @@ namespace SFXUtility.Class
         public readonly bool Available = false;
         public readonly int Range = 750;
         public readonly SpellSlot Slot = SpellSlot.Unknown;
-        public readonly string SummonerName = "SummonerSmite";
+        public readonly string SummonerName = "smite";
 
         #endregion
 
         #region Constructors
 
+        
         public Smite()
         {
             foreach (
                 var spell in
-                    ObjectManager.Player.SummonerSpellbook.Spells.Where(
-                        spell => String.Equals(spell.Name, SummonerName, StringComparison.CurrentCultureIgnoreCase)))
+                    ObjectManager.Player.SummonerSpellbook.Spells.Where(spell => spell.Name.ToLower().Contains(SummonerName)))
             {
                 Available = true;
                 Slot = spell.Slot;
             }
         }
+         
+        
+      
 
         #endregion
 

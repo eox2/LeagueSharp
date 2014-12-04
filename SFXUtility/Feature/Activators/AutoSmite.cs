@@ -149,8 +149,8 @@ namespace SFXUtility.Feature
 
                         if (map == Utility.Map.MapType.SummonersRift)
                         {
-                            _bigMinionNames = new[] {"AncientGolem", "LizardElder", "Worm", "Dragon"};
-                            _smallMinionNames = new[] {"GreatWraith", "Wraith", "GiantWolf", "Golem", "Wight"};
+                            _bigMinionNames = new[] { "AncientGolem", "LizardElder", "Worm", "Dragon", "SRU_Dragon", "SRU_Baron", "SRU_Blue", "SRU_Red" };
+                            _smallMinionNames = new[] { "GreatWraith", "Wraith", "GiantWolf", "Golem", "Wight", "SRU_Murkwolf", "SRU_Krug", "SRU_Gromp", "SRU_Razorbeak" };
                         }
                         else if (map == Utility.Map.MapType.TwistedTreeline)
                         {
