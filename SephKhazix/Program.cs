@@ -23,19 +23,14 @@ namespace SephKhazix
         private static Items.Item TIA;
         private static Items.Item BKR;
         private static Items.Item BWC;
-        private static SpellSlot IgniteSlot;
-        private static SpellSlot SmiteSlot;
         private static Items.Item YOU;
+        private static SpellSlot IgniteSlot;
+
 
 
         private static Obj_AI_Hero Player;
         private static bool Qnorm, Qevolved, Wnorm, Wevolved, Enorm, Eevolved, Rnorm, Revolved;
 
-        private String[] monsters =
-        {
-            "GreatWraith", "Wraith", "AncientGolem", "GiantWolf", "LizardElder", "Golem",
-            "Worm", "Dragon", "Wight"
-        };
 
 
         private static void Main(string[] args)
@@ -176,6 +171,10 @@ namespace SephKhazix
             Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
 
+            //Debug
+            Config.AddSubMenu(new Menu("Debug", "Debug"));
+            Config.SubMenu("Debug").AddItem(new MenuItem("Debugon", "Enable Debugging").SetValue(true));
+      
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += OnGameUpdate;
@@ -1255,14 +1254,21 @@ namespace SephKhazix
                     Config.Item("UseRCombo").GetValue<bool>())
                 {
                     R.Cast();
-                    Game.PrintChat("9 - Basic Ult Cast");
+                    if (Config.Item("Debugon").GetValue<bool>())
+                    {
+                        Game.PrintChat("9 - Basic Ult Cast");
+                    }
                 }
                 // Evolved
                 if (Qevolved && Player.Distance(target) <= QE.Range && Config.Item("UseQCombo").GetValue<bool>() &&
                     Q.IsReady())
                 {
                     QE.Cast(target);
-                    Game.PrintChat("10 - QE cast");
+                    if (Config.Item("Debugon").GetValue<bool>())
+                    {
+                        Game.PrintChat("10 - QE cast");
+                    }
+
                 }
                 //  if (Wevolved && Player.Distance(target) <= WE.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady()) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { if (enemy.IsValidTarget(WE.Range * 2)) { var pred = WEpred.GetPrediction(target); if ((pred.Hitchance == HitChance.Immobile && autoQI) || (pred.Hitchance == HitChance.Dashing && autoQD)) { CastWE(enemy, pred.UnitPosition.To2D()); } } } }
                 //   if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && Wpred.GetPrediction(target).Hitchance >= HitChance.Medium) { foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()) { var pred = Wpred.GetPrediction(target); Wpred.Cast(pred.CastPosition, usePacket); Game.PrintChat("2 - WpredCast Medium"); } }
