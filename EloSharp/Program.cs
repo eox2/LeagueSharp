@@ -426,7 +426,7 @@ namespace EloSharp
                         try
                         {
                             var container = new CookieContainer();
-                            playerNameEnc = "Tsu of Cat";
+                           // playerNameEnc = "Tsu of Cat";
                             var inforequest1 = (HttpWebRequest) WebRequest.Create(getregionurl() + playerNameEnc + "/");
                             inforequest1.UserAgent =
                                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36";
