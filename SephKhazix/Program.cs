@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
@@ -6,7 +6,6 @@ using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
 
-//using Color = System.Drawing.Color;
 
 namespace SephKhazix
 {
@@ -85,7 +84,6 @@ namespace SephKhazix
 
 
             IgniteSlot = Player.GetSpellSlot("summonerdot");
-            //  SmiteSlot = Player.GetSpellSlot("summonersmite");
 
 
             Config = new Menu("SephKhazix", "Khazix", true);
@@ -93,7 +91,7 @@ namespace SephKhazix
 
             //TargetSelector
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
             //Orbwalker
@@ -350,7 +348,7 @@ namespace SephKhazix
             Orbwalker.SetAttack(true);
 
             CheckSpells();
-            // var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            // var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             // foreach (var buff in eTarget.Buffs) { Game.PrintChat(buff.DisplayName); }
             // foreach (var buff in Player.Buffs) { Game.PrintChat(buff.DisplayName); }
 
@@ -383,7 +381,7 @@ namespace SephKhazix
 
         private static void Harass()
         {
-            Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (target != null)
             {
                 var usePacket = Config.Item("usePackets").GetValue<bool>();
@@ -415,7 +413,7 @@ namespace SephKhazix
         private static void JungleFarm()
         {
             var pos = new List<Vector2>();
-            Obj_AI_Hero target = SimpleTs.GetTarget(QE.Range, SimpleTs.DamageType.Physical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(QE.Range, TargetSelector.DamageType.Physical);
             List<Obj_AI_Base> mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.Health);
             foreach (Obj_AI_Base minion in mobs)
@@ -784,7 +782,7 @@ namespace SephKhazix
 
         private static void KillSteal()
         {
-            Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
             double QDmg = Player.GetSpellDamage(target, SpellSlot.Q);
             double hydradmg = Player.GetItemDamage(target, Damage.DamageItems.Hydra);
@@ -796,11 +794,11 @@ namespace SephKhazix
             double EEVDmg = Player.GetSpellDamage(target, SpellSlot.E);
 
             if (target != null && Config.Item("UseIgnite").GetValue<bool>() && IgniteSlot != SpellSlot.Unknown &&
-                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (igniteDmg > target.Health)
                 {
-                    Player.SummonerSpellbook.CastSpell(IgniteSlot, target);
+                    Player.Spellbook.CastSpell(IgniteSlot, target);
                 }
             }
 
@@ -1104,7 +1102,7 @@ namespace SephKhazix
             {
                 return;
             }
-            Obj_AI_Hero target = SimpleTs.GetTarget(1025, SimpleTs.DamageType.Physical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(1025, TargetSelector.DamageType.Physical);
             var usePacket = Config.Item("usePackets").GetValue<bool>();
 
             var autoWI = Config.Item("AutoWI").GetValue<bool>();
@@ -1159,7 +1157,7 @@ namespace SephKhazix
         private static void Combo()
         {
             var usePacket = Config.Item("usePackets").GetValue<bool>();
-            Obj_AI_Hero target = SimpleTs.GetTarget(1275, SimpleTs.DamageType.Physical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(1275, TargetSelector.DamageType.Physical);
 
 
             // Orbwalker.SetAttacks(!(Q.IsReady() || W.IsReady() || E.IsReady()) || TIA.IsReady() || HDR.IsReady());
