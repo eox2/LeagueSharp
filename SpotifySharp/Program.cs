@@ -10,35 +10,35 @@ using SharpDX;
 using SpotifySharp.Properties;
 using Color = System.Drawing.Color;
 
-namespace SpotSharp
+namespace SpotifySharp
 {
     internal class SpotifySharp
     {
-        private const int KEY_MESSAGE = 0x319;
-        private const int CONTROL_KEY = 0x11;
+        private const int KeyMessage = 0x319;
+        private const int ControlKey = 0x11;
 
-        private const long PLAYPAUSE_KEY = 0xE0000L;
-        private const long NEXTTRACK_KEY = 0xB0000L;
-        private const long PREVIOUS_KEY = 0xC0000L;
-        private static readonly Vector2 _scale = new Vector2(1.25f, 1.25f);
-        private static Vector2 _posplay = new Vector2(Drawing.Width/2f - 286.5f, 15);
-        private static Vector2 _posprev = new Vector2(Drawing.Width/2f - 250.5f, 15);
-        private static Vector2 _posnext = new Vector2(Drawing.Width/2f - 214.5f, 15);
+        private const long PlaypauseKey = 0xE0000L;
+        private const long NexttrackKey = 0xB0000L;
+        private const long PreviousKey = 0xC0000L;
+        private static readonly Vector2 Scale = new Vector2(1.25f, 1.25f);
+        private static Vector2 _posplay = new Vector2(Drawing.Width / 2f - 286.5f, 15);
+        private static Vector2 _posprev = new Vector2(Drawing.Width / 2f - 250.5f, 15);
+        private static Vector2 _posnext = new Vector2(Drawing.Width / 2f - 214.5f, 15);
 
-        private static Vector2 _posvolu = new Vector2(Drawing.Width/2f - 250.5f, 15);
-        private static Vector2 _posvold = new Vector2(Drawing.Width/2f - 214.5f, 15);
+        private static Vector2 _posvolu = new Vector2(Drawing.Width / 2f - 250.5f, 15);
+        private static Vector2 _posvold = new Vector2(Drawing.Width / 2f - 214.5f, 15);
 
-        private static Vector2 _posspotify = new Vector2(Drawing.Width/2f - 500, 15);
+        private static Vector2 _posspotify = new Vector2(Drawing.Width / 2f - 500, 15);
 
-        private static Render.Sprite play;
-        private static Render.Sprite spotifyicon;
-        private static Render.Sprite prev;
-        private static Render.Sprite next;
-        private static Render.Sprite volup1;
-        private static Render.Sprite voldown1;
+        private static Render.Sprite _play;
+        private static Render.Sprite _spotifyicon;
+        private static Render.Sprite _prev;
+        private static Render.Sprite _next;
+        private static Render.Sprite _volup1;
+        private static Render.Sprite _voldown1;
 
-        private static Menu Config;
-        public static string songname = "Not initialized - Press Play";
+        private static Menu _config;
+        public static string Songname = "Not initialized - Press Play";
 
 
         // Credit goes to http://code.google.com/p/spotifycontrol/source/browse/trunk/SpotifyControl/Controllers/ControllerSpotify.vb && SpotifyLib
@@ -64,11 +64,10 @@ namespace SpotSharp
 
         [return: MarshalAs(UnmanagedType.Bool)]
         [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        private static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
-        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags,
-            int dwExtraInfo);
+        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
 
 
         public static void Main(string[] args)
@@ -78,60 +77,57 @@ namespace SpotSharp
 
         public static void Game_OnGameLoad(EventArgs args)
         {
-            spotifyicon = loadspotify();
-            play = loadplay();
-            prev = loadprev();
-            next = loadnext();
-
-
-            volup1 = loadvolup();
-            voldown1 = loadvoldown();
+            _spotifyicon = Loadspotify();
+            _play = Loadplay();
+            _prev = Loadprev();
+            _next = Loadnext();
+            _volup1 = Loadvolup();
+            _voldown1 = Loadvoldown();
 
 
             //Menu
-            Config = new Menu("Spotify Controller", "Spotify", true);
+            _config = new Menu("Spotify Controller", "Spotify", true);
 
 
-            Config.AddSubMenu(new Menu("Spotify Settings", "settings"));
-            Config.SubMenu("settings").AddItem(new MenuItem("showtrack", "Show Track Name").SetValue(true));
-            Config.SubMenu("settings").AddItem(new MenuItem("enablekeysvol", "Enable Volume Keys").SetValue(true));
-            Config.SubMenu("settings").AddItem(new MenuItem("enablekeysctrl", "Enable Control Keys").SetValue(true));
+            _config.AddSubMenu(new Menu("Spotify Settings", "settings"));
+            _config.SubMenu("settings").AddItem(new MenuItem("showtrack", "Show Track Name").SetValue(true));
+            _config.SubMenu("settings").AddItem(new MenuItem("enablekeysvol", "Enable Volume Keys").SetValue(true));
+            _config.SubMenu("settings").AddItem(new MenuItem("enablekeysctrl", "Enable Control Keys").SetValue(true));
 
 
-            MenuItem ChangeVolumeUp =
-                Config.AddItem(new MenuItem("Volume", "Vol +").SetValue(new KeyBind(106, KeyBindType.Press)));
-            MenuItem ChangeVolumeDown =
-                Config.AddItem(new MenuItem("Volume2", "Vol -").SetValue(new KeyBind(108, KeyBindType.Press)));
-            MenuItem ChangeSkipTrack =
-                Config.AddItem(new MenuItem("skip", "Next --->").SetValue(new KeyBind(102, KeyBindType.Press)));
-            MenuItem ChangePrev =
-                Config.AddItem(new MenuItem("prev", "Prev  <---").SetValue(new KeyBind(104, KeyBindType.Press)));
-            MenuItem shosprites =
-                Config.AddItem(new MenuItem("showhide", "Hide key").SetValue(new KeyBind(9, KeyBindType.Press)));
+            MenuItem changeVolumeUp =
+                _config.AddItem(new MenuItem("Volume", "Vol +").SetValue(new KeyBind(106, KeyBindType.Press)));
+            MenuItem changeVolumeDown =
+                _config.AddItem(new MenuItem("Volume2", "Vol -").SetValue(new KeyBind(108, KeyBindType.Press)));
+            MenuItem changeSkipTrack =
+                _config.AddItem(new MenuItem("skip", "Next --->").SetValue(new KeyBind(102, KeyBindType.Press)));
+            MenuItem changePrev =
+                _config.AddItem(new MenuItem("prev", "Prev  <---").SetValue(new KeyBind(104, KeyBindType.Press)));
+            _config.AddItem(new MenuItem("showhide", "Hide key").SetValue(new KeyBind(9, KeyBindType.Press)));
 
             // Config.AddItem(new MenuItem("spriteshow", "Show Sprites").SetValue(new KeyBind("Y".ToCharArray()[0], KeyBindType.Toggle)));
 
 
-            Config.AddToMainMenu();
+            _config.AddToMainMenu();
 
 
-            if (isSpotifyOpen())
+            if (IsSpotifyOpen())
             {
                 Game.PrintChat("::: Spotify has been detected :::");
             }
 
 
-            ChangeVolumeUp.ValueChanged += delegate { volumeUpkeys(); };
+            changeVolumeUp.ValueChanged += delegate { VolumeUpkeys(); };
 
 
-            ChangeVolumeDown.ValueChanged += delegate { volumeDownkeys(); };
+            changeVolumeDown.ValueChanged += delegate { VolumeDownkeys(); };
 
-            ChangeSkipTrack.ValueChanged += delegate { nextTrackkeys(); };
+            changeSkipTrack.ValueChanged += delegate { NextTrackkeys(); };
 
-            ChangePrev.ValueChanged += delegate { previousTrackkeys(); };
+            changePrev.ValueChanged += delegate { PreviousTrackkeys(); };
 
             Game.PrintChat("Loaded Spotify Controller by Seph");
-            if (!isSpotifyOpen())
+            if (!IsSpotifyOpen())
             {
                 Game.PrintChat("Spotify isn't running");
             }
@@ -140,9 +136,9 @@ namespace SpotSharp
             Drawing.OnDraw += OnDraw;
         }
 
-        private static void bringtofront()
+        private static void Bringtofront()
         {
-            if (isSpotifyOpen())
+            if (IsSpotifyOpen())
             {
                 ShowWindow(FindSpotify(), 1);
                 SetForegroundWindow(FindSpotify());
@@ -153,67 +149,65 @@ namespace SpotSharp
 
         private static void Game_OnWndProc(WndEventArgs args)
         {
-            if (!Config.Item("showhide").GetValue<KeyBind>().Active)
+            if (!_config.Item("showhide").GetValue<KeyBind>().Active)
             {
-                spotifyicon.Show();
-                play.Show();
-                prev.Show();
-                next.Show();
+                _spotifyicon.Show();
+                _play.Show();
+                _prev.Show();
+                _next.Show();
 
-
-                volup1.Show();
-                voldown1.Show();
+                _volup1.Show();
+                _voldown1.Show();
             }
 
-            if (Config.Item("showhide").GetValue<KeyBind>().Active)
+            if (_config.Item("showhide").GetValue<KeyBind>().Active)
             {
-                spotifyicon.Hide();
-                play.Hide();
-                prev.Hide();
-                next.Hide();
+                _spotifyicon.Hide();
+                _play.Hide();
+                _prev.Hide();
+                _next.Hide();
+
+                _volup1.Hide();
+                _voldown1.Hide();
+            }
 
 
-                volup1.Hide();
-                voldown1.Hide();
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && Mouseonnext())
+            {
+                NextTrack();
+            }
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && Mouseonprev())
+            {
+                PreviousTrack();
             }
 
-
-            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonnext())
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && Mouseonplay())
             {
-                nextTrack();
+                Songname = GetSongName() + " - " + GetArtistName() + " - Paused... ";
+                PausePlay();
             }
-            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonprev())
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && Mouseonspotify())
             {
-                previousTrack();
+                Bringtofront();
             }
-
-            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonplay())
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && Mouseonvolup())
             {
-                songname = getSongName() + " - " + getArtistName() + " - Paused... ";
-                pausePlay();
+                VolumeUp();
             }
-            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonspotify())
+            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && Mouseonvoldown())
             {
-                bringtofront();
-            }
-            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonvolup())
-            {
-                volumeUp();
-            }
-            if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonvoldown())
-            {
-                volumeDown();
+                VolumeDown();
             }
         }
 
 
-        private static Render.Sprite loadspotify()
+        private static Render.Sprite Loadspotify()
         {
             _posspotify = GetScaledVector(_posspotify);
 
             var loadspotify = new Render.Sprite(Resources.spotify, _posspotify)
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
             loadspotify.Position = GetPosition(loadspotify.Width - 300);
@@ -225,13 +219,13 @@ namespace SpotSharp
         }
 
 
-        private static Render.Sprite loadnext()
+        private static Render.Sprite Loadnext()
         {
             _posnext = GetScaledVector(_posnext);
 
             var loadnext = new Render.Sprite(Resources.forward, _posnext)
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
             loadnext.Position = GetPosition(loadnext.Width - 150);
@@ -242,14 +236,14 @@ namespace SpotSharp
             return loadnext;
         }
 
-        private static Render.Sprite loadprev()
+        private static Render.Sprite Loadprev()
         {
             _posprev = GetScaledVector(_posprev);
 
 
             var loadprev = new Render.Sprite(Resources.rewind, _posprev)
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
             loadprev.Position = GetPosition(loadprev.Width + 150);
@@ -261,14 +255,14 @@ namespace SpotSharp
             return loadprev;
         }
 
-        private static Render.Sprite loadvolup()
+        private static Render.Sprite Loadvolup()
         {
             _posvolu = GetScaledVector(_posvolu);
 
 
             var loadvolup = new Render.Sprite(Resources.volup, _posvolu)
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
             loadvolup.Position = GetPosition(loadvolup.Width + 300);
@@ -280,14 +274,14 @@ namespace SpotSharp
             return loadvolup;
         }
 
-        private static Render.Sprite loadvoldown()
+        private static Render.Sprite Loadvoldown()
         {
             _posvold = GetScaledVector(_posvold);
 
 
             var loadvoldown = new Render.Sprite(Resources.voldown, _posvold)
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
             loadvoldown.Position = GetPosition(loadvoldown.Width + 400);
@@ -300,13 +294,13 @@ namespace SpotSharp
         }
 
 
-        private static Render.Sprite loadplay()
+        private static Render.Sprite Loadplay()
         {
             _posplay = GetScaledVector(_posplay);
 
             var loadplay = new Render.Sprite(Resources.play, _posplay)
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
             loadplay.Position = GetPosition(loadplay.Width);
@@ -318,12 +312,12 @@ namespace SpotSharp
 
         private static Vector2 GetPosition(int width)
         {
-            return new Vector2(Drawing.Width/2f - width/2f, 15);
+            return new Vector2(Drawing.Width / 2f - width / 2f, 15);
         }
 
         private static Vector2 GetScaledVector(Vector2 vector)
         {
-            return Vector2.Modulate(_scale, vector);
+            return Vector2.Modulate(Scale, vector);
         }
 
 
@@ -333,7 +327,7 @@ namespace SpotSharp
         }
 
 
-        private static String getTitle()
+        private static String GetTitle()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
             if (spotifyWindow == new IntPtr(0))
@@ -346,9 +340,9 @@ namespace SpotSharp
             return sb.ToString();
         }
 
-        public static bool isSpotifyOpen()
+        public static bool IsSpotifyOpen()
         {
-            if (getTitle() == "")
+            if (GetTitle() == "")
             {
                 return false;
             }
@@ -356,9 +350,9 @@ namespace SpotSharp
         }
 
 
-        public static String getSongName()
+        public static String GetSongName()
         {
-            String[] title = getTitle().Split('–');
+            String[] title = GetTitle().Split('–');
             if (title.Count() > 1)
             {
                 return title[1].Trim();
@@ -367,9 +361,9 @@ namespace SpotSharp
         }
 
 
-        public static String getArtistName()
+        public static String GetArtistName()
         {
-            String[] title = getTitle().Split('–');
+            String[] title = GetTitle().Split('–');
             if (title.Count() > 1)
             {
                 return title[0].Split('-')[1].Trim();
@@ -377,109 +371,110 @@ namespace SpotSharp
             return "";
         }
 
-        public static void pausePlay()
+        public static void PausePlay()
         {
-            IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            string songname = getSongName() + " - " + getArtistName();
-            PostMessage(spotifyWindow, KEY_MESSAGE, IntPtr.Zero, new IntPtr(PLAYPAUSE_KEY));
+            var spotifyWindow = FindWindow("SpotifyMainWindow", null);
+            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(PlaypauseKey));
         }
 
-        public static void nextTrackkeys()
+        public static void NextTrackkeys()
         {
-            if (!Config.Item("enablekeysctrl").GetValue<bool>())
+            if (!_config.Item("enablekeysctrl").GetValue<bool>())
+            {
+                return;
+            }
+            var spotifyWindow = FindWindow("SpotifyMainWindow", null);
+            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(NexttrackKey));
+        }
+
+        public static void PreviousTrackkeys()
+        {
+            if (!_config.Item("enablekeysctrl").GetValue<bool>())
+            {
+                return;
+            }
+            var spotifyWindow = FindWindow("SpotifyMainWindow", null);
+            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(PreviousKey));
+        }
+
+        public static void VolumeUpkeys()
+        {
+            if (!_config.Item("enablekeysvol").GetValue<bool>())
             {
                 return;
             }
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            PostMessage(spotifyWindow, KEY_MESSAGE, IntPtr.Zero, new IntPtr(NEXTTRACK_KEY));
-        }
-
-        public static void previousTrackkeys()
-        {
-            if (!Config.Item("enablekeysctrl").GetValue<bool>())
-            {
-                return;
-            }
-            IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            PostMessage(spotifyWindow, KEY_MESSAGE, IntPtr.Zero, new IntPtr(PREVIOUS_KEY));
-        }
-
-        public static void volumeUpkeys()
-        {
-            if (!Config.Item("enablekeysvol").GetValue<bool>())
-            {
-                return;
-            }
-            IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            keybd_event(CONTROL_KEY, 0x1D, 0, 0);
+            keybd_event(ControlKey, 0x1D, 0, 0);
             PostMessage(spotifyWindow, 0x100, new IntPtr(0x26), IntPtr.Zero);
             Thread.Sleep(1);
-            keybd_event(CONTROL_KEY, 0x1D, 0x2, 0);
+            keybd_event(ControlKey, 0x1D, 0x2, 0);
         }
 
-        public static void volumeDownkeys()
+        public static void VolumeDownkeys()
         {
-            if (!Config.Item("enablekeysvol").GetValue<bool>())
+            if (!_config.Item("enablekeysvol").GetValue<bool>())
             {
                 return;
             }
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            keybd_event(CONTROL_KEY, 0x1D, 0, 0);
+            keybd_event(ControlKey, 0x1D, 0, 0);
             PostMessage(spotifyWindow, 0x100, new IntPtr(0x28), IntPtr.Zero);
             Thread.Sleep(1);
-            keybd_event(CONTROL_KEY, 0x1D, 0x2, 0);
+            keybd_event(ControlKey, 0x1D, 0x2, 0);
         }
 
-        public static void nextTrack()
+        public static void NextTrack()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            PostMessage(spotifyWindow, KEY_MESSAGE, IntPtr.Zero, new IntPtr(NEXTTRACK_KEY));
+            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(NexttrackKey));
         }
 
-        public static void previousTrack()
+        public static void PreviousTrack()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            PostMessage(spotifyWindow, KEY_MESSAGE, IntPtr.Zero, new IntPtr(PREVIOUS_KEY));
+            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(PreviousKey));
         }
 
-        public static void volumeUp()
+        public static void VolumeUp()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            keybd_event(CONTROL_KEY, 0x1D, 0, 0);
+            keybd_event(ControlKey, 0x1D, 0, 0);
             PostMessage(spotifyWindow, 0x100, new IntPtr(0x26), IntPtr.Zero);
             Thread.Sleep(1);
-            keybd_event(CONTROL_KEY, 0x1D, 0x2, 0);
+            keybd_event(ControlKey, 0x1D, 0x2, 0);
         }
 
-        public static void volumeDown()
+        public static void VolumeDown()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            keybd_event(CONTROL_KEY, 0x1D, 0, 0);
+            keybd_event(ControlKey, 0x1D, 0, 0);
             PostMessage(spotifyWindow, 0x100, new IntPtr(0x28), IntPtr.Zero);
             Thread.Sleep(1);
-            keybd_event(CONTROL_KEY, 0x1D, 0x2, 0);
+            keybd_event(ControlKey, 0x1D, 0x2, 0);
         }
 
 
         public static float TextWidth(string text, Font f)
         {
-            float textWidth = 0;
+            float textWidth;
 
             using (var bmp = new Bitmap(1, 1))
-            using (Graphics g = Graphics.FromImage(bmp))
             {
-                textWidth = g.MeasureString(text, f).Width;
+                using (Graphics g = Graphics.FromImage(bmp))
+                {
+                    textWidth = g.MeasureString(text, f).Width;
+                }
             }
 
             return textWidth;
         }
 
-        private static bool mouseonspotify()
+        private static bool Mouseonspotify()
         {
             _posspotify = GetScaledVector(_posspotify);
             var loadspotify = new Render.Sprite(Resources.spotify, _posspotify)
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
             loadspotify.Position = GetPosition(loadspotify.Width - 300);
@@ -492,12 +487,11 @@ namespace SpotSharp
         }
 
 
-        private static bool mouseonplay()
+        private static bool Mouseonplay()
         {
             var loadplay = new Render.Sprite(Resources.play, _posplay)
-
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
             loadplay.Position = GetPosition(loadplay.Width);
@@ -510,12 +504,11 @@ namespace SpotSharp
         }
 
 
-        private static bool mouseonprev()
+        private static bool Mouseonprev()
         {
             var loadprev = new Render.Sprite(Resources.rewind, _posprev)
-
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
             loadprev.Position = GetPosition(loadprev.Width);
@@ -528,12 +521,11 @@ namespace SpotSharp
         }
 
 
-        private static bool mouseonnext()
+        private static bool Mouseonnext()
         {
             var loadnext = new Render.Sprite(Resources.forward, _posnext)
-
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
             loadnext.Position = GetPosition(loadnext.Width);
@@ -545,14 +537,14 @@ namespace SpotSharp
                     pos.Y >= nextbuttonpos.Y && pos.Y <= (nextbuttonpos.Y + loadnext.Height));
         }
 
-        private static bool mouseonvolup()
+        private static bool Mouseonvolup()
         {
             _posvolu = GetScaledVector(_posvolu);
 
 
             var loadvolup = new Render.Sprite(Resources.volup, _posvold)
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
 
@@ -566,14 +558,14 @@ namespace SpotSharp
         }
 
 
-        private static bool mouseonvoldown()
+        private static bool Mouseonvoldown()
         {
             _posvold = GetScaledVector(_posvold);
 
 
             var loadvoldown = new Render.Sprite(Resources.voldown, _posvold)
             {
-                Scale = _scale,
+                Scale = Scale,
                 Color = new ColorBGRA(255f, 255f, 255f, 20f)
             };
 
@@ -588,24 +580,25 @@ namespace SpotSharp
 
         public static void OnDraw(EventArgs args)
         {
-            if (Config.Item("showtrack").GetValue<bool>())
+            if (_config.Item("showtrack").GetValue<bool>())
             {
                 var font = new Font("Calibri", 12.5F);
 
-                if (getSongName() == null)
+                if (GetSongName() == null)
                 {
-                    Drawing.DrawText(Drawing.Width/2f - TextWidth("null", font)/2f, 50, Color.White, "null");
+                    Drawing.DrawText(Drawing.Width / 2f - TextWidth("null", font) / 2f, 50, Color.White, "null");
                 }
 
-                if (getSongName() == "") // note bugsplat if songname undefined 
+                if (GetSongName() == "") // note bugsplat if songname undefined 
                 {
-                    Drawing.DrawText(Drawing.Width/2f - TextWidth(songname, font)/2f, 50, Color.White, songname);
+                    Drawing.DrawText(Drawing.Width / 2f - TextWidth(Songname, font) / 2f, 50, Color.White, Songname);
                 }
 
-                if (getSongName() != "")
+                if (GetSongName() != "")
                 {
-                    Drawing.DrawText(Drawing.Width/2f - TextWidth(getSongName() + " - " + getArtistName(), font)/2f, 50,
-                        Color.White, getSongName() + " - " + getArtistName());
+                    Drawing.DrawText(
+                        Drawing.Width / 2f - TextWidth(GetSongName() + " - " + GetArtistName(), font) / 2f, 50,
+                        Color.White, GetSongName() + " - " + GetArtistName());
                 }
             }
         }

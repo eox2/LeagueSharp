@@ -62,7 +62,7 @@ namespace SephElise
 
             //TargetSelector
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
             //Orbwalker
@@ -157,7 +157,7 @@ namespace SephElise
 
         private static void Harass()
         {
-            Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target != null)
             {
                 if (HumanForm && Player.Distance(target) <= Q.Range && Config.Item("UseQHarass").GetValue<bool>() &&
@@ -177,7 +177,7 @@ namespace SephElise
 
         private static void JungleFarm()
         {
-            Obj_AI_Hero target = SimpleTs.GetTarget(QS.Range, SimpleTs.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(QS.Range, TargetSelector.DamageType.Magical);
             List<Obj_AI_Base> mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range,
                 MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.Health);
 
@@ -217,7 +217,7 @@ namespace SephElise
 
         private static void Farm()
         {
-            Obj_AI_Hero target = SimpleTs.GetTarget(QS.Range, SimpleTs.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(QS.Range, TargetSelector.DamageType.Magical);
             List<Obj_AI_Base> allminions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All,
                 MinionTeam.Enemy, MinionOrderTypes.Health);
 
@@ -258,17 +258,17 @@ namespace SephElise
 
         private static void KillSteal()
         {
-            Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
             double QHDmg = Player.GetSpellDamage(target, SpellSlot.Q);
             double WDmg = Player.GetSpellDamage(target, SpellSlot.W);
 
             if (target != null && Config.Item("UseIgnite").GetValue<bool>() && IgniteSlot != SpellSlot.Unknown &&
-                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (igniteDmg > target.Health)
                 {
-                    Player.SummonerSpellbook.CastSpell(IgniteSlot, target);
+                    Player.Spellbook.CastSpell(IgniteSlot, target);
                 }
             }
 
@@ -339,7 +339,7 @@ namespace SephElise
 
         private static void Combo()
         {
-            Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             Orbwalker.SetAttack((!Q.IsReady() || E.IsReady() || W.IsReady()));
 
             if (target != null)

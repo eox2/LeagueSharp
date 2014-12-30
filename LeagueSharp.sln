@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssemblySelector", "Assembl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFXUtility", "SFXUtility\SFXUtility.csproj", "{2D7486BB-8A00-4CDB-AE64-8BF17463B518}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReplaySharp", "ReplaySharp\ReplaySharp.csproj", "{6DBD2BFB-E495-465B-AFD7-5DB0BA68594C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{2D7486BB-8A00-4CDB-AE64-8BF17463B518}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D7486BB-8A00-4CDB-AE64-8BF17463B518}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D7486BB-8A00-4CDB-AE64-8BF17463B518}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DBD2BFB-E495-465B-AFD7-5DB0BA68594C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DBD2BFB-E495-465B-AFD7-5DB0BA68594C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DBD2BFB-E495-465B-AFD7-5DB0BA68594C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DBD2BFB-E495-465B-AFD7-5DB0BA68594C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
