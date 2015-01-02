@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -15,6 +16,7 @@ using Color = System.Drawing.Color;
 
 namespace EloSharp
 {
+  
     public class EloSharp
     {
 
@@ -41,10 +43,12 @@ namespace EloSharp
         {
             Ranks = new List<Info>();
 
+
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
 
                 Info info = new Info();
+
                 string playerNameEnc = HttpUtility.UrlEncode(hero.Name);
                 if (getregionurl() != "Not Supported" && getregionurl().Contains("op.gg"))
                 {
@@ -257,6 +261,7 @@ namespace EloSharp
                             info.herohandle = hero;
                             info.Ranking = rank;
                             info.lpamount = "";
+
                             Ranks.Add(info);
                             Console.WriteLine("Added info" + hero.Name + info.Ranking);
                         }

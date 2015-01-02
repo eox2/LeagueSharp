@@ -1158,8 +1158,7 @@ namespace SephKhazix
         {
             var usePacket = Config.Item("usePackets").GetValue<bool>();
             Obj_AI_Hero target = TargetSelector.GetTarget(1275, TargetSelector.DamageType.Physical);
-
-
+     
             // Orbwalker.SetAttacks(!(Q.IsReady() || W.IsReady() || E.IsReady()) || TIA.IsReady() || HDR.IsReady());
 
             if ((target != null))

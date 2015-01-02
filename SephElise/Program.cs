@@ -15,18 +15,10 @@ namespace SephElise
 
         private static Menu Config;
         public static Items.Item DFG;
-        private static Items.Item HDR;
-        private static Items.Item BKR;
-        private static Items.Item BWC;
         private static SpellSlot IgniteSlot;
-
-        private static Items.Item YOU;
-
         private static Obj_AI_Hero Player;
         private static bool HumanForm;
         private static bool SpiderForm;
-
-        public static Menu SEPH;
 
         private static void Main(string[] args)
         {
@@ -47,11 +39,6 @@ namespace SephElise
             R = new Spell(SpellSlot.R, 0);
             W.SetSkillshot(0.25f, 100f, 1000, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 55f, 1300, true, SkillshotType.SkillshotLine);
-
-            HDR = new Items.Item(3074, 175f);
-            BKR = new Items.Item(3153, 450f);
-            BWC = new Items.Item(3144, 450f);
-            YOU = new Items.Item(3142, 185f);
             DFG = new Items.Item(3128, 750f);
 
             IgniteSlot = Player.GetSpellSlot("SummonerDot");
@@ -80,7 +67,7 @@ namespace SephElise
             Config.SubMenu("Combo").AddItem(new MenuItem("UseESpider", "Use E Spider")).SetValue(true);
             Config.SubMenu("Combo").AddItem(new MenuItem("UseItems", "Use Items")).SetValue(true);
             Config.SubMenu("Combo")
-                .AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+                .AddItem(new MenuItem("ComboMode", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
 
 
             //Harass
@@ -89,7 +76,7 @@ namespace SephElise
             Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W")).SetValue(true);
             Config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("ActiveHarass", "Harass key").SetValue(new KeyBind("X".ToCharArray()[0],
+                    new MenuItem("HarassMode", "Harass key").SetValue(new KeyBind("X".ToCharArray()[0],
                         KeyBindType.Press)));
 
             //Farm
@@ -99,11 +86,11 @@ namespace SephElise
             Config.SubMenu("Farm").AddItem(new MenuItem("UseWFarm", "Use W (Spider)")).SetValue(true);
             Config.SubMenu("Farm")
                 .AddItem(
-                    new MenuItem("ActiveFarm", "Farm Key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("FarmMode", "Farm Key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             //Kill Steal
             Config.AddSubMenu(new Menu("KillSteal", "Ks"));
-            Config.SubMenu("Ks").AddItem(new MenuItem("ActiveKs", "Use KillSteal")).SetValue(true);
+            Config.SubMenu("Ks").AddItem(new MenuItem("KSMode", "Use KillSteal")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseQKs", "Use Q")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseQKsSpider", "Use Q (Spider)")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseWKsSpider", "Use W (Spider)")).SetValue(true);
@@ -137,19 +124,20 @@ namespace SephElise
 
             CheckForm();
 
-            if (Config.Item("ActiveCombo").GetValue<KeyBind>().Active)
+            if (Config.Item("ComboMode").GetValue<KeyBind>().Active)
             {
                 Combo();
             }
-            if (Config.Item("ActiveHarass").GetValue<KeyBind>().Active)
+            if (Config.Item("HarassMode").GetValue<KeyBind>().Active)
             {
                 Harass();
             }
-            if (Config.Item("ActiveFarm").GetValue<KeyBind>().Active)
+            if (Config.Item("FarmMode").GetValue<KeyBind>().Active)
             {
                 Farm();
+                JungleFarm();
             }
-            if (Config.Item("ActiveKs").GetValue<bool>())
+            if (Config.Item("KSMode").GetValue<bool>())
             {
                 KillSteal();
             }
@@ -273,7 +261,7 @@ namespace SephElise
             }
 
             if (Q.IsReady() && Player.Distance(target) <= Q.Range && target != null &&
-                Config.Item("UseQKs").GetValue<bool>())
+                Config.Item("UseQKs").GetValue<bool>() && !SpiderForm)
             {
                 if (target.Health <= QHDmg)
                 {
@@ -281,7 +269,7 @@ namespace SephElise
                 }
             }
             if (QS.IsReady() && Player.Distance(target) <= QS.Range && target != null &&
-                Config.Item("UseQKs").GetValue<bool>())
+                Config.Item("UseQKs").GetValue<bool>() && SpiderForm)
             {
                 if (target.Health <= QHDmg)
                 {
@@ -298,10 +286,6 @@ namespace SephElise
             }
         }
 
-
-        private static void Drawing_OnDraw(EventArgs args)
-        {
-        }
 
         private static void CheckForm()
         {
@@ -326,10 +310,10 @@ namespace SephElise
                 Player.Spellbook.GetSpell(SpellSlot.E).Name == "EliseSpiderEInitial")
             {
                 //Game.PrintChat("We are in Spider form.");
-                float QScd, WScd, EScd;
-                QScd = (Player.Spellbook.GetSpell(SpellSlot.Q).Cooldown);
-                WScd = (Player.Spellbook.GetSpell(SpellSlot.W).Cooldown);
-                EScd = (Player.Spellbook.GetSpell(SpellSlot.E).Cooldown);
+              //  float QScd, WScd, EScd;
+              //  QScd = (Player.Spellbook.GetSpell(SpellSlot.Q).Cooldown);
+               // WScd = (Player.Spellbook.GetSpell(SpellSlot.W).Cooldown);
+              //  EScd = (Player.Spellbook.GetSpell(SpellSlot.E).Cooldown);
 
                 HumanForm = false;
                 SpiderForm = true;
