@@ -237,7 +237,7 @@ namespace ReplaySharp
             {
                 editedgamereg = "";
             }
-            Game.PrintChat("Looking up: " + user + " " + region);
+          //  Game.PrintChat("Looking up: " + user + " " + region);
             //Send
             try
             {
@@ -275,7 +275,7 @@ namespace ReplaySharp
                 }
                 if (response.Contains("NowRecording"))
                 {
-                    Game.PrintChat("This game is already being recorded.");
+                   // Game.PrintChat("This game is already being recorded.");
                     recordstatus = "This game is being recorded already (someone else)";
                     recordingbool = true;
                     _recordable = false;
@@ -283,7 +283,7 @@ namespace ReplaySharp
 
                 if (response.Contains("requestRecording.json"))
                 {
-                    Game.PrintChat("This game is recordable");
+                   // Game.PrintChat("This game is recordable");
                     recordstatus = "Game found, can try to record this game!";
                     Console.WriteLine("We can attempt to record this game!");
                     _recordable = true;
