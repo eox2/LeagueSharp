@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
 
+
+//ToDo: Better Evolved W calcs, figure out why OnWaveClear activates when farm keybind not active
 
 namespace SephKhazix
 {
@@ -27,7 +28,6 @@ namespace SephKhazix
 
         private static Obj_AI_Hero Player;
         private static bool Wnorm, Wevolved;
-
 
 
         private static void Main(string[] args)
@@ -61,6 +61,7 @@ namespace SephKhazix
 
 
             IgniteSlot = Player.GetSpellSlot("summonerdot");
+
 
 
             Config = new Menu("SephKhazix", "Khazix", true);
@@ -115,6 +116,7 @@ namespace SephKhazix
             Config.SubMenu("Farm").AddItem(new MenuItem("UseQFarm", "Use Q")).SetValue(true);
             Config.SubMenu("Farm").AddItem(new MenuItem("UseEFarm", "Use E")).SetValue(false);
             Config.SubMenu("Farm").AddItem(new MenuItem("UseWFarm", "Use W")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseItemsFarm", "Use Items")).SetValue(true);
             Config.SubMenu("Farm")
                 .AddItem(
                     new MenuItem("Farm", "Farm Key").SetValue(
@@ -151,14 +153,13 @@ namespace SephKhazix
 
             //Debug
             Config.AddSubMenu(new Menu("Debug", "Debug"));
-            Config.SubMenu("Debug").AddItem(new MenuItem("Debugon", "Enable Debugging").SetValue(true));
+            Config.SubMenu("Debug").AddItem(new MenuItem("Debugon", "Enable Debugging").SetValue(false));
 
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += OnGameUpdate;
-            CustomEvents.Unit.OnLevelUpSpell += CheckSpells;
             Drawing.OnDraw += OnDraw;
-            Game.PrintChat("<font color='#1d87f2'>SephKhazix has been Loaded.</font>");
+            Game.PrintChat("<font color='#1d87f2'>SephKhazix has been Loaded. Version 1.5. Lots of changes, report problems on main topic</font>");
             HeroList = ObjectManager.Get<Obj_AI_Hero>().ToList();
 
         }
@@ -268,8 +269,9 @@ namespace SephKhazix
         private static void OnGameUpdate(EventArgs args)
         {
             Player = ObjectManager.Player;
-            Orbwalker.SetAttack(true);
+           // Orbwalker.SetAttack(true);
 
+            CheckSpells();
             if (Config.Item("Combo").GetValue<KeyBind>().Active)
             {
                 Combo();
@@ -305,7 +307,9 @@ namespace SephKhazix
                 var usePacket = Config.Item("usePackets").GetValue<bool>();
                 if (Player.Distance(target) <= Q.Range && Config.Item("UseQHarass").GetValue<bool>() && Q.IsReady())
                 {
+                    Orbwalker.SetAttack(false);
                     Q.Cast(target, usePacket);
+                    Orbwalker.SetAttack(true);
                 }
 
                 if (Player.Distance(target) <= W.Range && Config.Item("UseWHarass").GetValue<bool>() && W.IsReady() &&
@@ -338,7 +342,9 @@ namespace SephKhazix
                 if (Q.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= Q.Range &&
                     Config.Item("UseQFarm").GetValue<bool>())
                 {
+                    Orbwalker.SetAttack(false);
                     Q.Cast(minion);
+                    Orbwalker.SetAttack(true);
                 }
                 if (W.IsReady() && minion.IsValidTarget() && Wnorm && Player.Distance(minion) <= W.Range &&
                     Config.Item("UseWFarm").GetValue<bool>() && (pos.Any()))
@@ -380,10 +386,10 @@ namespace SephKhazix
 
         private static void OnWaveClear()
         {
+            Game.PrintChat("Onwaveclear activated??");
             List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
             if (Config.Item("UseQFarm").GetValue<bool>() && Q.IsReady())
             {
-
                 foreach (Obj_AI_Base minion in
                     allMinions.Where(
                         minion =>
@@ -395,7 +401,9 @@ namespace SephKhazix
                     if (Vector3.Distance(minion.ServerPosition, ObjectManager.Player.ServerPosition) >
                         Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) && Player.Distance(minion) <= Q.Range)
                     {
+                        Orbwalker.SetAttack(false);
                         Q.CastOnUnit(minion, false);
+                        Orbwalker.SetAttack(true);
                         return;
                     }
                 }
@@ -437,7 +445,7 @@ namespace SephKhazix
             }
 
 
-            if (Config.Item("UseItems").GetValue<bool>())
+            if (Config.Item("UseItemsFarm").GetValue<bool>())
             {
                 MinionManager.FarmLocation farmLocation =
                     MinionManager.GetBestCircularFarmLocation(
@@ -460,16 +468,22 @@ namespace SephKhazix
             }
         }
 
-
+        //Detuks
+        public static bool targetisisolated(Obj_AI_Base target)
+        {
+            var enes = ObjectManager.Get<Obj_AI_Base>()
+                .Where(her => her.IsEnemy && her.NetworkId != target.NetworkId && target.Distance(her) < 500 && !her.IsMe)
+                .ToArray();
+            return !enes.Any();
+        }
+        //Detuks
+  
+        /*
         private static bool targetisisolated(Obj_AI_Hero Target)
         {
-            return
-                !ObjectManager.Get<Obj_AI_Base>()
-                    .Where(x => x.Distance(Target) < 500 && x.NetworkId == Target.NetworkId && !x.IsAlly)
-                    .ToList()
-                    .Any();
+            return !ObjectManager.Get<Obj_AI_Base>().Where(x => x.Distance(Target) < 500 && !x.IsAlly && !x.IsMe).ToList().Any();
         }
-
+        */
         private static double getdamages(SpellSlot X, Obj_AI_Hero target)
         {
             if (X == SpellSlot.Q) {
@@ -497,16 +511,17 @@ namespace SephKhazix
                  .Where(x => x.IsValidTarget() && x.Distance(Player.Position) < 1000f)
                  .OrderBy(x => x.Health).FirstOrDefault();
             var usePacket = Config.Item("usePackets").GetValue<bool>();
-            double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
-            double QDmg = getdamages(SpellSlot.Q, target);
-            double WDmg = Player.GetSpellDamage(target, SpellSlot.W);
-            double EDmg = Player.GetSpellDamage(target, SpellSlot.E);
-            double hydradmg = Player.GetItemDamage(target, Damage.DamageItems.Hydra);
-            double tiamatdmg = Player.GetItemDamage(target, Damage.DamageItems.Tiamat);
+      
 
 
             if (target != null && !target.IsInvulnerable && !target.IsDead && !target.IsZombie)
             {
+                double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
+                double QDmg = getdamages(SpellSlot.Q, target);
+                double WDmg = Player.GetSpellDamage(target, SpellSlot.W);
+                double EDmg = Player.GetSpellDamage(target, SpellSlot.E);
+                double hydradmg = Player.GetItemDamage(target, Damage.DamageItems.Hydra);
+                double tiamatdmg = Player.GetItemDamage(target, Damage.DamageItems.Tiamat);
                 if (Config.Item("UseIgnite").GetValue<bool>() && IgniteSlot != SpellSlot.Unknown &&
                     Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 {
@@ -518,18 +533,21 @@ namespace SephKhazix
 
                 if (!ishealthy() && Config.Item("autoescape").GetValue<bool>() && Player.CountEnemysInRange(300) >= 1)
                 {
-                    var bestposition =
-                        ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(x => x.IsAlly && x.CountEnemysInRange(300) == 0 && x.HealthPercentage() > 45 && E.InRange(x))
-                            .FirstOrDefault()
-                            .ServerPosition;
-                    E.Cast(bestposition, usePacket);
+                    var objAiHero = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsAlly && x.CountEnemysInRange(300) == 0 && x.HealthPercentage() > 45 && E.IsInRange(x)).FirstOrDefault();
+                    if (objAiHero != null) {
+                        var bestposition =
+                            objAiHero.ServerPosition;
+                        E.Cast(bestposition, usePacket);
+                    }
+           
                 }
                 if (Q.IsReady() && Player.Distance(target) <= Q.Range && Config.Item("UseQKs").GetValue<bool>())
                 {
                     if (target.Health <= QDmg)
                     {
+                        Orbwalker.SetAttack(false);
                         Q.Cast(target, usePacket);
+                        Orbwalker.SetAttack(true);
                     }
                 }
 
@@ -633,10 +651,8 @@ namespace SephKhazix
         }
 
 
-        private static void CheckSpells(Obj_AI_Base sender, CustomEvents.Unit.OnLevelUpSpellEventArgs args)
+        private static void CheckSpells()
         {
-            if (!sender.IsMe)
-                return;
 
             //check for evolutions
             if (ObjectManager.Player.HasBuff("khazixqevo", true))
@@ -691,10 +707,10 @@ namespace SephKhazix
             Obj_AI_Hero target = TargetSelector.GetTarget(950, TargetSelector.DamageType.Physical);
             var autoWI = Config.Item("AutoWI").GetValue<bool>();
             var autoWD = Config.Item("AutoWD").GetValue<bool>();
-            if ((target != null) && (W.IsReady()) &&
-                ((W.GetPrediction(target).Hitchance >= HitChance.Medium) ||
-                 W.GetPrediction(target).Hitchance >= HitChance.High))
+            var hitchance = HarassHitChance();
+            if (target != null && W.IsReady() && W.GetPrediction(target).Hitchance >= hitchance)
             {
+       
                 if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("AutoHarrass").GetValue<bool>())
                 {
                     PredictionOutput predw = W.GetPrediction(target);
@@ -706,12 +722,14 @@ namespace SephKhazix
                 }
                 if (Wevolved && Player.Distance(target) <= W.Range && Config.Item("AutoHarrass").GetValue<bool>() && W.IsReady())
                     {
+      
                             if (target.IsValidTarget(WE.Range * 2))
                             {
+                           
                                 PredictionOutput pred = W.GetPrediction(target);
-                                if ((pred.Hitchance == HitChance.Immobile && autoWI) ||
-                                    (pred.Hitchance == HitChance.Dashing && autoWD))
+                                if ((pred.Hitchance == HitChance.Immobile && autoWI) || (pred.Hitchance == HitChance.Dashing && autoWD) || pred.Hitchance >= hitchance)
                                 {
+        
                                     CastWE(target, pred.UnitPosition.To2D());
                                 }
                             }
@@ -722,23 +740,21 @@ namespace SephKhazix
 
         public static List<Obj_AI_Hero> GetIsolatedTargets()
         {
-            var validtargets = HeroList.Where(h => h.IsEnemy && E.InRange(h.ServerPosition));
-            var isolatedtargets = new List<Obj_AI_Base>();
+           var validtargets = HeroList.Where(h => h.IsEnemy && E.IsInRange(h.ServerPosition));
+          //  var validtargets = ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsEnemy).ToList();
             var isolatedheroes = new List<Obj_AI_Hero>();
             foreach (var x in validtargets)
             {
-                isolatedtargets = ObjectManager.Get<Obj_AI_Base>().Where(xd => xd.IsEnemy && xd.Distance(x) < 500).ToList();
+                var isolatedtargets = ObjectManager.Get<Obj_AI_Base>().Where(xd => xd.IsEnemy && x.NetworkId != xd.NetworkId && x.ServerPosition.Distance(xd.ServerPosition) < 500).ToList(); 
                 if (!isolatedtargets.Any())
                 {
-                    isolatedheroes.Add(x);
+                    if (!x.IsDead && x.IsVisible)
+                    {
+                        isolatedheroes.Add(x);
+                    }
                 }
             }
-            if (isolatedheroes.Any())
-            {
-                return isolatedheroes;
-            }
-             return null;
-            
+            return isolatedheroes;
         }
 
         private static void Combo()
@@ -747,7 +763,7 @@ namespace SephKhazix
             var isolatedlist = GetIsolatedTargets();
             HitChance hitchance = HarassHitChance();
             Obj_AI_Hero target = new Obj_AI_Hero();
-            if (isolatedlist != null)
+            if (isolatedlist != null && isolatedlist.Any())
             {
                 isolatedlist.OrderByDescending(
                     hero =>
@@ -756,8 +772,10 @@ namespace SephKhazix
                 target = isolatedlist.FirstOrDefault();
             }
             if (target == null || !target.IsValid || !target.IsEnemy || target.IsDead || Player.Distance(target) > E.Range + 25)
-            target = TargetSelector.GetTarget(1275, TargetSelector.DamageType.Physical);
-            // Orbwalker.SetAttacks(!(Q.IsReady() || W.IsReady() || E.IsReady()) || TIA.IsReady() || HDR.IsReady());
+            {
+                target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            }
+     
             if ((target != null))
             {
                 var pos = new List<Vector2>();
@@ -766,7 +784,9 @@ namespace SephKhazix
                 if (Player.Distance(target) <= Q.Range && Config.Item("UseQCombo").GetValue<bool>() &&
                     Q.IsReady())
                 {
+                    Orbwalker.SetAttack(false);
                     Q.Cast(target);
+                    Orbwalker.SetAttack(true);
                 }
                 if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() &&
                     W.IsReady() && W.GetPrediction(target).Hitchance >= hitchance)
@@ -869,29 +889,36 @@ namespace SephKhazix
 
         private static void OnDraw(EventArgs args)
         {
+            if (Config.Item("Debugon").GetValue<bool>())
+            {
+                var isolatedtargs = GetIsolatedTargets();
+                foreach (var x in isolatedtargs)
+                {
+                    var heroposwts = Drawing.WorldToScreen(x.Position);
+                    Drawing.DrawText(heroposwts.X, heroposwts.Y, Color.White, "Isolated");
+                    
+
+                }
+            }
+
+
             if (Config.Item("CircleLag").GetValue<bool>())
             {
                 if (Config.Item("DrawQ").GetValue<bool>())
                 {
-                        Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, Color.White,
-                            Config.Item("CircleThickness").GetValue<Slider>().Value,
-                            Config.Item("CircleQuality").GetValue<Slider>().Value);
-                    }
+                    Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, Color.White);
+                }
             if (Config.Item("DrawW").GetValue<bool>())
             {
-                Utility.DrawCircle(
-                    ObjectManager.Player.Position, W.Range, Color.Red,
-                    Config.Item("CircleThickness").GetValue<Slider>().Value,
-                    Config.Item("CircleQuality").GetValue<Slider>().Value);
+                Render.Circle.DrawCircle(
+                    ObjectManager.Player.Position, W.Range, Color.Red);
             }
 
 
             if (Config.Item("DrawE").GetValue<bool>())
-                {
-                        Utility.DrawCircle(ObjectManager.Player.Position, E.Range, Color.Green,
-                            Config.Item("CircleThickness").GetValue<Slider>().Value,
-                            Config.Item("CircleQuality").GetValue<Slider>().Value);
-                }
+            {
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, Color.Green);
+            }
 
             }
 
