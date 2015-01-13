@@ -1329,7 +1329,6 @@ namespace EloSharp
             {
                 return "http://op.gg/";
             }
-            
             //Garena lookups
             /*  Testing purposes
             if (Game.Region.Contains("NA"))
@@ -1338,6 +1337,8 @@ namespace EloSharp
         
             }
              */
+              
+             /* RIP GARENA
             if (Game.Region.Contains("SG"))
             {
                 return "http://quickfind.kassad.in/profile/sg/";
@@ -1369,7 +1370,8 @@ namespace EloSharp
    
                 return "http://quickfind.kassad.in/profile/id/";
             }
-
+            */
+            Game.PrintChat("[ELOSHARP] Your region is no longer supported due to no reliable sources available for lookups. Sorry");
             return "Not Supported";
 
             // testing stuff
