@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Text;
 using System.Web;
 using LeagueSharp;
@@ -61,6 +62,7 @@ namespace ReplaySharp
             Game.PrintChat("OP.GG Replay Helper By Seph");
             Config = new Menu("ReplaySharp", "replaysharp", true);
             Config.AddItem(new MenuItem("checker", "Only Check Once").SetValue(false));
+            Config.AddItem(new MenuItem("Autorecord", "Record all Games").SetValue(false));
             Config.AddItem(new MenuItem("disable", "Disable Record Button").SetValue(false));
             Config.AddItem(new MenuItem("enabledrawings", "Show Drawings").SetValue(true));
             Config.AddToMainMenu();
@@ -75,8 +77,15 @@ namespace ReplaySharp
                 replaysharp = new ReplaySharp();
 
             });
-         //   thread.SetApartmentState(ApartmentState.STA);
+
             thread.Start();
+
+            if (Config.Item("Autorecord").GetValue<bool>())
+            {
+                Game.PrintChat("[ReplaySharp] Autorecording is on. Attempting to record the game.");
+                recordthis(playerNameEnc.ToLower(), Gameregion);
+            }
+
 
             Game.OnWndProc += Game_OnWndProc;
 

@@ -135,6 +135,7 @@ namespace SephKhazix
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEQKs", "Use EQ in KS")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEWKs", "Use EW in KS")).SetValue(false);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseTiaKs", "Use items")).SetValue(true);
+            Config.SubMenu("Ks").AddItem(new MenuItem("Edelay", "E Delay (ms)").SetValue(new Slider(0, 2, 300)));
             Config.SubMenu("Ks").AddItem(new MenuItem("autoescape", "Use E to get out when low")).SetValue(false);
 
             Config.SubMenu("Ks").AddItem(new MenuItem("UseIgnite", "Use Ignite")).SetValue(true);
@@ -556,7 +557,7 @@ namespace SephKhazix
                     if (target.Health <= EDmg) 
                     {
                         Utility.DelayAction.Add(
-                            Game.Ping + 200, delegate
+                            Game.Ping + Config.Item("EDelay").GetValue<Slider>().Value, delegate
                             {
                                 PredictionOutput pred = E.GetPrediction(target); 
                                 if (target.IsValid && !target.IsDead)
@@ -887,6 +888,8 @@ namespace SephKhazix
             }
         }
 
+  
+
         private static void OnDraw(EventArgs args)
         {
             if (Config.Item("Debugon").GetValue<bool>())
@@ -896,7 +899,7 @@ namespace SephKhazix
                 {
                     var heroposwts = Drawing.WorldToScreen(x.Position);
                     Drawing.DrawText(heroposwts.X, heroposwts.Y, Color.White, "Isolated");
-                    
+      
 
                 }
             }
