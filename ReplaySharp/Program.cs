@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Text;
 using System.Web;
 using LeagueSharp;
@@ -32,7 +31,7 @@ namespace ReplaySharp
         public static string recordstatus = "Initializing";
         public static string stage = "";
         private static string playerNameEnc;
-        private static string _region;
+
         public static System.Timers.Timer Timer = new System.Timers.Timer();
         public static CookieContainer container = new CookieContainer();
 
@@ -61,16 +60,15 @@ namespace ReplaySharp
             Gameregion = GetGameRegion();
             Game.PrintChat("OP.GG Replay Helper By Seph");
             Config = new Menu("ReplaySharp", "replaysharp", true);
-            Config.AddItem(new MenuItem("checker", "Only Check Once").SetValue(false));
+            Config.AddItem(new MenuItem("checkonce", "Only Check Once").SetValue(false));
             Config.AddItem(new MenuItem("Autorecord", "Record all Games").SetValue(false));
             Config.AddItem(new MenuItem("disable", "Disable Record Button").SetValue(false));
             Config.AddItem(new MenuItem("enabledrawings", "Show Drawings").SetValue(true));
+            Config.AddItem(new MenuItem("checkuntil", "Check until (mins)").SetValue(new Slider(10, 0, 60)));
             Config.AddToMainMenu();
 
             playerNameEnc = HttpUtility.UrlEncode(ObjectManager.Player.Name);
-            ObjectManager.Player.ChampionName.ToLower();
 
-            _region = GetGameRegion();
             Thread thread = new Thread(() =>
             {
 
@@ -125,7 +123,6 @@ namespace ReplaySharp
 
         public static System.Drawing.Color getcolor()
         {
-            //if (recordstatus.ToLower().Contains("recording") || recordstatus.ToLower().Contains("record"))
             if (recordingbool)
             {
                 return System.Drawing.Color.Red;
@@ -136,8 +133,6 @@ namespace ReplaySharp
             }
 
         }
-
-
 
 
         public static string GetGameRegion()
@@ -176,7 +171,7 @@ namespace ReplaySharp
             }
             if (Game.Region.ToLower().Contains("kr"))
             {
-                return "";
+                return "kr";
             }
             if (Game.Region.ToLower().Contains("oc1"))
             {
@@ -205,7 +200,7 @@ namespace ReplaySharp
             if (Gameregion != "")
             {
                 isgamebeingrecorded(playerNameEnc.ToLower(), Gameregion);
-                if (Config.Item("checker").GetValue<bool>())
+                if (Config.Item("checkonce").GetValue<bool>())
                 {
                     return;
                 }
@@ -213,16 +208,9 @@ namespace ReplaySharp
                 Timer.Interval = 30000;
                 Timer.Enabled = true;
 
-                // recorder(ObjectManager.Player.Name, Gameregion);
-                // recorder("JAYOB Eryon", "br");
-                //recorder("crs piglet", "na");
-                //  isgamebeingrecorded("krepo", "euw");
-
             }
 
         }
-
-
 
 
         public static void checkifrecording(object sender, EventArgs e)
@@ -232,9 +220,10 @@ namespace ReplaySharp
                 Timer.Elapsed -= new ElapsedEventHandler(checkifrecording);
                 return;
             }
-            if (Game.ClockTime > 600 || recordingbool) { Timer.Dispose(); Console.WriteLine("Timer disabled because the game is already recording or past 10 mins"); }
+            var checkuntil = Config.Item("checkuntil").GetValue<Slider>().Value;
+            if (Game.ClockTime > checkuntil || recordingbool) { Timer.Dispose(); Console.WriteLine("Timer disabled because the game is already recording or past 10 mins"); }
             //Game.PrintChat(Game.ClockTime.ToString());
-            if (Game.ClockTime <= 600)
+            if (Game.ClockTime <= checkuntil)
             {
                 isgamebeingrecorded(playerNameEnc.ToLower(), GetGameRegion());
             }
@@ -293,7 +282,7 @@ namespace ReplaySharp
                 if (response.Contains("NowRecording"))
                 {
                     //Game.PrintChat("This game is already being recorded.");
-                    recordstatus = "This game is being recorded already";
+                    recordstatus = "This game is being recorded by OP.GG!";
                     recordingbool = true;
                     _recordable = false;
                 }
@@ -308,8 +297,8 @@ namespace ReplaySharp
                     Match regex = new Regex("/match/observer/id=(.*?)\"").Matches(response)[0];
                     Match gameid = new Regex(regex.Groups[1].ToString()).Matches(response)[0];
                     gameidstring = gameid.ToString();
-                    recordstatus = "Finding Game ID: Success.";
-                    Console.WriteLine("Game ID: " + gameidstring);
+                    recordstatus = "Game is recordable (Not being recorded atm)";
+                    //Console.WriteLine("Game ID: " + gameidstring);
 
                 }
             }
