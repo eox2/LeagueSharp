@@ -217,11 +217,11 @@ namespace ReplaySharp
             }
         
             var checkuntil = (Config.Item("checkuntil").GetValue<Slider>().Value * 60) + 30;
-            if (Game.ClockTime > checkuntil || recordingbool) { Timer.Dispose(); Console.WriteLine("Timer disabled because the game is already recording or past 10 mins"); }
+            if (Game.ClockTime > checkuntil || recordingbool) { Timer.Dispose(); Console.WriteLine("Timer disabled because the game is already recording or past the set time"); }
       
             if (Game.ClockTime <= checkuntil)
             {
-                Game.PrintChat(("Checking"));
+         
                 isgamebeingrecorded(playerNameEnc.ToLower(), GetGameRegion());
             }
         }
