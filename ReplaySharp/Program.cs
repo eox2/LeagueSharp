@@ -185,12 +185,7 @@ namespace ReplaySharp
 
         public ReplaySharp()
         {
-            if (Config.Item("disable").GetValue<bool>())
-            {
-                return;
-            }
-
-  
+   
             if (Gameregion == "")
             {
                 Game.PrintChat("There was a problem with your region. Make sure you are supported on OP.GG");
@@ -215,16 +210,18 @@ namespace ReplaySharp
 
         public static void checkifrecording(object sender, EventArgs e)
         {
-            if (Config.Item("checker").GetValue<bool>())
+            if (Config.Item("checkonce").GetValue<bool>())
             {
                 Timer.Elapsed -= new ElapsedEventHandler(checkifrecording);
                 return;
             }
-            var checkuntil = Config.Item("checkuntil").GetValue<Slider>().Value;
+        
+            var checkuntil = (Config.Item("checkuntil").GetValue<Slider>().Value * 60) + 30;
             if (Game.ClockTime > checkuntil || recordingbool) { Timer.Dispose(); Console.WriteLine("Timer disabled because the game is already recording or past 10 mins"); }
-            //Game.PrintChat(Game.ClockTime.ToString());
+      
             if (Game.ClockTime <= checkuntil)
             {
+                Game.PrintChat(("Checking"));
                 isgamebeingrecorded(playerNameEnc.ToLower(), GetGameRegion());
             }
         }
@@ -312,6 +309,11 @@ namespace ReplaySharp
 
         public static void recordthis(string user, string region)
         {
+            if (Config.Item("disable").GetValue<bool>())
+            {
+                return;
+            }
+
             try
             {
                 if (region != "kr")
