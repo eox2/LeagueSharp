@@ -293,12 +293,7 @@ namespace SephElise
                 Player.Spellbook.GetSpell(SpellSlot.W).Name == "EliseHumanW" ||
                 Player.Spellbook.GetSpell(SpellSlot.E).Name == "EliseHumanE")
             {
-                float Qcd, Wcd, Ecd, QScd, WScd, EScd;
-                Qcd = (Player.Spellbook.GetSpell(SpellSlot.Q).Cooldown);
-                Wcd = (Player.Spellbook.GetSpell(SpellSlot.W).Cooldown);
-                Ecd = (Player.Spellbook.GetSpell(SpellSlot.E).Cooldown);
-
-
+              
                 HumanForm = true;
                 SpiderForm = false;
 

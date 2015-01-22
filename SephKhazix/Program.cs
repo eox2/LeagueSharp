@@ -532,9 +532,9 @@ namespace SephKhazix
                     }
                 }
 
-                if (!ishealthy() && Config.Item("autoescape").GetValue<bool>() && Player.CountEnemysInRange(300) >= 1)
+                if (!ishealthy() && Config.Item("autoescape").GetValue<bool>() && Player.CountEnemiesInRange(300) >= 1)
                 {
-                    var objAiHero = ObjectManager.Get<Obj_AI_Hero>().FirstOrDefault(x => x.IsAlly && x.CountEnemysInRange(300) == 0 && x.HealthPercentage() > 45 && E.IsInRange(x));
+                    var objAiHero = ObjectManager.Get<Obj_AI_Hero>().FirstOrDefault(x => x.IsAlly && x.CountEnemiesInRange(300) == 0 && x.HealthPercentage() > 45 && E.IsInRange(x));
                     if (objAiHero != null) {
                         var bestposition =
                             objAiHero.ServerPosition;

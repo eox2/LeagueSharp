@@ -15,11 +15,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EloSharp", "EloSharp\EloSha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssemblySelector", "AssemblySelector\AssemblySelector.csproj", "{DB22F458-B0EC-4BB7-9E9B-5B41071760CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFXUtility", "SFXUtility\SFXUtility.csproj", "{2D7486BB-8A00-4CDB-AE64-8BF17463B518}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReplaySharp", "ReplaySharp\ReplaySharp.csproj", "{6DBD2BFB-E495-465B-AFD7-5DB0BA68594C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoZhonya", "AutoZhonya\AutoZhonya.csproj", "{DC85DC8F-1172-4C18-9AE0-A372F1ABCBE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EloSharp V2", "EloSharp V2\EloSharp V2.csproj", "{6EF785FE-2039-44DC-895B-DC35250AFE1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,10 +51,6 @@ Global
 		{DB22F458-B0EC-4BB7-9E9B-5B41071760CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB22F458-B0EC-4BB7-9E9B-5B41071760CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB22F458-B0EC-4BB7-9E9B-5B41071760CE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2D7486BB-8A00-4CDB-AE64-8BF17463B518}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2D7486BB-8A00-4CDB-AE64-8BF17463B518}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2D7486BB-8A00-4CDB-AE64-8BF17463B518}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2D7486BB-8A00-4CDB-AE64-8BF17463B518}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6DBD2BFB-E495-465B-AFD7-5DB0BA68594C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6DBD2BFB-E495-465B-AFD7-5DB0BA68594C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DBD2BFB-E495-465B-AFD7-5DB0BA68594C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -63,6 +59,10 @@ Global
 		{DC85DC8F-1172-4C18-9AE0-A372F1ABCBE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC85DC8F-1172-4C18-9AE0-A372F1ABCBE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC85DC8F-1172-4C18-9AE0-A372F1ABCBE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EF785FE-2039-44DC-895B-DC35250AFE1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EF785FE-2039-44DC-895B-DC35250AFE1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EF785FE-2039-44DC-895B-DC35250AFE1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EF785FE-2039-44DC-895B-DC35250AFE1E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
