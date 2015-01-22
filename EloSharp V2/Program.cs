@@ -440,9 +440,6 @@ namespace EloSharp_V2
 }
 
            
-        
-
-  
         private static Render.Text RenderText(string text, bool isTop, int indexof, int toffset, Color2 color)
         {
             int ystart = isTop ? 15 + toffset : 411 + toffset;
