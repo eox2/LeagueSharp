@@ -42,22 +42,25 @@ namespace EloSharp_V2
             }
         }
 
-        // End Tc Crew
+      
+        //todo completely redo menu to customize for each website
 
         public static void MenuAttach(Menu menu)
         {
             Config = new Menu("EloSharp", "elosharp", true);
-            Config.AddItem(new MenuItem("enabledrawings", "Enable Drawings").SetValue(true));
-            Config.AddItem(new MenuItem("enablerank", "Draw Rank").SetValue(true));
-            Config.AddItem(new MenuItem("enablewinratio", "Draw Win Ratio").SetValue(false));
-            Config.AddItem(new MenuItem("enablekdaratio", "Draw KDA Ratio").SetValue(false));
+            Config.AddSubMenu(new Menu("general", "General"));
+            Config.SubMenu("general").AddItem(new MenuItem("enabledrawings", "Enable Drawings").SetValue(true));
+            Config.SubMenu("general").AddItem(new MenuItem("enablerank", "Draw Rank").SetValue(true));
+            Config.SubMenu("general").AddItem(new MenuItem("enablewinratio", "Draw Win Ratio").SetValue(false));
+            Config.SubMenu("general").AddItem(new MenuItem("enablekdaratio", "Draw KDA Ratio").SetValue(false));
+            Config.SubMenu("general").AddItem(new MenuItem("drawicons", "Draw Icons").SetValue(false));
+            Config.SubMenu("general").AddItem(new MenuItem("printranks", "Print at the beginning").SetValue(true));
+            
+            
             Config.AddItem(new MenuItem("showunknown", "Show Unknown").SetValue(true));
-            Config.AddItem(new MenuItem("printranks", "Print at the beginning").SetValue(true));
+      
             Config.AddItem(new MenuItem("enabledebug", "Enable Debug").SetValue(false));
             Config.AddItem(new MenuItem("autoupdate", "Auto change name").SetValue(true));
-            Config.AddItem(new MenuItem("TrackAllies", "Track allies").SetValue(true));
-            Config.AddItem(new MenuItem("TrackEnemies", "Track enemies").SetValue(true));
-            Config.AddItem(new MenuItem("TrackMe", "Track me").SetValue(false));
             Config.AddItem(new MenuItem("choosewebsite", "Choose Website").SetValue(new StringList(new[] { "LolNexus", "LolSkill", "OPGG"}, 0)));
             SetWebsite = Config.Item("choosewebsite").GetValue<StringList>().SelectedIndex;
             Config.AddSubMenu(new Menu("Loading Screen", "loadingscreen"));
@@ -70,6 +73,8 @@ namespace EloSharp_V2
 
             Config.AddToMainMenu();
         }
+
+        // End Tc Crew
 
         public static string StripHTML(string html)
         {
@@ -224,8 +229,12 @@ namespace EloSharp_V2
 
         public static Bitmap champbitmap(string champname)
         {
-            var champicon = (Bitmap)Resources.ResourceManager.GetObject(string.Format("{0}_square_0", champname.ToLower()));
-            return champicon;
+            var champicon = (Bitmap) Resources.ResourceManager.GetObject(string.Format("{0}_square_0", champname.ToLower()));
+            if (champicon != null)
+            {
+                return champicon;
+            }
+            return (Bitmap) Resources.ResourceManager.GetObject("aatrox_square_0");
         }
 
         public static string getsetwebsite()

@@ -282,9 +282,12 @@ namespace EloSharp_V2
                         int ystart = isTop ? 15 : 411;
                         int xformula = isTop ? 210 + (indexof * 200) : 210 + ((indexof - 5) * 200);
 
-                        Drawsprite(
-                            infoloading.champsprite, Newspriteposition(xformula, ystart),
-                            Newspriteposition(xformula - 20, ystart + 5));
+                        if (Misc.Config.Item("drawicons").GetValue<bool>())
+                        {
+                            Drawsprite(
+                                infoloading.champsprite, Newspriteposition(xformula, ystart),
+                                Newspriteposition(xformula - 20, ystart + 5));
+                        }
 
                         RenderText(
                             Misc.FormatString(infoloading.Name) + " " + infoloading.seriescheck, isTop, indexof, 15,
