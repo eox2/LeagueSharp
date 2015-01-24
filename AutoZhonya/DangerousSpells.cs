@@ -68,7 +68,7 @@ namespace SephZhonya
                     Name = "ViR",
                     DisplayName = "Vi R",
                     Source = "Vi",
-                    BaseDelay = 0.3,
+                    BaseDelay = 0.25,
                     SSDelay = 1.0,
                     Zhonyable = true,
                     SpellShieldable = true

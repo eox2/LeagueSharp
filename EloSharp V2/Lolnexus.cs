@@ -98,7 +98,7 @@ namespace EloSharp_V2
                     string champtotal = Misc.StripHTML(Misc.ExtractString(inbetween, "<h2>Champion Games</h2>The number of games played with this champion.\\\">", "</b>)</span>"));
 
                     string champnameforbitmap = champnamefix.ToLower().Replace(" ", "");
-
+                    Game.PrintChat(champnameforbitmap);
                     //Console.WriteLine(champnameforbitmap);
                     Bitmap spritechamp = Misc.champbitmap(champnameforbitmap);
 
