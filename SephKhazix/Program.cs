@@ -116,10 +116,10 @@ namespace SephKhazix
             Config.SubMenu("Farm").AddItem(new MenuItem("UseQFarm", "Use Q")).SetValue(true);
             Config.SubMenu("Farm").AddItem(new MenuItem("UseEFarm", "Use E")).SetValue(false);
             Config.SubMenu("Farm").AddItem(new MenuItem("UseWFarm", "Use W")).SetValue(true);
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseItemsFarm", "Use Items")).SetValue(true);
+            Config.SubMenu("Farm").AddItem(new MenuItem("UseItemsFarm", "Use Items")).SetValue(true);
             Config.SubMenu("Farm")
                 .AddItem(
-                    new MenuItem("Farm", "Farm Key").SetValue(
+                    new MenuItem("WaveFarm", "Farm Key").SetValue(
                         new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             Config.SubMenu("Farm")
                 .AddItem(
@@ -285,7 +285,7 @@ namespace SephKhazix
                 AutoHarrass();
             }
 
-            if (Config.Item("Farm").GetValue<KeyBind>().Active)
+            if (Config.Item("WaveFarm").GetValue<KeyBind>().Active)
             {
                 OnWaveClear();
             }
@@ -776,7 +776,6 @@ namespace SephKhazix
                         TargetSelector.GetPriority(hero)).FirstOrDefault();
 
                 target = isolated;
-                Game.PrintChat(target.Name);
                 isolatedlist.Clear();
             }
             else
@@ -844,7 +843,7 @@ namespace SephKhazix
                 if (Wevolved && Player.Distance(target) <= WE.Range && Config.Item("UseWCombo").GetValue<bool>() &&
                     W.IsReady() && W.GetPrediction(target).Hitchance >= hitchance)
                 {
-                        PredictionOutput pred = W.GetPrediction(target);
+                        PredictionOutput pred = WE.GetPrediction(target);
                        // W.Cast(pred.CastPosition, usePacket); 
                         CastWE(target, pred.UnitPosition.To2D()); 
                 }
