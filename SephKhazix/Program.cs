@@ -767,20 +767,28 @@ namespace SephKhazix
             var isolatedlist = GetIsolatedTargets();
             HitChance hitchance = HarassHitChance();
             Obj_AI_Hero target = new Obj_AI_Hero();
-            
+
             if (isolatedlist != null && isolatedlist.Any())
             {
-                isolatedlist.OrderByDescending(
+                var isolated = isolatedlist.OrderByDescending(
                     hero =>
-                        Player.CalcDamage(hero, Damage.DamageType.Physical, 100) / (1 + hero.Health) *
+                        Player.CalcDamage(hero, Damage.DamageType.Physical, 100)/(1 + hero.Health)*
                         TargetSelector.GetPriority(hero)).FirstOrDefault();
-                target = isolatedlist.FirstOrDefault();
+
+                target = isolated;
+                Game.PrintChat(target.Name);
+                isolatedlist.Clear();
             }
-          
-            if (target == null || !target.IsValid || !target.IsEnemy || target.IsDead || Player.Distance(target) > E.Range + 25)
+            else
             {
                 target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             }
+          
+            if (target == null || !target.IsValid || !target.IsEnemy || target.IsDead || Player.Distance(target) > E.Range + 100)
+            {
+                target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            }
+         
      
             if ((target != null))
             {
@@ -790,7 +798,7 @@ namespace SephKhazix
                     Q.IsReady())
                 {
                     Orbwalker.SetAttack(false);
-                    Q.Cast(target);
+                    Q.Cast(target, usePacket);
                     Orbwalker.SetAttack(true);
                 }
                 if (Wnorm && Player.Distance(target) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() &&
