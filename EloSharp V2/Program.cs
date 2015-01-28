@@ -82,9 +82,8 @@ namespace EloSharp_V2
             {
                 LolSkill.lolskilllookup(nameofplayer);
                 DoDrawings();
-
             }
-
+    
         }
    
 
@@ -128,7 +127,7 @@ namespace EloSharp_V2
                 });
             }
 
-            if (Misc.getsetwebsite() == "opgg")
+            if (Misc.getsetwebsite() == "opgg2")
             {
                     new System.Threading.Thread(() =>
                     {
@@ -137,6 +136,11 @@ namespace EloSharp_V2
                     }).Start();
             }
 
+            if (Misc.getsetwebsite() == "opgg")
+            {
+                new OPGGLIVE();
+                DoDrawings();
+            }
         }
 
 
@@ -361,6 +365,36 @@ namespace EloSharp_V2
                     }
 
                 }
+
+                if (OPGGLIVE.Ranks != null && Misc.getsetwebsite() == "opgg")
+                {
+                    foreach (var hero in OPGGLIVE.Ranks)
+                    {
+                        Console.WriteLine(hero.Name);
+                        int indexof = 0;
+                        indexof = OPGGLIVE.Ranks.IndexOf(hero);
+                        bool isTop = indexof < 5;
+                        int ystart = isTop ? 15 : 411;
+                        int xformula = isTop ? 210 + (indexof * 200) : 210 + ((indexof - 5) * 200);
+
+                        Drawsprite(
+                            hero.champsprite, Newspriteposition(xformula, ystart),
+                            Newspriteposition(xformula - 20, ystart + 5));
+
+                        RenderText(
+                            Misc.FormatString(hero.Name) + " ", isTop, indexof, 15,
+                            Color2.White);
+
+                        RenderText(hero.Ranking, isTop, indexof, 35, Misc.rankincolorls(hero.Ranking));
+
+                        RenderText(
+                           hero.herohandle.ChampionName + " Games: " + hero.champgamesplayed, isTop, indexof, 75, Color2.Red);
+
+                        RenderText("Win Ratio: " + hero.champwinratio, isTop, indexof, 95, Color2.White);
+
+                        RenderText("KDA: " + hero.kdaratio, isTop, indexof, 115, Color2.Red);
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -434,6 +468,20 @@ namespace EloSharp_V2
                     }
                 }
                 
+              if (Misc.getsetwebsite() == "opgg")
+                {
+                    foreach (OPGGLIVE.Info info  in OPGGLIVE.Ranks)
+                    {
+                        var indicator = new Misc.HpBarIndicator { Unit = info.herohandle };
+                        X = (int)indicator.Position.X;
+                        Y = (int)indicator.Position.Y;
+                        var startX = X + 50;
+                        var startY = Y - 60;
+                        Text.DrawText(
+                            null, info.Ranking, startX + (15 - info.Ranking.Length * 4) / 2,
+                            startY + 6, Misc.ColorRank(info.Ranking));
+                    }
+                }
             }
 
             catch (Exception e)
@@ -453,10 +501,6 @@ namespace EloSharp_V2
             texty.Add(1);
             return texty;
         }
-
-      
-
-       
 
  
 

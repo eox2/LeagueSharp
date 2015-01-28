@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using EloSharp_V2.Properties;
@@ -48,20 +49,20 @@ namespace EloSharp_V2
         public static void MenuAttach(Menu menu)
         {
             Config = new Menu("EloSharp", "elosharp", true);
-            Config.AddSubMenu(new Menu("general", "General"));
-            Config.SubMenu("general").AddItem(new MenuItem("enabledrawings", "Enable Drawings").SetValue(true));
-            Config.SubMenu("general").AddItem(new MenuItem("enablerank", "Draw Rank").SetValue(true));
-            Config.SubMenu("general").AddItem(new MenuItem("enablewinratio", "Draw Win Ratio").SetValue(false));
-            Config.SubMenu("general").AddItem(new MenuItem("enablekdaratio", "Draw KDA Ratio").SetValue(false));
-            Config.SubMenu("general").AddItem(new MenuItem("drawicons", "Draw Icons").SetValue(false));
-            Config.SubMenu("general").AddItem(new MenuItem("printranks", "Print at the beginning").SetValue(true));
+            Config.AddSubMenu(new Menu("General", "General"));
+            Config.SubMenu("General").AddItem(new MenuItem("enabledrawings", "Enable Drawings").SetValue(true));
+            Config.SubMenu("General").AddItem(new MenuItem("enablerank", "Draw Rank").SetValue(true));
+            Config.SubMenu("General").AddItem(new MenuItem("enablewinratio", "Draw Win Ratio").SetValue(false));
+            Config.SubMenu("General").AddItem(new MenuItem("enablekdaratio", "Draw KDA Ratio").SetValue(false));
+            Config.SubMenu("General").AddItem(new MenuItem("drawicons", "Draw Icons").SetValue(false));
+            Config.SubMenu("General").AddItem(new MenuItem("printranks", "Print at the beginning").SetValue(true));
             
             
             Config.AddItem(new MenuItem("showunknown", "Show Unknown").SetValue(true));
       
             Config.AddItem(new MenuItem("enabledebug", "Enable Debug").SetValue(false));
             Config.AddItem(new MenuItem("autoupdate", "Auto change name").SetValue(true));
-            Config.AddItem(new MenuItem("choosewebsite", "Choose Website").SetValue(new StringList(new[] { "LolNexus", "LolSkill", "OPGG"}, 0)));
+            Config.AddItem(new MenuItem("choosewebsite", "Choose Website").SetValue(new StringList(new[] { "LolNexus", "LolSkill", "OPGG", "OPGG2"}, 3)));
             SetWebsite = Config.Item("choosewebsite").GetValue<StringList>().SelectedIndex;
             Config.AddSubMenu(new Menu("Loading Screen", "loadingscreen"));
             Config.SubMenu("loadingscreen")
@@ -115,18 +116,29 @@ namespace EloSharp_V2
             return char.ToUpper(s[0]) + s.Substring(1);
         }
 
+        public static Obj_AI_Hero GetRandomHero()
+        {
+            var herolist = ObjectManager.Get<Obj_AI_Hero>().ToList();
+            Random r = new Random();
+            Obj_AI_Hero randomhero = herolist[r.Next(herolist.Count)];
+            return randomhero;
+        }
  
 
         public static bool Validregion()
         {
             string lxtag = sortedregion();
             if (lxtag == "na" || lxtag == "euw" || lxtag == "euw" || lxtag == "eune" || lxtag == "oce" || lxtag == "las" ||
-                lxtag == "lan" || lxtag == "ru" || lxtag == "br" || lxtag == "tr")
+                lxtag == "lan" || lxtag == "ru" || lxtag == "br" || lxtag == "tr" || lxtag == "kr")
             {
                 return true;
             }
             return false;
         }
+
+
+
+
 
         public static string sortedregion()
         {
@@ -165,6 +177,10 @@ namespace EloSharp_V2
             if (RegionTag.ToLower().Contains("br"))
             {
                 return "br";
+            }
+            if (RegionTag.ToLower().Contains("kr"))
+            {
+                return "kr";
             }
             return "Not Supported";
         }
@@ -242,7 +258,8 @@ namespace EloSharp_V2
             if (SetWebsite == 0) { return "lolnexus"; }
             if (SetWebsite == 1) { return "lolskill"; }
             if (SetWebsite == 2) { return "opgg"; }
-            return "lolnexus";
+            if (SetWebsite == 3) { return "opgg2"; }
+            return "opgg";
         }
 
         public static Color rankincolorls(string rank)
@@ -290,6 +307,45 @@ namespace EloSharp_V2
             return Color.White;
         }
 
-        
+
+        public static float TextWidth(string text, Font f)
+        {
+            float textWidth = 0;
+
+            using (var bmp = new Bitmap(1, 1))
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                textWidth = g.MeasureString(text, f).Width;
+            }
+
+            return textWidth;
+        }
+
+
+    public static byte[] Decompress(byte[] gzip)
+    {
+	using (GZipStream stream = new GZipStream(new MemoryStream(gzip), CompressionMode.Decompress))
+	{
+	    const int size = 4096;
+	    byte[] buffer = new byte[size];
+	    using (MemoryStream memory = new MemoryStream())
+	    {
+		int count = 0;
+		do
+		{
+		    count = stream.Read(buffer, 0, size);
+		    if (count > 0)
+		    {
+			memory.Write(buffer, 0, count);
+		    }
+		}
+		while (count > 0);
+		return memory.ToArray();
+	    }
+	}
     }
 }
+    }
+
+
+

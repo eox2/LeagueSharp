@@ -86,7 +86,7 @@ namespace SephKhazix
 
             //Packets
             Config.AddSubMenu(new Menu("Packet Setting", "Packets"));
-            Config.SubMenu("Packets").AddItem(new MenuItem("usePackets", "Enable Packets").SetValue(true));
+            Config.SubMenu("Packets").AddItem(new MenuItem("usePackets", "Enable Packets").SetValue(false));
 
             //Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
@@ -160,7 +160,7 @@ namespace SephKhazix
 
             Game.OnGameUpdate += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
-            Game.PrintChat("<font color='#1d87f2'>SephKhazix has been Loaded. Version 1.5. Lots of changes, report problems on main topic</font>");
+            Game.PrintChat("<font color='#1d87f2'>SephKhazix has been Loaded. Version 1.6. Lots of changes, report problems on main topic</font>");
             HeroList = ObjectManager.Get<Obj_AI_Hero>().ToList();
 
         }
@@ -269,7 +269,6 @@ namespace SephKhazix
 
         private static void OnGameUpdate(EventArgs args)
         {
-            Player = ObjectManager.Player;
            // Orbwalker.SetAttack(true);
 
             CheckSpells();
@@ -387,7 +386,6 @@ namespace SephKhazix
 
         private static void OnWaveClear()
         {
-            Game.PrintChat("Onwaveclear activated??");
             List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
             if (Config.Item("UseQFarm").GetValue<bool>() && Q.IsReady())
             {
@@ -741,7 +739,7 @@ namespace SephKhazix
 
         public static List<Obj_AI_Hero> GetIsolatedTargets()
         {
-           var validtargets = HeroList.Where(h => h.IsEnemy && E.IsInRange(h.ServerPosition));
+           var validtargets = HeroList.Where(h => h.IsEnemy && h.Distance(Player) <= E.Range);
           //  var validtargets = ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsEnemy).ToList();
             var isolatedheroes = new List<Obj_AI_Hero>();
             foreach (var x in validtargets)
@@ -752,6 +750,7 @@ namespace SephKhazix
                     if (!x.IsDead && x.IsVisible)
                     {
                         isolatedheroes.Add(x);
+
                     }
                 }
             }
@@ -760,10 +759,15 @@ namespace SephKhazix
 
         private static void Combo()
         {
+            if (Player.IsDead)
+            {
+                return; 
+            }
             var usePacket = Config.Item("usePackets").GetValue<bool>();
             var isolatedlist = GetIsolatedTargets();
             HitChance hitchance = HarassHitChance();
             Obj_AI_Hero target = new Obj_AI_Hero();
+            
             if (isolatedlist != null && isolatedlist.Any())
             {
                 isolatedlist.OrderByDescending(
@@ -772,6 +776,7 @@ namespace SephKhazix
                         TargetSelector.GetPriority(hero)).FirstOrDefault();
                 target = isolatedlist.FirstOrDefault();
             }
+          
             if (target == null || !target.IsValid || !target.IsEnemy || target.IsDead || Player.Distance(target) > E.Range + 25)
             {
                 target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
@@ -779,8 +784,7 @@ namespace SephKhazix
      
             if ((target != null))
             {
-                var pos = new List<Vector2>();
-                pos.Add(target.ServerPosition.To2D());
+            
                 // Normal abilities
                 if (Player.Distance(target) <= Q.Range && Config.Item("UseQCombo").GetValue<bool>() &&
                     Q.IsReady())

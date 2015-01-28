@@ -96,7 +96,7 @@ namespace EloSharp_V2
                     char[] delimiters = { '+', '(', '-' };
                     string[] runes = runesfixed.Split(delimiters);
 
-                    Match namechamp = new Regex("title=\"&raquo;" + p.Name + "&laquo; has a SkillScore of <b>(.*?)</b> with (.*?)<br>").Matches(htmlcode)[0];
+                    Match namechamp = new Regex("title=\"&raquo;" + p.Name + "&laquo; has a LolSkillScore of <b>(.*?)</b> with (.*?)<br>").Matches(htmlcode)[0];
                     string champname = namechamp.ToString();
                     string champnamefix = champname.Replace("&#x27;", string.Empty);
                     string currentmasteries = Misc.StripHTML(Misc.ExtractString(inbetween, "<b>Masteries:</b><br>", "<br><br><i>"));
