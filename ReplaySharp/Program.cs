@@ -151,7 +151,7 @@ namespace ReplaySharp
             }
             if (Game.Region.ToLower().Contains("la1"))
             {
-                return "euw";
+                return "lan";
             }
             if (Game.Region.ToLower().Contains("la2"))
             {
