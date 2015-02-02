@@ -42,6 +42,7 @@ namespace SephZhonya
                             var subMenu = new Menu(spell.DisplayName, spell.DisplayName);
 
                             subMenu.AddItem(new MenuItem("Enabled" + spell.DisplayName, "Enabled").SetValue(true));
+                         //   subMenu.AddItem(new MenuItem("spelldelay", "Spell Delay")).SetValue(new Slider(0, 0, 2000));
 
                             spellmenu.AddSubMenu(subMenu);
                         }
@@ -64,6 +65,7 @@ namespace SephZhonya
 
         static void SpellDetector(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+   
             // return if ally or non hero spell
             if (sender.IsAlly || sender.Type != GameObjectType.obj_AI_Hero || !args.Target.IsMe)
             {
@@ -71,13 +73,13 @@ namespace SephZhonya
             }
             if (!args.SData.Name.ToLower().Contains("basicattack"))
             {
-                // Console.WriteLine(args.SData.Name + " Detected");
+                 //Game.PrintChat(args.SData.Name + " Detected");
 
                 var Spellinfo = DangerousSpells.GetByName(args.SData.Name.ToLower());
 
                 if (Spellinfo != null)
                 {
-                    Console.WriteLine("List spell detected: " + args.SData.Name);
+                    // Console.WriteLine("List spell detected: " + args.SData.Name);
                 }
                 if (Spellinfo != null && zhonyaready() && args.Target.IsMe &&
                     (Menu.Item("Enabled" + Spellinfo.DisplayName).GetValue<bool>()))

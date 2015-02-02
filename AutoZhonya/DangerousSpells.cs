@@ -338,8 +338,8 @@ namespace SephZhonya
                     Name = "KennenShurikenStorm",
                     DisplayName = "Kennen R",
                     Source = "Kennen",
-                    BaseDelay = 1, //Zhonya lasts 2.5 seconds 
-                    SSDelay = 2,
+                    BaseDelay = 0, //Zhonya lasts 2.5 seconds 
+                    SSDelay = 0,
                     Zhonyable = true,
                     SpellShieldable = true,
                     Buffrequirement = false,
@@ -437,6 +437,43 @@ namespace SephZhonya
                 });
 
             #endregion ZedR
+
+            #region GarenR
+
+            AvoidableSpells.Add(
+                new Data
+                {
+                    Name = "GarenR",
+                    DisplayName = "Garen R",
+                    Source = "Garen",
+                    BaseDelay = 0.1, //Zed untargettable for 0.75 seconds
+                    SSDelay = 0,
+                    Zhonyable = true,
+                    SpellShieldable = true,
+                    Buffrequirement = false,
+                    RequiredBuff = "aniviaslowdebuffnamehere"
+                });
+
+            #endregion GarenR
+
+            #region NautilusR
+
+            AvoidableSpells.Add(
+                new Data
+                {
+                    Name = "nautilusgrandline",
+                    DisplayName = "Nautilus R",
+                    Source = "Nautilus",
+                    BaseDelay = 0.5, //Zed untargettable for 0.75 seconds
+                    SSDelay = 0.5,
+                    Zhonyable = true,
+                    SpellShieldable = true,
+                    Buffrequirement = false,
+                    RequiredBuff = "aniviaslowdebuffnamehere"
+                });
+
+            #endregion NautilusR
+
 
             #region Jarvan R
 
