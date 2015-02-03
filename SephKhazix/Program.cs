@@ -16,7 +16,7 @@ namespace SephKhazix
         private const string ChampionName = "Khazix";
         private static Orbwalking.Orbwalker Orbwalker;
         public static Spell Q, W, E, R, WE;
-        private const float Wangle = 28 * (float) Math.PI / 180;
+        private const float Wangle = 22 * (float) Math.PI / 180;
         private static Menu Config;
         private static Items.Item HDR;
         private static Items.Item TIA;

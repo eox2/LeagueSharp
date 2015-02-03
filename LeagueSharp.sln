@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoZhonya", "AutoZhonya\Au
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EloSharp V2", "EloSharp V2\EloSharp V2.csproj", "{6EF785FE-2039-44DC-895B-DC35250AFE1E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CCChainer", "CCChainer\CCChainer.csproj", "{89E39FA0-F52C-4267-9B0D-C3D6450457C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{6EF785FE-2039-44DC-895B-DC35250AFE1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EF785FE-2039-44DC-895B-DC35250AFE1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EF785FE-2039-44DC-895B-DC35250AFE1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89E39FA0-F52C-4267-9B0D-C3D6450457C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89E39FA0-F52C-4267-9B0D-C3D6450457C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89E39FA0-F52C-4267-9B0D-C3D6450457C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89E39FA0-F52C-4267-9B0D-C3D6450457C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
