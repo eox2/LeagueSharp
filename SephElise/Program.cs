@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using LeagueSharp;
 using LeagueSharp.Common;
 
-//using Color = System.Drawing.Color;
+// This assembly was an experimental one to get use the LeagueSharp api. There is better assemblies for Elise out there. Since I don't play Elise anymore and she is weak, I will not work on improving this unless i have nothing better to do. 
 
 namespace SephElise
 {
@@ -32,14 +32,13 @@ namespace SephElise
 
             Q = new Spell(SpellSlot.Q, 625f);
             W = new Spell(SpellSlot.W, 950f);
-            E = new Spell(SpellSlot.E, 1075f);
+            E = new Spell(SpellSlot.E, 1100f);
             QS = new Spell(SpellSlot.Q, 475f);
             WS = new Spell(SpellSlot.W, 0);
             ES = new Spell(SpellSlot.E, 750f);
             R = new Spell(SpellSlot.R, 0);
             W.SetSkillshot(0.25f, 100f, 1000, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.25f, 55f, 1300, true, SkillshotType.SkillshotLine);
-            DFG = new Items.Item(3128, 750f);
+            E.SetSkillshot(0.25f, 55f, 1450, true, SkillshotType.SkillshotLine);
 
             IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
@@ -118,10 +117,8 @@ namespace SephElise
 
         private static void OnGameUpdate(EventArgs args)
         {
-            Player = ObjectManager.Player;
             QS = new Spell(SpellSlot.Q, QS.Range);
             Orbwalker.SetAttack(true);
-
             CheckForm();
 
             if (Config.Item("ComboMode").GetValue<KeyBind>().Active)
@@ -145,19 +142,21 @@ namespace SephElise
 
         private static void Harass()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
             if (target != null)
             {
-                if (HumanForm && Player.Distance(target) <= Q.Range && Config.Item("UseQHarass").GetValue<bool>() &&
-                    Q.IsReady())
+                if (HumanForm)
                 {
-                    Q.Cast(target);
-                }
+                    if (Player.Distance(target) <= Q.Range && Config.Item("UseQHarass").GetValue<bool>() && Q.IsReady())
+                    {
+                        Q.Cast(target);
+                    }
 
-                if (HumanForm && Player.Distance(target) <= W.Range && Config.Item("UseWHarass").GetValue<bool>() &&
-                    W.IsReady())
-                {
-                    W.Cast(target);
+                    if (Player.Distance(target) <= W.Range && Config.Item("UseWHarass").GetValue<bool>() &&
+                        W.IsReady())
+                    {
+                        W.Cast(target);
+                    }
                 }
             }
         }
@@ -182,22 +181,28 @@ namespace SephElise
                         {
                             W.Cast();
                         }
-                        R.Cast();
+                        if (!Q.IsReady() && !W.IsReady())
+                        {
+                            R.Cast();
+                        }
                     }
-                foreach (Obj_AI_Base minion in mobs)
+                if (!HumanForm)
                 {
-                    if (QS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= QS.Range)
+                    foreach (Obj_AI_Base minion in mobs)
                     {
-                        QS.Cast(minion);
-                    }
-                    if (WS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= 125)
-                    {
-                        WS.Cast();
-                    }
-                    if (ES.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= ES.Range &&
-                        Config.Item("UseSpiderEFarm").GetValue<bool>())
-                    {
-                        ES.Cast(minion);
+                        if (QS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= QS.Range)
+                        {
+                            QS.Cast(minion);
+                        }
+                        if (WS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= WS.Range)
+                        {
+                            WS.Cast();
+                        }
+                        if (ES.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= ES.Range &&
+                            Config.Item("UseSpiderEFarm").GetValue<bool>())
+                        {
+                            ES.Cast(minion);
+                        }
                     }
                 }
             }
@@ -211,7 +216,7 @@ namespace SephElise
 
             if (Config.Item("UseQFarm").GetValue<bool>())
             {
-                foreach (Obj_AI_Base minion in allminions)
+                foreach (Obj_AI_Base minion in allminions) { 
                     if (HumanForm)
                     {
                         if (QS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= Q.Range)
@@ -224,13 +229,13 @@ namespace SephElise
                         }
                         R.Cast();
                     }
-                foreach (Obj_AI_Base minion in allminions)
+                if (!HumanForm)
                 {
                     if (QS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= QS.Range)
                     {
                         QS.Cast(minion);
                     }
-                    if (WS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= 125)
+                    if (WS.IsReady() && minion.IsValidTarget() && Player.Distance(minion) <= WS.Range)
                     {
                         WS.Cast();
                     }
@@ -242,19 +247,22 @@ namespace SephElise
                 }
             }
         }
+        }
 
 
         private static void KillSteal()
         {
             Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
-            double QHDmg = Player.GetSpellDamage(target, SpellSlot.Q);
-            double WDmg = Player.GetSpellDamage(target, SpellSlot.W);
+            double QHDmg = Player.GetSpellDamage(target, SpellSlot.Q, 0);
+            double QSDmg = Player.GetSpellDamage(target, SpellSlot.Q, 1);
+            double WHDmg = Player.GetSpellDamage(target, SpellSlot.W);
+            double WSDmg = Player.GetSpellDamage(target, SpellSlot.W, 1);
 
             if (target != null && Config.Item("UseIgnite").GetValue<bool>() && IgniteSlot != SpellSlot.Unknown &&
                 Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                if (igniteDmg > target.Health)
+                if (igniteDmg >= target.Health)
                 {
                     Player.Spellbook.CastSpell(IgniteSlot, target);
                 }
@@ -271,7 +279,7 @@ namespace SephElise
             if (QS.IsReady() && Player.Distance(target) <= QS.Range && target != null &&
                 Config.Item("UseQKs").GetValue<bool>() && SpiderForm)
             {
-                if (target.Health <= QHDmg)
+                if (target.Health <= QSDmg)
                 {
                     Q.Cast(target);
                 }
@@ -279,11 +287,21 @@ namespace SephElise
             if (W.IsReady() && Player.Distance(target) <= W.Range && target != null &&
                 Config.Item("UseWKs").GetValue<bool>() && HumanForm)
             {
-                if (target.Health <= WDmg)
+                if (target.Health <= WHDmg)
                 {
                     W.Cast(target);
                 }
             }
+
+            if (W.IsReady() && Player.Distance(target) <= WS.Range && target != null &&
+             Config.Item("UseWKs").GetValue<bool>() && SpiderForm)
+            {
+                if (target.Health <= WSDmg)
+                {
+                    W.Cast(target);
+                }
+            }
+
         }
 
 
@@ -318,8 +336,8 @@ namespace SephElise
 
         private static void Combo()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            Orbwalker.SetAttack((!Q.IsReady() || E.IsReady() || W.IsReady()));
+            Obj_AI_Hero target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            Orbwalker.SetAttack((!Q.IsReady() || !E.IsReady() || !W.IsReady()));
 
             if (target != null)
             {
