@@ -3413,6 +3413,7 @@ namespace CCChainer
             return AbilityList;
         }
 
+
         public static SpellData GetByName(string spellName)
         {
             spellName = spellName.ToLower();

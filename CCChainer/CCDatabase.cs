@@ -36,8 +36,6 @@ namespace CCChainer
            CCList.Add(new CCData { CCname = "Ahri E", CCsource = "Ahri", Skillshot = true, Skillshotname = "AhriSeduce", CCSlot = SpellSlot.E, range = 1000f });
            #endregion Ahri
 
-
-
            #region Alistar
            CCList.Add(new CCData { CCname = "Alistar Q", CCsource = "Alistar", Skillshot = false, CCSlot = SpellSlot.Q, range = 365f });
            #endregion Alistar

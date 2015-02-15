@@ -5,6 +5,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 
 //Credits to Kortatu for the Evade Spell Database 
+//TO DO: Add/Fix Autoattack based cc's like Leona and Renekton Stun + Test script for the first time ingame
 
 namespace CCChainer
 {
@@ -44,29 +45,35 @@ namespace CCChainer
                         {
                             if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Charm ||
                                 buff.Type == BuffType.Fear || hero.IsMovementImpaired() || hero.MoveSpeed <= 0.60 * hero.MoveSpeed)
-                            {
+                            { 
+                                var casttime = 150; // need to reimplement evade database for casttimes i deleted them all fuckkkkkkk
+
                                 if (!ability.Skillshot)
                                 {
-                                    if (ability.CCSlot == SpellSlot.Q)
+                                    if ((Game.Time - buff.EndTime) <= casttime)
                                     {
-                                        Q.Cast(hero);
-                                    }
-                                    if (ability.CCSlot == SpellSlot.W)
-                                    {
-                                        W.Cast(hero);
-                                    }
-                                    if (ability.CCSlot == SpellSlot.E)
-                                    {
-                                        E.Cast(hero);
-                                    }
-                                    if (ability.CCSlot == SpellSlot.R)
-                                    {
-                                        R.Cast(hero);
+                                        if (ability.CCSlot == SpellSlot.Q)
+                                        {
+                                            Q.Cast(hero);
+                                        }
+                                        if (ability.CCSlot == SpellSlot.W)
+                                        {
+                                            W.Cast(hero);
+                                        }
+                                        if (ability.CCSlot == SpellSlot.E)
+                                        {
+                                            E.Cast(hero);
+                                        }
+                                        if (ability.CCSlot == SpellSlot.R)
+                                        {
+                                            R.Cast(hero);
+                                        }
                                     }
                                 }
+
                                 if (ability.Skillshot)
                                 {
-                                    if (ability.CCSlot == SpellSlot.Q)
+                                    if (ability.CCSlot == SpellSlot.Q && (Game.Time - buff.EndTime) <= Q.Delay)
                                     {
                                         var predpos = Q.GetPrediction(hero);
                                         if (predpos != null)
@@ -74,7 +81,7 @@ namespace CCChainer
                                             Q.Cast(predpos.CastPosition);
                                         }
                                     }
-                                    if (ability.CCSlot == SpellSlot.W)
+                                    if (ability.CCSlot == SpellSlot.W && (Game.Time - buff.EndTime) <= W.Delay)
                                     {
                                         var predpos = W.GetPrediction(hero);
                                         if (predpos != null)
@@ -82,7 +89,7 @@ namespace CCChainer
                                             W.Cast(predpos.CastPosition);
                                         }
                                     }
-                                    if (ability.CCSlot == SpellSlot.E)
+                                    if (ability.CCSlot == SpellSlot.E && (Game.Time - buff.EndTime) <= E.Delay)
                                     {
                                         var predpos = E.GetPrediction(hero);
                                         if (predpos != null)
@@ -90,7 +97,7 @@ namespace CCChainer
                                             E.Cast(predpos.CastPosition);
                                         }
                                     }
-                                    if (ability.CCSlot == SpellSlot.R)
+                                    if (ability.CCSlot == SpellSlot.R && (Game.Time - buff.EndTime) <= R.Delay)
                                     {
                                         var predpos = R.GetPrediction(hero);
                                         if (predpos != null)

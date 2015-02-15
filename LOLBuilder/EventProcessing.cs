@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using LeagueSharp;
@@ -9,7 +10,6 @@ namespace LolBuilder
 {
     internal class EventProcessing
     {
-        private static INotification Notification;
         public static Menu Config;
 
         public static void GameLoad(EventArgs args)
@@ -18,8 +18,14 @@ namespace LolBuilder
             String championname = ObjectManager.Player.ChampionName.Replace(" ", "").Replace("'", "");
             ProBuilds(championname);
             CreateMenu(Config);
-            Notification = new Notification("Loaded LolBuilder by Seph", 300);
-            Notifications.AddNotification(Notification);
+            
+            /* Common Autolevel is broken so no point
+            if (AutoLevOn())
+            {
+                var sequence = BuildData.SkillSequence;
+                new AutoLevel(sequence);
+            }
+            */
         }
 
         public static void ProBuilds(string cname)
@@ -28,6 +34,21 @@ namespace LolBuilder
             WebClient pbClient = new WebClient();
             String Data = pbClient.DownloadString("http://lolbuilder.net/" + cname);
 
+            String SkillSeq = ExtractString(Data, "window.skillOrder[0] = [", "];");
+            string[] seqinstringarray = SkillSeq.Split(new string[] {","}, StringSplitOptions.None);
+            int[] OrderedSequence = new int[seqinstringarray.Length];
+                    for (int i = 0; i < seqinstringarray.Length; i++)
+                    {
+                        try
+                        {
+                            OrderedSequence[i] = int.Parse(seqinstringarray[i]);
+                        }
+                        catch (Exception e)
+                        {
+                        }
+
+                        BuildData.SkillSequence = OrderedSequence;
+                    }
             MatchCollection Builds = Regex.Matches(Data, "<div class=\"build-body\"[\\S\\s]*?id=\"build-content-");
             foreach (var b in Builds)
             {
@@ -35,8 +56,11 @@ namespace LolBuilder
                 List<String> Buildorders = new List<string>();
                 List<String> Final = new List<string>();
                 BuildData.BuildInfo BuildInfo = new BuildData.BuildInfo();
+
+                //Specific Build info
                 string buildinfo = b.ToString();
 
+                //Extraction 
                 String sitemsect = ExtractString(buildinfo, "<div class=\"shortcut-area starting-item-sets row",
                     "</section>");
                 MatchCollection StartItems = Regex.Matches(sitemsect, "<small class=\"t-overflow[\\S\\s]*?</small>");
@@ -78,10 +102,19 @@ namespace LolBuilder
             //return false;
             return Config.Item("notif").GetValue<bool>();
         }
+
+        private static bool AutoLevOn()
+        {
+            //return false;
+            return Config.Item("leveler").GetValue<bool>();
+        }
         public static void CreateMenu(Menu Menu)
         {
             Config = new Menu("ProBuilds", "ProBuilds", true);
             var settings = new Menu("Misc", "Misc");
+            MenuItem levelersetting = Config.AddItem(new MenuItem("leveler", "ProLeveler").SetValue(true));
+            levelersetting.ValueChanged += delegate { AutoLevel.Enabled(Config.Item("leveler").GetValue<bool>()); };
+            
             settings.AddItem(new MenuItem("notif", "Enable Notifications")).SetValue(true);
             Config.AddSubMenu(settings);
             foreach (var build in BuildData.BuildsList)
