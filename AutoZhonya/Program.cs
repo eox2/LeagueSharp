@@ -1,6 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
 
 namespace SephZhonya
 {
@@ -65,7 +67,6 @@ namespace SephZhonya
 
         static void SpellDetector(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-   
             // return if ally or non hero spell
             if (sender.IsAlly || sender.Type != GameObjectType.obj_AI_Hero || !args.Target.IsMe)
             {
