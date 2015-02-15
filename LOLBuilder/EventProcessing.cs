@@ -18,7 +18,7 @@ namespace LolBuilder
             String championname = ObjectManager.Player.ChampionName.Replace(" ", "").Replace("'", "");
             ProBuilds(championname);
             CreateMenu(Config);
-            Notification = new Notification("Loaded LolBuilder by Seph");
+            Notification = new Notification("Loaded LolBuilder by Seph", 300);
             Notifications.AddNotification(Notification);
         }
 
