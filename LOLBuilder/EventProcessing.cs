@@ -19,13 +19,13 @@ namespace LolBuilder
             ProBuilds(championname);
             CreateMenu(Config);
             
-            /* Common Autolevel is broken so no point
+   
             if (AutoLevOn())
             {
                 var sequence = BuildData.SkillSequence;
                 new AutoLevel(sequence);
             }
-            */
+            
         }
 
         public static void ProBuilds(string cname)
