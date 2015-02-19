@@ -78,10 +78,6 @@ namespace SephZhonya
 
                 var Spellinfo = DangerousSpells.GetByName(args.SData.Name.ToLower());
 
-                if (Spellinfo != null)
-                {
-                    // Console.WriteLine("List spell detected: " + args.SData.Name);
-                }
                 if (Spellinfo != null && zhonyaready() && args.Target.IsMe &&
                     (Menu.Item("Enabled" + Spellinfo.DisplayName).GetValue<bool>()))
                 {
