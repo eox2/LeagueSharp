@@ -16,6 +16,7 @@ namespace LolBuilder
             public List<String> startingitems { get; set; }
             public List<String> buildorder { get; set; }
             public List<String> finalitems { get; set; }
+            public List<String> buildsummary { get; set; }
         } 
     }
 

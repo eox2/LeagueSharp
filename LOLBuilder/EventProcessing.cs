@@ -45,6 +45,7 @@ namespace LolBuilder
                         }
                         catch (Exception e)
                         {
+                            Console.Write(e);
                         }
 
                         BuildData.SkillSequence = OrderedSequence;
@@ -55,6 +56,7 @@ namespace LolBuilder
                 List<String> Starting = new List<string>();
                 List<String> Buildorders = new List<string>();
                 List<String> Final = new List<string>();
+                List<String> BuildSummary = new List<string>();
                 BuildData.BuildInfo BuildInfo = new BuildData.BuildInfo();
 
                 //Specific Build info
@@ -88,10 +90,21 @@ namespace LolBuilder
                     //Console.WriteLine(ItemNameFixed);
                 }
 
+                String BuildSummarysect = ExtractString(buildinfo, "<div class=\"shortcut-area build-summary\">", "</section>");
+                MatchCollection Summary = Regex.Matches(BuildSummarysect,
+                    "<small class=\"t-overflow\">[\\S\\s]*?</small>");
+                foreach (var item in Summary)
+                {
+                    String ItemNameFixed = HTMLStrip(item.ToString());
+                    BuildSummary.Add(ItemNameFixed);
+                }
+
+
                 // Add to Lists
                 BuildInfo.startingitems = Starting;
                 BuildInfo.buildorder = Buildorders;
                 BuildInfo.finalitems = Final;
+                BuildInfo.buildsummary = BuildSummary;
                 BuildData.BuildsList.Add(BuildInfo);
             }
 
@@ -125,7 +138,8 @@ namespace LolBuilder
                 var BuildMenu = new Menu(BuildName, BuildName);
                 var starting = BuildMenu.AddSubMenu(new Menu("Starting", "Starting"));
                 var Buildorder = BuildMenu.AddSubMenu(new Menu("Order", "Build Order"));
-                var Final = BuildMenu.AddSubMenu(new Menu("Final", "Final"));
+                var Final = BuildMenu.AddSubMenu(new Menu("Final Items", "Final"));
+                var Summary = BuildMenu.AddSubMenu(new Menu("Build Summary", "Summary"));
 
                 if (BuildData.BuildsList.IndexOf(build) == 0 && NotifOn())
                 {
@@ -172,7 +186,12 @@ namespace LolBuilder
                     }
 
                 }
-                // Console.Write("END");
+
+                foreach (var summitem in build.buildsummary)
+                {
+                    Summary.AddItem(new MenuItem(summitem + Random.Next(), summitem));
+                }
+    
                 Config.AddSubMenu(BuildMenu);
             }
             Config.AddToMainMenu();
