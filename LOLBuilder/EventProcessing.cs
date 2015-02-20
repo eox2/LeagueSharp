@@ -16,9 +16,13 @@ namespace LolBuilder
         {
             Game.PrintChat("<font color=\"#43C6DB\"><b>LolBuilder Loaded - By Seph</font></b>");
             String championname = ObjectManager.Player.ChampionName.Replace(" ", "").Replace("'", "");
-            ProBuilds(championname);
-            CreateMenu(Config);
-            
+            var main = new System.Threading.Thread(() =>
+            {
+                ProBuilds(championname);
+                CreateMenu(Config);
+            });
+
+            main.Start();
    
             if (AutoLevOn())
             {
