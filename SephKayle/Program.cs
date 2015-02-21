@@ -266,7 +266,6 @@ namespace SephKayle
                 return;
             }
 
-
             if ((bool)GetSettings("Healingon", true) && !Config.Item("onlyhincdmg").GetValue<bool>())
             {
             var herolistheal = ObjectManager.Get<Obj_AI_Hero>()

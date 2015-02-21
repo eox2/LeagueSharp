@@ -7,7 +7,7 @@ namespace CCChainer
    public static class CCDatabase
    {
 
-       public static List<CCData> CCList;
+       public static List<CCData> CCList = new List<CCData>();
 
        public class CCData
        {
@@ -218,12 +218,12 @@ namespace CCChainer
 
        public static List<CCData> GetByChampName(string Champname)
        {
-           Champname = Champname.ToLower();
            List<CCData> AbilityList = new List<CCData>();
            foreach (var Data in CCList)
            {
                if (Data.CCsource == Champname)
                {
+           
                    AbilityList.Add(Data);
                }
            }
