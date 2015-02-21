@@ -16,16 +16,21 @@ namespace CCChainer
            public float range { get; set; }
            public bool Skillshot { get; set; }
            public bool GoesThroughMinions { get; set; }
-           public string BuffName { get; set; } //Annie Stun 
+           public string BuffName { get; set; } //Annie Stun, etc
            public string Skillshotname { get; set; } //match evade
            public float Skillshotspeed { get; set; }
            public float Skillshotwidth { get; set; }
            public float skillshotdelay { get; set; } 
            public SkillshotType skillshottype { get; set; }
            public SpellSlot CCSlot { get; set; }
+
+           // Specific things for cast logic //implement these booleans into each ccdata 
+           public bool SSthenAuto { get; set; }
+           public bool SelfthenAuto { get; set; }
+           public bool aoe { get; set; }
        }
 
-       //To do add ranges for everything
+       //To do add aoe bool for everything to manage multi target chaining
        static CCDatabase()
        {
            #region Aatrox
@@ -63,7 +68,7 @@ namespace CCChainer
 
     
            #region Ashe
-           CCList.Add(new CCData { CCname = "Ashe W", CCsource = "Ashe", Skillshot = true, Skillshotname = "VolleyAttack", CCSlot = SpellSlot.R, GoesThroughMinions = true, range = 1200f });
+           CCList.Add(new CCData { CCname = "Ashe W", CCsource = "Ashe", Skillshot = true, Skillshotname = "VolleyAttack", CCSlot = SpellSlot.W, GoesThroughMinions = true, range = 1200f });
            CCList.Add(new CCData { CCname = "Ashe R", CCsource = "Ashe", Skillshot = true, Skillshotname = "EnchantedCrystalArrow", CCSlot = SpellSlot.R, GoesThroughMinions = true, range = 20000f });
            #endregion Ashe
 
@@ -115,7 +120,7 @@ namespace CCChainer
            #endregion Janna
 
            #region Leona
-           CCList.Add(new CCData { CCname = "Leona Q", CCsource = "Leona", Skillshot = false, CCSlot = SpellSlot.Q, range = ObjectManager.Player.AttackRange }); //Add as buff
+           CCList.Add(new CCData { CCname = "Leona Q", CCsource = "Leona", Skillshot = false, CCSlot = SpellSlot.Q, range = ObjectManager.Player.AttackRange, SelfthenAuto = true }); //Add as buff
            CCList.Add(new CCData { CCname = "Leona E", CCsource = "Leona", Skillshot = true, Skillshotname = "LeonaZenithBlade", CCSlot = SpellSlot.E, GoesThroughMinions = true, range = 905f });
            CCList.Add(new CCData { CCname = "Leona R", CCsource = "Leona", Skillshot = true, Skillshotname = "LeonaSolarFlare", CCSlot = SpellSlot.Q, GoesThroughMinions = true, range = 1200f });
            #endregion Leona
@@ -155,7 +160,7 @@ namespace CCChainer
            #endregion Pantheon
 
            #region Renekton
-          // CCList.Add(new CCData { CCname = "Renekton W", CCsource = "Renekton", Skillshot = false, CCSlot = SpellSlot.W, range = 600f }); 
+           CCList.Add(new CCData { CCname = "Renekton W", CCsource = "Renekton", Skillshot = false, CCSlot = SpellSlot.W, range = 600f, SelfthenAuto = true }); 
            #endregion Renekton
 
            #region Riven

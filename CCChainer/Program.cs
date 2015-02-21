@@ -47,6 +47,7 @@ namespace CCChainer
             }
             misc.AddItem(new MenuItem("customdelays", "Use % CC duration").SetValue(false));
             Config.AddSubMenu(spells);
+            Config.AddSubMenu(misc);
             Config.AddToMainMenu();
      
         }
@@ -71,8 +72,9 @@ namespace CCChainer
 
         private static void CCChain()
         {
-            foreach (var ability in PlayerCCs)
+            foreach (var skill in PlayerCCs)
             {
+                var ability = skill;
                 foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsEnemy))
                 {
                     var target = hero;
@@ -80,7 +82,7 @@ namespace CCChainer
                     { 
                         foreach (var buff in hero.Buffs)
                         {
-                            Game.PrintChat(buff.Name + " " + buff.StartTime);
+                           // Game.PrintChat(buff.Name + " " + buff.StartTime);
                             if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Charm ||
                                 buff.Type == BuffType.Fear)
                             { 
@@ -101,9 +103,19 @@ namespace CCChainer
                                         {
                                             if (ability.CCSlot == SpellSlot.Q && !delayingq)
                                             {
+                                                if (ability.SelfthenAuto)
+                                                {
+                                                    SpellLogic.CastSpellSelfAuto(Q, target);
+                                                    return;
+                                                }
                                                 delayingq = true;
                                                 Utility.DelayAction.Add((int) delayby, () =>
                                                 {
+                                                    if (ability.SelfthenAuto)
+                                                    {
+                                                        SpellLogic.CastSpellSelfAuto(Q, target);
+                                                        return;
+                                                    }
                                                     delayingq = false;
                                                     Q.CastOnUnit(target);
                                                     
@@ -157,6 +169,12 @@ namespace CCChainer
                                         {
                                             if (percentcc >= CCdurationpast(ability.CCname))
                                             {
+                                                if (ability.Skillshotname == "JannaQ")
+                                                {
+                                                    var JannaQPred = Q.GetPrediction(target);
+                                                    SpellLogic.JannaQ(JannaQPred.CastPosition);
+                                                    return;
+                                                }
                                                 var predpos = Q.GetPrediction(target);
                                                 if (predpos != null)
                                                 {
@@ -170,6 +188,12 @@ namespace CCChainer
                                             delayingq = true;
                                             Utility.DelayAction.Add((int) delayby, () =>
                                             {
+                                                if (ability.Skillshotname == "JannaQ")
+                                                {
+                                                    var JannaQPred = Q.GetPrediction(target);
+                                                    SpellLogic.JannaQ(JannaQPred.CastPosition);
+                                                    return;
+                                                }
                                                 delayingq = false;
                                                 var predpos = Q.GetPrediction(target);
                                                 if (predpos != null)
@@ -243,6 +267,7 @@ namespace CCChainer
                                             });
                                         }
                                     }
+                                    var data = SpellDatabase.GetByName(ability.CCname);
                                     if (ability.CCSlot == SpellSlot.R && (Game.Time - buff.EndTime) <= R.Delay && !delayingr)
                                     {
                                         var lastpossibletime = buff.EndTime - R.Delay - 100;
@@ -315,7 +340,7 @@ namespace CCChainer
                     if (x.Skillshot)
                     {
                         var EvadeData = SpellDatabase.GetByName(x.Skillshotname);
-                        Q.SetSkillshot(EvadeData.Delay, EvadeData.Radius, EvadeData.MissileSpeed, x.GoesThroughMinions, ConvertSkillShotType(EvadeData.Type));
+                        Q.SetSkillshot(EvadeData.Delay / 1000f, EvadeData.Radius, EvadeData.MissileSpeed, EvadeData.CollisionObjects.Contains(CollisionObjectTypes.Champions), ConvertSkillShotType(EvadeData.Type));
                     }
                 }
                 if (x.CCSlot == SpellSlot.W)
@@ -324,7 +349,7 @@ namespace CCChainer
                     if (x.Skillshot)
                     {
                         var EvadeData = SpellDatabase.GetByName(x.Skillshotname);
-                        W.SetSkillshot(EvadeData.Delay, EvadeData.Radius, EvadeData.MissileSpeed, x.GoesThroughMinions, ConvertSkillShotType(EvadeData.Type));
+                        W.SetSkillshot(EvadeData.Delay / 1000f, EvadeData.Radius, EvadeData.MissileSpeed, EvadeData.CollisionObjects.Contains(CollisionObjectTypes.Champions), ConvertSkillShotType(EvadeData.Type));
                     }
                 }
                 if (x.CCSlot == SpellSlot.E)
@@ -333,7 +358,7 @@ namespace CCChainer
                     if (x.Skillshot)
                     {
                         var EvadeData = SpellDatabase.GetByName(x.Skillshotname);
-                        E.SetSkillshot(EvadeData.Delay, EvadeData.Radius, EvadeData.MissileSpeed, x.GoesThroughMinions, ConvertSkillShotType(EvadeData.Type));
+                        E.SetSkillshot(EvadeData.Delay / 1000f, EvadeData.Radius, EvadeData.MissileSpeed, EvadeData.CollisionObjects.Contains(CollisionObjectTypes.Champions), ConvertSkillShotType(EvadeData.Type));
                     }
 
                 }
@@ -343,7 +368,7 @@ namespace CCChainer
                     if (x.Skillshot)
                     {
                         var EvadeData = SpellDatabase.GetByName(x.Skillshotname);
-                        R.SetSkillshot(EvadeData.Delay, EvadeData.Radius, EvadeData.MissileSpeed, x.GoesThroughMinions, ConvertSkillShotType(EvadeData.Type));
+                        R.SetSkillshot(EvadeData.Delay / 1000f, EvadeData.Radius, EvadeData.MissileSpeed, EvadeData.CollisionObjects.Contains(CollisionObjectTypes.Champions), ConvertSkillShotType(EvadeData.Type));
                     }
                 }
             }
