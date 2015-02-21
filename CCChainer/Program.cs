@@ -45,7 +45,7 @@ namespace CCChainer
                 SpellMenu.AddItem(new MenuItem("percent" + x.CCname, "CC duration past (%)").SetValue(new Slider(30, 0, 100)));
                 spells.AddSubMenu(SpellMenu);
             }
-            misc.AddItem(new MenuItem("customdelays", "Use % CC duration").SetValue(false));
+            misc.AddItem(new MenuItem("customdelays", "Use % CC duration (only for testing)").SetValue(false));
             Config.AddSubMenu(spells);
             Config.AddSubMenu(misc);
             Config.AddToMainMenu();
@@ -70,23 +70,31 @@ namespace CCChainer
         }
 
 
+
         private static void CCChain()
         {
             foreach (var skill in PlayerCCs)
             {
                 var ability = skill;
+                
+                var Spell = GetByslot(ability.CCSlot);
+                if (!Spell.IsReady())
+                {
+                    return; 
+                }
+                 
                 foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsEnemy))
                 {
                     var target = hero;
-                    if (hero.Distance(Player) <= ability.range)
+                    if (hero.Distance(Player) <= Spell.Range)
                     { 
                         foreach (var buff in hero.Buffs)
                         {
                            // Game.PrintChat(buff.Name + " " + buff.StartTime);
-                            if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Charm ||
-                                buff.Type == BuffType.Fear)
+                            if ((buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Charm ||
+                                buff.Type == BuffType.Fear) && target.IsValid && !target.IsDead && !target.IsZombie)
                             { 
-                              //  Game.PrintChat("The buff end time is on  " + hero.ChampionName + " is" + buff.EndTime + "and the current time is" + Game.Time);
+                               // Game.PrintChat("The buff end time is on  " + hero.ChampionName + " is" + buff.EndTime + "and the current time is" + Game.Time);
 
                                 var totalcctime = buff.EndTime - buff.StartTime;
                                 var cctimeleft = buff.EndTime - Game.Time;
@@ -97,7 +105,7 @@ namespace CCChainer
                                 {
                                     if ((Game.Time - buff.EndTime) <= casttime)
                                     {
-                                        var lastpossibletime = buff.EndTime - casttime - 100;
+                                        var lastpossibletime = buff.EndTime - casttime - 300;
                                         var delayby = lastpossibletime - Game.Time;
                                         if (percentcc >= CCdurationpast(ability.CCname))
                                         {
@@ -178,7 +186,10 @@ namespace CCChainer
                                                 var predpos = Q.GetPrediction(target);
                                                 if (predpos != null)
                                                 {
-                                                    Q.Cast(predpos.CastPosition);
+                                                    if (predpos.Hitchance >= HitChance.Immobile)
+                                                    {
+                                                        Q.Cast(predpos.CastPosition);
+                                                    }
                                                 }
                                             }
                                         }
@@ -198,7 +209,10 @@ namespace CCChainer
                                                 var predpos = Q.GetPrediction(target);
                                                 if (predpos != null)
                                                 {
-                                                    Q.Cast(predpos.CastPosition);
+                                                    if (predpos.Hitchance >= HitChance.Immobile)
+                                                    {
+                                                        Q.Cast(predpos.CastPosition);
+                                                    }
                                                 }
 
                                             });
@@ -216,7 +230,10 @@ namespace CCChainer
                                                 var predpos = W.GetPrediction(target);
                                                 if (predpos != null)
                                                 {
-                                                    W.Cast(predpos.CastPosition);
+                                                    if (predpos.Hitchance >= HitChance.Immobile)
+                                                    {
+                                                        W.Cast(predpos.CastPosition);
+                                                    }
                                                 }
                                             }
                                         }
@@ -230,7 +247,10 @@ namespace CCChainer
                                                 var predpos = W.GetPrediction(target);
                                                 if (predpos != null)
                                                 {
-                                                    W.Cast(predpos.CastPosition);
+                                                    if (predpos.Hitchance >= HitChance.Immobile)
+                                                    {
+                                                        W.Cast(predpos.CastPosition);
+                                                    }
                                                 }
 
                                             });
@@ -247,7 +267,10 @@ namespace CCChainer
                                                 var predpos = E.GetPrediction(target);
                                                 if (predpos != null)
                                                 {
-                                                    E.Cast(predpos.CastPosition);
+                                                    if (predpos.Hitchance >= HitChance.Immobile)
+                                                    {
+                                                        E.Cast(predpos.CastPosition);
+                                                    }
                                                 }
                                             }
                                         }
@@ -261,7 +284,10 @@ namespace CCChainer
                                                 var predpos = E.GetPrediction(target);
                                                 if (predpos != null)
                                                 {
-                                                    E.Cast(predpos.CastPosition);
+                                                    if (predpos.Hitchance >= HitChance.Immobile)
+                                                    {
+                                                        E.Cast(predpos.CastPosition);
+                                                    }
                                                 }
 
                                             });
@@ -279,7 +305,10 @@ namespace CCChainer
                                                 var predpos = R.GetPrediction(target);
                                                 if (predpos != null)
                                                 {
-                                                    R.Cast(predpos.CastPosition);
+                                                    if (predpos.Hitchance >= HitChance.Immobile)
+                                                    {
+                                                        R.Cast(predpos.CastPosition);
+                                                    }
                                                 }
                                             }
                                         }
@@ -307,6 +336,26 @@ namespace CCChainer
             }
         }
 
+        static Spell GetByslot(SpellSlot slot)
+        {
+            Spell spell = null;
+            switch (slot)
+            {
+                case SpellSlot.Q:
+                    spell = Q;
+                    break;
+                case SpellSlot.W:
+                    spell = Q;
+                    break;
+                case SpellSlot.E:
+                    spell = Q;
+                    break;
+                case SpellSlot.R:
+                    spell = Q;
+                    break;
+            }
+            return spell;
+        }
         private static LeagueSharp.Common.SkillshotType ConvertSkillShotType(CCChainer.Data.SkillShotType Type)
         {
             var result = new SkillshotType();
