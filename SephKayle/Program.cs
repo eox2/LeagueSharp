@@ -95,7 +95,7 @@ namespace SephKayle
             {
                 return;
             }
-            Game.PrintChat("Kayle -  The Judicator -- By Seph -- Loaded");
+            Game.PrintChat("SephKayle Loaded");
             CreateMenu();
             DefineSpells();
             Game.OnGameUpdate += GameTick;
@@ -130,7 +130,7 @@ namespace SephKayle
 
         private static bool Eon
         {
-            get { return ObjectManager.Player.AttackRange == 500f; }
+            get { return ObjectManager.Player.AttackRange > 400f; }
         }
 
         private static Object GetSettings(string itemname, bool isbool = false, bool isslider = false)
@@ -186,12 +186,11 @@ namespace SephKayle
             if (Config.Item("UseQwc").GetValue<bool>() && Q.IsReady())
             {
                 foreach (Obj_AI_Base minion in
-                    allMinions.Where(
-                        minion =>
-                            minion.IsValidTarget() &&
-                            HealthPrediction.GetHealthPrediction(
-                                minion, (int) (ObjectManager.Player.Distance(minion)*1000/1400)) <
-                            0.75*Player.GetSpellDamage(minion, SpellSlot.Q)))
+                   allMinions.Where(
+               minion =>
+                   minion.IsValidTarget() &&
+                   HealthPrediction.GetHealthPrediction(minion, (int)((Player.Distance(minion) * 1000) / 1500) + 300 + Game.Ping / 2) <
+                   0.75 * Player.GetSpellDamage(minion, SpellSlot.Q)))
                 {
                     if (Vector3.Distance(minion.ServerPosition, ObjectManager.Player.ServerPosition) >
                         Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) && Player.Distance(minion) <= Q.Range)
@@ -226,30 +225,26 @@ namespace SephKayle
                 return;
             }
 
-            var targetx = new Obj_AI_Hero();
             var hero = GetHero(target.Name);
             if (hero == null)
             {
                 return;
             }
-               targetx = hero;
 
             if (sender.IsMinion)
             {
                 return;}
-                var damg = Damage.GetAutoAttackDamage(sender, targetx);
-                Game.PrintChat("With cast " + damg.ToString());
                 var damage = Damage.GetAutoAttackDamage(sender, hero);
-                Game.PrintChat("Withherochek" + damage);
+              //  Game.PrintChat("Withherochek" + damage);
                 float setvaluehealth = (int) GetSettings("hpct" + hero.ChampionName, false, true);
                 float setvalueult = (int) GetSettings("hpct" + hero.ChampionName, false, true);
-                if ((bool)GetSettings("heal" + targetx.ChampionName, true) && (hero.HealthPercentage() <= setvaluehealth || (hero.Health - damage) / hero.MaxHealth <= setvaluehealth))
+                if (Config.Item("UseEwc").GetValue<bool>() && (hero.HealthPercentage() <= setvaluehealth || (hero.Health - damage) / hero.MaxHealth <= setvaluehealth))
                 {
                     HealUltManager(true, false, hero);
                     return;
                 }
 
-                if ((bool)GetSettings("ult" + targetx.ChampionName, true) && (hero.HealthPercentage() <= setvalueult || (hero.Health - damage) / hero.MaxHealth <= setvalueult))
+                if ((bool)GetSettings("ult" + hero.ChampionName, true) && (hero.HealthPercentage() <= setvalueult || (hero.Health - damage) / hero.MaxHealth <= setvalueult))
                 {
                     HealUltManager(false, true, hero);
                     return;
@@ -258,13 +253,8 @@ namespace SephKayle
         }
 
 
-
         static void HealUltManager(bool forceheal = false, bool forceult = false, Obj_AI_Hero target = null)
         {
-            if (!W.IsReady() && !R.IsReady())
-            {
-                return;
-            }
             if (forceheal && target != null && W.IsReady() && Player.Distance(target) <= W.Range)
             {
                 W.CastOnUnit(target);
@@ -276,7 +266,7 @@ namespace SephKayle
                 return;
             }
 
-  
+
             if ((bool)GetSettings("Healingon", true) && !Config.Item("onlyhincdmg").GetValue<bool>())
             {
             var herolistheal = ObjectManager.Get<Obj_AI_Hero>()
@@ -339,10 +329,11 @@ namespace SephKayle
 
         static void GameTick(EventArgs args)
         {
-            if (!Config.Item("onlyhinc").GetValue<bool>() || !Config.Item("onlyuincdmg").GetValue<bool>())
+            if (!Config.Item("onlyhincdmg").GetValue<bool>() || !Config.Item("onlyuincdmg").GetValue<bool>())
             {
                 HealUltManager();
             }
+
             if (!Config.Item("killsteal").GetValue<bool>())
             {
                 KillSteal();
@@ -388,8 +379,7 @@ namespace SephKayle
                     allMinions.Where(
                         minion =>
                             minion.IsValidTarget() &&
-                            HealthPrediction.GetHealthPrediction(
-                                minion, (int) (ObjectManager.Player.Distance(minion)*1000/1400)) <
+                            HealthPrediction.GetHealthPrediction(minion, (int) ((Player.Distance(minion)*1000)/1500) + 300 + Game.Ping / 2) <
                             0.75*Player.GetSpellDamage(minion, SpellSlot.Q)))
                 {
                     if (Vector3.Distance(minion.ServerPosition, ObjectManager.Player.ServerPosition) >
@@ -431,12 +421,11 @@ namespace SephKayle
             if (Config.Item("UseQFarm").GetValue<bool>() && Q.IsReady())
             {
                 foreach (Obj_AI_Base minion in
-                    allMinions.Where(
-                        minion =>
-                            minion.IsValidTarget() &&
-                            HealthPrediction.GetHealthPrediction(
-                                minion, (int) (ObjectManager.Player.Distance(minion)*1000/1400)) <
-                            0.75*Player.GetSpellDamage(minion, SpellSlot.Q)))
+                allMinions.Where(
+               minion =>
+                   minion.IsValidTarget() &&
+                   HealthPrediction.GetHealthPrediction(minion, (int)((Player.Distance(minion) * 1000) / 1500) + 300 + Game.Ping / 2) <
+                   0.75 * Player.GetSpellDamage(minion, SpellSlot.Q)))
                 {
                     if (Vector3.Distance(minion.ServerPosition, ObjectManager.Player.ServerPosition) >
                         Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) && Player.Distance(minion) <= Q.Range)
