@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Channels;
 using CCChainer.Data;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -42,19 +41,20 @@ namespace CCChainer
             {
                 var SpellMenu = new Menu(x.CCname, x.CCname);
                 SpellMenu.AddItem(new MenuItem("Enabled" + x.CCname, "Enabled").SetValue(true));
-                SpellMenu.AddItem(new MenuItem("percent" + x.CCname, "CC duration past (%)").SetValue(new Slider(30, 0, 100)));
+                SpellMenu.AddItem(
+                    new MenuItem("percent" + x.CCname, "CC duration past (%)").SetValue(new Slider(30, 0, 100)));
                 spells.AddSubMenu(SpellMenu);
             }
             misc.AddItem(new MenuItem("customdelays", "Use % CC duration (only for testing)").SetValue(false));
             Config.AddSubMenu(spells);
             Config.AddSubMenu(misc);
             Config.AddToMainMenu();
-     
+
         }
 
         private static float CCdurationpast(string ccname)
         {
-            return Config.Item("percent" + ccname).GetValue<Slider>().Value / 100f;
+            return Config.Item("percent" + ccname).GetValue<Slider>().Value/100f;
         }
 
         private static bool CustomDelays()
@@ -62,7 +62,7 @@ namespace CCChainer
             return Config.Item("customdelays").GetValue<bool>();
         }
 
-       
+
 
         private static void OnGameUpdate(EventArgs args)
         {
@@ -76,25 +76,19 @@ namespace CCChainer
             foreach (var skill in PlayerCCs)
             {
                 var ability = skill;
-                
-                var Spell = GetByslot(ability.CCSlot);
-                if (!Spell.IsReady())
+     
+                foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsEnemy && Player.Distance(h) <= ability.range))
                 {
-                    return; 
-                }
-                 
-                foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsEnemy))
-                {
-                    var target = hero;
-                    if (hero.Distance(Player) <= Spell.Range)
-                    { 
+                        var target = hero;
                         foreach (var buff in hero.Buffs)
                         {
-                           // Game.PrintChat(buff.Name + " " + buff.StartTime);
-                            if ((buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Charm ||
-                                buff.Type == BuffType.Fear) && target.IsValid && !target.IsDead && !target.IsZombie)
-                            { 
-                               // Game.PrintChat("The buff end time is on  " + hero.ChampionName + " is" + buff.EndTime + "and the current time is" + Game.Time);
+                            var bufftype = buff.Type;
+                            // Game.PrintChat(buff.Name + " " + buff.StartTime);
+                            if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt ||
+                                 buff.Type == BuffType.Charm ||
+                                 buff.Type == BuffType.Fear || buff.Type == BuffType.Suppression)
+                            {
+                                Game.PrintChat(buff.Name + " The buff end time is on  " + hero.ChampionName + " is" + buff.EndTime + "and the current time is" + Game.Time);
 
                                 var totalcctime = buff.EndTime - buff.StartTime;
                                 var cctimeleft = buff.EndTime - Game.Time;
@@ -105,7 +99,7 @@ namespace CCChainer
                                 {
                                     if ((Game.Time - buff.EndTime) <= casttime)
                                     {
-                                        var lastpossibletime = buff.EndTime - casttime - 300;
+                                        var lastpossibletime = buff.EndTime - casttime - 200;
                                         var delayby = lastpossibletime - Game.Time;
                                         if (percentcc >= CCdurationpast(ability.CCname))
                                         {
@@ -126,42 +120,42 @@ namespace CCChainer
                                                     }
                                                     delayingq = false;
                                                     Q.CastOnUnit(target);
-                                                    
+
                                                 });
-                                              //  Q.Cast(hero);
+                                                //  Q.Cast(hero);
                                             }
 
                                             if (ability.CCSlot == SpellSlot.W && !delayingw)
                                             {
                                                 delayingw = true;
-                                                Utility.DelayAction.Add((int)delayby, () =>
+                                                Utility.DelayAction.Add((int) delayby, () =>
                                                 {
                                                     delayingw = false;
                                                     W.CastOnUnit(target);
 
                                                 });
-                                               // W.Cast(hero);
+                                                // W.Cast(hero);
                                             }
                                             if (ability.CCSlot == SpellSlot.E && !delayinge)
                                             {
                                                 delayinge = true;
-                                                Utility.DelayAction.Add((int)delayby, () =>
+                                                Utility.DelayAction.Add((int) delayby, () =>
                                                 {
                                                     delayinge = false;
                                                     E.CastOnUnit(target);
                                                 });
-                                               // E.CastOnUnit(hero);
+                                                // E.CastOnUnit(hero);
                                             }
                                             if (ability.CCSlot == SpellSlot.R && !delayingr)
                                             {
                                                 delayingr = true;
-                                                Utility.DelayAction.Add((int)delayby, () =>
+                                                Utility.DelayAction.Add((int) delayby, () =>
                                                 {
                                                     delayingr = false;
                                                     R.CastOnUnit(target);
 
                                                 });
-                                               // R.Cast(hero);
+                                                // R.Cast(hero);
                                             }
                                         }
                                     }
@@ -169,146 +163,133 @@ namespace CCChainer
 
                                 if (ability.Skillshot)
                                 {
-                                    if (ability.CCSlot == SpellSlot.Q && (Game.Time - buff.EndTime) <= Q.Delay && !delayingq)
+                                    if (bufftype == BuffType.Fear)
                                     {
-                                        var lastpossibletime = buff.EndTime - Q.Delay - 100;
+                                        //Work on this
+                                        return;
+                                    }
+
+                                    var EvadeData = SpellDatabase.GetByName(ability.Skillshotname);
+                                    if (ability.CCSlot == SpellSlot.Q && !delayingq)
+                                    {
+                                        var dist = Player.Distance(target);
+                                        var lastpossibletime = buff.EndTime - (Q.Delay / 1000f) - (dist/EvadeData.MissileSpeed) -
+                                                               Game.Ping;
                                         var delayby = lastpossibletime - Game.Time;
-                                        if (CustomDelays())
+                                        if (Game.Time <= lastpossibletime)
                                         {
-                                            if (percentcc >= CCdurationpast(ability.CCname))
+                                            if (CustomDelays())
                                             {
-                                                if (ability.Skillshotname == "JannaQ")
+                                                if (percentcc >= CCdurationpast(ability.CCname))
                                                 {
-                                                    var JannaQPred = Q.GetPrediction(target);
-                                                    SpellLogic.JannaQ(JannaQPred.CastPosition);
-                                                    return;
-                                                }
-                                                var predpos = Q.GetPrediction(target);
-                                                if (predpos != null)
-                                                {
-                                                    if (predpos.Hitchance >= HitChance.Immobile)
+                                                    /*
+                                                    if (bufftype == BuffType.Fear)
                                                     {
-                                                        Q.Cast(predpos.CastPosition);
+                                                        var pred = Q.GetPrediction(target);
+                                                        Q.Cast(pred.CastPosition);
+                                                        return;
                                                     }
+                                                     * */
+                                                    if (ability.Skillshotname == "JannaQ")
+                                                    {
+                                                        var JannaQPred = Q.GetPrediction(target);
+                                                        SpellLogic.JannaQ(JannaQPred.CastPosition);
+                                                        return;
+                                                    }
+                                                    Q.Cast(target.ServerPosition);
                                                 }
                                             }
-                                        }
 
-                                        if (!CustomDelays())
-                                        {
-                                            delayingq = true;
-                                            Utility.DelayAction.Add((int) delayby, () =>
+                                            if (!CustomDelays())
                                             {
-                                                if (ability.Skillshotname == "JannaQ")
+                                                delayingq = true;
+                                                Utility.DelayAction.Add((int) delayby, () =>
                                                 {
-                                                    var JannaQPred = Q.GetPrediction(target);
-                                                    SpellLogic.JannaQ(JannaQPred.CastPosition);
-                                                    return;
-                                                }
-                                                delayingq = false;
-                                                var predpos = Q.GetPrediction(target);
-                                                if (predpos != null)
-                                                {
-                                                    if (predpos.Hitchance >= HitChance.Immobile)
+                                                    if (ability.Skillshotname == "JannaQ")
                                                     {
-                                                        Q.Cast(predpos.CastPosition);
+                                                        var JannaQPred = Q.GetPrediction(target);
+                                                        SpellLogic.JannaQ(JannaQPred.CastPosition);
+                                                        return;
                                                     }
-                                                }
+                                                    delayingq = false;
+                                                    Q.Cast(target.ServerPosition);
 
-                                            });
+                                                });
+                                            }
                                         }
                                     }
 
-                                    if (ability.CCSlot == SpellSlot.W && (Game.Time - buff.EndTime) <= W.Delay && !delayingw)
+                                    if (ability.CCSlot == SpellSlot.W && !delayingw)
                                     {
-                                        var lastpossibletime = buff.EndTime - W.Delay - 100;
+                                        var dist = Player.Distance(target);
+                                        var lastpossibletime = buff.EndTime - (W.Delay / 1000f) - (dist / EvadeData.MissileSpeed) -
+                                                               Game.Ping;
                                         var delayby = lastpossibletime - Game.Time;
-                                        if (CustomDelays())
+                                        if (Game.Time <= lastpossibletime)
                                         {
-                                            if (percentcc >= CCdurationpast(ability.CCname))
+                                            if (CustomDelays())
                                             {
-                                                var predpos = W.GetPrediction(target);
-                                                if (predpos != null)
+                                                if (percentcc >= CCdurationpast(ability.CCname))
                                                 {
-                                                    if (predpos.Hitchance >= HitChance.Immobile)
-                                                    {
-                                                        W.Cast(predpos.CastPosition);
-                                                    }
+                                                    W.Cast(target.ServerPosition);
                                                 }
                                             }
-                                        }
 
-                                        if (!CustomDelays())
-                                        {
-                                            delayingw = true;
-                                            Utility.DelayAction.Add((int)delayby, () =>
+                                            if (!CustomDelays())
                                             {
-                                                delayingw = false;
-                                                var predpos = W.GetPrediction(target);
-                                                if (predpos != null)
+                                                delayingw = true;
+                                                Utility.DelayAction.Add((int) delayby, () =>
                                                 {
-                                                    if (predpos.Hitchance >= HitChance.Immobile)
-                                                    {
-                                                        W.Cast(predpos.CastPosition);
-                                                    }
-                                                }
+                                                    delayingw = false;
+                                                    W.Cast(target.ServerPosition);
 
-                                            });
-                                        }
-                                    }
-                                    if (ability.CCSlot == SpellSlot.E && (Game.Time - buff.EndTime) <= E.Delay && !delayinge)
-                                    {
-                                        var lastpossibletime = buff.EndTime - E.Delay - 100;
-                                        var delayby = lastpossibletime - Game.Time;
-                                        if (CustomDelays())
-                                        {
-                                            if (percentcc >= CCdurationpast(ability.CCname))
-                                            {
-                                                var predpos = E.GetPrediction(target);
-                                                if (predpos != null)
-                                                {
-                                                    if (predpos.Hitchance >= HitChance.Immobile)
-                                                    {
-                                                        E.Cast(predpos.CastPosition);
-                                                    }
-                                                }
+                                                });
                                             }
                                         }
-
-                                        if (!CustomDelays())
+                                    }
+                                    if (ability.CCSlot == SpellSlot.E && !delayinge)
+                                    {
+                                        var dist = Player.Distance(target);
+                                        var lastpossibletime = buff.EndTime - (E.Delay / 1000f) - (dist / EvadeData.MissileSpeed) -
+                                                               Game.Ping;
+                                        var delayby = lastpossibletime - Game.Time;
+                                        if (Game.Time <= lastpossibletime)
                                         {
-                                            delayinge = true;
-                                            Utility.DelayAction.Add((int)delayby, () =>
+                                            if (CustomDelays())
                                             {
-                                                delayinge = false;
-                                                var predpos = E.GetPrediction(target);
-                                                if (predpos != null)
+                                                if (percentcc >= CCdurationpast(ability.CCname))
                                                 {
-                                                    if (predpos.Hitchance >= HitChance.Immobile)
-                                                    {
-                                                        E.Cast(predpos.CastPosition);
-                                                    }
+                                                    E.Cast(target.ServerPosition);
                                                 }
+                                            }
 
-                                            });
+                                            if (!CustomDelays())
+                                            {
+                                                delayinge = true;
+                                                Utility.DelayAction.Add((int) delayby, () =>
+                                                {
+                                                    delayinge = false;
+                                                    E.Cast(target.ServerPosition);
+
+                                                });
+                                            }
                                         }
                                     }
-                                    var data = SpellDatabase.GetByName(ability.CCname);
-                                    if (ability.CCSlot == SpellSlot.R && (Game.Time - buff.EndTime) <= R.Delay && !delayingr)
+                                    if (ability.CCSlot == SpellSlot.R && !delayingr)
                                     {
-                                        var lastpossibletime = buff.EndTime - R.Delay - 100;
+                                        var dist = Player.Distance(target);
+                                        var lastpossibletime = buff.EndTime - (R.Delay / 1000f) - (dist / EvadeData.MissileSpeed) -
+                                                               Game.Ping;
                                         var delayby = lastpossibletime - Game.Time;
-                                        if (CustomDelays())
+                                        if (Game.Time <= lastpossibletime)
                                         {
-                                            if (percentcc >= CCdurationpast(ability.CCname))
+                                            if (CustomDelays())
                                             {
-                                                var predpos = R.GetPrediction(target);
-                                                if (predpos != null)
+                                                if (percentcc >= CCdurationpast(ability.CCname))
                                                 {
-                                                    if (predpos.Hitchance >= HitChance.Immobile)
-                                                    {
-                                                        R.Cast(predpos.CastPosition);
-                                                    }
+
+                                                    R.Cast(target.ServerPosition);
+
                                                 }
                                             }
                                         }
@@ -316,27 +297,25 @@ namespace CCChainer
                                         if (!CustomDelays())
                                         {
                                             delayingr = true;
-                                            Utility.DelayAction.Add((int)delayby, () =>
+                                            Utility.DelayAction.Add((int) delayby, () =>
                                             {
                                                 delayingr = false;
-                                                var predpos = R.GetPrediction(target);
-                                                if (predpos != null)
-                                                {
-                                                    R.Cast(predpos.CastPosition);
-                                                }
+                                                R.Cast(target.ServerPosition);
 
                                             });
                                         }
                                     }
                                 }
                             }
-                        }
+                        
                     }
                 }
             }
         }
+    
 
-        static Spell GetByslot(SpellSlot slot)
+
+static Spell GetByslot(SpellSlot slot)
         {
             Spell spell = null;
             switch (slot)

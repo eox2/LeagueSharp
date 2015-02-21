@@ -119,6 +119,11 @@ namespace CCChainer
            CCList.Add(new CCData { CCname = "Janna Q", CCsource = "Janna", Skillshot = true, Skillshotname = "JannaQ", CCSlot = SpellSlot.Q, GoesThroughMinions = true, range = 1700f });
            #endregion Janna
 
+           #region Jinx
+           CCList.Add(new CCData { CCname = "Jinx W", CCsource = "Jinx", Skillshot = true, Skillshotname = "JinxW", CCSlot = SpellSlot.W, GoesThroughMinions = true, range = 1700f });
+           //CCList.Add(new CCData { CCname = "Jinx E", CCsource = "Jinx", Skillshot = true, Skillshotname = "JinxE", CCSlot = SpellSlot.E, GoesThroughMinions = true, range = 1700f });
+           #endregion Jinx
+
            #region Leona
            CCList.Add(new CCData { CCname = "Leona Q", CCsource = "Leona", Skillshot = false, CCSlot = SpellSlot.Q, range = ObjectManager.Player.AttackRange, SelfthenAuto = true }); //Add as buff
            CCList.Add(new CCData { CCname = "Leona E", CCsource = "Leona", Skillshot = true, Skillshotname = "LeonaZenithBlade", CCSlot = SpellSlot.E, GoesThroughMinions = true, range = 905f });
@@ -228,7 +233,6 @@ namespace CCChainer
            {
                if (Data.CCsource == Champname)
                {
-           
                    AbilityList.Add(Data);
                }
            }
