@@ -20,16 +20,15 @@ namespace LolBuilder
             {
                 ProBuilds(championname);
                 CreateMenu(Config);
+                if (AutoLevOn())
+                {
+                    var sequence = BuildData.SkillSequence;
+                    new AutoLevel(sequence);
+                }
             });
 
             main.Start();
-   
-            if (AutoLevOn())
-            {
-                var sequence = BuildData.SkillSequence;
-                new AutoLevel(sequence);
-            }
-            
+
         }
 
         public static void ProBuilds(string cname)
@@ -39,13 +38,14 @@ namespace LolBuilder
             String Data = pbClient.DownloadString("http://lolbuilder.net/" + cname);
 
             String SkillSeq = ExtractString(Data, "window.skillOrder[0] = [", "];");
-            string[] seqinstringarray = SkillSeq.Split(new string[] {","}, StringSplitOptions.None);
+            string[] seqinstringarray = SkillSeq.Split(new string[] {","}, StringSplitOptions.RemoveEmptyEntries);
             int[] OrderedSequence = new int[seqinstringarray.Length];
                     for (int i = 0; i < seqinstringarray.Length; i++)
                     {
                         try
                         {
                             OrderedSequence[i] = int.Parse(seqinstringarray[i]);
+                            Console.Write(OrderedSequence[i]);
                         }
                         catch (Exception e)
                         {
@@ -122,16 +122,27 @@ namespace LolBuilder
 
         private static bool AutoLevOn()
         {
-            //return false;
             return Config.Item("leveler").GetValue<bool>();
         }
+
+  
         public static void CreateMenu(Menu Menu)
         {
             Config = new Menu("ProBuilds", "ProBuilds", true);
             var settings = new Menu("Misc", "Misc");
-            MenuItem levelersetting = Config.AddItem(new MenuItem("leveler", "ProLeveler").SetValue(true));
-            levelersetting.ValueChanged += delegate { AutoLevel.Enabled(Config.Item("leveler").GetValue<bool>()); };
-            
+            Config.AddItem(new MenuItem("leveler", "ProLeveler").SetValue(true));
+            Config.Item("leveler").ValueChanged += (s, e) =>
+            {
+                AutoLevel.Enabled(e.GetNewValue<bool>());
+                Game.PrintChat("ProLeveler: " + e.GetNewValue<bool>());
+                if (e.GetNewValue<bool>())
+                {
+                    var sequence = BuildData.SkillSequence;
+                    Console.Write(sequence);
+                    new AutoLevel(sequence);
+                }
+            };
+
             settings.AddItem(new MenuItem("notif", "Enable Notifications")).SetValue(true);
             Config.AddSubMenu(settings);
             foreach (var build in BuildData.BuildsList)

@@ -88,16 +88,17 @@ namespace CCChainer
                                  buff.Type == BuffType.Charm ||
                                  buff.Type == BuffType.Fear || buff.Type == BuffType.Suppression)
                             {
-                                Game.PrintChat(buff.Name + " The buff end time is on  " + hero.ChampionName + " is" + buff.EndTime + "and the current time is" + Game.Time);
+                                //Game.PrintChat(buff.Name + " The buff end time is on  " + hero.ChampionName + " is" + buff.EndTime + "and the current time is" + Game.Time);
 
                                 var totalcctime = buff.EndTime - buff.StartTime;
                                 var cctimeleft = buff.EndTime - Game.Time;
                                 var percentcc = cctimeleft/totalcctime;
+
                                 var casttime = 25; // IdK delays for targetted spells maybe implement in future
 
                                 if (!ability.Skillshot)
                                 {
-                                    if ((Game.Time - buff.EndTime) <= casttime)
+                                    if ((buff.EndTime - Game.Time) >= casttime)
                                     {
                                         var lastpossibletime = buff.EndTime - casttime - 200;
                                         var delayby = lastpossibletime - Game.Time;

@@ -120,7 +120,7 @@ namespace CCChainer
            #endregion Janna
 
            #region Jinx
-           CCList.Add(new CCData { CCname = "Jinx W", CCsource = "Jinx", Skillshot = true, Skillshotname = "JinxW", CCSlot = SpellSlot.W, GoesThroughMinions = true, range = 1700f });
+           CCList.Add(new CCData { CCname = "Jinx W", CCsource = "Jinx", Skillshot = true, Skillshotname = "JinxW", CCSlot = SpellSlot.W, GoesThroughMinions = false, range = 1500f });
            //CCList.Add(new CCData { CCname = "Jinx E", CCsource = "Jinx", Skillshot = true, Skillshotname = "JinxE", CCSlot = SpellSlot.E, GoesThroughMinions = true, range = 1700f });
            #endregion Jinx
 
