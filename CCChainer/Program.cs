@@ -25,7 +25,7 @@ namespace CCChainer
 
         private static void OnGameLoad(EventArgs args)
         {
-            Game.PrintChat("CC Chainer Loaded - WIP INCOMPLETE BY SEPH WTFx");
+            Game.PrintChat("CC Chainer Loaded - Beta");
             DefineSpells();
             CreateMenu();
             Game.OnGameUpdate += OnGameUpdate;
@@ -88,8 +88,8 @@ namespace CCChainer
 
         private static void OnGameUpdate(EventArgs args)
         {
-            Debug();
-           // CCChain();
+           // Debug();
+            CCChain();
         }
 
 
@@ -369,7 +369,6 @@ namespace CCChainer
 
                                         if (!CustomDelays())
                                         {
-                                            Console.Write("legit");
                                             delayingr = true;
                                             Utility.DelayAction.Add((int) delayby, () =>
                                             {
