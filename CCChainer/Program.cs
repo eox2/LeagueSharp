@@ -25,11 +25,12 @@ namespace CCChainer
 
         private static void OnGameLoad(EventArgs args)
         {
-            Game.PrintChat("CC Chainer Loaded - WIP INCOMPLETE BY SEPH WTF");
+            Game.PrintChat("CC Chainer Loaded - WIP INCOMPLETE BY SEPH WTFx");
             DefineSpells();
             CreateMenu();
             Game.OnGameUpdate += OnGameUpdate;
         }
+
 
 
         private static void CreateMenu()
@@ -62,26 +63,51 @@ namespace CCChainer
             return Config.Item("customdelays").GetValue<bool>();
         }
 
+        private static bool CCenabled(string ccname)
+        {
+            return Config.Item("Enabled" + ccname).GetValue<bool>();
+        }
+
+        private static void Debug()
+        {
+            foreach (var buff in Player.Buffs)
+            {
+                Console.Write(buff.Name);
+                if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt ||
+                    buff.Type == BuffType.Charm ||
+                    buff.Type == BuffType.Fear || buff.Type == BuffType.Suppression)
+                {
+                    Game.PrintChat("lawl");
+                    Console.WriteLine("CC Duration " + buff.Name + " " + (buff.EndTime - buff.StartTime));
+
+                }
+              
+            }
+        }
 
 
         private static void OnGameUpdate(EventArgs args)
         {
-            CCChain();
+            Debug();
+           // CCChain();
         }
 
 
 
         private static void CCChain()
         {
-            foreach (var skill in PlayerCCs)
+            foreach (var skill in PlayerCCs.Where(c => CCenabled(c.CCname)))
             {
                 var ability = skill;
      
                 foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsEnemy && Player.Distance(h) <= ability.range))
                 {
                         var target = hero;
+                        var tenacity = hero.PercentCCReduction;
+                   
                         foreach (var buff in hero.Buffs)
                         {
+                            var buffEndTime = buff.EndTime - (tenacity * (buff.EndTime - buff.StartTime)); //actual
                             var bufftype = buff.Type;
                             // Game.PrintChat(buff.Name + " " + buff.StartTime);
                             if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt ||
@@ -90,7 +116,7 @@ namespace CCChainer
                             {
                                 //Game.PrintChat(buff.Name + " The buff end time is on  " + hero.ChampionName + " is" + buff.EndTime + "and the current time is" + Game.Time);
 
-                                var totalcctime = buff.EndTime - buff.StartTime;
+                                var totalcctime = (buffEndTime - buff.StartTime);
                                 var cctimeleft = buff.EndTime - Game.Time;
                                 var percentcc = cctimeleft/totalcctime;
 
@@ -100,7 +126,7 @@ namespace CCChainer
                                 {
                                     if ((buff.EndTime - Game.Time) >= casttime)
                                     {
-                                        var lastpossibletime = buff.EndTime - casttime - 200;
+                                        var lastpossibletime = buffEndTime - casttime - 200;
                                         var delayby = lastpossibletime - Game.Time;
                                         if (percentcc >= CCdurationpast(ability.CCname))
                                         {
@@ -171,10 +197,11 @@ namespace CCChainer
                                     }
 
                                     var EvadeData = SpellDatabase.GetByName(ability.Skillshotname);
+                                    var dist = Player.Distance(target.ServerPosition);
+
                                     if (ability.CCSlot == SpellSlot.Q && !delayingq)
                                     {
-                                        var dist = Player.Distance(target);
-                                        var lastpossibletime = buff.EndTime - (Q.Delay / 1000f) - (dist/EvadeData.MissileSpeed) -
+                                        var lastpossibletime = buffEndTime - (Q.Delay / 1000f) - (dist/EvadeData.MissileSpeed) -
                                                                Game.Ping;
                                         var delayby = lastpossibletime - Game.Time;
                                         if (Game.Time <= lastpossibletime)
@@ -197,7 +224,14 @@ namespace CCChainer
                                                         SpellLogic.JannaQ(JannaQPred.CastPosition);
                                                         return;
                                                     }
+                                                    var pred = Q.GetPrediction(target);
+                                                    if (pred != null)
+                                                    {
+                                                        Q.Cast(pred.CastPosition);
+                                                        return;
+                                                    }
                                                     Q.Cast(target.ServerPosition);
+                                                    return;
                                                 }
                                             }
 
@@ -213,8 +247,14 @@ namespace CCChainer
                                                         return;
                                                     }
                                                     delayingq = false;
+                                                    var pred = Q.GetPrediction(target);
+                                                    if (pred != null)
+                                                    {
+                                                        Q.Cast(pred.CastPosition);
+                                                        return;
+                                                    }
                                                     Q.Cast(target.ServerPosition);
-
+       
                                                 });
                                             }
                                         }
@@ -222,9 +262,8 @@ namespace CCChainer
 
                                     if (ability.CCSlot == SpellSlot.W && !delayingw)
                                     {
-                                        var dist = Player.Distance(target);
-                                        var lastpossibletime = buff.EndTime - (W.Delay / 1000f) - (dist / EvadeData.MissileSpeed) -
-                                                               Game.Ping;
+                                        var lastpossibletime = buffEndTime - (W.Delay / 1000f) - (dist / EvadeData.MissileSpeed) -
+                                                               Game.Ping - 200;
                                         var delayby = lastpossibletime - Game.Time;
                                         if (Game.Time <= lastpossibletime)
                                         {
@@ -232,7 +271,14 @@ namespace CCChainer
                                             {
                                                 if (percentcc >= CCdurationpast(ability.CCname))
                                                 {
+                                                    var pred = W.GetPrediction(target);
+                                                    if (pred != null)
+                                                    {
+                                                        W.Cast(pred.CastPosition);
+                                                        return;
+                                                    }
                                                     W.Cast(target.ServerPosition);
+                                                    return;
                                                 }
                                             }
 
@@ -242,7 +288,14 @@ namespace CCChainer
                                                 Utility.DelayAction.Add((int) delayby, () =>
                                                 {
                                                     delayingw = false;
+                                                    var pred = W.GetPrediction(target);
+                                                    if (pred != null)
+                                                    {
+                                                        W.Cast(pred.CastPosition);
+                                                        return;
+                                                    }
                                                     W.Cast(target.ServerPosition);
+                                                    return;
 
                                                 });
                                             }
@@ -250,8 +303,7 @@ namespace CCChainer
                                     }
                                     if (ability.CCSlot == SpellSlot.E && !delayinge)
                                     {
-                                        var dist = Player.Distance(target);
-                                        var lastpossibletime = buff.EndTime - (E.Delay / 1000f) - (dist / EvadeData.MissileSpeed) -
+                                        var lastpossibletime = buffEndTime - (E.Delay / 1000f) - (dist / EvadeData.MissileSpeed) -
                                                                Game.Ping;
                                         var delayby = lastpossibletime - Game.Time;
                                         if (Game.Time <= lastpossibletime)
@@ -260,7 +312,14 @@ namespace CCChainer
                                             {
                                                 if (percentcc >= CCdurationpast(ability.CCname))
                                                 {
+                                                    var pred = E.GetPrediction(target);
+                                                    if (pred != null)
+                                                    {
+                                                        E.Cast(pred.CastPosition);
+                                                        return;
+                                                    }
                                                     E.Cast(target.ServerPosition);
+                                                    return;
                                                 }
                                             }
 
@@ -270,7 +329,14 @@ namespace CCChainer
                                                 Utility.DelayAction.Add((int) delayby, () =>
                                                 {
                                                     delayinge = false;
+                                                    var pred = E.GetPrediction(target);
+                                                    if (pred != null)
+                                                    {
+                                                        E.Cast(pred.CastPosition);
+                                                        return;
+                                                    }
                                                     E.Cast(target.ServerPosition);
+                                                    return;
 
                                                 });
                                             }
@@ -278,9 +344,8 @@ namespace CCChainer
                                     }
                                     if (ability.CCSlot == SpellSlot.R && !delayingr)
                                     {
-                                        var dist = Player.Distance(target);
-                                        var lastpossibletime = buff.EndTime - (R.Delay / 1000f) - (dist / EvadeData.MissileSpeed) -
-                                                               Game.Ping;
+                                        var lastpossibletime = buffEndTime - (R.Delay / 1000f) - (dist / EvadeData.MissileSpeed) -
+                                                               Game.Ping - 200; 
                                         var delayby = lastpossibletime - Game.Time;
                                         if (Game.Time <= lastpossibletime)
                                         {
@@ -289,7 +354,14 @@ namespace CCChainer
                                                 if (percentcc >= CCdurationpast(ability.CCname))
                                                 {
 
+                                                    var pred = R.GetPrediction(target);
+                                                    if (pred != null)
+                                                    {
+                                                        R.Cast(pred.CastPosition);
+                                                        return;
+                                                    }
                                                     R.Cast(target.ServerPosition);
+                                                    return;
 
                                                 }
                                             }
@@ -297,11 +369,19 @@ namespace CCChainer
 
                                         if (!CustomDelays())
                                         {
+                                            Console.Write("legit");
                                             delayingr = true;
                                             Utility.DelayAction.Add((int) delayby, () =>
                                             {
                                                 delayingr = false;
+                                                var pred = R.GetPrediction(target);
+                                                if (pred != null)
+                                                {
+                                                    R.Cast(pred.CastPosition);
+                                                    return;
+                                                }
                                                 R.Cast(target.ServerPosition);
+                                                return;
 
                                             });
                                         }
