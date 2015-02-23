@@ -273,6 +273,7 @@ namespace SephKayle
                                 h =>
                                     (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead && (bool) GetSettings("heal" + h.ChampionName, true) &&
                                     h.HealthPercentage() <= (int) GetSettings("hpct" + h.ChampionName, false, true) && Player.Distance(h) <= R.Range).OrderByDescending(i => i == Player).ThenBy(i => i);
+                
                 if (W.IsReady())
                 {
                     if (herolistheal.Contains(Player) && !Player.IsRecalling() && !Player.InFountain())
@@ -302,7 +303,7 @@ namespace SephKayle
                                 (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead &&
                                 (bool) GetSettings("ult" + h.ChampionName, true) &&
                                 h.HealthPercentage() <= (int) GetSettings("upct" + h.ChampionName, false, true) &&
-                                Player.Distance(h) <= R.Range).OrderByDescending(i => i == Player).ThenBy(i => i);
+                                Player.Distance(h) <= R.Range && Player.CountEnemiesInRange(500) > 0).OrderByDescending(i => i == Player).ThenBy(i => i);
 
                     if (R.IsReady())
                     {
@@ -404,7 +405,7 @@ namespace SephKayle
             if (Config.Item("UseEfarm").GetValue<bool>())
             {
                 var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && Player.Distance(m) <= incrange);
-                if (minions.Any() && E.IsReady() && !Eon)
+                if (minions.Any() && E.IsReady() &&  Config.Item("UseEFarm").GetValue<bool>() && !Eon)
                 {
                     E.CastOnUnit(Player);
                 }
@@ -432,10 +433,6 @@ namespace SephKayle
                         Orbwalker.SetAttack(false);
                         Q.CastOnUnit(minion, false);
                         Orbwalker.SetAttack(true);
-                        if (Config.Item("UseEFarm").GetValue<bool>() && E.IsReady() && !Eon)
-                        {
-                            E.CastOnUnit(Player);
-                        }
                         return;
                     }
                 }

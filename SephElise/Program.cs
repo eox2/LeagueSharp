@@ -12,9 +12,9 @@ namespace SephElise
         private const string ChampionName = "Elise";
         private static Orbwalking.Orbwalker Orbwalker;
         public static Spell Q, W, E, R, QS, WS, ES;
+        public static float Qrange, Wrange, Erange;
 
         private static Menu Config;
-        public static Items.Item DFG;
         private static SpellSlot IgniteSlot;
         private static Obj_AI_Hero Player;
         private static bool HumanForm;
@@ -33,6 +33,7 @@ namespace SephElise
             Q = new Spell(SpellSlot.Q, 625f);
             W = new Spell(SpellSlot.W, 950f);
             E = new Spell(SpellSlot.E, 1100f);
+
             QS = new Spell(SpellSlot.Q, 475f);
             WS = new Spell(SpellSlot.W, 0);
             ES = new Spell(SpellSlot.E, 750f);
@@ -102,22 +103,34 @@ namespace SephElise
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQ", "Draw Q")).SetValue(true);
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawW", "Draw W")).SetValue(true);
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
-            Config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag Free Circles").SetValue(true));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
 
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += OnGameUpdate;
+            Drawing.OnDraw += OnDraw;
             Game.PrintChat("<font color='#1d87f2'>SephElise has been Loaded.</font>");
         }
 
 
+        private static void OnDraw(EventArgs args) 
+        {
+            if (Config.Item("DrawQ").GetValue<bool>()) 
+            {
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Qrange, System.Drawing.Color.White);
+            }
+            if (Config.Item("DrawW").GetValue<bool>())
+            {
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Wrange, System.Drawing.Color.Red);
+            }
+            if (Config.Item("DrawE").GetValue<bool>())
+            {
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Erange, System.Drawing.Color.Blue);
+            }
+
+        }
+
         private static void OnGameUpdate(EventArgs args)
         {
-            QS = new Spell(SpellSlot.Q, QS.Range);
             Orbwalker.SetAttack(true);
             CheckForm();
 
@@ -164,7 +177,6 @@ namespace SephElise
 
         private static void JungleFarm()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(QS.Range, TargetSelector.DamageType.Magical);
             List<Obj_AI_Base> mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range,
                 MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.Health);
 
@@ -210,7 +222,6 @@ namespace SephElise
 
         private static void Farm()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(QS.Range, TargetSelector.DamageType.Magical);
             List<Obj_AI_Base> allminions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All,
                 MinionTeam.Enemy, MinionOrderTypes.Health);
 
@@ -314,6 +325,9 @@ namespace SephElise
               
                 HumanForm = true;
                 SpiderForm = false;
+                Qrange = Q.Range;
+                Wrange = W.Range;
+                Erange = E.Range;
 
                 // Game.PrintChat("We are in Human form.");
             }
@@ -330,6 +344,9 @@ namespace SephElise
 
                 HumanForm = false;
                 SpiderForm = true;
+                Qrange = QS.Range;
+                Wrange = WS.Range;
+                Erange = ES.Range;
             }
         }
 
@@ -401,5 +418,7 @@ namespace SephElise
                 }
             }
         }
+
+ 
     }
 }
