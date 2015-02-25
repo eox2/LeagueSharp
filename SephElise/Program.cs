@@ -222,8 +222,7 @@ namespace SephElise
 
         private static void Farm()
         {
-            List<Obj_AI_Base> allminions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All,
-                MinionTeam.Enemy, MinionOrderTypes.Health);
+            List<Obj_AI_Base> allminions = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
 
             if (Config.Item("UseQFarm").GetValue<bool>())
             {
@@ -371,7 +370,8 @@ namespace SephElise
                     }
                     if (Player.Distance(target) <= E.Range && Config.Item("UseEHuman").GetValue<bool>() && E.IsReady())
                     {
-                        E.Cast(target);
+                        var pred = E.GetPrediction(target);
+                        E.Cast(pred.CastPosition);
                     }
                     if (!Q.IsReady() && !W.IsReady() && !E.IsReady() && Player.Distance(target) <= 750 &&
                         Config.Item("UseR").GetValue<bool>())
