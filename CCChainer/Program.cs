@@ -6,7 +6,6 @@ using LeagueSharp;
 using LeagueSharp.Common;
 
 //Credits to Kortatu for the Evade Spell Database 
-//TO DO: Add/Fix Autoattack based cc's like Leona and Renekton Stun + Test script for the first time ingame
 
 namespace CCChainer
 {
@@ -77,7 +76,6 @@ namespace CCChainer
                     buff.Type == BuffType.Charm ||
                     buff.Type == BuffType.Fear || buff.Type == BuffType.Suppression)
                 {
-                    Game.PrintChat("lawl");
                     Console.WriteLine("CC Duration " + buff.Name + " " + (buff.EndTime - buff.StartTime));
 
                 }
@@ -197,7 +195,7 @@ namespace CCChainer
                                     }
 
                                     var EvadeData = SpellDatabase.GetByName(ability.Skillshotname);
-                                    var dist = Player.Distance(target.ServerPosition);
+                                    var dist = Player.Distance(target.ServerPosition.To2D());
 
                                     if (ability.CCSlot == SpellSlot.Q && !delayingq)
                                     {
@@ -353,7 +351,6 @@ namespace CCChainer
                                             {
                                                 if (percentcc >= CCdurationpast(ability.CCname))
                                                 {
-
                                                     var pred = R.GetPrediction(target);
                                                     if (pred != null)
                                                     {
