@@ -90,8 +90,6 @@ namespace CCChainer
             CCChain();
         }
 
-
-
         private static void CCChain()
         {
             foreach (var skill in PlayerCCs.Where(c => CCenabled(c.CCname)))
@@ -115,14 +113,14 @@ namespace CCChainer
                                 //Game.PrintChat(buff.Name + " The buff end time is on  " + hero.ChampionName + " is" + buff.EndTime + "and the current time is" + Game.Time);
 
                                 var totalcctime = (buffEndTime - buff.StartTime);
-                                var cctimeleft = buff.EndTime - Game.Time;
+                                var cctimeleft = buffEndTime - Game.Time;
                                 var percentcc = cctimeleft/totalcctime;
 
                                 var casttime = 25; // IdK delays for targetted spells maybe implement in future
 
                                 if (!ability.Skillshot)
                                 {
-                                    if ((buff.EndTime - Game.Time) >= casttime)
+                                    if ((buffEndTime - Game.Time) >= casttime)
                                     {
                                         var lastpossibletime = buffEndTime - casttime - 200;
                                         var delayby = lastpossibletime - Game.Time;
