@@ -103,7 +103,7 @@ namespace CCChainer.Data
             Console.WriteLine(
                 Utils.TickCount + " Projectile Created: " + missile.SData.Name + " distance: " +
                 missile.StartPosition.Distance(missile.EndPosition) + "Radius: " +
-                missile.SData.CastRadiusSecondary[0] + " Speed: " + missile.SData.MissileSpeed);
+                missile.SData.CastRadiusSecondary + " Speed: " + missile.SData.MissileSpeed);
 
 #endif
 

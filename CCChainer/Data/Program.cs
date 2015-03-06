@@ -152,20 +152,6 @@ namespace CCChainer.Data
 
             Game.PrintChat("<font color=\"#00BFFF\">Evade# -</font> <font color=\"#FFFFFF\">Loaded</font>");
 
-
-            if (Config.PrintSpellData)
-            {
-                foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
-                {
-                    foreach (var spell in hero.Spellbook.Spells)
-                    {
-                        Console.WriteLine(
-                             "Slot  " + spell.Slot + " " + spell.SData.Name + " w:" + spell.SData.LineWidth + " s:" + spell.SData.MissileSpeed + " r: " +
-                            spell.SData.CastRange[0]);
-                    }
-                }
-                Console.WriteLine(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name);
-            }
         }
         private static void DetectedSkillshots_OnAdd(object sender, EventArgs e)
         {
