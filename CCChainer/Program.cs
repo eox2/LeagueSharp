@@ -45,6 +45,9 @@ namespace CCChainer
                 spells.AddSubMenu(SpellMenu);
             }
             Config.AddSubMenu(spells);
+
+            misc.AddItem(new MenuItem("slowpct", "Slowed % to consider CC").SetValue(new Slider(40, 0, 100)));
+            misc.AddItem(new MenuItem("hpct", "Min targ health %").SetValue(new Slider(0, 0, 100)));
             Config.AddSubMenu(misc);
             Config.AddToMainMenu();
 
@@ -97,7 +100,7 @@ namespace CCChainer
                 }
                 foreach (
                     var hero in
-                        ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsEnemy && Player.Distance(h) <= ability.range))
+                        ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsEnemy && Player.Distance(h) <= ability.range && Player.HealthPercent >= Config.Item("hpct").GetValue<Slider>().Value))
                 {
                     var target = hero;
                     var tenacity = hero.PercentCCReduction;
@@ -110,7 +113,7 @@ namespace CCChainer
                             buff.Type == BuffType.Charm ||
                             buff.Type == BuffType.Fear || buff.Type == BuffType.Knockup ||
                             buff.Type == BuffType.Polymorph || buff.Type == BuffType.Snare ||
-                            buff.Type == BuffType.Suppression)
+                            buff.Type == BuffType.Suppression || buff.Type == BuffType.Flee || buff.Type == BuffType.Slow && target.MoveSpeed <= ((Config.Item("slowpct").GetValue<Slider>().Value / 100f) * target.MoveSpeed))
                         {
                             //Game.PrintChat(buff.Name + " The buff end time is on  " + hero.ChampionName + " is" + buff.EndTime + "and the current time is" + Game.Time);
                             /*
@@ -144,7 +147,7 @@ namespace CCChainer
                                             Q.CastOnUnit(target);
 
                                         });
-                                        //  Q.Cast(hero);
+
                                     }
 
                                     if (ability.CCSlot == SpellSlot.W && !delayingw)
@@ -156,7 +159,7 @@ namespace CCChainer
                                             W.CastOnUnit(target);
 
                                         });
-                                        // W.Cast(hero);
+                    
                                     }
                                     if (ability.CCSlot == SpellSlot.E && !delayinge)
                                     {
@@ -166,7 +169,7 @@ namespace CCChainer
                                             delayinge = false;
                                             E.CastOnUnit(target);
                                         });
-                                        // E.CastOnUnit(hero);
+                    
                                     }
                                     if (ability.CCSlot == SpellSlot.R && !delayingr)
                                     {
@@ -177,7 +180,7 @@ namespace CCChainer
                                             R.CastOnUnit(target);
 
                                         });
-                                        // R.Cast(hero);
+          
                                     }
                                 }
                             }
@@ -190,7 +193,7 @@ namespace CCChainer
 
                                 if (ability.CCSlot == SpellSlot.Q && !delayingq)
                                 {
-                                    var lastpossibletime = buffEndTime - (dist/EvadeData.MissileSpeed + Q.Delay);
+                                    var lastpossibletime = buffEndTime - (dist/EvadeData.MissileSpeed + Q.Delay) - (Game.Ping / 1000f);
                                     var delayby = lastpossibletime - Game.Time;
                                     if (Game.Time <= lastpossibletime)
                                     {
@@ -211,9 +214,9 @@ namespace CCChainer
 
                                 if (ability.CCSlot == SpellSlot.W && !delayingw)
                                 {
-                                    var lastpossibletime = buff.EndTime - (dist/EvadeData.MissileSpeed + W.Delay);
+                                    var lastpossibletime = buff.EndTime - (dist / EvadeData.MissileSpeed + W.Delay) - (Game.Ping / 1000f);
                                     var delayby = lastpossibletime - Game.Time;
-                                   // Console.WriteLine(buff.DisplayName + " last possible " + lastpossibletime + " delay amt" + delayby + " current " + Game.Time);
+                                  //  Console.WriteLine(buff.DisplayName + " W - last possible " + lastpossibletime + " delay amt" + delayby + " current " + Game.Time);
                                     if (Game.Time <= lastpossibletime)
                                     {
                                         delayingw = true;
@@ -226,7 +229,7 @@ namespace CCChainer
                                 }
                                 if (ability.CCSlot == SpellSlot.E && !delayinge)
                                 {
-                                    var lastpossibletime = buff.EndTime - (dist/EvadeData.MissileSpeed + E.Delay);
+                                    var lastpossibletime = buff.EndTime - (dist/EvadeData.MissileSpeed + E.Delay) - (Game.Ping / 1000f);
                                     var delayby = lastpossibletime - Game.Time;
                                    // Console.WriteLine(buff.DisplayName + " last possible " + lastpossibletime + " delay amt" + delayby + " current " + Game.Time);
                                     if (Game.Time <= lastpossibletime)
@@ -241,9 +244,9 @@ namespace CCChainer
                                 }
                                 if (ability.CCSlot == SpellSlot.R && !delayingr)
                                 {
-                                    var lastpossibletime = buff.EndTime - (dist/EvadeData.MissileSpeed + R.Delay);
+                                    var lastpossibletime = buff.EndTime - (dist/EvadeData.MissileSpeed + R.Delay) - (Game.Ping / 1000f);
                                     var delayby = lastpossibletime - Game.Time;
-                                  //  Console.WriteLine(buff.DisplayName + " last possible " + lastpossibletime + " delay amt" + delayby + " current " + Game.Time);
+                                    // Console.WriteLine(buff.DisplayName + " Bufftype " + buffType + " R - last possible " + lastpossibletime + " delay amt" + delayby + " current " + Game.Time);
                                     if (Game.Time <= lastpossibletime)
                                     {
                                         delayingr = true;
