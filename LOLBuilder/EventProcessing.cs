@@ -16,18 +16,13 @@ namespace LolBuilder
         {
             Game.PrintChat("<font color=\"#43C6DB\"><b>LolBuilder Loaded - By Seph</font></b>");
             String championname = ObjectManager.Player.ChampionName.Replace(" ", "").Replace("'", "");
-            var main = new System.Threading.Thread(() =>
+            ProBuilds(championname);
+            CreateMenu(Config);
+            if (AutoLevOn())
             {
-                ProBuilds(championname);
-                CreateMenu(Config);
-                if (AutoLevOn())
-                {
-                    var sequence = BuildData.SkillSequence;
-                    new AutoLevel(sequence);
-                }
-            });
-
-            main.Start();
+                var sequence = BuildData.SkillSequence;
+                new AutoLevel(sequence);
+            }
 
         }
 
@@ -143,7 +138,7 @@ namespace LolBuilder
                 }
             };
 
-            settings.AddItem(new MenuItem("notif", "Enable Notifications")).SetValue(true);
+            settings.AddItem(new MenuItem("notif", "Enable Notifications")).SetValue(false);
             Config.AddSubMenu(settings);
             foreach (var build in BuildData.BuildsList)
             {

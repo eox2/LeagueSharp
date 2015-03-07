@@ -79,7 +79,7 @@ namespace CCChainer
             }
         }
 
-
+  
         private static void OnGameUpdate(EventArgs args)
         {
             // Debug();
