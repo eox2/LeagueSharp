@@ -106,7 +106,7 @@ namespace SephElise
 
             Config.AddToMainMenu();
 
-            Game.OnGameUpdate += OnGameUpdate;
+            Game.OnUpdate += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
             Game.PrintChat("<font color='#1d87f2'>SephElise has been Loaded.</font>");
         }

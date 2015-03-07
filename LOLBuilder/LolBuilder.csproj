@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildData.cs" />
+    <Compile Include="CommonAutoLevel.cs" />
     <Compile Include="EventProcessing.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

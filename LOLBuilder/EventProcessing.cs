@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using LeagueSharp;
@@ -16,13 +15,19 @@ namespace LolBuilder
         {
             Game.PrintChat("<font color=\"#43C6DB\"><b>LolBuilder Loaded - By Seph</font></b>");
             String championname = ObjectManager.Player.ChampionName.Replace(" ", "").Replace("'", "");
-            ProBuilds(championname);
-            CreateMenu(Config);
-            if (AutoLevOn())
+            var main = new System.Threading.Thread(() =>
             {
-                var sequence = BuildData.SkillSequence;
-                new AutoLevel(sequence);
-            }
+                ProBuilds(championname);
+                CreateMenu(Config);
+                if (AutoLevOn())
+                {
+                    var sequence = BuildData.SkillSequence;
+                    new CommonAutoLevel(sequence);
+                }
+            });
+
+            main.Start();
+       
 
         }
 
@@ -33,22 +38,22 @@ namespace LolBuilder
             String Data = pbClient.DownloadString("http://lolbuilder.net/" + cname);
 
             String SkillSeq = ExtractString(Data, "window.skillOrder[0] = [", "];");
-            string[] seqinstringarray = SkillSeq.Split(new string[] {","}, StringSplitOptions.RemoveEmptyEntries);
+            string[] seqinstringarray = SkillSeq.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
             int[] OrderedSequence = new int[seqinstringarray.Length];
-                    for (int i = 0; i < seqinstringarray.Length; i++)
-                    {
-                        try
-                        {
-                            OrderedSequence[i] = int.Parse(seqinstringarray[i]);
-                            Console.Write(OrderedSequence[i]);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.Write(e);
-                        }
+            for (int i = 0; i < seqinstringarray.Length; i++)
+            {
+                try
+                {
+                    OrderedSequence[i] = int.Parse(seqinstringarray[i]);
+                    Console.Write(OrderedSequence[i]);
+                }
+                catch (Exception e)
+                {
+                    Console.Write(e);
+                }
 
-                        BuildData.SkillSequence = OrderedSequence;
-                    }
+                BuildData.SkillSequence = OrderedSequence;
+            }
             MatchCollection Builds = Regex.Matches(Data, "<div class=\"build-body\"[\\S\\s]*?id=\"build-content-");
             foreach (var b in Builds)
             {
@@ -120,7 +125,7 @@ namespace LolBuilder
             return Config.Item("leveler").GetValue<bool>();
         }
 
-  
+
         public static void CreateMenu(Menu Menu)
         {
             Config = new Menu("ProBuilds", "ProBuilds", true);
@@ -138,7 +143,7 @@ namespace LolBuilder
                 }
             };
 
-            settings.AddItem(new MenuItem("notif", "Enable Notifications")).SetValue(false);
+            settings.AddItem(new MenuItem("notif", "Enable Notifications")).SetValue(true);
             Config.AddSubMenu(settings);
             foreach (var build in BuildData.BuildsList)
             {
@@ -201,7 +206,7 @@ namespace LolBuilder
                 {
                     Summary.AddItem(new MenuItem(summitem + Random.Next(), summitem));
                 }
-    
+
                 Config.AddSubMenu(BuildMenu);
             }
             Config.AddToMainMenu();
@@ -244,7 +249,7 @@ namespace LolBuilder
 
             return "";
         }
-       
+
     }
 
 

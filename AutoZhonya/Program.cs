@@ -62,7 +62,7 @@ namespace SephZhonya
         static void EventSubscriptions()
         {
             Obj_AI_Base.OnProcessSpellCast += SpellDetector;
-            Game.OnGameUpdate += BuffDetector;
+            Game.OnUpdate += BuffDetector;
         }
 
         static void SpellDetector(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)

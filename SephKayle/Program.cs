@@ -98,7 +98,7 @@ namespace SephKayle
             Game.PrintChat("SephKayle Loaded");
             CreateMenu();
             DefineSpells();
-            Game.OnGameUpdate += GameTick;
+            Game.OnUpdate += GameTick;
             Obj_AI_Base.OnProcessSpellCast += HealUltTrigger;
         }
 

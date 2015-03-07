@@ -158,7 +158,7 @@ namespace SephKhazix
 
             Config.AddToMainMenu();
 
-            Game.OnGameUpdate += OnGameUpdate;
+            Game.OnUpdate += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
             Game.PrintChat("<font color='#1d87f2'>SephKhazix has been Loaded. Version 1.6. Lots of changes, report problems on main topic</font>");
             HeroList = ObjectManager.Get<Obj_AI_Hero>().ToList();
