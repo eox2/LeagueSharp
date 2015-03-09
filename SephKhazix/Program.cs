@@ -27,7 +27,7 @@ namespace SephKhazix
         private static List<Obj_AI_Hero> HeroList;
 
         private static Obj_AI_Hero Player;
-        private static bool Wnorm, Wevolved;
+        private static bool Wnorm, Wevolved, Eevolved;
 
 
         private static void Main(string[] args)
@@ -132,6 +132,7 @@ namespace SephKhazix
             Config.SubMenu("Ks").AddItem(new MenuItem("UseQKs", "Use Q")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseWKs", "Use W")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEKs", "Use E")).SetValue(true);
+            Config.SubMenu("Ks").AddItem(new MenuItem("djump", "Double Jump (Beta)")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEQKs", "Use EQ in KS")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEWKs", "Use EW in KS")).SetValue(false);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseTiaKs", "Use items")).SetValue(true);
@@ -146,11 +147,7 @@ namespace SephKhazix
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQ", "Draw Q")).SetValue(true);
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawW", "Draw W")).SetValue(true);
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
-            Config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag Free Circles").SetValue(true));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
+      
 
             //Debug
             Config.AddSubMenu(new Menu("Debug", "Debug"));
@@ -164,7 +161,7 @@ namespace SephKhazix
             HeroList = ObjectManager.Get<Obj_AI_Hero>().ToList();
 
         }
-
+        
         private static void CastWE(Obj_AI_Base unit, Vector2 unitPosition, int minTargets = 0)
         {
             var usePacket = Config.Item("usePackets").GetValue<bool>();
@@ -269,9 +266,8 @@ namespace SephKhazix
 
         private static void OnGameUpdate(EventArgs args)
         {
-           // Orbwalker.SetAttack(true);
-
             CheckSpells();
+
             if (Config.Item("Combo").GetValue<KeyBind>().Active)
             {
                 Combo();
@@ -454,14 +450,10 @@ namespace SephKhazix
 
                 if (HDR.IsReady() && Player.Distance(farmLocation.Position) <= HDR.Range && farmLocation.MinionsHit >= 2)
                 {
-                    // HDR.Cast(farmLocation.Position);
-                    // HDR.Cast();
                     Items.UseItem(3074, ObjectManager.Player);
                 }
                 if (TIA.IsReady() && Player.Distance(farmLocation.Position) <= TIA.Range && farmLocation.MinionsHit >= 2)
                 {
-                    //TIA.Cast(farmLocation.Position);
-                    // TIA.Cast();
                     Items.UseItem(3077, ObjectManager.Player);
                 }
             }
@@ -480,7 +472,7 @@ namespace SephKhazix
         /*
         private static bool targetisisolated(Obj_AI_Hero Target)
         {
-            return !ObjectManager.Get<Obj_AI_Base>().Where(x => x.Distance(Target) < 500 && !x.IsAlly && !x.IsMe).ToList().Any();
+            return !ObjectManager.Get<Obj_AI_Base>().Any(x => x.Distance(Target) < 500 && !x.IsAlly && !x.IsMe);
         }
         */
         private static double getdamages(SpellSlot X, Obj_AI_Hero target)
@@ -504,11 +496,49 @@ namespace SephKhazix
             return Player.HealthPercentage() > 15;
         }
 
+        static void DoubleJump(Obj_AI_Hero currenttarg)
+        {
+            double QDmg = getdamages(SpellSlot.Q, currenttarg);
+            var jumptarget = new Obj_AI_Hero();
+            if (currenttarg.Health < QDmg)
+            {
+                     jumptarget = ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(x => x.IsValidTarget() && x.Distance(Player.Position) < 2000f && x != currenttarg)
+                    .OrderBy(x => x.Health).FirstOrDefault();
+                     Q.CastOnUnit(currenttarg);
+                    if (jumptarget != null)
+                    {
+                    E.Cast(jumptarget);
+                    }
+                return;
+            }
+
+            var validtargets = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable).OrderBy(x => x.Health);
+            var Qtarg = validtargets.Where(x => x.Health <= QDmg && x.Distance(Player) <= Q.Range).FirstOrDefault();
+            var Etarg = validtargets.Where(x => x.Distance(Player) <= E.Range * 2).FirstOrDefault();
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .OrderBy(x => x.Health).FirstOrDefault(x => x.IsValidTarget() && x.Health <= QDmg && x.Distance(Player) <= Q.Range);
+            if (Qtarg != null)
+            {
+                Q.CastOnUnit(Qtarg);
+            }
+            if (Etarg != null)
+            {
+                E.Cast(Etarg.ServerPosition);
+            }
+
+        }
+
         private static void KillSteal()
         {
             Obj_AI_Hero target = ObjectManager.Get<Obj_AI_Hero>()
                  .Where(x => x.IsValidTarget() && x.Distance(Player.Position) < 1000f)
                  .OrderBy(x => x.Health).FirstOrDefault();
+
+            if (Config.Item("djump").GetValue<Boolean>() && Eevolved && E.IsReady() && Q.IsReady())
+            {
+                DoubleJump(target);
+            }
             var usePacket = Config.Item("usePackets").GetValue<bool>();
       
 
@@ -547,11 +577,13 @@ namespace SephKhazix
                         Orbwalker.SetAttack(false);
                         Q.Cast(target, usePacket);
                         Orbwalker.SetAttack(true);
+         
                     }
                 }
 
                 if (E.IsReady() && Player.Distance(target) <= E.Range && Config.Item("UseEKs").GetValue<bool>())
                 {
+                
                     if (target.Health <= EDmg) 
                     {
                         Utility.DelayAction.Add(
@@ -562,6 +594,7 @@ namespace SephKhazix
                                     E.Cast(pred.CastPosition, usePacket);
                             });
                     }
+
                 }
 
                 if (W.IsReady() && Wnorm && Player.Distance(target) <= W.Range && Config.Item("UseWKs").GetValue<bool>())
@@ -667,6 +700,7 @@ namespace SephKhazix
             if (ObjectManager.Player.HasBuff("khazixeevo", true))
             {
                 E.Range = 1000;
+                Eevolved = true;
             } 
 
             if (!ObjectManager.Player.HasBuff("khazixwevo", true))
@@ -740,11 +774,10 @@ namespace SephKhazix
         public static List<Obj_AI_Hero> GetIsolatedTargets()
         {
            var validtargets = HeroList.Where(h => h.IsEnemy && h.Distance(Player) <= E.Range);
-          //  var validtargets = ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsEnemy).ToList();
             var isolatedheroes = new List<Obj_AI_Hero>();
             foreach (var x in validtargets)
             {
-                var isolatedtargets = ObjectManager.Get<Obj_AI_Base>().Where(xd => xd.IsEnemy && x.NetworkId != xd.NetworkId && x.ServerPosition.Distance(xd.ServerPosition) < 500).ToList(); 
+                var isolatedtargets = ObjectManager.Get<Obj_AI_Base>().Where(xd => xd.IsEnemy && x.NetworkId != xd.NetworkId && x.ServerPosition.Distance(xd.ServerPosition) < 500); 
                 if (!isolatedtargets.Any())
                 {
                     if (!x.IsDead && x.IsVisible)
@@ -915,19 +948,16 @@ namespace SephKhazix
                 }
             }
 
-
-            if (Config.Item("CircleLag").GetValue<bool>())
+       
+            if (Config.Item("DrawQ").GetValue<bool>())
             {
-                if (Config.Item("DrawQ").GetValue<bool>())
-                {
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, Color.White);
-                }
+            }
             if (Config.Item("DrawW").GetValue<bool>())
             {
                 Render.Circle.DrawCircle(
                     ObjectManager.Player.Position, W.Range, Color.Red);
             }
-
 
             if (Config.Item("DrawE").GetValue<bool>())
             {
@@ -935,26 +965,6 @@ namespace SephKhazix
             }
 
             }
-
-            else
-            {
-                if (Config.Item("DrawQ").GetValue<bool>())
-                {
-                        Drawing.DrawCircle(ObjectManager.Player.Position, Q.Range, Color.White);
-              
-                }
-                if (Config.Item("DrawW").GetValue<bool>())
-                {
-                 
-                        Drawing.DrawCircle(ObjectManager.Player.Position, W.Range, Color.Red);
-          
-                }
-                if (Config.Item("DrawE").GetValue<bool>())
-                {
-                    
-                        Drawing.DrawCircle(ObjectManager.Player.Position, E.Range, Color.Green);
-                }
-            }
         }
     }
-}
+
