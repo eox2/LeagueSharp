@@ -136,7 +136,7 @@ namespace SephKhazix
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEQKs", "Use EQ in KS")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEWKs", "Use EW in KS")).SetValue(false);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseTiaKs", "Use items")).SetValue(true);
-            Config.SubMenu("Ks").AddItem(new MenuItem("Edelay", "E Delay (ms)").SetValue(new Slider(0, 2, 300)));
+            Config.SubMenu("Ks").AddItem(new MenuItem("Edelay", "E Delay (ms)").SetValue(new Slider(0, 0, 300)));
             Config.SubMenu("Ks").AddItem(new MenuItem("autoescape", "Use E to get out when low")).SetValue(false);
 
             Config.SubMenu("Ks").AddItem(new MenuItem("UseIgnite", "Use Ignite")).SetValue(true);
@@ -493,29 +493,29 @@ namespace SephKhazix
 
         public static bool ishealthy()
         {
-            return Player.HealthPercentage() > 15;
+            return Player.HealthPercentage() > 20;
         }
 
         static void DoubleJump(Obj_AI_Hero currenttarg)
         {
             double QDmg = getdamages(SpellSlot.Q, currenttarg);
-            var jumptarget = new Obj_AI_Hero();
-            if (currenttarg.Health < QDmg)
+            if (currenttarg.Health <= QDmg)
             {
-                     jumptarget = ObjectManager.Get<Obj_AI_Hero>()
+                    var jumptarget = ObjectManager.Get<Obj_AI_Hero>()
                     .Where(x => x.IsValidTarget() && x.Distance(Player.Position) < 2000f && x != currenttarg)
-                    .OrderBy(x => x.Health).FirstOrDefault();
+                    .OrderBy(x => x.Health);
                      Q.CastOnUnit(currenttarg);
-                    if (jumptarget != null)
+                    if (jumptarget.Any())
                     {
-                    E.Cast(jumptarget);
+                    E.Cast(jumptarget.First());
                     }
                 return;
             }
 
+
             var validtargets = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable).OrderBy(x => x.Health);
-            var Qtarg = validtargets.Where(x => x.Health <= QDmg && x.Distance(Player) <= Q.Range).FirstOrDefault();
-            var Etarg = validtargets.Where(x => x.Distance(Player) <= E.Range * 2).FirstOrDefault();
+            var Qtarg = validtargets.FirstOrDefault(x => x.Health <= QDmg && x.Distance(Player) <= Q.Range);
+            var Etarg = validtargets.FirstOrDefault(x => x.Distance(Player) <= E.Range * 2);
                 ObjectManager.Get<Obj_AI_Hero>()
                     .OrderBy(x => x.Health).FirstOrDefault(x => x.IsValidTarget() && x.Health <= QDmg && x.Distance(Player) <= Q.Range);
             if (Qtarg != null)
@@ -560,15 +560,24 @@ namespace SephKhazix
                     }
                 }
 
-                if (!ishealthy() && Config.Item("autoescape").GetValue<bool>() && Player.CountEnemiesInRange(300) >= 1)
-                {
-                    var objAiHero = ObjectManager.Get<Obj_AI_Hero>().FirstOrDefault(x => x.IsAlly && x.CountEnemiesInRange(300) == 0 && x.HealthPercentage() > 45 && E.IsInRange(x));
-                    if (objAiHero != null) {
-                        var bestposition =
-                            objAiHero.ServerPosition;
-                        E.Cast(bestposition, usePacket);
+                if (Config.Item("autoescape").GetValue<bool>()) { 
+                var objAiturret = ObjectManager.Get<Obj_AI_Turret>().Where(x => x.IsEnemy && Player.Distance(x.ServerPosition) <= 900f);
+                    if (!ishealthy() && (Player.CountEnemiesInRange(500) >= 1 || objAiturret.Any()))
+                    {
+                        var objAiHero =
+                            ObjectManager.Get<Obj_AI_Hero>()
+                                .FirstOrDefault(
+                                    x =>
+                                        x.IsAlly && x.CountEnemiesInRange(300) == 0 && x.HealthPercentage() > 45 &&
+                                        E.IsInRange(x));
+                        if (objAiHero != null)
+                        {
+                            var bestposition =
+                                objAiHero.ServerPosition;
+                            E.Cast(bestposition, usePacket);
+                        }
                     }
-           
+
                 }
                 if (Q.IsReady() && Player.Distance(target) <= Q.Range && Config.Item("UseQKs").GetValue<bool>())
                 {
@@ -635,7 +644,7 @@ namespace SephKhazix
                     {
                         if ((target.Health <= QDmg + EDmg))
                         {
-                            Utility.DelayAction.Add(Game.Ping + 200, delegate
+                            Utility.DelayAction.Add(Config.Item("EDelay").GetValue<Slider>().Value, delegate
                             {
                                 PredictionOutput pred = E.GetPrediction(target);
                                 if (target.IsValid && !target.IsDead)
@@ -652,7 +661,7 @@ namespace SephKhazix
                         if (target.Health <= WDmg)
                         {
 
-                            Utility.DelayAction.Add(Game.Ping + 200, delegate
+                            Utility.DelayAction.Add(Config.Item("EDelay").GetValue<Slider>().Value, delegate
                             {
                                 PredictionOutput pred = E.GetPrediction(target);
                                 if (target.IsValid && !target.IsDead)
