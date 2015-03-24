@@ -488,13 +488,13 @@ namespace SephKhazix
             return Player.HealthPercentage() > 20;
         }
 
-        static void DoubleJump(Obj_AI_Hero currenttarg)
+        private static void DoubleJump(Obj_AI_Hero currenttarg)
         {
             double QDmg = getdamages(SpellSlot.Q, currenttarg);
 
             if (currenttarg.Health <= QDmg && currenttarg.Distance(Player.Position) <= Q.Range)
-           {
-                     var jumptarget = ObjectManager.Get<Obj_AI_Hero>()
+            {
+                var jumptarget = ObjectManager.Get<Obj_AI_Hero>()
                     .Where(x => x.IsValidTarget() && x.Distance(Player.ServerPosition) < 2000f && x != currenttarg)
                     .OrderBy(x => x.Health);
                 var jtarg = jumptarget.First();
@@ -505,33 +505,57 @@ namespace SephKhazix
                 }
                 else
                 {
-                    var getclosestally = ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && !h.IsDead && !h.IsMe).OrderBy(h => Vector3.Distance(h.ServerPosition, Player.ServerPosition)).First();
+                    var getclosestally =
+                        ObjectManager.Get<Obj_AI_Hero>()
+                            .Where(h => h.IsAlly && !h.IsDead && !h.IsMe)
+                            .OrderBy(h => Vector3.Distance(h.ServerPosition, Player.ServerPosition))
+                            .First();
                     E.Cast(getclosestally.ServerPosition);
                     Q.CastOnUnit(currenttarg);
                 }
-                   
+
                 return;
             }
 
-            var validtargets = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable).OrderBy(x => x.Health);
-            var Qtarg = validtargets.FirstOrDefault(x => x.Health <= QDmg && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range);
-            var Etarg = validtargets.FirstOrDefault(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= E.Range * 2);
+            var validtargets =
                 ObjectManager.Get<Obj_AI_Hero>()
-                    .OrderBy(x => x.Health).FirstOrDefault(x => x.IsValidTarget() && x.Health <= QDmg && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range && x != Qtarg);
-             if (Etarg != null && Qtarg != null && Qtarg != Etarg)
+                    .Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable)
+                    .OrderBy(x => x.Health);
+            var Qtarg =
+                validtargets.FirstOrDefault(
+                    x => x.Health <= QDmg && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range);
+            var Etarg =
+                validtargets.FirstOrDefault(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= E.Range*2);
+            ObjectManager.Get<Obj_AI_Hero>()
+                .OrderBy(x => x.Health)
+                .FirstOrDefault(
+                    x =>
+                        x.IsValidTarget() && x.Health <= QDmg &&
+                        Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range && x != Qtarg);
+            if (Etarg != null && Qtarg != null && Qtarg != Etarg)
             {
                 E.Cast(Etarg.ServerPosition);
                 Q.CastOnUnit(Qtarg);
             }
-             else { 
-             {
-                    var jumppoint = ishealthy() ? HeroList.Where(h => h.IsEnemy && !h.IsDead && !h.IsMe && !h.IsZombie).OrderBy(h => Vector3.Distance(h.ServerPosition, Player.ServerPosition)).First().ServerPosition : HeroList.Where(h => h.IsAlly && !h.IsDead && !h.IsMe).OrderBy(h => Vector3.Distance(h.ServerPosition, Player.ServerPosition)).First().ServerPosition;
+            else
+            {
+                {
+                    var jumppoint = ishealthy()
+                        ? HeroList.Where(h => h.IsEnemy && !h.IsDead && !h.IsMe && !h.IsZombie)
+                            .OrderBy(h => Vector3.Distance(h.ServerPosition, Player.ServerPosition))
+                            .First()
+                            .ServerPosition
+                        : HeroList.Where(h => h.IsAlly && !h.IsDead && !h.IsMe)
+                            .OrderBy(h => Vector3.Distance(h.ServerPosition, Player.ServerPosition))
+                            .First()
+                            .ServerPosition;
                     E.Cast(jumppoint);
                     Q.CastOnUnit(currenttarg);
                 }
-             }
+            }
+        }
 
-        
+
 
         private static void KillSteal()
         {
