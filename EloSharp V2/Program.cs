@@ -196,7 +196,7 @@ namespace EloSharp_V2
 
         private static Vector2 GetScaledVector(Vector2 vector, Vector2 scale)
         {
-            return Vector2.Modulate(scale, vector);
+            return Vector2.Multiply(scale, vector);
         }
 
         private static Render.Sprite loadbutton()

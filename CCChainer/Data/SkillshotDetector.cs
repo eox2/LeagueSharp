@@ -46,10 +46,6 @@ namespace CCChainer.Data
             //GameObject.OnCreate += GameObject_OnCreate; //TODO: Detect lux R and other large skillshots.
             GameObject.OnDelete += GameObject_OnDelete;
 
-            if (false && Config.TestOnAllies && ObjectManager.Get<Obj_AI_Hero>().Count() == 1)
-            {
-                Game.OnWndProc += Game_OnWndProc;
-            }
         }
 
         private static void Game_OnWndProc(WndEventArgs args)

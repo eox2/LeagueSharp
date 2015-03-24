@@ -129,7 +129,7 @@ namespace CCChainer.Data
         private static void Game_OnGameStart(EventArgs args)
         {
             //Add the game events.
-            Game.OnGameUpdate += Game_OnOnGameUpdate;
+            Game.OnUpdate += Game_OnOnGameUpdate;
             Obj_AI_Hero.OnIssueOrder += ObjAiHeroOnOnIssueOrder;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             //Set up the OnDetectSkillshot Event.
@@ -276,14 +276,14 @@ namespace CCChainer.Data
                         {
                             var v = minion.ServerPosition.To2D() - skillshot.Unit.ServerPosition.To2D();
                             if (minion.Name == "Seed" && edge1.CrossProduct(v) > 0 && v.CrossProduct(edge2) > 0 &&
-                                minion.Distance(skillshot.Unit) < 800 &&
+                                Vector3.Distance(skillshot.Unit.ServerPosition, minion.ServerPosition) < 800 &&
                                 (minion.Team != ObjectManager.Player.Team || Config.TestOnAllies))
                             {
                                 var start = minion.ServerPosition.To2D();
                                 var end = skillshot.Unit.ServerPosition.To2D()
                                     .Extend(
                                         minion.ServerPosition.To2D(),
-                                        skillshot.Unit.Distance(minion) > 200 ? 1300 : 1000);
+                                        Vector3.Distance(minion.ServerPosition, skillshot.Unit.ServerPosition) > 200 ? 1300 : 1000);
 
                                 var skillshotToAdd = new Skillshot(
                                     skillshot.DetectionType, skillshot.SpellData, skillshot.StartTick, start, end,
@@ -463,7 +463,7 @@ namespace CCChainer.Data
                             foreach (var evadeSpell in EvadeSpellDatabase.Spells)
                             {
                                 if (evadeSpell.IsShield && evadeSpell.CanShieldAllies &&
-                                    ally.Distance(ObjectManager.Player) < evadeSpell.MaxRange &&
+                                    Vector3.Distance(ObjectManager.Player.ServerPosition, ally.ServerPosition) < evadeSpell.MaxRange &&
                                     dangerLevel >= evadeSpell.DangerLevel &&
                                     ObjectManager.Player.Spellbook.CanUseSpell(evadeSpell.Slot) == SpellState.Ready &&
                                     IsAboutToHit(ally, evadeSpell.Delay))
@@ -709,13 +709,14 @@ namespace CCChainer.Data
         {
             if (sender.IsMe)
             {
+                /*
                 if (Config.PrintSpellData)
                 {
                     Console.WriteLine(
                         Utils.TickCount + "DASH: Speed: " + args.Speed + " Width:" +
                         args.EndPos.Distance(args.StartPos));
                 }
-
+                */
                 Utility.DelayAction.Add(args.Duration, delegate { Evading = false; });
             }
         }
@@ -1293,21 +1294,6 @@ namespace CCChainer.Data
             }
 
 
-            if (Config.TestOnAllies)
-            {
-                var myPath = ObjectManager.Player.GetWaypoints();
-
-                for (var i = 0; i < myPath.Count - 1; i++)
-                {
-                    var A = myPath[i];
-                    var B = myPath[i + 1];
-                    var SA = Drawing.WorldToScreen(A.To3D());
-                    var SB = Drawing.WorldToScreen(B.To3D());
-                     Drawing.DrawLine(SA.X, SA.Y, SB.X, SB.Y, 1, Color.White);
-                }
-
-                Drawing.DrawCircle(EvadePoint.To3D(), 300, Color.White);
-            }
 
         }
 

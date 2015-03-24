@@ -389,7 +389,7 @@ namespace ReplaySharp
 
         private static Vector2 GetScaledVector(Vector2 vector)
         {
-            return Vector2.Modulate(Scale, vector);
+            return Vector2.Multiply(Scale, vector);
         }
         private static Render.Sprite loadrecordicon()
         {

@@ -364,7 +364,7 @@ namespace iTunes
 
         private static Vector2 GetScaledVector(Vector2 vector)
         {
-            return Vector2.Modulate(_scale, vector);
+            return Vector2.Multiply(_scale, vector);
         }
 
 

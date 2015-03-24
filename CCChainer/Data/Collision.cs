@@ -151,8 +151,7 @@ namespace CCChainer.Data
                             ObjectManager.Get<Obj_AI_Hero>()
                                 .Where(
                                     h =>
-                                        (h.IsValidTarget(1200, false) && h.Team == ObjectManager.Player.Team && !h.IsMe ||
-                                         Config.TestOnAllies && h.Team != ObjectManager.Player.Team)))
+                                        (h.IsValidTarget(1200, false) && h.Team == ObjectManager.Player.Team && !h.IsMe)))
                         {
                             var pred = FastPrediction(
                                 from, hero,

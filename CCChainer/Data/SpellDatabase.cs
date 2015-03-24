@@ -33,31 +33,6 @@ namespace CCChainer.Data
         {
             //Add spells to the database 
 
-            #region Test
-
-            if (Config.TestOnAllies)
-            {
-                Spells.Add(
-                    new SpellData
-                    {
-                        ChampionName = ObjectManager.Player.ChampionName,
-                        SpellName = "TestSkillShot",
-                        Slot = SpellSlot.R,
-                        Type = SkillShotType.SkillshotCircle,
-                        Delay = 600,
-                        Range = 650,
-                        Radius = 350,
-                        MissileSpeed = int.MaxValue,
-                        FixedRange = false,
-                        AddHitbox = true,
-                        DangerValue = 5,
-                        IsDangerous = true,
-                        MissileSpellName = "TestSkillShot",
-                    });
-            }
-
-            #endregion Test
-
             #region Aatrox
 
             Spells.Add(
