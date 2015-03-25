@@ -537,13 +537,13 @@ namespace SephKhazix
 
                 return;
             }
-
+            //if current targ not low enuf find new targ in range 
             var validtargets =
                 ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget() && !x.IsZombie).OrderBy(x => x.Health);
             
             var Qtarg =
                 validtargets.FirstOrDefault(
-                    x => x.Health <= QDmg && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range);
+                    x => x.Health < getdamages(SpellSlot.Q, x) && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range);
             var Etarg =
                 validtargets.FirstOrDefault(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= E.Range * 2 && x != Qtarg);
             
@@ -558,7 +558,7 @@ namespace SephKhazix
             else
             {
                 var qtarget =
-                    ObjectManager.Get<Obj_AI_Hero>().FirstOrDefault(x => x.IsValidTarget() && !x.IsZombie && x.Health < QDmg && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range);
+                    ObjectManager.Get<Obj_AI_Hero>().FirstOrDefault(x => x.IsValidTarget() && !x.IsZombie && x.Health < getdamages(SpellSlot.Q, x) && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range);
                         var jumppoint = ishealthy()
                         ? HeroList.Where(h => h.IsEnemy && !h.IsDead && !h.IsMe && !h.IsZombie)
                             .OrderBy(h => Vector3.Distance(h.ServerPosition, Player.ServerPosition))
