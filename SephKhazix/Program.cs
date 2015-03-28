@@ -160,6 +160,7 @@ namespace SephKhazix
             Game.PrintChat("<font color='#1d87f2'>SephKhazix has been Loaded. Version 1.7.</font>");
             HeroList = ObjectManager.Get<Obj_AI_Hero>().ToList();
 
+
         }
 
         private static void CastWE(Obj_AI_Base unit, Vector2 unitPosition, int minTargets = 0)

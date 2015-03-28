@@ -52,31 +52,31 @@
   <ItemGroup>
     <Reference Include="clipper_library, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\\System\clipper_library.dll</HintPath>
+      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\System\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp, Version=1.0.0.25, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\\System\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\\System\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\System\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Toolkit, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\\System\SharpDX.Toolkit.dll</HintPath>
+      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\System\SharpDX.Toolkit.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Toolkit.Graphics, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\\System\SharpDX.Toolkit.Graphics.dll</HintPath>
+      <HintPath>C:\Users\Laptop\Desktop\LeagueSharp\System\SharpDX.Toolkit.Graphics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

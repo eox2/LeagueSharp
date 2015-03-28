@@ -28,7 +28,7 @@ namespace CCChainer
             Game.PrintChat("CC Chainer Loaded - Beta");
             DefineSpells();
             CreateMenu();
-            Game.OnGameUpdate += OnGameUpdate;
+            Game.OnUpdate += OnGameUpdate;
         }
 
 

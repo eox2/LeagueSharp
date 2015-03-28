@@ -12,6 +12,8 @@ using Color = System.Drawing.Color;
 
 namespace SpotifySharp
 {
+    //Credits to SpotifyLib && https://code.google.com/p/spotifycontrol/source/browse/trunk/SpotifyControl/Controllers/ControllerSpotify.vb & Trees
+
     internal class SpotifySharp
     {
         private const int KeyMessage = 0x319;
@@ -20,6 +22,10 @@ namespace SpotifySharp
         private const long PlaypauseKey = 0xE0000L;
         private const long NexttrackKey = 0xB0000L;
         private const long PreviousKey = 0xC0000L;
+        private const long VolumeUpKey = 0xa0000L;
+        private const long VolumeDownKey = 0x90000L;
+
+
         private static readonly Vector2 Scale = new Vector2(1.25f, 1.25f);
         private static Vector2 _posplay = new Vector2(Drawing.Width / 2f - 286.5f, 15);
         private static Vector2 _posprev = new Vector2(Drawing.Width / 2f - 250.5f, 15);
@@ -41,41 +47,13 @@ namespace SpotifySharp
         public static string Songname = "Not initialized - Press Play";
 
 
-        // Credit goes to http://code.google.com/p/spotifycontrol/source/browse/trunk/SpotifyControl/Controllers/ControllerSpotify.vb && SpotifyLib
-        // for some of the key message commands, etc and Trees for some sprite code
-        [DllImport("user32.dll")]
-        internal static extern IntPtr SetFocus(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        [DllImport("user32.dll")]
-        internal static extern bool SetForegroundWindow(IntPtr hWnd);
-
-
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern int GetWindowTextLength(IntPtr hWnd);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
-        [return: MarshalAs(UnmanagedType.Bool)]
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("user32.dll")]
-        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
-
 
         public static void Main(string[] args)
         {
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
+            CustomEvents.Game.OnGameLoad += OnGameLoad;
         }
 
-        public static void Game_OnGameLoad(EventArgs args)
+        public static void OnGameLoad(EventArgs args)
         {
             _spotifyicon = Loadspotify();
             _play = Loadplay();
@@ -111,7 +89,7 @@ namespace SpotifySharp
             _config.AddToMainMenu();
 
 
-            if (IsSpotifyOpen())
+            if (SpotifyOpen())
             {
                 Game.PrintChat("::: Spotify has been detected :::");
             }
@@ -127,7 +105,7 @@ namespace SpotifySharp
             changePrev.ValueChanged += delegate { PreviousTrackkeys(); };
 
             Game.PrintChat("Loaded Spotify Controller by Seph");
-            if (!IsSpotifyOpen())
+            if (!SpotifyOpen())
             {
                 Game.PrintChat("Spotify isn't running");
             }
@@ -138,7 +116,7 @@ namespace SpotifySharp
 
         private static void Bringtofront()
         {
-            if (IsSpotifyOpen())
+            if (SpotifyOpen())
             {
                 ShowWindow(FindSpotify(), 1);
                 SetForegroundWindow(FindSpotify());
@@ -340,13 +318,12 @@ namespace SpotifySharp
             return sb.ToString();
         }
 
-        public static bool IsSpotifyOpen()
+
+
+        public static bool SpotifyOpen()
         {
-            if (GetTitle() == "")
-            {
-                return false;
-            }
-            return true;
+            IntPtr Spotify = FindWindow("SpotifyMainWindow", null);
+            return Spotify != null;
         }
 
 
@@ -602,5 +579,31 @@ namespace SpotifySharp
                 }
             }
         }
+
+        [DllImport("user32.dll")]
+        internal static extern IntPtr SetFocus(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        internal static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern int GetWindowTextLength(IntPtr hWnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        [return: MarshalAs(UnmanagedType.Bool)]
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
     }
+
 }
