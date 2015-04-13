@@ -400,6 +400,18 @@ namespace SpotifySharp
             keybd_event(ControlKey, 0x1D, 0x2, 0);
         }
 
+        public static void VollUp()
+        {
+            IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
+            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(VolumeUpKey));
+        }
+        public static void VollDown()
+        {
+            IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
+            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(VolumeDownKey));
+        }
+
+
         public static void NextTrack()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);

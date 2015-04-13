@@ -13,6 +13,10 @@ using Font = SharpDX.Direct3D9.Font;
 
 namespace EloSharp_V2
 {
+
+    /*
+     * To do: Test and Update Assembly once Loader adds ability to allow websites through sandbox
+     */
     public class EloSharp
     {
         public static bool disabletext;
@@ -48,9 +52,9 @@ namespace EloSharp_V2
             Misc.MenuAttach(Misc.Config);
 
         
-            if (File.Exists(Config.LeagueSharpDirectory + "\\elosharp.txt"))
+            if (File.Exists(Config.AppDataDirectory + "\\elosharp.txt"))
             {
-                nameofplayer = File.ReadAllText(Config.LeagueSharpDirectory + "\\elosharp.txt").ToLower();
+                nameofplayer = File.ReadAllText(Config.AppDataDirectory + "\\elosharp.txt").ToLower();
             }
 
             if (Misc.Validregion() && (nameofplayer != ""))
@@ -94,22 +98,22 @@ namespace EloSharp_V2
         {
             Game.PrintChat("<<EloSharp V2 Loaded>>");
 
-            if (File.Exists(LeagueSharp.Common.Config.LeagueSharpDirectory + "\\elosharp.txt") &&
+            if (File.Exists(LeagueSharp.Common.Config.AppDataDirectory+ "\\elosharp.txt") &&
                 Misc.Config.Item("autoupdate").GetValue<bool>())
             {
                 string getplayername =
-                    File.ReadAllText(LeagueSharp.Common.Config.LeagueSharpDirectory + "\\elosharp.txt");
+                    File.ReadAllText(LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt");
                 if (getplayername != ObjectManager.Player.Name)
                 {
                     Game.PrintChat("EloSharp has added the current name as the default user for faster lookups!");
                     File.WriteAllText(
-                        LeagueSharp.Common.Config.LeagueSharpDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
+                        LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
                 }
             }
-            if (!File.Exists(LeagueSharp.Common.Config.LeagueSharpDirectory + "\\elosharp.txt"))
+            if (!File.Exists(LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt"))
             {
                 File.WriteAllText(
-                    LeagueSharp.Common.Config.LeagueSharpDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
+                    LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
                 Game.PrintChat("EloSharp has added the current name as the default user for faster lookups!");
             }
             

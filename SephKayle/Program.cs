@@ -91,7 +91,7 @@ namespace SephKayle
         static void OnGameLoad(EventArgs args)
         {
             Player = ObjectManager.Player;
-            if (Player.ChampionName != "Kayle")
+            if (Player.BaseSkinName != "Kayle")
             {
                 return;
             }
@@ -170,11 +170,7 @@ namespace SephKayle
 
         private static void WaveClear()
         {
-            if (Player.IsDead)
-            {
-                return;
-            }
-            
+     
             var minions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsEnemy && Player.Distance(m) <= incrange);
             if (minions.Any() && Config.Item("UseEwc").GetValue<bool>() && E.IsReady() && !Eon)
             {
@@ -329,6 +325,10 @@ namespace SephKayle
 
         static void GameTick(EventArgs args)
         {
+            if (Player.IsDead)
+            {
+                return;
+            }
             if (!Config.Item("onlyhincdmg").GetValue<bool>() || !Config.Item("onlyuincdmg").GetValue<bool>())
             {
                 HealUltManager();

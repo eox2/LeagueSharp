@@ -39,7 +39,9 @@ namespace SephKhazix
         {
             Player = ObjectManager.Player;
             if (Player.BaseSkinName != ChampionName)
+            {
                 return;
+            }
 
             Q = new Spell(SpellSlot.Q, 325f);
             W = new Spell(SpellSlot.W, 1000f);
@@ -267,6 +269,10 @@ namespace SephKhazix
 
         private static void OnGameUpdate(EventArgs args)
         {
+            if (Player.IsDead)
+            {
+                return;
+            }
             CheckSpells();
 
             if (Config.Item("Combo").GetValue<KeyBind>().Active)
