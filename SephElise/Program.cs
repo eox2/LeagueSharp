@@ -39,7 +39,7 @@ namespace SephElise
             ES = new Spell(SpellSlot.E, 750f);
             R = new Spell(SpellSlot.R, 0);
             W.SetSkillshot(0.25f, 100f, 1000, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.25f, 55f, 1450, true, SkillshotType.SkillshotLine);
+            E.SetSkillshot(0.25f, 55f, 1600, true, SkillshotType.SkillshotLine);
 
             IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
