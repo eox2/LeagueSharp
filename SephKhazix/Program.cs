@@ -650,7 +650,7 @@ namespace SephKhazix
                 var dmg = (Player.GetAutoAttackDamage(target) * 2) + qdmg;
                 if (target.Health < dmg && target.Health > qdmg)
                 { //save some unnecessary q's if target is killable with 2 autos instead of Q as Q is important for double jumping
-                    Game.PrintChat("cancelled Q");
+                   // Game.PrintChat("cancelled Q");
                     args.Process = false;
                 }
             }
