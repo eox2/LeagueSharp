@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SephZhonya
+namespace AutoZhonya
 {
     public static class DangerousSpells
     {
@@ -586,7 +586,7 @@ namespace SephZhonya
 
         public static Data GetByName2(string spellName)
         {
-            return AvoidableSpells.FirstOrDefault(spell => spell.Name.ToLower() == spellName);
+            return AvoidableSpells.FirstOrDefault(spell => String.Equals(spell.Name, spellName, StringComparison.CurrentCultureIgnoreCase));
         }
     }
 }

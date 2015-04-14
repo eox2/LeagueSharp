@@ -6,9 +6,6 @@ using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
 
-
-//ToDo: Better Evolved W calcs, figure out why OnWaveClear activates when farm keybind not active
-
 namespace SephKhazix
 {
     internal class Program
@@ -18,16 +15,15 @@ namespace SephKhazix
         public static Spell Q, W, E, R, WE;
         private const float Wangle = 22 * (float)Math.PI / 180;
         private static Menu Config;
-        private static Items.Item HDR;
-        private static Items.Item TIA;
-        private static Items.Item BKR;
-        private static Items.Item BWC;
-        private static Items.Item YOU;
+        private static Items.Item HDR, TIA, BKR, BWC, YOU;
         private static SpellSlot IgniteSlot;
         private static List<Obj_AI_Hero> HeroList;
+        private static bool EvolvedQ, EvolvedW, EvolvedE, EvolvedR;
+        private static List<Vector3> TurretPositions = new List<Vector3>();
 
         private static Obj_AI_Hero Player;
-        private static bool Wnorm, Wevolved, Eevolved;
+        private static bool Wnorm =  true, Wevolved, Eevolved;
+  
 
 
         private static void Main(string[] args)
@@ -38,6 +34,7 @@ namespace SephKhazix
         private static void Game_OnGameLoad(EventArgs args)
         {
             Player = ObjectManager.Player;
+
             if (Player.BaseSkinName != ChampionName)
             {
                 return;
@@ -134,14 +131,20 @@ namespace SephKhazix
             Config.SubMenu("Ks").AddItem(new MenuItem("UseQKs", "Use Q")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseWKs", "Use W")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEKs", "Use E")).SetValue(true);
-            Config.SubMenu("Ks").AddItem(new MenuItem("djump", "Double Jump (Beta)")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEQKs", "Use EQ in KS")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEWKs", "Use EW in KS")).SetValue(false);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseTiaKs", "Use items")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("Edelay", "E Delay (ms)").SetValue(new Slider(0, 0, 300)));
             Config.SubMenu("Ks").AddItem(new MenuItem("autoescape", "Use E to get out when low")).SetValue(false);
-
             Config.SubMenu("Ks").AddItem(new MenuItem("UseIgnite", "Use Ignite")).SetValue(true);
+
+            Config.AddSubMenu(new Menu("Double Jumping", "DoubleJump"));
+            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("djumpenabled", "Enabled")).SetValue(true);
+            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("save", "Save Double Jump Abilities")).SetValue(true);
+            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("jcursor", "Jump to Cursor (true) or false for script logic")).SetValue(true);
+            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("secondjump", "Do second Jump")).SetValue(true);
+            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("jcursor2", "Second Jump to Cursor (true) or false for script logic")).SetValue(true);
+            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("jumpdrawings", "Enable Jump Drawinsg")).SetValue(true);
 
 
             //Drawings
@@ -154,15 +157,23 @@ namespace SephKhazix
             //Debug
             Config.AddSubMenu(new Menu("Debug", "Debug"));
             Config.SubMenu("Debug").AddItem(new MenuItem("Debugon", "Enable Debugging").SetValue(false));
-
             Config.AddToMainMenu();
 
+            //Get Turrets
+
+            foreach (var t in ObjectManager.Get<Obj_AI_Hero>().Where(t => t.IsAlly))
+            {
+                TurretPositions.Add(t.ServerPosition);
+            }
+
             Game.OnUpdate += OnGameUpdate;
+            Game.OnUpdate += CheckSpells;
+            Game.OnUpdate += DoubleJump;
+            Spellbook.OnCastSpell += SpellCast;
+            Orbwalking.BeforeAttack += BeforeAttack;
             Drawing.OnDraw += OnDraw;
             Game.PrintChat("<font color='#1d87f2'>SephKhazix has been Loaded. Version 1.7.</font>");
             HeroList = ObjectManager.Get<Obj_AI_Hero>().ToList();
-
-
         }
 
         private static void CastWE(Obj_AI_Base unit, Vector2 unitPosition, int minTargets = 0)
@@ -273,7 +284,6 @@ namespace SephKhazix
             {
                 return;
             }
-            CheckSpells();
 
             if (Config.Item("Combo").GetValue<KeyBind>().Active)
             {
@@ -308,7 +318,7 @@ namespace SephKhazix
             if (target != null)
             {
                 var usePacket = Config.Item("usePackets").GetValue<bool>();
-                if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= Q.Range && Config.Item("UseQHarass").GetValue<bool>() && Q.IsReady())
+                if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= Q.Range && Config.Item("UseQHarass").GetValue<bool>() && Q.IsReady() && !Jumping)
                 {
                     Orbwalker.SetAttack(false);
                     Q.Cast(target, usePacket);
@@ -470,7 +480,7 @@ namespace SephKhazix
         public static bool targetisisolated(Obj_AI_Base target)
         {
             var enes = ObjectManager.Get<Obj_AI_Base>()
-                .Where(her => her.IsEnemy && her.NetworkId != target.NetworkId && target.Distance(her) < 500 && !her.IsMe)
+                .Where(her => her.IsEnemy && her.NetworkId != target.NetworkId && target.Distance(her) < 450 && !her.IsMe)
                 .ToArray();
             return !enes.Any();
         }
@@ -491,7 +501,7 @@ namespace SephKhazix
                     return targetisisolated(target) ? Player.GetSpellDamage(target, SpellSlot.Q, 1) : Player.GetSpellDamage(target, SpellSlot.Q);
 
                 }
-                else
+                if (Q.Range > 325)
                 {
                     return Player.GetSpellDamage(target, SpellSlot.Q, targetisisolated(target) ? 3 : 2);
                 }
@@ -501,101 +511,169 @@ namespace SephKhazix
 
         public static bool ishealthy()
         {
-            return Player.HealthPercentage() > 20;
+            return Player.HealthPercent > 20;
         }
 
-        private static void DoubleJump(Obj_AI_Hero currenttarg)
+        private static Vector3 Jumppoint1 = new Vector3();
+        private static Vector3 Jumppoint2 = new Vector3();
+        private static bool Jumping = false;
+
+        private static void DoubleJump(EventArgs args)
         {
-
-            double QDmg = getdamages(SpellSlot.Q, currenttarg);
-
-            if (currenttarg.Health <= QDmg && currenttarg.Distance(Player.Position) <= Q.Range)
+            if (!E.IsReady() || !Eevolved || !Config.Item("djumpenabled").GetValue<bool>())
             {
-                var jumptarget = ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(x => x.IsValidTarget() && x.Distance(Player.ServerPosition) < 2000f && x != currenttarg)
-                    .OrderBy(x => x.Health);
-                if (jumptarget.Any())
+                return;
+            }
+
+            var Targets = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget() && !x.IsInvulnerable && !x.IsZombie);
+
+            if (Q.IsReady())
+            {
+                var CheckQKillable = Targets.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Q.Range - 50 && getdamages(SpellSlot.Q, x) > x.Health).FirstOrDefault();
+
+                if (CheckQKillable != null)
                 {
-                    var jtarg = jumptarget.FirstOrDefault();
-                    if (jtarg != null && jtarg != currenttarg) 
+                    Jumping = true;
+                    Jumppoint1 = GetJumpPoint(CheckQKillable);
+                    E.Cast(Jumppoint1);
+                    Q.Cast(CheckQKillable);
+                    Utility.DelayAction.Add(250 + Game.Ping, () =>
                     {
-                        //   Game.PrintChat("Seperate targets" + " Cuurrent targ " + currenttarg + " jump targ " + jtarg);
-                        E.Cast(jtarg.ServerPosition);
-                        Q.CastOnUnit(currenttarg);
-                        return;
-                    }
-                }
-                else
-                {
-                    var jumppoint = ishealthy()
-                        ? ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(x => x.IsValidTarget() && !x.IsZombie && x != currenttarg)
-                            .FirstOrDefault()
-                        : ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(x => x.IsAlly && !x.IsZombie && !x.IsDead && !x.IsMe)
-                            .OrderBy(x => Vector3.Distance(x.ServerPosition, Player.ServerPosition))
-                            .FirstOrDefault();
-
-                 //   Game.PrintChat("Seperate targets");
-
-                    E.Cast(jumppoint.ServerPosition);
-                    Q.CastOnUnit(currenttarg);
-                }
-
-                return;
-            }
-            //if current targ not low enuf find new targ in range 
-            var validtargets =
-                ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget() && !x.IsZombie).OrderBy(x => x.Health);
-            
-            var Qtarg =
-                validtargets.FirstOrDefault(
-                    x => x.Health < getdamages(SpellSlot.Q, x) && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range);
-            var Etarg =
-                validtargets.FirstOrDefault(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= E.Range * 2 && x != Qtarg);
-            
-
-            if (Etarg != null && Qtarg != null && Qtarg != Etarg)
-            {
-               // Game.PrintChat("Not initial target...");
-                E.Cast(Etarg.ServerPosition);
-                Q.CastOnUnit(Qtarg);
-                return;
-            }
-            else
-            {
-                var qtarget =
-                    ObjectManager.Get<Obj_AI_Hero>().FirstOrDefault(x => x.IsValidTarget() && !x.IsZombie && x.Health < getdamages(SpellSlot.Q, x) && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range);
-                        var jumppoint = ishealthy()
-                        ? HeroList.Where(h => h.IsEnemy && !h.IsDead && !h.IsMe && !h.IsZombie)
-                            .OrderBy(h => Vector3.Distance(h.ServerPosition, Player.ServerPosition))
-                            .FirstOrDefault()
-                            .ServerPosition
-                        : HeroList.Where(h => h.IsAlly && !h.IsDead && !h.IsMe)
-                            .OrderBy(h => Vector3.Distance(h.ServerPosition, Player.ServerPosition))
-                            .FirstOrDefault()
-                            .ServerPosition;
-                if (jumppoint != null && qtarget != null)
-                {
-                   // Game.PrintChat("Final check");
-                    E.Cast(jumppoint);
-                    Q.CastOnUnit(qtarget);
+                        if (E.IsReady())
+                        {
+                            Jumppoint2 = GetJumpPoint(CheckQKillable);
+                            E.Cast(Jumppoint2);
+                        }
+                        Jumping = false;
+                    });
                     return;
                 }
             }
-         }
+
+            if (HDR.IsReady())
+            {
+                var CheckHDRKillable = Targets.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) < HDR.Range - 50 && Player.GetItemDamage(x, Damage.DamageItems.Hydra) > x.Health).FirstOrDefault();
+
+                if (CheckHDRKillable != null)
+                {
+                    Jumping = true;
+                    Jumppoint1 = GetJumpPoint(CheckHDRKillable);
+                    E.Cast(Jumppoint1);
+                    HDR.Cast(CheckHDRKillable);
+                    Utility.DelayAction.Add(250 + Game.Ping, () =>
+                    {
+                        if (E.IsReady())
+                        {
+                            Jumppoint2 = GetJumpPoint(CheckHDRKillable);
+                            E.Cast(Jumppoint2);
+                        }
+                        Jumping = false;
+                    });
+                    return;
+                }
+            }
+
+         if (TIA.IsReady())
+            {
+                var CheckHDRKillable = Targets.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) < TIA.Range - 50 && Player.GetItemDamage(x, Damage.DamageItems.Tiamat) > x.Health).FirstOrDefault();
+                if (CheckHDRKillable != null)
+                {
+                    Jumping = true;
+                    Jumppoint1 = GetJumpPoint(CheckHDRKillable);
+                    E.Cast(Jumppoint1);
+                    TIA.Cast(CheckHDRKillable);
+                    Utility.DelayAction.Add(250 + Game.Ping, () =>
+                    {
+                        if (E.IsReady())
+                        {
+                            Jumppoint2 = GetJumpPoint(CheckHDRKillable, false);
+                            E.Cast(Jumppoint1);
+                        }
+                        Jumping = false;
+                    });
+                    return;
+                }
+            }
+        }
+
         
+
+        static Vector3 GetJumpPoint(Obj_AI_Hero Qtarget, bool firstjump = true)
+        {
+            if (firstjump && Config.Item("jcursor").GetValue<bool>())
+            {
+                return Game.CursorPos;
+            }
+
+            if (!firstjump && Config.Item("jcursor2").GetValue<bool>())
+            {
+                return Game.CursorPos;
+            }
+
+            Vector3 Position = new Vector3();
+            var jumptarget = ishealthy()
+                  ? ObjectManager.Get<Obj_AI_Hero>()
+                      .Where(
+                          x =>
+                              x.IsValidTarget() && !x.IsZombie && x != Qtarget &&
+                              Vector3.Distance(Player.ServerPosition, x.ServerPosition) < E.Range)
+                      .FirstOrDefault()
+                  :
+              ObjectManager.Get<Obj_AI_Hero>()
+                  .Where(
+                      x =>
+                          x.IsAlly && !x.IsZombie && !x.IsDead && !x.IsMe &&
+                          Vector3.Distance(Player.ServerPosition, x.ServerPosition) < E.Range)
+                  .FirstOrDefault();
+
+            if (jumptarget != null)
+            {
+                Position = jumptarget.ServerPosition;
+            }
+            if (jumptarget == null)
+            {
+                Position = Player.ServerPosition.Extend(TurretPositions.MinOrDefault(h => Player.Distance(h)), E.Range);
+            }
+            return Position;
+        }
+
+        static void SpellCast(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (!Eevolved)
+            {
+                return;
+            }
+            if (args.Slot.Equals(SpellSlot.Q) && args.Target is Obj_AI_Hero && Config.Item("djumpenabled").GetValue<bool>() && Config.Item("save").GetValue<bool>())
+            {
+                var target = args.Target as Obj_AI_Hero;
+                var qdmg = getdamages(SpellSlot.Q, target);
+                var dmg = (Player.GetAutoAttackDamage(target) * 2) + qdmg;
+                if (target.Health < dmg && target.Health > qdmg)
+                { //save some unnecessary q's if target is killable with 2 autos instead of Q as Q is important for double jumping
+                    Game.PrintChat("cancelled Q");
+                    args.Process = false;
+                }
+            }
+        }
+
+        static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            if (args.Target.Type == GameObjectType.obj_AI_Hero && Config.Item("djumpenabled").GetValue<bool>() && Config.Item("save").GetValue<bool>())
+            {
+                if (args.Target.Health < getdamages(SpellSlot.Q, (Obj_AI_Hero) args.Target) &&
+                    Player.ManaPercent > 15)
+                {
+                    args.Process = false;
+                }
+            }
+        }
 
         private static void KillSteal()
         {
             Obj_AI_Hero target = ObjectManager.Get<Obj_AI_Hero>()
-                  .Where(x => x.IsValidTarget() && x.Distance(Player.Position) < 1000f && !x.IsZombie)
-                  .OrderBy(x => x.Health).FirstOrDefault();
-
-            if (Config.Item("djump").GetValue<Boolean>() && Eevolved && E.IsReady() && Q.IsReady())
-            {
-                DoubleJump(target);
-            }
+                .Where(x => x.IsValidTarget() && x.Distance(Player.Position) < 1000f && !x.IsZombie)
+                .MinOrDefault(x => x.Health);
+            
             var usePacket = Config.Item("usePackets").GetValue<bool>();
 
             if (target != null)
@@ -624,7 +702,7 @@ namespace SephKhazix
                             ObjectManager.Get<Obj_AI_Hero>()
                                 .FirstOrDefault(
                                     x =>
-                                        x.IsAlly && x.CountEnemiesInRange(300) == 0 && x.HealthPercentage() > 45 &&
+                                        x.IsAlly && x.CountEnemiesInRange(300) == 0 && x.HealthPercent> 45 &&
                                         E.IsInRange(x));
                         if (objAiHero != null)
                         {
@@ -637,7 +715,7 @@ namespace SephKhazix
                 }
                 if (Q.IsReady() && Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= Q.Range && Config.Item("UseQKs").GetValue<bool>())
                 {
-                    if (target.Health <= QDmg)
+                    if (target.Health <= QDmg && !Jumping)
                     {
                         Orbwalker.SetAttack(false);
                         Q.Cast(target, usePacket);
@@ -748,37 +826,28 @@ namespace SephKhazix
         }
 
 
-        private static void CheckSpells()
+        private static void CheckSpells(EventArgs args)
         {
-
             //check for evolutions
-            if (ObjectManager.Player.HasBuff("khazixqevo", true))
+            if (ObjectManager.Player.HasBuff("khazixqevo", true) && !EvolvedQ)
             {
                 Q.Range = 375;
+                EvolvedQ = true;
             }
-            if (ObjectManager.Player.HasBuff("khazixwevo", true))
+            if (ObjectManager.Player.HasBuff("khazixwevo", true) && !Wevolved)
             {
                 Wevolved = true;
                 Wnorm = false;
                 W.SetSkillshot(0.225f, 100f, 828.5f, true, SkillshotType.SkillshotLine);
             }
-            if (ObjectManager.Player.HasBuff("khazixeevo", true))
+            if (ObjectManager.Player.HasBuff("khazixeevo", true) && !Eevolved)
             {
                 E.Range = 1000;
                 Eevolved = true;
             }
-
-            if (!ObjectManager.Player.HasBuff("khazixwevo", true))
-            {
-                Wnorm = true;
-                Wevolved = false;
-            }
-
-
         }
-
-        //Trees
-        private static HitChance HarassHitChance()
+        
+        private static HitChance HarassHitChance() 
         {
             var hitchance = Config.Item("AutoWHitchance").GetValue<StringList>();
             switch (hitchance.SList[hitchance.SelectedIndex])
@@ -792,7 +861,7 @@ namespace SephKhazix
             }
             return HitChance.Medium;
         }
-        // Trees End
+
 
         private static void AutoHarrass()
         {
@@ -892,7 +961,7 @@ namespace SephKhazix
 
                 // Normal abilities
                 if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= Q.Range && Config.Item("UseQCombo").GetValue<bool>() &&
-                    Q.IsReady())
+                    Q.IsReady() && !Jumping)
                 {
                     Orbwalker.SetAttack(false);
                     Q.Cast(target, usePacket);
@@ -920,9 +989,13 @@ namespace SephKhazix
                 {
                     PredictionOutput pred = E.GetPrediction(target);
                     if (target.IsValid && !target.IsDead)
+                    {
                         E.Cast(pred.CastPosition, usePacket);
+                    }
                     if (Config.Item("UseRGapcloseW").GetValue<bool>() && R.IsReady())
+                    {
                         R.CastOnUnit(ObjectManager.Player);
+                    }
                 }
 
 
@@ -1008,25 +1081,30 @@ namespace SephKhazix
                 {
                     var heroposwts = Drawing.WorldToScreen(x.Position);
                     Drawing.DrawText(heroposwts.X, heroposwts.Y, Color.White, "Isolated");
-
-
                 }
             }
-
-
+            if (Config.Item("jumpdrawings").GetValue<bool>() && Jumping)
+            {
+                var PlayerPosition = Drawing.WorldToScreen(Player.Position);
+                var Jump1 = Drawing.WorldToScreen(Jumppoint1).To3D();
+                var Jump2 = Drawing.WorldToScreen(Jumppoint2).To3D();
+                Render.Circle.DrawCircle(Jump1, E.Range, Color.White);
+                Render.Circle.DrawCircle(Jump2, E.Range, Color.White);
+                Drawing.DrawLine(PlayerPosition.X, PlayerPosition.Y, Jump1.X, Jump1.Y, 10, Color.DarkCyan);
+                Drawing.DrawLine(Jump1.X, Jump1.Y, Jump2.X, Jump2.Y, 25, Color.DarkCyan);
+            }
             if (Config.Item("DrawQ").GetValue<bool>())
             {
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, Color.White);
+                Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
             if (Config.Item("DrawW").GetValue<bool>())
             {
-                Render.Circle.DrawCircle(
-                    ObjectManager.Player.Position, W.Range, Color.Red);
+                Render.Circle.DrawCircle(Player.Position, W.Range, Color.Red);
             }
 
             if (Config.Item("DrawE").GetValue<bool>())
             {
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, Color.Green);
+                Render.Circle.DrawCircle(Player.Position, E.Range, Color.Green);
             }
 
         }

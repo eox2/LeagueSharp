@@ -1,13 +1,13 @@
 ﻿using System;
-using System.ComponentModel;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX;
 
-namespace SephZhonya
+namespace AutoZhonya
 {
-    //Testchange
-
+    /*
+     * To do
+     * Add Buffs for not detectable spells
+     */
     class Program
     {
 
@@ -34,8 +34,7 @@ namespace SephZhonya
             miscmenu.AddItem(new MenuItem("remaininghealth", "Remaining Health %")).SetValue(new Slider(15, 0, 100));
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
-
-                if (hero.Team != ObjectManager.Player.Team)
+                if (hero.IsEnemy)
                 {
                     foreach (var spell in DangerousSpells.AvoidableSpells)
                     {
@@ -68,23 +67,21 @@ namespace SephZhonya
         static void SpellDetector(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             // return if ally or non hero spell
-            if (sender.IsAlly || sender.Type != GameObjectType.obj_AI_Hero || !args.Target.IsMe)
+        
+            if (Player.IsDead || sender.IsAlly || !(sender is Obj_AI_Hero) || !args.Target.IsMe || args.SData.Name.ToLower().Contains("basicattack"))
             {
                 return;
             }
-            if (!args.SData.Name.ToLower().Contains("basicattack"))
-            {
-                 //Game.PrintChat(args.SData.Name + " Detected");
+               // Game.PrintChat(args.SData.Name + " Detected");
+                var Spellinfo = DangerousSpells.GetByName2(args.SData.Name);
 
-                var Spellinfo = DangerousSpells.GetByName(args.SData.Name.ToLower());
-
-                if (Spellinfo != null && zhonyaready() && args.Target.IsMe &&
+                if (Spellinfo != null && /*zhonyaready() && */
                     (Menu.Item("Enabled" + Spellinfo.DisplayName).GetValue<bool>()))
                 {
-                    Game.PrintChat("Attempting to Evade: " + args.SData.Name);
+                    Game.PrintChat("Attempting to Zhonya: " + args.SData.Name);
                     var delay = Spellinfo.BaseDelay * 1000;
-                    Utility.DelayAction.Add((int)delay, () => Zhonya.Cast());
-
+                    Utility.DelayAction.Add((int) delay, () => Zhonya.Cast());
+                    return;
                 }
 
                 if (Menu.Item("enablehpzhonya").GetValue<bool>() && zhonyaready())
@@ -97,14 +94,14 @@ namespace SephZhonya
                     var hptozhonya = Menu.Item("hptozhonya").GetValue<Slider>().Value;
                     var remaininghealthslider = Menu.Item("remaininghealth").GetValue<Slider>().Value / 100f;
                     if ((
-                        calcdmg / Player.Health) >= slidervalue || Player.HealthPercentage() <= hptozhonya || remaininghealth <= remaininghealthslider * Player.Health)
+                        calcdmg / Player.Health) >= slidervalue || Player.HealthPercent <= hptozhonya || remaininghealth <= remaininghealthslider * Player.Health)
                     {
                         Console.WriteLine("Attempting to Zhonya because incoming spell costs " + calcdmg / Player.Health
                             + " of our health.");
                         Zhonya.Cast();
                     }
                 }
-            }
+            
 
         }
 
@@ -116,7 +113,7 @@ namespace SephZhonya
 
         public static bool zhonyaready()
         {
-            return Items.HasItem(Zhonya.Id) && Zhonya.IsReady();
+            return Items.HasItem(3157) && Zhonya.IsReady();
         }
     }
 
