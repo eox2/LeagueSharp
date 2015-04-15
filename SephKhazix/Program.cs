@@ -146,7 +146,7 @@ namespace SephKhazix
             Config.AddSubMenu(new Menu("Double Jumping", "DoubleJump"));
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("djumpenabled", "Enabled")).SetValue(true);
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("save", "Save Double Jump Abilities")).SetValue(true);
-            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("noauto", "Prevent auto almost killable Q even if cooldown")).SetValue(true);
+            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("noauto", "Wait for Q instead of autos")).SetValue(false);
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("jcursor", "Jump to Cursor (true) or false for script logic")).SetValue(true);
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("secondjump", "Do second Jump")).SetValue(true);
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("jcursor2", "Second Jump to Cursor (true) or false for script logic")).SetValue(true);
