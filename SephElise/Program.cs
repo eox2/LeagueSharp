@@ -96,6 +96,7 @@ namespace SephElise
             Config.AddSubMenu(new Menu("KillSteal", "Ks"));
             Config.SubMenu("Ks").AddItem(new MenuItem("KSMode", "Use KillSteal")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseQKs", "Use Q")).SetValue(true);
+            Config.SubMenu("Ks").AddItem(new MenuItem("UseWKs", "Use W")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseQKsSpider", "Use Q (Spider)")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseWKsSpider", "Use W (Spider)")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEKsSpider", "Use E (Spider)")).SetValue(true);
@@ -286,7 +287,7 @@ namespace SephElise
                 }
 
                 if (Q.IsReady() && Player.Distance(target) <= Q.Range && target != null &&
-                    Config.Item("UseQKs").GetValue<bool>() && !SpiderForm)
+                    Config.Item("UseQKs").GetValue<bool>() && HumanForm)
                 {
                     if (target.Health <= QHDmg)
                     {
@@ -294,7 +295,7 @@ namespace SephElise
                     }
                 }
                 if (QS.IsReady() && Player.Distance(target) <= QS.Range && target != null &&
-                    Config.Item("UseQKs").GetValue<bool>() && SpiderForm)
+                    Config.Item("UseQKsSpider").GetValue<bool>() && SpiderForm)
                 {
                     if (target.Health <= QSDmg)
                     {
@@ -311,7 +312,7 @@ namespace SephElise
                 }
 
                 if (W.IsReady() && Player.Distance(target) <= WS.Range && target != null &&
-                    Config.Item("UseWKs").GetValue<bool>() && SpiderForm)
+                    Config.Item("UseWKsSpider").GetValue<bool>() && SpiderForm)
                 {
                     if (target.Health <= WSDmg)
                     {
