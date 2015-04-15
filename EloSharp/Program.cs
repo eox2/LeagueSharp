@@ -621,6 +621,7 @@ namespace EloSharp
             {
                 return;
             }
+
          
             foreach (Info info in Ranks)
             {
@@ -635,17 +636,12 @@ namespace EloSharp
 
                     if (Config.Item("enabledebug").GetValue<bool>())
                     {
-                     
                           //  Console.WriteLine("Drawing: " + info.Name);
                             Drawing.DrawText(Xee - (TextWidth(info.Ranking, font)/2), Yee - 60, Color.Yellow,
                                 info.Ranking);
-                        
-
-
                     }
 
-                    
-                    if (Config.Item("enablekdaratio").GetValue<bool>())
+                    if (info.kdaratio != null && Config.Item("enablekdaratio").GetValue<bool>())
                     {
                         if (info.kdaratio.Contains("KDA")) //checking if its valid
                         {
@@ -653,11 +649,8 @@ namespace EloSharp
                                 info.kdaratio);
                             Yee = Yee - 20;
                         }
-                     
                     }
-                    
-                
-                    if (Config.Item("enablewinratio").GetValue<bool>())
+                    if (info.winratio != null && Config.Item("enablewinratio").GetValue<bool>())
                     {
                         if (info.winratio.Contains("Win Ratio")) //checking if its valid
                         {

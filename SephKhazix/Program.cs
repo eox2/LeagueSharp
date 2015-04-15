@@ -10,8 +10,6 @@ using Color = System.Drawing.Color;
 namespace SephKhazix
 {
 
-    //Todo Sort out Damage Calculations for Isolated Q 
-
     internal class Program
     {
         private const string ChampionName = "Khazix";
@@ -145,6 +143,7 @@ namespace SephKhazix
 
             Config.AddSubMenu(new Menu("Double Jumping", "DoubleJump"));
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("djumpenabled", "Enabled")).SetValue(true);
+            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("jumpmode", "Jump Mode").SetValue(new StringList(new[] { "Default (jumps towards your nexus)", "Custom - Settings below" }, 0)));
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("save", "Save Double Jump Abilities")).SetValue(true);
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("noauto", "Wait for Q instead of autos")).SetValue(false);
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("jcursor", "Jump to Cursor (true) or false for script logic")).SetValue(true);
@@ -172,16 +171,19 @@ namespace SephKhazix
                 EnemyTurretPositions.Add(t.ServerPosition);
             }
             NexusPosition = ObjectManager.Get<Obj_HQ>().Where(o => o.IsAlly).FirstOrDefault().Position;
-
-            Game.PrintChat(Player.FlatPhysicalDamageMod.ToString());
             Game.OnUpdate += OnGameUpdate;
             Game.OnUpdate += CheckSpells;
             Game.OnUpdate += DoubleJump;
             Spellbook.OnCastSpell += SpellCast;
             Orbwalking.BeforeAttack += BeforeAttack;
             Drawing.OnDraw += OnDraw;
-            Game.PrintChat("<font color='#1d87f2'>SephKhazix has been Loaded. Version 1.8</font>");
+            Game.PrintChat("<font color='#1d87f2'>SephKhazix has been Loaded. Version 1.9. If anything is not functioning as it used to, disable Double Jumping.</font>");
             HeroList = ObjectManager.Get<Obj_AI_Hero>().ToList();
+        }
+
+        private static int GetJumpMode()
+        {
+            return Config.Item("jumpmode").GetValue<StringList>().SelectedIndex;
         }
 
         private static void CastWE(Obj_AI_Base unit, Vector2 unitPosition, int minTargets = 0)
@@ -544,7 +546,6 @@ namespace SephKhazix
                 {
                     Jumping = true;
                     Jumppoint1 = GetJumpPoint(CheckQKillable);
-                   // Jumppoint1 = Player.ServerPosition.Extend(NexusPosition, E.Range);
                     E.Cast(Jumppoint1);
                     Q.Cast(CheckQKillable);
                     var oldpos = Player.ServerPosition;
@@ -554,7 +555,6 @@ namespace SephKhazix
                         {
                            // Game.PrintChat("2nd cast");
                             Jumppoint2 = GetJumpPoint(CheckQKillable, false);
-                           // Jumppoint2 = Player.ServerPosition.Extend(NexusPosition, E.Range);
                             E.Cast(Jumppoint2);
                         }
                         Jumping = false;
@@ -566,6 +566,12 @@ namespace SephKhazix
 
         static Vector3 GetJumpPoint(Obj_AI_Hero Qtarget, bool firstjump = true)
         {
+            if (GetJumpMode() == 0)
+            {
+                return Player.ServerPosition.Extend(NexusPosition, E.Range);
+            }
+
+            
             if (firstjump && Config.Item("jcursor").GetValue<bool>())
             {
                 return Game.CursorPos;
@@ -616,7 +622,7 @@ namespace SephKhazix
                 var qdmg = GetQDamage(target);
                 var dmg = (Player.GetAutoAttackDamage(target) * 2) + qdmg;
                 if (target.Health < dmg && target.Health > qdmg)
-                { //save some unnecessary q's if target is killable with 2 autos instead of Q as Q is important for double jumping
+                { //save some unnecessary q's if target is killable with 2 autos + Q instead of Q as Q is important for double jumping
                    // Game.PrintChat("cancelled Q");
                     args.Process = false;
                 }
