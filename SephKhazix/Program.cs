@@ -665,6 +665,7 @@ namespace SephKhazix
                 double EDmg = Player.GetSpellDamage(target, SpellSlot.E);
                 double hydradmg = Player.GetItemDamage(target, Damage.DamageItems.Hydra);
                 double tiamatdmg = Player.GetItemDamage(target, Damage.DamageItems.Tiamat);
+
                 if (Config.Item("UseIgnite").GetValue<bool>() && IgniteSlot != SpellSlot.Unknown &&
                     Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 {
@@ -724,8 +725,9 @@ namespace SephKhazix
                             return;
                         }
                     }
+                }
 
-                    if (W.IsReady() && Wevolved &&
+                if (W.IsReady() && Wevolved &&
                         Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= W.Range &&
                         Config.Item("UseWKs").GetValue<bool>())
                     {
@@ -813,7 +815,7 @@ namespace SephKhazix
                     }
                 }
             }
-        }
+        
 
 
         private static void CheckSpells(EventArgs args)
@@ -987,10 +989,6 @@ namespace SephKhazix
                     Config.Item("UseRCombo").GetValue<bool>())
                 {
                     R.Cast();
-                    if (Config.Item("Debugon").GetValue<bool>())
-                    {
-                        Game.PrintChat("9 - Basic Ult Cast");
-                    }
                 }
                 // Evolved
 
