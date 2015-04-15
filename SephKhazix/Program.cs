@@ -509,7 +509,12 @@ namespace SephKhazix
                 }
                 if (Q.Range > 325)
                 {
-                    return Player.GetSpellDamage(target, SpellSlot.Q, targetisisolated(target) ? 3 : 0);
+                    var isolated = targetisisolated(target);
+                    if (isolated)
+                    {
+                        return 0.984 * Player.GetSpellDamage(target, SpellSlot.Q, 3);
+                    }
+                        return Player.GetSpellDamage(target, SpellSlot.Q, 0);
                 }
             return 0;
         }
