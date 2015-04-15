@@ -27,8 +27,12 @@ namespace SephElise
 
         private static void Game_OnGameLoad(EventArgs args)
         {
+
             Player = ObjectManager.Player;
-            if (Player.BaseSkinName != ChampionName) return;
+            if (Player.BaseSkinName != ChampionName && Player.BaseSkinName != "elisespider")
+            {
+                return;
+            }
 
             Q = new Spell(SpellSlot.Q, 625f);
             W = new Spell(SpellSlot.W, 950f);
@@ -263,60 +267,64 @@ namespace SephElise
         private static void KillSteal()
         {
             Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
-            double QHDmg = Player.GetSpellDamage(target, SpellSlot.Q, 0);
-            double QSDmg = Player.GetSpellDamage(target, SpellSlot.Q, 1);
-            double WHDmg = Player.GetSpellDamage(target, SpellSlot.W);
-            double WSDmg = Player.GetSpellDamage(target, SpellSlot.W, 1);
+            if (target != null)
+            {
+                double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
+                double QHDmg = Player.GetSpellDamage(target, SpellSlot.Q, 0);
+                double QSDmg = Player.GetSpellDamage(target, SpellSlot.Q, 1);
+                double WHDmg = Player.GetSpellDamage(target, SpellSlot.W);
+                double WSDmg = Player.GetSpellDamage(target, SpellSlot.W, 1);
 
-            if (target != null && Config.Item("UseIgnite").GetValue<bool>() && IgniteSlot != SpellSlot.Unknown &&
-                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-            {
-                if (igniteDmg >= target.Health)
-                {
-                    Player.Spellbook.CastSpell(IgniteSlot, target);
-                }
-            }
 
-            if (Q.IsReady() && Player.Distance(target) <= Q.Range && target != null &&
-                Config.Item("UseQKs").GetValue<bool>() && !SpiderForm)
-            {
-                if (target.Health <= QHDmg)
+                if (Config.Item("UseIgnite").GetValue<bool>() && IgniteSlot != SpellSlot.Unknown &&
+                    Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 {
-                    Q.Cast(target);
+                    if (igniteDmg >= target.Health)
+                    {
+                        Player.Spellbook.CastSpell(IgniteSlot, target);
+                    }
                 }
-            }
-            if (QS.IsReady() && Player.Distance(target) <= QS.Range && target != null &&
-                Config.Item("UseQKs").GetValue<bool>() && SpiderForm)
-            {
-                if (target.Health <= QSDmg)
-                {
-                    Q.Cast(target);
-                }
-            }
-            if (W.IsReady() && Player.Distance(target) <= W.Range && target != null &&
-                Config.Item("UseWKs").GetValue<bool>() && HumanForm)
-            {
-                if (target.Health <= WHDmg)
-                {
-                    W.Cast(target);
-                }
-            }
 
-            if (W.IsReady() && Player.Distance(target) <= WS.Range && target != null &&
-             Config.Item("UseWKs").GetValue<bool>() && SpiderForm)
-            {
-                if (target.Health <= WSDmg)
+                if (Q.IsReady() && Player.Distance(target) <= Q.Range && target != null &&
+                    Config.Item("UseQKs").GetValue<bool>() && !SpiderForm)
                 {
-                    W.Cast(target);
+                    if (target.Health <= QHDmg)
+                    {
+                        Q.Cast(target);
+                    }
+                }
+                if (QS.IsReady() && Player.Distance(target) <= QS.Range && target != null &&
+                    Config.Item("UseQKs").GetValue<bool>() && SpiderForm)
+                {
+                    if (target.Health <= QSDmg)
+                    {
+                        Q.Cast(target);
+                    }
+                }
+                if (W.IsReady() && Player.Distance(target) <= W.Range && target != null &&
+                    Config.Item("UseWKs").GetValue<bool>() && HumanForm)
+                {
+                    if (target.Health <= WHDmg)
+                    {
+                        W.Cast(target);
+                    }
+                }
+
+                if (W.IsReady() && Player.Distance(target) <= WS.Range && target != null &&
+                    Config.Item("UseWKs").GetValue<bool>() && SpiderForm)
+                {
+                    if (target.Health <= WSDmg)
+                    {
+                        W.Cast(target);
+                    }
                 }
             }
-
         }
 
 
         private static void CheckForm()
         {
+            
             if (Player.Spellbook.GetSpell(SpellSlot.Q).Name == "EliseHumanQ" ||
                 Player.Spellbook.GetSpell(SpellSlot.W).Name == "EliseHumanW" ||
                 Player.Spellbook.GetSpell(SpellSlot.E).Name == "EliseHumanE")
