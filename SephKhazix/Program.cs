@@ -499,20 +499,17 @@ namespace SephKhazix
             return !ObjectManager.Get<Obj_AI_Base>().Any(x => x.Distance(Target) < 500 && !x.IsAlly && !x.IsMe);
         }
         */
-        private static double getdamages(SpellSlot X, Obj_AI_Hero target)
+        private static double GetQDamage(Obj_AI_Hero target)
         {
-            if (X == SpellSlot.Q)
-            {
                 if (Q.Range == 325)
                 {
-                    return targetisisolated(target) ? Player.GetSpellDamage(target, SpellSlot.Q, 1) : Player.GetSpellDamage(target, SpellSlot.Q);
+                    return Player.GetSpellDamage(target, SpellSlot.Q, targetisisolated(target) ? 1 : 0);
 
                 }
                 if (Q.Range > 325)
                 {
                     return Player.GetSpellDamage(target, SpellSlot.Q, targetisisolated(target) ? 3 : 2);
                 }
-            }
             return 0;
         }
 
@@ -535,7 +532,7 @@ namespace SephKhazix
 
             if (Q.IsReady())
             {
-                var CheckQKillable = Targets.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Q.Range - 50 && getdamages(SpellSlot.Q, x) > x.Health).FirstOrDefault();
+                var CheckQKillable = Targets.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Q.Range - 50 && GetQDamage(x) > x.Health).FirstOrDefault();
 
                 if (CheckQKillable != null)
                 {
@@ -550,7 +547,7 @@ namespace SephKhazix
                         if (E.IsReady())
                         {
                            // Game.PrintChat("2nd cast");
-                            Jumppoint2 = GetJumpPoint(CheckQKillable);
+                            Jumppoint2 = GetJumpPoint(CheckQKillable, false);
                            // Jumppoint2 = Player.ServerPosition.Extend(NexusPosition, E.Range);
                             E.Cast(Jumppoint2);
                         }
@@ -610,7 +607,7 @@ namespace SephKhazix
             if (args.Slot.Equals(SpellSlot.Q) && args.Target is Obj_AI_Hero && Config.Item("djumpenabled").GetValue<bool>() && Config.Item("save").GetValue<bool>())
             {
                 var target = args.Target as Obj_AI_Hero;
-                var qdmg = getdamages(SpellSlot.Q, target);
+                var qdmg = GetQDamage(target);
                 var dmg = (Player.GetAutoAttackDamage(target) * 2) + qdmg;
                 if (target.Health < dmg && target.Health > qdmg)
                 { //save some unnecessary q's if target is killable with 2 autos instead of Q as Q is important for double jumping
@@ -632,7 +629,7 @@ namespace SephKhazix
         {
             if (args.Target.Type == GameObjectType.obj_AI_Hero && Config.Item("djumpenabled").GetValue<bool>() && Config.Item("noauto").GetValue<bool>())
             {
-                if (args.Target.Health < getdamages(SpellSlot.Q, (Obj_AI_Hero) args.Target) &&
+                if (args.Target.Health < GetQDamage((Obj_AI_Hero) args.Target) &&
                     Player.ManaPercent > 15)
                 {
                     args.Process = false;
@@ -651,7 +648,7 @@ namespace SephKhazix
             if (target != null)
             {
                 double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
-                double QDmg = getdamages(SpellSlot.Q, target);
+                double QDmg = GetQDamage(target);
                 double WDmg = Player.GetSpellDamage(target, SpellSlot.W);
                 double EDmg = Player.GetSpellDamage(target, SpellSlot.E);
                 double hydradmg = Player.GetItemDamage(target, Damage.DamageItems.Hydra);
