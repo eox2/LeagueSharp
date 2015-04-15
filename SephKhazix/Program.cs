@@ -173,6 +173,7 @@ namespace SephKhazix
             }
             NexusPosition = ObjectManager.Get<Obj_HQ>().Where(o => o.IsAlly).FirstOrDefault().Position;
 
+            Game.PrintChat(Player.FlatPhysicalDamageMod.ToString());
             Game.OnUpdate += OnGameUpdate;
             Game.OnUpdate += CheckSpells;
             Game.OnUpdate += DoubleJump;
@@ -508,7 +509,7 @@ namespace SephKhazix
                 }
                 if (Q.Range > 325)
                 {
-                    return Player.GetSpellDamage(target, SpellSlot.Q, targetisisolated(target) ? 3 : 2);
+                    return Player.GetSpellDamage(target, SpellSlot.Q, targetisisolated(target) ? 3 : 0);
                 }
             return 0;
         }
