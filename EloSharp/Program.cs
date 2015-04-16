@@ -537,8 +537,6 @@ namespace EloSharp
                                Game.PrintChat("<font color=\"#FF0000\"><b>" + hero.ChampionName +
                                                "</font> <font color=\"#FFFFFF\">(" + hero.Name + ")" + " : " + tier);
                             }
-                           
-
                             info.Name = hero.Name;
                             info.herohandle = hero;
                             info.Ranking = tier;
@@ -551,20 +549,16 @@ namespace EloSharp
                             int delay = random.Next(8000, 13000);
                           //  Game.PrintChat("Last time " + playerNameEnc + " Time: " + Game.Time);
                             System.Threading.Thread.Sleep(delay);
-                
                         }
 
                         catch (Exception ex)
                         {
                             Console.Write("Error " + ex);
                         }
-                                      
-                        
-         
-                 
+  
                 }
-               
             }
+            Drawing.OnDraw += OnDraw;
         }
 
 
@@ -717,7 +711,6 @@ namespace EloSharp
         public static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-            Drawing.OnDraw += OnDraw;
         }
 
         public static void Game_OnGameLoad(EventArgs args)
@@ -744,7 +737,7 @@ namespace EloSharp
                 //  thread.SetApartmentState(ApartmentState.STA);
                 thread.Start();
             }
-           
+  
         }
 
 

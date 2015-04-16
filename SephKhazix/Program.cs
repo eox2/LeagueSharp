@@ -23,6 +23,9 @@ namespace SephKhazix
         private static bool EvolvedQ, EvolvedW, EvolvedE, EvolvedR;
         private static List<Vector3> EnemyTurretPositions = new List<Vector3>();
         private static Vector3 NexusPosition;
+        private static Vector3 Jumppoint1 = new Vector3();
+        private static Vector3 Jumppoint2 = new Vector3();
+        private static bool Jumping = false;
 
         private static Obj_AI_Hero Player;
         private static bool Wnorm =  true, Wevolved, Eevolved;
@@ -143,6 +146,7 @@ namespace SephKhazix
 
             Config.AddSubMenu(new Menu("Double Jumping", "DoubleJump"));
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("djumpenabled", "Enabled")).SetValue(true);
+            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("JEDelay", "Delay between jumps").SetValue(new Slider(250, 250, 500)));
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("jumpmode", "Jump Mode").SetValue(new StringList(new[] { "Default (jumps towards your nexus)", "Custom - Settings below" }, 0)));
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("save", "Save Double Jump Abilities")).SetValue(true);
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("noauto", "Wait for Q instead of autos")).SetValue(false);
@@ -166,7 +170,7 @@ namespace SephKhazix
 
             //Get Turrets
 
-            foreach (var t in ObjectManager.Get<Obj_AI_Hero>().Where(t => t.IsEnemy))
+            foreach (var t in ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsEnemy))
             {
                 EnemyTurretPositions.Add(t.ServerPosition);
             }
@@ -195,7 +199,7 @@ namespace SephKhazix
             Vector2 startPoint = ObjectManager.Player.ServerPosition.To2D();
             Vector2 originalDirection = W.Range * (unitPosition - startPoint).Normalized();
 
-            foreach (Obj_AI_Hero enemy in ObjectManager.Get<Obj_AI_Hero>())
+            foreach (Obj_AI_Hero enemy in HeroList)
             {
                 if (enemy.IsValidTarget() && enemy.NetworkId != unit.NetworkId)
                 {
@@ -490,7 +494,7 @@ namespace SephKhazix
         public static bool targetisisolated(Obj_AI_Base target)
         {
             var enes = ObjectManager.Get<Obj_AI_Base>()
-                .Where(her => her.IsEnemy && her.NetworkId != target.NetworkId && target.Distance(her) < 500 && !her.IsMe)
+                .Where(her => her.IsEnemy && her.NetworkId != target.NetworkId && Vector3.Distance(target.ServerPosition, her.ServerPosition) < 500 && !her.IsMe)
                 .ToArray();
             return !enes.Any();
         }
@@ -506,8 +510,7 @@ namespace SephKhazix
         {
                 if (Q.Range == 325)
                 {
-                    return Player.GetSpellDamage(target, SpellSlot.Q, targetisisolated(target) ? 1 : 0);
-
+                    return 0.984 * Player.GetSpellDamage(target, SpellSlot.Q, targetisisolated(target) ? 1 : 0);
                 }
                 if (Q.Range > 325)
                 {
@@ -526,17 +529,22 @@ namespace SephKhazix
             return Player.HealthPercent > 20;
         }
 
-        private static Vector3 Jumppoint1 = new Vector3();
-        private static Vector3 Jumppoint2 = new Vector3();
-        private static bool Jumping = false;
+
+        public static bool PointUnderEnemyTurret(Vector3 Point)
+        {
+            var EnemyTurrets =
+                EnemyTurretPositions.Where(t => Vector3.Distance(t, Point) <= 900f);
+            return EnemyTurrets.Any();
+        }
 
         private static void DoubleJump(EventArgs args)
         {
-            if (!E.IsReady() || !Eevolved || !Config.Item("djumpenabled").GetValue<bool>())
+            if (!E.IsReady() || !Eevolved || !Config.Item("djumpenabled").GetValue<bool>() || Player.IsDead)
             {
                 return;
             }
-            var Targets = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget() && !x.IsInvulnerable && !x.IsZombie);
+
+            var Targets = HeroList.Where(x => x.IsValidTarget() && !x.IsInvulnerable && !x.IsZombie);
 
             if (Q.IsReady())
             {
@@ -549,11 +557,10 @@ namespace SephKhazix
                     E.Cast(Jumppoint1);
                     Q.Cast(CheckQKillable);
                     var oldpos = Player.ServerPosition;
-                    Utility.DelayAction.Add(250 + Game.Ping, () =>
+                    Utility.DelayAction.Add(Config.Item("JEDelay").GetValue<Slider>().Value + Game.Ping, () =>
                     {
                         if (E.IsReady())
                         {
-                           // Game.PrintChat("2nd cast");
                             Jumppoint2 = GetJumpPoint(CheckQKillable, false);
                             E.Cast(Jumppoint2);
                         }
@@ -566,12 +573,16 @@ namespace SephKhazix
 
         static Vector3 GetJumpPoint(Obj_AI_Hero Qtarget, bool firstjump = true)
         {
+            if (PointUnderEnemyTurret(Player.ServerPosition))
+            {
+                return Player.ServerPosition.Extend(NexusPosition, E.Range);
+            }
+
             if (GetJumpMode() == 0)
             {
                 return Player.ServerPosition.Extend(NexusPosition, E.Range);
             }
 
-            
             if (firstjump && Config.Item("jcursor").GetValue<bool>())
             {
                 return Game.CursorPos;
@@ -584,14 +595,14 @@ namespace SephKhazix
 
             Vector3 Position = new Vector3();
             var jumptarget = ishealthy()
-                  ? ObjectManager.Get<Obj_AI_Hero>()
+                  ? HeroList
                       .Where(
                           x =>
                               x.IsValidTarget() && !x.IsZombie && x != Qtarget &&
                               Vector3.Distance(Player.ServerPosition, x.ServerPosition) < E.Range)
                       .FirstOrDefault()
                   :
-              ObjectManager.Get<Obj_AI_Hero>()
+              HeroList
                   .Where(
                       x =>
                           x.IsAlly && !x.IsZombie && !x.IsDead && !x.IsMe &&
@@ -651,7 +662,7 @@ namespace SephKhazix
 
         private static void KillSteal()
         {
-            Obj_AI_Hero target = ObjectManager.Get<Obj_AI_Hero>()
+            Obj_AI_Hero target = HeroList
                 .Where(x => x.IsValidTarget() && x.Distance(Player.Position) < 1000f && !x.IsZombie)
                 .MinOrDefault(x => x.Health);
             
@@ -659,16 +670,10 @@ namespace SephKhazix
 
             if (target != null)
             {
-                double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
-                double QDmg = GetQDamage(target);
-                double WDmg = Player.GetSpellDamage(target, SpellSlot.W);
-                double EDmg = Player.GetSpellDamage(target, SpellSlot.E);
-                double hydradmg = Player.GetItemDamage(target, Damage.DamageItems.Hydra);
-                double tiamatdmg = Player.GetItemDamage(target, Damage.DamageItems.Tiamat);
-
                 if (Config.Item("UseIgnite").GetValue<bool>() && IgniteSlot != SpellSlot.Unknown &&
                     Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 {
+                    double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
                     if (igniteDmg > target.Health)
                     {
                         Player.Spellbook.CastSpell(IgniteSlot, target);
@@ -678,8 +683,15 @@ namespace SephKhazix
 
                 if (Config.Item("autoescape").GetValue<bool>() && !ishealthy())
                 {
+                    var ally =
+                        HeroList.Where(h => h.HealthPercent > 50 && h.CountEnemiesInRange(400) == 0 && !PointUnderEnemyTurret(h.ServerPosition)).FirstOrDefault();
+                    if (ally != null && ally.IsValid)
+                    {
+                        E.Cast(ally.ServerPosition);
+                        return;
+                    }
                     var objAiturret = EnemyTurretPositions.Where(x => Vector3.Distance(Player.ServerPosition, x) <= 900f);
-                    if ((Player.CountEnemiesInRange(500) >= 1 || objAiturret.Any()))
+                    if (objAiturret.Any() || Player.CountEnemiesInRange(500) >= 1)
                     {
                         var bestposition = Player.ServerPosition.Extend(NexusPosition, E.Range);
                         E.Cast(bestposition, usePacket);
@@ -687,35 +699,40 @@ namespace SephKhazix
                     }
                 }
 
-                if (Config.Item("UseQKs").GetValue<bool>() && target.Health <= QDmg && Q.IsReady() &&
+                if (Config.Item("UseQKs").GetValue<bool>()&& Q.IsReady() &&
                     Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= Q.Range)
                 {
-                    if (!Jumping)
+                    double QDmg = GetQDamage(target);
+                    if (!Jumping && target.Health <= QDmg)
                     {
                         Q.Cast(target, usePacket);
+                        return;
                     }
                 }
 
-                if (target.Health <= EDmg && Config.Item("UseEKs").GetValue<bool>() && E.IsReady() &&
-                    Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= E.Range)
+                if (Config.Item("UseEKs").GetValue<bool>() && E.IsReady() &&
+                    Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= E.Range && Vector3.Distance(Player.ServerPosition, target.ServerPosition) > Q.Range)
                 {
-                    if (!Jumping)
+                    double EDmg = Player.GetSpellDamage(target, SpellSlot.E);
+                    if (!Jumping && target.Health < EDmg)
                     {
                         Utility.DelayAction.Add(
                             Game.Ping + Config.Item("EDelay").GetValue<Slider>().Value, delegate
                             {
                                 PredictionOutput pred = E.GetPrediction(target);
                                 if (target.IsValid && !target.IsDead)
+                                {
                                     E.Cast(pred.CastPosition, usePacket);
-                                return;
+                                    return;
+                                }
                             });
                     }
-
                 }
 
                 if (W.IsReady() && Wnorm && Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= W.Range &&
                     Config.Item("UseWKs").GetValue<bool>())
                 {
+                    double WDmg = Player.GetSpellDamage(target, SpellSlot.W);
                     if (target.Health <= WDmg)
                     {
                         var pred = W.GetPrediction(target);
@@ -731,8 +748,9 @@ namespace SephKhazix
                         Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= W.Range &&
                         Config.Item("UseWKs").GetValue<bool>())
                     {
+                        double WDmg = Player.GetSpellDamage(target, SpellSlot.W);
                         PredictionOutput pred = W.GetPrediction(target);
-                        if (target.Health <= WDmg)
+                        if (target.Health <= WDmg && pred.Hitchance > HitChance.Medium)
                         {
                             CastWE(target, pred.UnitPosition.To2D());
                             return;
@@ -758,6 +776,8 @@ namespace SephKhazix
                         Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= E.Range + Q.Range
                         && Config.Item("UseEQKs").GetValue<bool>())
                     {
+                        double QDmg = GetQDamage(target);
+                        double EDmg = Player.GetSpellDamage(target, SpellSlot.E);
                         if ((target.Health <= QDmg + EDmg))
                         {
                             Utility.DelayAction.Add(Config.Item("EDelay").GetValue<Slider>().Value, delegate
@@ -778,6 +798,7 @@ namespace SephKhazix
                         Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= W.Range + E.Range
                         && Config.Item("UseEWKs").GetValue<bool>())
                     {
+                        double WDmg = Player.GetSpellDamage(target, SpellSlot.W);
                         if (target.Health <= WDmg)
                         {
 
@@ -787,6 +808,7 @@ namespace SephKhazix
                                 if (target.IsValid && !target.IsDead)
                                 {
                                     E.Cast(pred.CastPosition);
+                                    return;
                                 }
                             });
                         }
@@ -797,6 +819,7 @@ namespace SephKhazix
                         Vector2.Distance(Player.ServerPosition.To2D(), target.ServerPosition.To2D()) <= TIA.Range &&
                         Config.Item("UseTiaKs").GetValue<bool>())
                     {
+                        double tiamatdmg = Player.GetItemDamage(target, Damage.DamageItems.Tiamat);
                         if (target.Health <= tiamatdmg)
                         {
                             TIA.Cast();
@@ -807,6 +830,7 @@ namespace SephKhazix
                         Vector2.Distance(Player.ServerPosition.To2D(), target.ServerPosition.To2D()) <= HDR.Range &&
                         Config.Item("UseTiaKs").GetValue<bool>())
                     {
+                        double hydradmg = Player.GetItemDamage(target, Damage.DamageItems.Hydra);
                         if (target.Health <= hydradmg)
                         {
                             HDR.Cast();
@@ -960,15 +984,17 @@ namespace SephKhazix
                 }
 
                 if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= E.Range && Config.Item("UseECombo").GetValue<bool>() &&
-                    E.IsReady() && Vector3.Distance(Player.ServerPosition, target.ServerPosition) > Q.Range)
+                    E.IsReady() && Vector3.Distance(Player.ServerPosition, target.ServerPosition) > Q.Range + (0.7 * Player.MoveSpeed))
                 {
                     PredictionOutput pred = E.GetPrediction(target);
                     if (target.IsValid && !target.IsDead)
+                    {
                         E.Cast(pred.CastPosition, usePacket);
+                    }
                 }
 
                 // Use EQ AND EW Synergy
-                if ((Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= E.Range + Q.Range && Vector3.Distance(Player.ServerPosition, target.ServerPosition) > Q.Range && E.IsReady() &&
+                if ((Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= E.Range + Q.Range + (0.7 * Player.MoveSpeed) && Vector3.Distance(Player.ServerPosition, target.ServerPosition) > Q.Range && E.IsReady() &&
                     Config.Item("UseEGapclose").GetValue<bool>()) || (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= E.Range + W.Range && Vector3.Distance(Player.ServerPosition, target.ServerPosition) > Q.Range && E.IsReady() && W.IsReady() &&
                     Config.Item("UseEGapcloseW").GetValue<bool>()))
                 {
@@ -1010,9 +1036,8 @@ namespace SephKhazix
                         }
                     }
                 }
-    
 
-                if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= E.Range && Vector3.Distance(Player.ServerPosition, target.ServerPosition) > Q.Range &&
+                if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= E.Range + (0.7 * Player.MoveSpeed) && Vector3.Distance(Player.ServerPosition, target.ServerPosition) > Q.Range &&
                     Config.Item("UseECombo").GetValue<bool>() && E.IsReady())
                 {
                     PredictionOutput pred = E.GetPrediction(target);
