@@ -83,7 +83,7 @@ namespace SephLissandra
             Interrupter.AddItem(new MenuItem("Interrupter.AG.UseR", "AntiGapClose with R").SetValue(true));
             Config.AddSubMenu(Interrupter);
 
-            Menu BlackList = new Menu("BlackList", "BlackList", false);
+            Menu BlackList = new Menu("Ultimate BlackList", "BlackList", false);
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsEnemy))
             {
                 BlackList.AddItem(new MenuItem("Blacklist." + hero.ChampionName, hero.ChampionName, false).SetValue(false));
@@ -91,8 +91,6 @@ namespace SephLissandra
             Config.AddSubMenu(BlackList);
 
             Menu Misc = new Menu("Misc", "Misc", false);
-            Misc.AddItem(new MenuItem("Misc.UltGapCloser", "Ult Gapclosers", false).SetValue(true));
-            Misc.AddItem(new MenuItem("Misc.WGapCloser", "W Gapclosers", false).SetValue(true));
             Misc.AddItem(new MenuItem("Misc.PrioritizeUnderTurret", "Prioritize Targets Under Turret", false).SetValue(true));
             Misc.AddItem(new MenuItem("Misc.DontETurret", "Don't 2nd E Turret Range", false).SetValue(true));
             Misc.AddItem(new MenuItem("Misc.EMouse", "E to Mouse Key", false).SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)));

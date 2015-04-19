@@ -144,7 +144,11 @@ namespace SephLissandra
          private static void ComboHandler()
         {
             var Target = TargetSelector.GetTarget(Spells["Q"].Range, TargetSelector.DamageType.Magical);
-            if (Target != null && !Target.IsInvulnerable && !LissUtils.Active("Blacklist." + Target.ChampionName))
+            if (Target == null || !Target.IsValidTarget())
+            {
+                Target = HeroManager.Enemies.Where(h => h.IsValidTarget() && (Vector3.Distance(h.ServerPosition, Player.ServerPosition) < Spells["Q"].Range) && !h.IsZombie).FirstOrDefault();
+            }
+            if (Target != null && !Target.IsInvulnerable)
             {
                 if (LissUtils.Active("Combo.UseQ") && SpellSlot.Q.IsReady())
                 {
@@ -180,7 +184,7 @@ namespace SephLissandra
                      Spells["W"].CastOnUnit(Player);
                      return;
                  }
-                 if (LissUtils.Active("Interrupter.AG.UseR") && Vector3.Distance(sender.ServerPosition, Player.ServerPosition) <= Spells["R"].Range)
+                 if (LissUtils.Active("Interrupter.AG.UseR") && !LissUtils.Active("Blacklist." + sender.ChampionName) && Vector3.Distance(sender.ServerPosition, Player.ServerPosition) <= Spells["R"].Range)
                  {
                      Spells["R"].Cast(sender);
                  }
@@ -201,7 +205,7 @@ namespace SephLissandra
                      Spells["W"].CastOnUnit(Player);
                      return;
                  }
-                 if (LissUtils.Active("Interrupter.UseR") && Vector3.Distance(sender.ServerPosition, Player.ServerPosition) <= Spells["R"].Range)
+                 if (LissUtils.Active("Interrupter.UseR") && !LissUtils.Active("Blacklist." + sender.ChampionName) && Vector3.Distance(sender.ServerPosition, Player.ServerPosition) <= Spells["R"].Range)
                  {
                      Spells["R"].Cast(sender);
                  }
@@ -281,7 +285,7 @@ namespace SephLissandra
                      Spells["Q"].Cast(pred.CastPosition);
                      return;
                  }
-             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget() && !h.IsInvulnerable && Vector3.Distance(h.ServerPosition, Player.ServerPosition) < Spells["Q2"].Range && SpellSlot.Q.IsReady()))
+             foreach (var hero in HeroManager.Enemies.Where(h => h.IsValidTarget() && !h.IsInvulnerable && Vector3.Distance(h.ServerPosition, Player.ServerPosition) < Spells["Q2"].Range && SpellSlot.Q.IsReady()))
              {
                  var prediction = Spells["Q2"].GetPrediction(hero);
                  if (prediction.CollisionObjects.Any() && prediction.Hitchance > LissUtils.GetHitChance("Hitchance.Q"))
@@ -304,7 +308,7 @@ namespace SephLissandra
                 Spells["W"].CastOnUnit(Player);
                 return;
             }
-            else if (ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget() && (Vector3.Distance(h.ServerPosition, Player.ServerPosition) < Spells["W"].Range) && !h.IsZombie && !LissUtils.Active("Blacklist." + h.ChampionName)).Any())
+            else if (HeroManager.Enemies.Where(h => h.IsValidTarget() && (Vector3.Distance(h.ServerPosition, Player.ServerPosition) < Spells["W"].Range) && !h.IsZombie).Any())
             {
                 Spells["W"].CastOnUnit(Player);
             }
@@ -318,7 +322,7 @@ namespace SephLissandra
                 var PredManager = new List<Tuple<Vector3, int, HitChance, List<Obj_AI_Hero>>>();
                 foreach (
                     var hero in
-                        ObjectManager.Get<Obj_AI_Hero>()
+                        HeroManager.Enemies
                             .Where(
                                 h =>
                                     h.IsValidTarget() && !h.IsZombie &&
@@ -406,9 +410,9 @@ namespace SephLissandra
         static void CastR(Obj_AI_Hero currenttarget)
         {
             var Check =
-                ObjectManager.Get<Obj_AI_Hero>()
+                HeroManager.Enemies
                     .Where(
-                        h => h.IsValidTarget(Spells["R"].Range) && h.CountEnemiesInRange(Spells["R"].Range) >= LissUtils.GetSlider("Combo.Rcount")).ToList();
+                        h => h.IsValidTarget(Spells["R"].Range) && h.CountEnemiesInRange(Spells["R"].Range) >= LissUtils.GetSlider("Combo.Rcount") && !LissUtils.Active("Blacklist." + h.ChampionName)).ToList();
 
             if (Player.CountEnemiesInRange(Spells["R"].Range) >= LissUtils.GetSlider("Combo.Rcount"))
             {
@@ -427,6 +431,10 @@ namespace SephLissandra
                     Spells["R"].Cast(target);
                     return;
                 }
+            }
+            if (LissUtils.Active("Blacklist." + currenttarget.ChampionName))
+            {
+                return;
             }
             if (currenttarget.IsKillableFromPoint(Player.ServerPosition))
             {
@@ -455,7 +463,7 @@ namespace SephLissandra
                 return;
             }
 
-            var possibilities = ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget() && Vector3.Distance(h.ServerPosition, Player.ServerPosition) <= Spells["R"].Range || (h.IsKillableFromPoint(Player.ServerPosition) && h.IsValidTarget() && !h.IsInvulnerable)).ToList();
+            var possibilities = HeroManager.Enemies.Where(h => (h.IsValidTarget() && Vector3.Distance(h.ServerPosition, Player.ServerPosition) <= Spells["R"].Range || (h.IsKillableFromPoint(Player.ServerPosition) && h.IsValidTarget() && !h.IsInvulnerable)) && !LissUtils.Active("Blacklist." + h.ChampionName)).ToList();
 
             var arranged = possibilities.OrderByDescending(h => h.CountEnemiesInRange(Spells["R"].Range));
             if (LissUtils.Active("Misc.PrioritizeUnderTurret"))
@@ -491,7 +499,7 @@ namespace SephLissandra
         static void KillSteal()
         {
             var targets =
-                ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget() && !x.IsInvulnerable & !x.IsZombie);
+                HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsInvulnerable & !x.IsZombie);
 
             if (SpellSlot.Q.IsReady() && LissUtils.Active("Killsteal.UseQ"))
             {
@@ -574,7 +582,7 @@ namespace SephLissandra
             if (SpellSlot.R.IsReady() && LissUtils.Active("Killsteal.UseR"))
             {
                 var Rtarget = targets.Where(h =>
-                           (Vector3.Distance(Player.ServerPosition, h.ServerPosition) < Spells["R"].Range) && h.CountEnemiesInRange(Spells["R"].Range) > 1 && h.Health < Player.GetSpellDamage(h, SpellSlot.R)).MinOrDefault(h => h.Health);
+                           (Vector3.Distance(Player.ServerPosition, h.ServerPosition) < Spells["R"].Range) && h.CountEnemiesInRange(Spells["R"].Range) > 1 && h.Health < Player.GetSpellDamage(h, SpellSlot.R) && !LissUtils.Active("Blacklist." + h.ChampionName)).MinOrDefault(h => h.Health);
                 if (Rtarget != null)
                 {
                     Spells["R"].Cast(Rtarget);

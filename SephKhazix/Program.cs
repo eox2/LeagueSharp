@@ -182,7 +182,7 @@ namespace SephKhazix
             Orbwalking.BeforeAttack += BeforeAttack;
             Drawing.OnDraw += OnDraw;
             Game.PrintChat("<font color='#1d87f2'>SephKhazix has been Loaded. Version 1.9. If anything is not functioning as it used to, disable Double Jumping.</font>");
-            HeroList = ObjectManager.Get<Obj_AI_Hero>().ToList();
+            HeroList = HeroManager.AllHeroes;
         }
 
         private static int GetJumpMode()
@@ -303,6 +303,7 @@ namespace SephKhazix
             {
                 Combo();
             }
+      
             if (Config.Item("Harass").GetValue<KeyBind>().Active)
             {
                 Harass();
@@ -1094,6 +1095,7 @@ namespace SephKhazix
                     Drawing.DrawText(heroposwts.X, heroposwts.Y, Color.White, "Isolated");
                 }
             }
+
             if (Config.Item("jumpdrawings").GetValue<bool>() && Jumping)
             {
                 var PlayerPosition = Drawing.WorldToScreen(Player.Position);
