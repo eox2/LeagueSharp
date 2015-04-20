@@ -61,21 +61,25 @@ namespace AutoZhonya
         static void EventSubscriptions()
         {
             Obj_AI_Base.OnProcessSpellCast += SpellDetector;
-            Game.OnUpdate += BuffDetector;
+          //  Game.OnUpdate += BuffDetector;
         }
 
         static void SpellDetector(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            if (!zhonyaready())
+            {
+                return;
+            }
             // return if ally or non hero spell
         
-            if (Player.IsDead || sender.IsAlly || !(sender is Obj_AI_Hero) || !args.Target.IsMe || args.SData.Name.ToLower().Contains("basicattack"))
+            if (Player.IsDead || sender.IsAlly || !(sender is Obj_AI_Hero) || !args.Target.IsMe || args.SData.IsAutoAttack())
             {
                 return;
             }
                // Game.PrintChat(args.SData.Name + " Detected");
                 var Spellinfo = DangerousSpells.GetByName2(args.SData.Name);
 
-                if (Spellinfo != null && /*zhonyaready() && */
+                if (Spellinfo != null && 
                     (Menu.Item("Enabled" + Spellinfo.DisplayName).GetValue<bool>()))
                 {
                     Game.PrintChat("Attempting to Zhonya: " + args.SData.Name);
