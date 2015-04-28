@@ -11,6 +11,7 @@ using System.Threading;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using System.Reflection;
 
 using Color = System.Drawing.Color;
 
@@ -42,13 +43,9 @@ namespace EloSharp
         public EloSharp()
         {
             Ranks = new List<Info>();
-
-
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
-
                 Info info = new Info();
-
                 string playerNameEnc = HttpUtility.UrlEncode(hero.Name);
                 if (getregionurl() != "Not Supported" && getregionurl().Contains("op.gg"))
                 {

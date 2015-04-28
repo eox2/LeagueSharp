@@ -41,10 +41,12 @@ namespace SephKhazix
         {
             Player = ObjectManager.Player;
 
+            
             if (Player.BaseSkinName != ChampionName)
             {
                 return;
             }
+             
 
             Q = new Spell(SpellSlot.Q, 325f);
             W = new Spell(SpellSlot.W, 1000f);
@@ -174,7 +176,9 @@ namespace SephKhazix
             {
                 EnemyTurretPositions.Add(t.ServerPosition);
             }
-            NexusPosition = ObjectManager.Get<Obj_HQ>().Where(o => o.IsAlly).FirstOrDefault().Position;
+
+            NexusPosition = ObjectManager.Get<Obj_Shop>().Where(o => o.IsAlly).FirstOrDefault().Position;
+
             Game.OnUpdate += OnGameUpdate;
             Game.OnUpdate += CheckSpells;
             Game.OnUpdate += DoubleJump;
@@ -1086,6 +1090,10 @@ namespace SephKhazix
 
         private static void OnDraw(EventArgs args)
         {
+            if (Player.IsDead)
+            {
+                return;
+            }
             if (Config.Item("Debugon").GetValue<bool>())
             {
                 var isolatedtargs = GetIsolatedTargets();

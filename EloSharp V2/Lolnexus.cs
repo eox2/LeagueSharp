@@ -46,7 +46,7 @@ namespace EloSharp_V2
             public Bitmap champsprite { get; set; }
         }
 
-   
+
         public static void lolnexuslookup(string name, string region)
         {
             Ranksloading = new List<Infoloading>();
@@ -131,11 +131,10 @@ namespace EloSharp_V2
         }
 
 
-            }
+    }
 
-        }
+}
 
 
-  
-    
+
 

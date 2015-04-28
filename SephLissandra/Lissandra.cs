@@ -177,6 +177,7 @@ namespace SephLissandra
                  return;
              }
              var sender = args.Sender;
+          
              if (LissUtils.Active("Interrupter.AntiGapClose") && sender.IsValidTarget())
              {
                  if (LissUtils.Active("Interrupter.AG.UseW") && Vector3.Distance(args.End, Player.ServerPosition) <= Spells["W"].Range)
@@ -670,7 +671,7 @@ namespace SephLissandra
                 var KillableMinionsQ = Minions.Where(m => m.Health < Player.GetSpellDamage(m, SpellSlot.Q) && Vector3.Distance(m.ServerPosition, Player.ServerPosition) > Player.AttackRange);
                 if (KillableMinionsQ.Any())
                 {
-                    Spells["Q"].Cast(KillableMinionsQ.FirstOrDefault());
+                    Spells["Q"].Cast(KillableMinionsQ.FirstOrDefault().ServerPosition);
                 }
             }
             if (SpellSlot.W.IsReady() && LissUtils.Active("Farm.UseW"))
@@ -682,7 +683,7 @@ namespace SephLissandra
                 }
             }
 
-            if (SpellSlot.E.IsReady() && LissUtils.Active("Farm.UseE") && LissEMissile == null && !LissUtils.CanSecondE() && LissEMissile == null && !LissUtils.CanSecondE())
+            if (SpellSlot.E.IsReady() && LissUtils.Active("Farm.UseE") && LissEMissile == null && !LissUtils.CanSecondE() && LissEMissile == null)
             {
                 var KillableMinionsE = Minions.Where(m => m.Health < Player.GetSpellDamage(m, SpellSlot.E) && Vector3.Distance(m.ServerPosition, Player.ServerPosition) > Player.AttackRange);
                 if (KillableMinionsE.Any())
@@ -757,6 +758,10 @@ namespace SephLissandra
      
         private static void OnDraw(EventArgs args)
         {
+            if (Player.IsDead)
+            {
+                return;
+            }
             if (LissUtils.Active("Misc.Debug"))
             {
                 var poswts = Drawing.WorldToScreen(Player.Position);

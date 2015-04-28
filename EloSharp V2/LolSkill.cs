@@ -43,9 +43,9 @@ namespace EloSharp_V2
             public String assists { get; set; }
             public Bitmap champsprite { get; set; }
 
-    
 
-  
+
+
 
 
         }
@@ -153,7 +153,6 @@ namespace EloSharp_V2
     }
 
 }
-
 
 
 

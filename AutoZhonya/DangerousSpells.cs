@@ -68,7 +68,7 @@ namespace AutoZhonya
                     Name = "ViR",
                     DisplayName = "Vi R",
                     Source = "Vi",
-                    BaseDelay = 0.25,
+                    BaseDelay = 0.2,
                     SSDelay = 1.0,
                     Zhonyable = true,
                     SpellShieldable = true
@@ -164,7 +164,7 @@ namespace AutoZhonya
                     Name = "VladimirHemoplague",
                     DisplayName = "Vlad R",
                     Source = "Vladimir",
-                    BaseDelay = 2.9, //Zhonya lasts 2.5 seconds 
+                    BaseDelay = 2.5, //Zhonya lasts 2.5 seconds 
                     SSDelay = 5,
                     Zhonyable = true,
                     SpellShieldable = true
@@ -180,7 +180,7 @@ namespace AutoZhonya
                     Name = "CaitlynAceintheHole",
                     DisplayName = "Cait R",
                     Source = "Caitlyn",
-                    BaseDelay = 0.3, //Zhonya lasts 2.5 seconds 
+                    BaseDelay = 0.2, //Zhonya lasts 2.5 seconds 
                     SSDelay = 0.9,
                     Zhonyable = true,
                     SpellShieldable = true
@@ -303,7 +303,7 @@ namespace AutoZhonya
                     DisplayName = "Lux R",
                     Source = "Lux",
                     BaseDelay = 0, //Zhonya lasts 2.5 seconds 
-                    SSDelay = 0.5,
+                    SSDelay = 0.1,
                     Zhonyable = true,
                     SpellShieldable = true,
                     Buffrequirement = false,
@@ -374,7 +374,7 @@ namespace AutoZhonya
                     Name = "FioraDanceStrike",
                     DisplayName = "Fiora R",
                     Source = "Fiora",
-                    BaseDelay = 0, //Zhonya lasts 2.5 seconds 
+                    BaseDelay = 0.2, //Zhonya lasts 2.5 seconds 
                     SSDelay = 0,
                     Zhonyable = true,
                     SpellShieldable = false,
@@ -392,7 +392,7 @@ namespace AutoZhonya
                     Name = "FioraDance",
                     DisplayName = "Fiora R2",
                     Source = "Fiora",
-                    BaseDelay = 0, //Zhonya lasts 2.5 seconds 
+                    BaseDelay = 0.2, //Zhonya lasts 2.5 seconds 
                     SSDelay = 0,
                     Zhonyable = true,
                     SpellShieldable = false,
@@ -464,8 +464,8 @@ namespace AutoZhonya
                     Name = "nautilusgrandline",
                     DisplayName = "Nautilus R",
                     Source = "Nautilus",
-                    BaseDelay = 0.5, //Zed untargettable for 0.75 seconds
-                    SSDelay = 0.5,
+                    BaseDelay = 0.1, //Zed untargettable for 0.75 seconds
+                    SSDelay = 0.1,
                     Zhonyable = true,
                     SpellShieldable = true,
                     Buffrequirement = false,
@@ -502,7 +502,7 @@ namespace AutoZhonya
                     Name = "SejuaniGlacialPrisonStart",
                     DisplayName = "Sejuani R",
                     Source = "Sejuani",
-                    BaseDelay = 0.2, //Zed untargettable for 0.75 seconds
+                    BaseDelay = 0.1, //Zed untargettable for 0.75 seconds
                     SSDelay = 0,
                     Zhonyable = true,
                     SpellShieldable = true,
@@ -556,7 +556,7 @@ namespace AutoZhonya
                     Name = "NocturneParanoia",
                     DisplayName = "Nocturne R",
                     Source = "Nocturne",
-                    BaseDelay = 0.5,
+                    BaseDelay = 0.15,
                     SSDelay = 1.0,
                     Zhonyable = true,
                     SpellShieldable = false,

@@ -29,7 +29,6 @@ namespace EloSharp_V2
             public Obj_AI_Hero herohandle { get; set; }
         }
 
-
         public static string rank = "";
         public static Menu Config;
  
@@ -40,7 +39,6 @@ namespace EloSharp_V2
 
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
-
                 Info info = new Info();
                 string playerNameEnc = HttpUtility.UrlEncode(hero.Name);
                 if (getregionurl() != "Not Supported" && getregionurl().Contains("op.gg"))

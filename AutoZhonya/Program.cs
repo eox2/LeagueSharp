@@ -64,19 +64,26 @@ namespace AutoZhonya
           //  Game.OnUpdate += BuffDetector;
         }
 
+        static void GameUpdate()
+        {
+            if (Menu.Item("enablehpzhonya").GetValue<bool>() && zhonyaready())
+            {
+                if (Player.Health < Player.MaxHealth * 0.50 && Player.CountEnemiesInRange(450) >= 1 && (!SpellSlot.Q.IsReady() || !SpellSlot.W.IsReady() || !SpellSlot.E.IsReady() || !SpellSlot.R.IsReady()) && Player.Mana < Player.MaxMana * 80) {
+                    Zhonya.Cast();
+                }
+            }
+        }
+
         static void SpellDetector(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!zhonyaready())
-            {
-                return;
-            }
             // return if ally or non hero spell
         
-            if (Player.IsDead || sender.IsAlly || !(sender is Obj_AI_Hero) || !args.Target.IsMe || args.SData.IsAutoAttack())
+            if (Player.IsDead || !zhonyaready() || sender.IsAlly || !(sender is Obj_AI_Hero) || !args.Target.IsMe || args.SData.IsAutoAttack() || sender.IsMe)
             {
                 return;
             }
                // Game.PrintChat(args.SData.Name + " Detected");
+
                 var Spellinfo = DangerousSpells.GetByName2(args.SData.Name);
 
                 if (Spellinfo != null && 
@@ -97,16 +104,13 @@ namespace AutoZhonya
                     var slidervalue = Menu.Item("minspelldmg").GetValue<Slider>().Value / 100f;
                     var hptozhonya = Menu.Item("hptozhonya").GetValue<Slider>().Value;
                     var remaininghealthslider = Menu.Item("remaininghealth").GetValue<Slider>().Value / 100f;
-                    if ((
-                        calcdmg / Player.Health) >= slidervalue || Player.HealthPercent <= hptozhonya || remaininghealth <= remaininghealthslider * Player.Health)
+                    if ((calcdmg / Player.Health) >= slidervalue || Player.HealthPercent <= hptozhonya || remaininghealth <= remaininghealthslider * Player.Health)
                     {
                         Console.WriteLine("Attempting to Zhonya because incoming spell costs " + calcdmg / Player.Health
                             + " of our health.");
                         Zhonya.Cast();
                     }
                 }
-            
-
         }
 
         static void BuffDetector(EventArgs args)

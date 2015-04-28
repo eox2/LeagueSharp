@@ -19,31 +19,14 @@ namespace EloSharp_V2
         public static int SetWebsite;
         public static String RegionTag;
 
-        //Tc CREW
-        internal class HpBarIndicator
+
+        public static String RemoveSpaces(string s)
         {
-            internal Obj_AI_Hero Unit { get; set; }
-
-            private Vector2 Offset
-            {
-                get
-                {
-                    if (Unit != null)
-                    {
-                        return Unit.IsAlly ? new Vector2(-9, 14) : new Vector2(-9, 17);
-                    }
-
-                    return new Vector2();
-                }
-            }
-
-            internal Vector2 Position
-            {
-                get { return new Vector2(Unit.HPBarPosition.X + Offset.X, Unit.HPBarPosition.Y + Offset.Y); }
-            }
+            return Regex.Replace(s, @"\s+", " ");
         }
+    
 
-      
+
         //todo completely redo menu to customize for each website
 
         public static void MenuAttach(Menu menu)
@@ -56,13 +39,13 @@ namespace EloSharp_V2
             Config.SubMenu("General").AddItem(new MenuItem("enablekdaratio", "Draw KDA Ratio").SetValue(false));
             Config.SubMenu("General").AddItem(new MenuItem("drawicons", "Draw Icons").SetValue(false));
             Config.SubMenu("General").AddItem(new MenuItem("printranks", "Print at the beginning").SetValue(true));
-            
-            
+
+
             Config.AddItem(new MenuItem("showunknown", "Show Unknown").SetValue(true));
-      
+
             Config.AddItem(new MenuItem("enabledebug", "Enable Debug").SetValue(false));
             Config.AddItem(new MenuItem("autoupdate", "Auto change name").SetValue(true));
-            Config.AddItem(new MenuItem("choosewebsite", "Choose Website").SetValue(new StringList(new[] { "LolNexus", "LolSkill", "OPGG", "OPGG2"}, 3)));
+            Config.AddItem(new MenuItem("choosewebsite", "Choose Website").SetValue(new StringList(new[] { "LolNexus", "LolSkill", "OPGG Live", "Old EloSharp" }, 3)));
             SetWebsite = Config.Item("choosewebsite").GetValue<StringList>().SelectedIndex;
             Config.AddSubMenu(new Menu("Loading Screen", "loadingscreen"));
             Config.SubMenu("loadingscreen")
@@ -75,8 +58,6 @@ namespace EloSharp_V2
             Config.AddToMainMenu();
         }
 
-        // End Tc Crew
-
         public static string StripHTML(string html)
         {
             string htmlgarbage = @"<(.|\n)*?>";
@@ -86,26 +67,7 @@ namespace EloSharp_V2
             return removedspaces;
         }
 
-        // Credits to Shalzuth for this
-        public static string GetRegionInfo()
-        {
-            Process proc = Process.GetProcesses().First(p => p.ProcessName.Contains("League of Legends"));
-            String propFile =
-                Path.GetDirectoryName(
-                    Path.GetDirectoryName(
-                        Path.GetDirectoryName(
-                            Path.GetDirectoryName(
-                                Path.GetDirectoryName(Path.GetDirectoryName(proc.Modules[0].FileName))))));
-            propFile += @"\projects\lol_air_client\releases\";
-            DirectoryInfo di =
-                new DirectoryInfo(propFile).GetDirectories().OrderByDescending(d => d.LastWriteTimeUtc).First();
-            propFile = di.FullName + @"\deploy\lol.properties";
-            propFile = File.ReadAllText(propFile);
-            RegionTag = new Regex("regionTag=(.+)\r").Match(propFile).Groups[1].Value;
-            return RegionTag;
-        }
-
-        // End Shalzuth
+      
 
         public static string FormatString(string s)
         {
@@ -123,7 +85,7 @@ namespace EloSharp_V2
             Obj_AI_Hero randomhero = herolist[r.Next(herolist.Count)];
             return randomhero;
         }
- 
+
 
         public static bool Validregion()
         {
@@ -135,10 +97,6 @@ namespace EloSharp_V2
             }
             return false;
         }
-
-
-
-
 
         public static string sortedregion()
         {
@@ -245,12 +203,12 @@ namespace EloSharp_V2
 
         public static Bitmap champbitmap(string champname)
         {
-            var champicon = (Bitmap) Resources.ResourceManager.GetObject(string.Format("{0}_square_0", champname.ToLower()));
+            var champicon = (Bitmap)Resources.ResourceManager.GetObject(string.Format("{0}_square_0", champname.ToLower()));
             if (champicon != null)
             {
                 return champicon;
             }
-            return (Bitmap) Resources.ResourceManager.GetObject("aatrox_square_0");
+            return (Bitmap)Resources.ResourceManager.GetObject("aatrox_square_0");
         }
 
         public static string getsetwebsite()
@@ -259,7 +217,7 @@ namespace EloSharp_V2
             if (SetWebsite == 1) { return "lolskill"; }
             if (SetWebsite == 2) { return "opgg"; }
             if (SetWebsite == 3) { return "opgg2"; }
-            return "opgg";
+            return "opgg2";
         }
 
         public static Color rankincolorls(string rank)
@@ -321,31 +279,54 @@ namespace EloSharp_V2
             return textWidth;
         }
 
+        //Tc CREW
+        internal class HpBarIndicator
+        {
+            internal Obj_AI_Hero Unit { get; set; }
 
-    public static byte[] Decompress(byte[] gzip)
-    {
-	using (GZipStream stream = new GZipStream(new MemoryStream(gzip), CompressionMode.Decompress))
-	{
-	    const int size = 4096;
-	    byte[] buffer = new byte[size];
-	    using (MemoryStream memory = new MemoryStream())
-	    {
-		int count = 0;
-		do
-		{
-		    count = stream.Read(buffer, 0, size);
-		    if (count > 0)
-		    {
-			memory.Write(buffer, 0, count);
-		    }
-		}
-		while (count > 0);
-		return memory.ToArray();
-	    }
-	}
+            private Vector2 Offset
+            {
+                get
+                {
+                    if (Unit != null)
+                    {
+                        return Unit.IsAlly ? new Vector2(-9, 14) : new Vector2(-9, 17);
+                    }
+
+                    return new Vector2();
+                }
+            }
+
+            internal Vector2 Position
+            {
+                get { return new Vector2(Unit.HPBarPosition.X + Offset.X, Unit.HPBarPosition.Y + Offset.Y); }
+            }
+        }
+
+
+        public static byte[] Decompress(byte[] gzip)
+        {
+            using (GZipStream stream = new GZipStream(new MemoryStream(gzip), CompressionMode.Decompress))
+            {
+                const int size = 4096;
+                byte[] buffer = new byte[size];
+                using (MemoryStream memory = new MemoryStream())
+                {
+                    int count = 0;
+                    do
+                    {
+                        count = stream.Read(buffer, 0, size);
+                        if (count > 0)
+                        {
+                            memory.Write(buffer, 0, count);
+                        }
+                    }
+                    while (count > 0);
+                    return memory.ToArray();
+                }
+            }
+        }
     }
 }
-    }
-
 
 

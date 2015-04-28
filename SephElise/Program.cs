@@ -119,6 +119,10 @@ namespace SephElise
 
         private static void OnDraw(EventArgs args) 
         {
+            if (Player.IsDead)
+            {
+                return;
+            }
             if (Config.Item("DrawQ").GetValue<bool>()) 
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Qrange, System.Drawing.Color.White);
