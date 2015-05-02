@@ -765,7 +765,7 @@ namespace SephKhazix
                         {
                             List<Obj_AI_Base> PCollision = pred.CollisionObjects;
                             var x =
-                                PCollision.Where(PredCollisionChar => PredCollisionChar.Distance(target) <= 30)
+                                PCollision.Where(PredCollisionChar => Vector3.Distance(PredCollisionChar.ServerPosition, target.ServerPosition) <= 30)
                                     .FirstOrDefault();
                             if (x != null)
                             {

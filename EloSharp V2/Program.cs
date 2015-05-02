@@ -11,6 +11,7 @@ using SharpDX.Direct3D9;
 using Color2 = SharpDX.Color;
 using Font = SharpDX.Direct3D9.Font;
 using System.Timers;
+using System.Text;
 
 namespace EloSharp_V2
 {
@@ -24,7 +25,7 @@ namespace EloSharp_V2
     public class EloSharp
     {
 
-        public static System.Timers.Timer Timer = new System.Timers.Timer();
+        public static System.Timers.Timer Timer;
 
 
         public static bool disabletext;
@@ -44,7 +45,7 @@ namespace EloSharp_V2
         private static readonly Vector2 _scaleicon = new Vector2(1.0f, 1.0f);
         private static readonly Vector2 _scalesprites = new Vector2(0.2f, 0.2f);
         public static bool ready;
-        public static List<Obj_AI_Hero> champlist { get; set; }
+        public static List<Obj_AI_Hero> champlist = new List<Obj_AI_Hero>();
         private static string nameofplayer = "";
         private static bool delaying;
 
@@ -83,18 +84,17 @@ namespace EloSharp_V2
                     Console.WriteLine("performing delayed lookup");
                     delaying = true;
                     CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-
-                    Utility.DelayAction.Add(10000, () => //Delay to make sure game is detected
-                    {
-                        Console.WriteLine("in lookup xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-                        Performlookup();
-                    });
-                     
+                    Timer = new System.Timers.Timer(5000);
+                    Timer.Elapsed += new ElapsedEventHandler(TriggerLookup);
+                    Timer.Enabled = true;
                 }
             }
-
         }
 
+        static void TriggerLookup(object sender, ElapsedEventArgs e) 
+        {
+            Performlookup();
+        }
 
         private static void Performlookup()
         {
@@ -104,44 +104,75 @@ namespace EloSharp_V2
             {
                 Console.WriteLine("Looking up using Lolnexus");
                 Lolnexus.lolnexuslookup(nameofplayer, Misc.sortedregion());
-                DoDrawings();
-                SubEvents();
-                Game.OnWndProc += Game_OnWndProc;
+                if (Lolnexus.Ranksloading.Any())
+                {
+                    DoDrawings();
+                    Game.OnWndProc += Game_OnWndProc;
+                    Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+                    Timer.Enabled = false;
+                }
                 return;
             }
             if (setwebsite == "lolskill")
             {
                 LolSkill.lolskilllookup(nameofplayer);
-                DoDrawings();
-                SubEvents();
-                Game.OnWndProc += Game_OnWndProc;
+                if (LolSkill.Ranksloading.Any())
+                {
+                    DoDrawings();
+                    Game.OnWndProc += Game_OnWndProc;
+                    Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+                    Timer.Enabled = false;
+                }
                 return;
             }
             if (setwebsite == "opgg")
             {
                  OPGGLIVE.PerformLookup(nameofplayer);
-                 SubEvents();
-                 DoDrawings();
-                 Game.OnWndProc += Game_OnWndProc;
+                 if (OPGGLIVE.Ranks.Any())
+                 {
+                     DoDrawings();
+                     Game.OnWndProc += Game_OnWndProc;
+                     Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+                     Timer.Enabled = false;
+                 }
             }
         }
 
 
-
-
-
         public static void Game_OnGameLoad(EventArgs args)
         {
+            Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+            Timer.Enabled = false;
+
+
+            Console.WriteLine("<<EloSharp V2 Loaded>> by Seph.");
+
             string setwebsite = Misc.getsetwebsite().ToLower();
 
+            
+            if (setwebsite == "opgg2")
+            {
+                new System.Threading.Thread(() =>
+                {
+                    new OPGG();
+                    Drawing.OnDraw += OPGG.OnDraw;
+                }).Start();
+
+                return;
+            }
+             
+
+            
             if (!delaying)
             {
                 Performlookup();
             }
+             
+          
+            SubEvents();
 
-            GetHeroHandles();
-
-            Game.PrintChat("<<EloSharp V2 Loaded>> by Seph. Not fit for usage.");
+            GetHeroHandles(setwebsite);
+             
 
             if (File.Exists(Config.AppDataDirectory + "\\elosharp.txt") &&
                 Misc.Config.Item("autoupdate").GetValue<bool>())
@@ -150,27 +181,17 @@ namespace EloSharp_V2
                     File.ReadAllText(Config.AppDataDirectory + "\\elosharp.txt");
                 if (getplayername != ObjectManager.Player.Name)
                 {
-                    Game.PrintChat("EloSharp has added the current name as the default user for faster lookups!");
+                    Console.WriteLine("[EloSharp] has set the default name as the default user for faster lookups!");
                     File.WriteAllText(
                         LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
                 }
+                return;
             }
             if (!File.Exists(LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt"))
             {
                 File.WriteAllText(
                     LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
                 Game.PrintChat("EloSharp has added the current name as the default user for faster lookups!");
-            }
-
-    
-            if (Misc.getsetwebsite() == "opgg2")
-            {
-                new System.Threading.Thread(() =>
-                {
-                    new OPGG();
-                    Drawing.OnDraw += OPGG.OnDraw;
-                }).Start();
-
             }
         }
 
@@ -184,18 +205,29 @@ namespace EloSharp_V2
             AppDomain.CurrentDomain.ProcessExit += CurrentDomainOnDomainUnload;
         }
 
-        private static void GetHeroHandles()
+        private static void GetHeroHandles(string setwebsite)
         {
-            champlist = ObjectManager.Get<Obj_AI_Hero>().ToList();
-            string setwebsite = Misc.getsetwebsite().ToLower();
+            if (setwebsite == "opgg")
+            {
+                foreach (OPGGLIVE.Info infoloading in OPGGLIVE.Ranks)
+                {
+                    Obj_AI_Hero herohandle = HeroManager.AllHeroes.Find(o => o.Name.ToLower().Equals(infoloading.Name.ToLower()));
+                    if (herohandle != null)
+                    {
+                        infoloading.herohandle = herohandle;
+                    }
+                }
+                return;
+            }
+
             if (setwebsite == "lolnexus")
             {
                 foreach (Lolnexus.Infoloading infoloading in Lolnexus.Ranksloading)
                 {
                     infoloading.herohandle = champlist.Find(hero => hero.Name.ToLower() == infoloading.Name.ToLower());
                     Lolnexus.Ranksloading.Add(infoloading);
-
                 }
+                return;
             }
             if (setwebsite == "lolskill")
             {
@@ -204,16 +236,9 @@ namespace EloSharp_V2
                     infoloading.herohandle = champlist.Find(o => o.Name.ToLower() == infoloading.Name.ToLower());
                     LolSkill.Ranksloading.Add(infoloading);
                 }
+                return;
             }
 
-            if (setwebsite == "opgg")
-            {
-                foreach (OPGGLIVE.Info infoloading in OPGGLIVE.Ranks)
-                {
-                    Game.PrintChat(infoloading.Name.ToLower());
-                    infoloading.herohandle = champlist.Find(o => o.Name.ToLower() == infoloading.Name.ToLower());
-                }
-            }
         }
 
 
@@ -367,6 +392,7 @@ namespace EloSharp_V2
                                 "" + Misc.StripHTML(infoloading.currentrunes[i]), isTop, indexof, 135 + (i * 20),
                                 Color2.White);
                         }
+                        return;
                     }
 
                 }
@@ -411,15 +437,15 @@ namespace EloSharp_V2
                                 "" + Misc.StripHTML(infoloading.currentrunes[i]), isTop, indexof, 135 + (i * 20),
                                 Color2.White);
                         }
+                        return;
                     }
 
                 }
 
-                if (OPGGLIVE.Ranks != null && Misc.getsetwebsite() == "opgg")
+                if (OPGGLIVE.Ranks != null && OPGGLIVE.Ranks.Any() && Misc.getsetwebsite() == "opgg")
                 {
                     foreach (var hero in OPGGLIVE.Ranks)
                     {
-                        Console.WriteLine(hero.Name);
                         int indexof = 0;
                         indexof = OPGGLIVE.Ranks.IndexOf(hero);
                         bool isTop = indexof < 5;
@@ -446,6 +472,7 @@ namespace EloSharp_V2
 
                         RenderText("KDA: " + hero.kda, isTop, indexof, 135, Color2.Red);
                     }
+                    return;
                 }
             }
             catch (Exception e)
@@ -478,7 +505,7 @@ namespace EloSharp_V2
 
         private static void Drawing_OnEndScene(EventArgs args)
         {
-            if (Drawing.Direct3DDevice == null || Drawing.Direct3DDevice.IsDisposed)
+            if (Drawing.Direct3DDevice == null || Drawing.Direct3DDevice.IsDisposed || Game.Mode != GameMode.Running)
             {
                 return;
             }
@@ -553,7 +580,6 @@ namespace EloSharp_V2
             texty.Add(1);
             return texty;
         }
-
 
 
         public static void DoDrawings()

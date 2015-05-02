@@ -45,7 +45,7 @@ namespace EloSharp_V2
 
             Config.AddItem(new MenuItem("enabledebug", "Enable Debug").SetValue(false));
             Config.AddItem(new MenuItem("autoupdate", "Auto change name").SetValue(true));
-            Config.AddItem(new MenuItem("choosewebsite", "Choose Website").SetValue(new StringList(new[] { "LolNexus", "LolSkill", "OPGG Live", "Old EloSharp" }, 3)));
+            Config.AddItem(new MenuItem("choosewebsite", "Choose Website").SetValue(new StringList(new[] { "LolNexus", "LolSkill", "OPGG Live", "Old EloSharp" }, 2)));
             SetWebsite = Config.Item("choosewebsite").GetValue<StringList>().SelectedIndex;
             Config.AddSubMenu(new Menu("Loading Screen", "loadingscreen"));
             Config.SubMenu("loadingscreen")

@@ -68,7 +68,7 @@ namespace AutoZhonya
         {
             if (Menu.Item("enablehpzhonya").GetValue<bool>() && zhonyaready())
             {
-                if (Player.Health < Player.MaxHealth * 0.50 && Player.CountEnemiesInRange(450) >= 1 && (!SpellSlot.Q.IsReady() || !SpellSlot.W.IsReady() || !SpellSlot.E.IsReady() || !SpellSlot.R.IsReady()) && Player.Mana < Player.MaxMana * 80) {
+                if (Player.Health < Player.MaxHealth * 0.35 && Player.CountEnemiesInRange(300) >= 1 && (!SpellSlot.Q.IsReady() || !SpellSlot.W.IsReady() || !SpellSlot.E.IsReady() || !SpellSlot.R.IsReady()) && Player.Mana < Player.MaxMana * 80) {
                     Zhonya.Cast();
                 }
             }

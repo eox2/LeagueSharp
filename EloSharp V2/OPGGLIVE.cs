@@ -40,7 +40,7 @@ namespace EloSharp_V2
             WebHeaderCollection WHC = new WebHeaderCollection();
             Getinfo.Headers = WHC;
             WHC.Add("Accept-Language: en-US,en;q=0.8"); // Don't want any korean shit
-            String source = Getinfo.DownloadString("http://na.op.gg/summoner/ajax/spectator/userName=" + ObjectManager.Player.Name + "&force=true");
+            String source = Getinfo.DownloadString("http://na.op.gg/summoner/ajax/spectator/userName=" + name + "&force=true");
             System.IO.File.WriteAllText(Path.Combine(LeagueSharp.Common.Config.AppDataDirectory, "webpage.txt"), Misc.RemoveSpaces(source)); // Testing purposes
             ParseIt(source);
         }
@@ -65,7 +65,7 @@ namespace EloSharp_V2
                     info.rankedwinrate = Misc.ExtractString(data, @"<div class=""ratio normal"">", "</div>");
                     info.rankedwins = Misc.ExtractString(data, @"<span class=""title"">(", ")</span>");
                    // info.champtotal = Misc.ExtractString(data, @"<span class=""title"">", "</span>"); -- ranked wins
-                    info.champwinrate = Misc.ExtractString(data, @"<div class=""WinRatio""> <span class=""ratio", "</span>");
+                    info.champwinrate = RmColor(Misc.ExtractString(data, @"<div class=""WinRatio""> <span class=""ratio", "</span>"));
                     info.champtotal = Misc.ExtractString(data, @"(<span class=""title"">", "</span>)");
                     string kdastring = Misc.ExtractString(data, @"<div class=""KDA"">", "/span>");
                     if (Regex.Match(kdastring, @"[^0-9\.]+").Success)
@@ -91,6 +91,12 @@ namespace EloSharp_V2
                 }
             }
             Console.WriteLine("[EloSharp] Data Collection Completed");
+        }
+
+
+        public static string RmColor(string input)
+        {
+            return Regex.Replace(input, ".*?>", String.Empty);
         }
 
         public static string SortSeries(string rawseries)
