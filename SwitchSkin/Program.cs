@@ -54,8 +54,7 @@ namespace SwitchSkin
             {
                 return; 
             }
-            var hero = sender as Obj_AI_Hero;
-            Console.WriteLine(args.Property + " " + args.NewValue + " " + args.OldValue + " ");
+            var hero = (Obj_AI_Hero) sender;
             if (args.NewValue <= 0)
             {
                 var gethero = Heros.Find(x => x.name == sender.Name);
