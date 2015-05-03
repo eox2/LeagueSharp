@@ -52,7 +52,7 @@ namespace SwitchSkin
 
         static void FloatPropertyChange(GameObject sender, GameObjectFloatPropertyChangeEventArgs args)
         {
-            if (!(sender is Obj_AI_Hero) || args.Property != "mHP")
+            if (!(sender is Obj_AI_Hero) || args.Property != "mHP" || sender.Name != ObjectManager.Player.Name && !menu.Item("forall").GetValue<bool>())
             {
                 return; 
             }
