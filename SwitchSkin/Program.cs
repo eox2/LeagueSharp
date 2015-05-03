@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
@@ -8,8 +6,7 @@ namespace SwitchSkin
 {
     class Program
     {
-        public static List<Info> Heros = new List<Info>();
-        public static Menu menu;
+        private static Menu menu;
 
         static void Main(string[] args)
         {
@@ -23,8 +20,7 @@ namespace SwitchSkin
 
             foreach (var hero in HeroManager.AllHeroes)
             {
-                Heros.Add(new Info { died = false, herohandle = hero, name = hero.Name });
-
+                var lasttick = Environment.TickCount;
                 var currenthero = hero;
                 var selectskin = menu.AddItem(new MenuItem("skin." + hero.Name, hero.ChampionName + " (" + hero.Name + ")").SetValue(new Slider(0, 0, 10)));
 
@@ -33,8 +29,14 @@ namespace SwitchSkin
                     currenthero.SetSkin(currenthero.ChampionName, selectskin.GetValue<Slider>().Value);
                 }
 
-                selectskin.ValueChanged += delegate
+
+                selectskin.ValueChanged += delegate(object sender, OnValueChangeEventArgs args)
                 {
+                    if (Environment.TickCount - lasttick < 200) //bugsplat fix
+                    {
+                        args.Process = false; 
+                        return;
+                    }
                     try
                     {
                         currenthero.SetSkin(currenthero.ChampionName, selectskin.GetValue<Slider>().Value);
@@ -43,6 +45,9 @@ namespace SwitchSkin
                     {
                         Console.Write(e);
                     }
+
+                    lasttick = Environment.TickCount;
+
                 };
             }
             menu.AddToMainMenu();
@@ -55,28 +60,13 @@ namespace SwitchSkin
                 return; 
             }
             var hero = (Obj_AI_Hero) sender;
-            if (args.NewValue <= 0)
-            {
-                var gethero = Heros.Find(x => x.name == sender.Name);
-                gethero.died = true;
-            }
+ 
             if (args.OldValue.Equals(args.NewValue) && args.NewValue.Equals(hero.MaxHealth) && !hero.IsDead)
             {
-                var gethero = Heros.Find(x => x.name.ToLower() == sender.Name.ToLower());
-                gethero.herohandle.SetSkin(gethero.herohandle.ChampionName, menu.Item("skin." + hero.Name).GetValue<Slider>().Value);
-                gethero.died = false;
+                hero.SetSkin(hero.ChampionName, menu.Item("skin." + hero.Name).GetValue<Slider>().Value);
             }
         }
-
     }
-
-   
-        public class Info
-        {
-            public Obj_AI_Hero herohandle { get; set; }
-            public bool died { get; set; }
-            public string name { get; set; }
-        }
 }
 
 
