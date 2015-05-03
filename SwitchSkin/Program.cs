@@ -20,7 +20,6 @@ namespace SwitchSkin
 
             foreach (var hero in HeroManager.AllHeroes)
             {
-                var lasttick = Environment.TickCount;
                 var currenthero = hero;
                 var selectskin = menu.AddItem(new MenuItem("skin." + hero.Name, hero.ChampionName + " (" + hero.Name + ")").SetValue(new Slider(0, 0, 10)));
 
@@ -29,14 +28,8 @@ namespace SwitchSkin
                     currenthero.SetSkin(currenthero.ChampionName, selectskin.GetValue<Slider>().Value);
                 }
 
-
-                selectskin.ValueChanged += delegate(object sender, OnValueChangeEventArgs args)
+                selectskin.ValueChanged += delegate
                 {
-                    if (Environment.TickCount - lasttick < 200) //bugsplat fix
-                    {
-                        args.Process = false; 
-                        return;
-                    }
                     try
                     {
                         currenthero.SetSkin(currenthero.ChampionName, selectskin.GetValue<Slider>().Value);
@@ -45,9 +38,6 @@ namespace SwitchSkin
                     {
                         Console.Write(e);
                     }
-
-                    lasttick = Environment.TickCount;
-
                 };
             }
             menu.AddToMainMenu();
