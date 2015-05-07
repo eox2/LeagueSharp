@@ -127,7 +127,7 @@ namespace SephLux
             if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Combo.UseQ"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
-                if (pred.CollisionObjects.Count <= 2 && pred.Hitchance > LuxUtils.GetHitChance("HitChance.Q"))
+                if (pred.CollisionObjects.Count <= 2 && pred.Hitchance > LuxUtils.GetHitChance("Hitchance.Q"))
                 {
                     Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
@@ -135,7 +135,7 @@ namespace SephLux
             if (Spells[SpellSlot.E].IsReady() && LuxE == null && LuxUtils.Active("Combo.UseE"))
             {
                 var pred = Spells[SpellSlot.E].GetPrediction(target, true);
-                if (pred.Hitchance >= LuxUtils.GetHitChance("HitChance.E"))
+                if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.E"))
                 {
                     Spells[SpellSlot.E].Cast(pred.CastPosition);
                 }
@@ -162,7 +162,7 @@ namespace SephLux
                 {
                     var pred = Spells[SpellSlot.R].GetPrediction(target);
                     if (pred.Hitchance >= HitChance.VeryHigh ||
-                        pred.CollisionObjects.Count(x => x.Type == GameObjectType.obj_AI_Hero && x.IsEnemy) > 1 &&
+                        pred.CollisionObjects.Count(x => x.Type == GameObjectType.obj_AI_Hero && x.IsEnemy) > 2 &&
                         pred.Hitchance >= HitChance.High)
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
