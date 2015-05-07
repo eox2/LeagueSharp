@@ -90,8 +90,6 @@ namespace SephLux
              
 
             Menu Misc = new Menu("Misc", "Misc", false);
-            Misc.AddItem(new MenuItem("Misc.PrioritizeUnderTurret", "Prioritize Targets Under Turret", false).SetValue(true));
-            Misc.AddItem(new MenuItem("spaceholder", ""));
             Misc.AddItem(new MenuItem("Hitchance.Q", "Q Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 1)));
             Misc.AddItem(new MenuItem("Hitchance.E", "E Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString() , HitChance.Immobile.ToString() }, 1)));
             Misc.AddItem(new MenuItem("Hitchance.R", "R Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 4)));
