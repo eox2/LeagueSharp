@@ -13,7 +13,7 @@ namespace LolBuilder
 
         public static void GameLoad(EventArgs args)
         {
-            Game.PrintChat("<font color=\"#43C6DB\"><b>LolBuilder Loaded - By Seph</font></b>");
+            Console.WriteLine("LolBuilder Loaded - By Seph");
             String championname = ObjectManager.Player.ChampionName.Replace(" ", "").Replace("'", "");
             var main = new System.Threading.Thread(() =>
             {
@@ -22,7 +22,7 @@ namespace LolBuilder
                 if (AutoLevOn())
                 {
                     var sequence = BuildData.SkillSequence;
-                    new CommonAutoLevel(sequence);
+                   // new CommonAutoLevel(sequence);
                 }
             });
 
@@ -35,8 +35,17 @@ namespace LolBuilder
         {
             BuildData.BuildsList = new List<BuildData.BuildInfo>();
             WebClient pbClient = new WebClient();
-            String Data = pbClient.DownloadString("http://lolbuilder.net/" + cname);
-
+            String Data = null;
+            try
+            {
+                Data = pbClient.DownloadString("http://lolbuilder.net/" + cname);
+                Console.Write(Data);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            
             String SkillSeq = ExtractString(Data, "window.skillOrder[0] = [", "];");
             string[] seqinstringarray = SkillSeq.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
             int[] OrderedSequence = new int[seqinstringarray.Length];

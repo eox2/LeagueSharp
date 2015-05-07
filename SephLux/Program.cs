@@ -10,7 +10,7 @@ namespace SephLux
     {
         static void Main(string[] args)
         {
-            Lux.OnLoad();
+            Lux.LuxMain();
         }
     }
 }

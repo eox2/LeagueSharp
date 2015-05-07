@@ -25,7 +25,7 @@ namespace EloSharp_V2
     public class EloSharp
     {
 
-        public static System.Timers.Timer Timer;
+        public static Timer Timer;
 
 
         public static bool disabletext;
@@ -74,17 +74,25 @@ namespace EloSharp_V2
 
                 if (Game.Mode == GameMode.Running)
                 {
-                    Console.WriteLine("performing instant lookup");
-                    delaying = false;
-                    Game_OnGameLoad(new EventArgs { });
-                    return;
+                    try
+                    {
+                        Console.WriteLine("performing instant lookup");
+                        Performlookup();
+                        delaying = false;
+                        Game_OnGameLoad(new EventArgs());
+         
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
                 }
                 else
                 {
                     Console.WriteLine("performing delayed lookup");
                     delaying = true;
                     CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-                    Timer = new System.Timers.Timer(5000);
+                    Timer = new Timer(5000);
                     Timer.Elapsed += new ElapsedEventHandler(TriggerLookup);
                     Timer.Enabled = true;
                 }
@@ -99,7 +107,6 @@ namespace EloSharp_V2
         private static void Performlookup()
         {
             string setwebsite = Misc.getsetwebsite().ToLower();
-
             if (setwebsite == "lolnexus")
             {
                 Console.WriteLine("Looking up using Lolnexus");
@@ -108,32 +115,43 @@ namespace EloSharp_V2
                 {
                     DoDrawings();
                     Game.OnWndProc += Game_OnWndProc;
-                    Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
-                    Timer.Enabled = false;
+                    if (Timer != null)
+                    {
+                        Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+                        Timer.Enabled = false;
+                    }
                 }
                 return;
             }
             if (setwebsite == "lolskill")
             {
+                Console.WriteLine("Looking up using Lolskill");
                 LolSkill.lolskilllookup(nameofplayer);
                 if (LolSkill.Ranksloading.Any())
                 {
                     DoDrawings();
                     Game.OnWndProc += Game_OnWndProc;
-                    Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
-                    Timer.Enabled = false;
+                    if (Timer != null)
+                    {
+                        Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+                        Timer.Enabled = false;
+                    }
                 }
                 return;
             }
             if (setwebsite == "opgg")
             {
+                Console.WriteLine("Looking up using OPGG Live");
                  OPGGLIVE.PerformLookup(nameofplayer);
                  if (OPGGLIVE.Ranks.Any())
                  {
                      DoDrawings();
                      Game.OnWndProc += Game_OnWndProc;
-                     Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
-                     Timer.Enabled = false;
+                     if (Timer != null)
+                     {
+                         Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+                         Timer.Enabled = false;
+                     }
                  }
             }
         }
@@ -141,11 +159,14 @@ namespace EloSharp_V2
 
         public static void Game_OnGameLoad(EventArgs args)
         {
-            Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
-            Timer.Enabled = false;
+          //  Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+           // Timer.Enabled = false;
 
 
             Console.WriteLine("<<EloSharp V2 Loaded>> by Seph.");
+
+            Notifications.AddNotification("hi, 5, true");
+            
 
             string setwebsite = Misc.getsetwebsite().ToLower();
 
@@ -161,14 +182,6 @@ namespace EloSharp_V2
                 return;
             }
              
-
-            
-            if (!delaying)
-            {
-                Performlookup();
-            }
-             
-          
             SubEvents();
 
             GetHeroHandles(setwebsite);
@@ -191,7 +204,6 @@ namespace EloSharp_V2
             {
                 File.WriteAllText(
                     LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
-                Game.PrintChat("EloSharp has added the current name as the default user for faster lookups!");
             }
         }
 

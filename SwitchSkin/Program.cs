@@ -22,7 +22,7 @@ namespace SwitchSkin
         {
              menu = new Menu("SwitchSkins", "Skinswitcher", true);
 
-             menu.AddItem(new MenuItem("forall", "Enable for all (lags menu)").SetValue(false));
+             menu.AddItem(new MenuItem("forall", "Enable for all (reload required)").SetValue(true));
 
             foreach (var hero in HeroManager.AllHeroes)
             {
@@ -33,18 +33,20 @@ namespace SwitchSkin
 
                 var currenthero = hero;
 
-                var newselect = menu.AddItem(new MenuItem("skin." + hero.ChampionName, hero.ChampionName + " (" + hero.Name + ")").SetValue(new StringList(new[] { "Skin 0", "Skin 1", "Skin 2", "Skin 3", "Skin 4", "Skin 5", "Skin 6", "Skin 7", "Skin 8", "Skin 9", "Skin 10" }, 0)));
+                var herosubmenu = new Menu(hero.ChampionName + " (" + hero.Name + ") ", hero.Name);
+                var skinselect = herosubmenu.AddItem(new MenuItem("skin." + hero.ChampionName, hero.ChampionName + " (" + hero.Name + ")").SetValue(new StringList(new[] { "Skin 0", "Skin 1", "Skin 2", "Skin 3", "Skin 4", "Skin 5", "Skin 6", "Skin 7", "Skin 8", "Skin 9", "Skin 10" }, 0)));
 
-                ChampSkins.Add(hero.Name, newselect.GetValue<StringList>().SelectedIndex);
+                ChampSkins.Add(hero.Name, skinselect.GetValue<StringList>().SelectedIndex);
 
                 hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
 
-                newselect.ValueChanged += delegate(Object sender, OnValueChangeEventArgs args)
+                menu.AddSubMenu(herosubmenu);
+
+                skinselect.ValueChanged += delegate(Object sender, OnValueChangeEventArgs args)
                 {
                    ChampSkins[currenthero.Name] = args.GetNewValue<StringList>().SelectedIndex;
                    currenthero.SetSkin(currenthero.ChampionName, ChampSkins[currenthero.Name]);
                 };
-
             }
             menu.AddToMainMenu();
         }
