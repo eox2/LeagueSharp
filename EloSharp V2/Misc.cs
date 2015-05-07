@@ -304,6 +304,53 @@ namespace EloSharp_V2
         }
 
 
+        public static string getregionurl()
+        {
+            if (Game.Region.ToLower().Contains("na"))
+            {
+                return "http://na.op.gg/";
+            }
+
+            if (Game.Region.ToLower().Contains("euw"))
+            {
+                return "http://euw.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("eun"))
+            {
+                return "http://eune.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("la1"))
+            {
+                return "http://lan.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("la2"))
+            {
+                return "http://las.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("tr"))
+            {
+                return "http://tr.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("ru"))
+            {
+                return "http://ru.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("oc1"))
+            {
+                return "http://oce.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("br"))
+            {
+                return "http://br.op.gg/";
+            }
+            if (Game.Region.ToLower().Contains("kr"))
+            {
+                return "http://op.gg/";
+            }
+            return null;
+        }
+
+
         public static byte[] Decompress(byte[] gzip)
         {
             using (GZipStream stream = new GZipStream(new MemoryStream(gzip), CompressionMode.Decompress))

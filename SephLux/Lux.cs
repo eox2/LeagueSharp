@@ -144,7 +144,7 @@ namespace SephLux
                      Vector3.Distance(LuxE.Position, target.ServerPosition) <=
                      LuxE.BoundingRadius + target.BoundingRadius)
             {
-                Spells[SpellSlot.E].Cast(target);
+                Spells[SpellSlot.E].Cast();
             }
 
             if (SpellSlot.R.IsReady() && LuxUtils.Active("Combo.UseR"))
@@ -170,6 +170,19 @@ namespace SephLux
                 }
             }
 
+        }
+
+        static void Explode(EventArgs args)
+        {
+            foreach (var target in HeroManager.Enemies)
+            {
+                if (LuxUtils.Active("Combo.UseE2") && LuxE != null &&
+                    Vector3.Distance(LuxE.Position, target.ServerPosition) <=
+                    LuxE.BoundingRadius + target.BoundingRadius)
+                {
+                    Spells[SpellSlot.E].Cast();
+                }
+            }
         }
 
         #endregion
@@ -247,14 +260,13 @@ namespace SephLux
 
         static void MixedModeLogic(Obj_AI_Hero target, bool isMixed)
         {
-            if (!LuxUtils.Active("Farm.Enable"))
+            if (!LuxUtils.Active("Farm.Enable") || target == null)
             {
                 return;
             }
-            if (target.IsValidTarget())
-            {
+         
                 Harass(target);
-            }
+            
 
             if (Player.ManaPercent < LuxUtils.GetSlider("Farm.Mana"))
             {

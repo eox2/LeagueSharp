@@ -41,11 +41,11 @@ namespace EloSharp_V2
             {
                 Info info = new Info();
                 string playerNameEnc = HttpUtility.UrlEncode(hero.Name);
-                if (getregionurl() != "Not Supported" && getregionurl().Contains("op.gg"))
+                if (Misc.getregionurl() != "Not Supported" && Misc.getregionurl().Contains("op.gg"))
                 {
                     string htmlcode = "";
                     var request =
-                        (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/userName=" + playerNameEnc);
+                        (HttpWebRequest)WebRequest.Create(Misc.getregionurl() + "summoner/userName=" + playerNameEnc);
                     var response = (HttpWebResponse)request.GetResponse();
 
                     if (response.StatusCode == HttpStatusCode.OK)
@@ -273,8 +273,8 @@ namespace EloSharp_V2
                         string data = "";
                         request =
                             (HttpWebRequest)
-                                WebRequest.Create(getregionurl() + "summoner/champions/userName=" + playerNameEnc);
-                        // request = (HttpWebRequest)WebRequest.Create(getregionurl() + "summoner/champions/userName=Chief Raydere");
+                                WebRequest.Create(Misc.getregionurl() + "summoner/champions/userName=" + playerNameEnc);
+                        // request = (HttpWebRequest)WebRequest.Create(Misc.getregionurl() + "summoner/champions/userName=Chief Raydere");
                         response = (HttpWebResponse)request.GetResponse();
 
                         if (response.StatusCode == HttpStatusCode.OK)
@@ -713,99 +713,7 @@ namespace EloSharp_V2
             return Color.Red;
         }
 
-        public static string getregionurl()
-        {
-
-            if (Game.Region.ToLower().Contains("na"))
-            {
-                return "http://na.op.gg/";
-            }
-
-
-            if (Game.Region.ToLower().Contains("euw"))
-            {
-                return "http://euw.op.gg/";
-            }
-            if (Game.Region.ToLower().Contains("eun"))
-            {
-                return "http://eune.op.gg/";
-            }
-            if (Game.Region.ToLower().Contains("la1"))
-            {
-                return "http://lan.op.gg/";
-            }
-            if (Game.Region.ToLower().Contains("la2"))
-            {
-                return "http://las.op.gg/";
-            }
-            if (Game.Region.ToLower().Contains("tr"))
-            {
-                return "http://tr.op.gg/";
-            }
-            if (Game.Region.ToLower().Contains("ru"))
-            {
-                return "http://ru.op.gg/";
-            }
-            if (Game.Region.ToLower().Contains("oc1"))
-            {
-                return "http://oce.op.gg/";
-            }
-            if (Game.Region.ToLower().Contains("br"))
-            {
-                return "http://br.op.gg/";
-            }
-            if (Game.Region.ToLower().Contains("kr"))
-            {
-                return "http://op.gg/";
-            }
-
-            //Garena lookups
-            /*  Testing purposes
-            if (Game.Region.Contains("NA"))
-            {
-                return "http://quickfind.kassad.in/profile/vn/";
-        
-            }
-             */
-            if (Game.Region.Contains("SG"))
-            {
-                return "http://quickfind.kassad.in/profile/sg/";
-
-            }
-            if (Game.Region.Contains("VN"))
-            {
-                return "http://quickfind.kassad.in/profile/vn/";
-
-
-            }
-
-            if (Game.Region.Contains("PH"))
-            {
-                return "http://quickfind.kassad.in/profile/ph/";
-            }
-
-            if (Game.Region.Contains("TW"))
-            {
-                return "http://quickfind.kassad.in/profile/tw/";
-            }
-            if (Game.Region.Contains("TH"))
-            {
-                return "http://quickfind.kassad.in/profile/th/";
-            }
-            if (Game.Region.Contains("ID"))
-            {
-
-                return "http://quickfind.kassad.in/profile/id/";
-            }
-
-            return "Not Supported";
-
-            // testing stuff
-            //return "http://kassad.in";
-            // return "http://na.op.gg/";
-        }
-
-
+   
         public static float TextWidth(string text, Font f)
         {
             float textWidth = 0;

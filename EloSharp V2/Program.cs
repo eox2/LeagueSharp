@@ -164,8 +164,6 @@ namespace EloSharp_V2
 
 
             Console.WriteLine("<<EloSharp V2 Loaded>> by Seph.");
-
-            Notifications.AddNotification("hi, 5, true");
             
 
             string setwebsite = Misc.getsetwebsite().ToLower();
@@ -567,17 +565,32 @@ namespace EloSharp_V2
                         X = (int)indicator.Position.X;
                         Y = (int)indicator.Position.Y;
                         var startX = X + 50;
-                        var startY = Y - 60;
-                        Text.DrawText(
-                            null, info.Ranking, startX + (15 - info.Ranking.Length * 4) / 2,
-                            startY + 6, Misc.ColorRank(info.Ranking));
+                        var startY = Y - 70;
+                        if (Misc.Config.Item("enablerank").GetValue<bool>())
+                        {
+                            Text.DrawText(
+                                null, info.Ranking, startX + (15 - info.Ranking.Length * 4) / 2, startY + 5,
+                                Misc.ColorRank(info.Ranking));
+                        }
+                        if (Misc.Config.Item("enablewinratio").GetValue<bool>())
+                        {
+                            Text.DrawText(
+                                null, "Ranked: " + info.rankedwinrate + " (" + info.rankedwins + " wins)",
+                                startX + (15 - info.Ranking.Length * 4) / 2, startY + 20, Misc.ColorRank(info.Ranking));
+                        }
+                        if (Misc.Config.Item("enablekdaratio").GetValue<bool>())
+                        {
+                            Text.DrawText(
+                                null, "Champ: " + info.champwinrate + " (" + info.kda + " KDA)",
+                                startX + (15 - info.Ranking.Length * 4) / 2, startY + 35, Misc.ColorRank(info.Ranking));
+                        }
                     }
                 }
             }
 
             catch (Exception e)
             {
-                Console.WriteLine(@"Error drawing sprites " + e);
+                Console.WriteLine(@"Error drawing text loading screen " + e);
             }
         }
 
