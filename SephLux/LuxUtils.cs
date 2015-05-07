@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -37,6 +34,10 @@ namespace SephLux
                     return HitChance.Medium;
                 case "High":
                     return HitChance.High;
+                case "VeryHigh":
+                    return HitChance.VeryHigh;
+                case "Immobile":
+                    return HitChance.Immobile;
             }
             return HitChance.Medium;
         }

@@ -68,7 +68,7 @@ namespace SephLux
             Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "AntiGapClose with Q").SetValue(true));
             Config.AddSubMenu(Interrupter);
             
-            Menu Blist = new Menu("Ultimate BlackList", "BlackList", false);
+            Menu Blist = new Menu("BlackList", "BlackList", false);
             foreach (var hero in HeroManager.Enemies)
             {
                 var champ = hero;
@@ -89,7 +89,7 @@ namespace SephLux
             Config.AddSubMenu(Blist);
              
 
-            Menu Misc = new Menu("Misc", "Misc", false);
+            Menu Misc = new Menu("Hitchance Settings", "Misc", false);
             Misc.AddItem(new MenuItem("Hitchance.Q", "Q Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 1)));
             Misc.AddItem(new MenuItem("Hitchance.E", "E Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString() , HitChance.Immobile.ToString() }, 1)));
             Misc.AddItem(new MenuItem("Hitchance.R", "R Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 4)));

@@ -341,6 +341,7 @@ namespace SephLux
 
             if (SpellSlot.Q.IsReady() && LuxUtils.Active("Killsteal.UseQ"))
             {
+
                 Obj_AI_Hero qtarget =
                     targets.Where(x => x.Distance(Player.Position) < Spells[SpellSlot.Q].Range)
                     .MinOrDefault(x => x.Health);
