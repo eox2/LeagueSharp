@@ -260,18 +260,13 @@ namespace SephLux
 
         static void MixedModeLogic(Obj_AI_Hero target, bool isMixed)
         {
-            if (!LuxUtils.Active("Farm.Enable") || target == null)
+            if (!LuxUtils.Active("Farm.Enable") || target == null || Player.ManaPercent < LuxUtils.GetSlider("Farm.Mana"))
             {
                 return;
             }
-         
-                Harass(target);
+        
+            Harass(target);
             
-
-            if (Player.ManaPercent < LuxUtils.GetSlider("Farm.Mana"))
-            {
-                return;
-            }
             var Minions =
                 ObjectManager.Get<Obj_AI_Minion>()
                     .Where(
@@ -279,6 +274,10 @@ namespace SephLux
                             m.IsValidTarget() &&
                             (Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.E].Range));
 
+            if (!Minions.Any())
+            {
+                return;
+            }
             if (SpellSlot.Q.IsReady() && LuxUtils.Active("Farm.UseQ"))
             {
                 var KillableMinionsQ = Minions.Where(m => m.Health < Player.GetSpellDamage(m, SpellSlot.Q) && Vector3.Distance(m.ServerPosition, Player.ServerPosition) > Player.AttackRange);
@@ -296,7 +295,7 @@ namespace SephLux
                 }
             }
 
-            if (LuxUtils.Active("Farm.UseE2") && LuxE != null && LuxE.Position == LuxE.EndPosition)
+            if (LuxE != null && LuxE.Position == LuxE.EndPosition)
             {
                 Spells[SpellSlot.E].Cast();
             }
