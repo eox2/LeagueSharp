@@ -127,7 +127,7 @@ namespace SephLux
             if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Combo.UseQ"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
-                if (pred.CollisionObjects.Count <= 2 && pred.Hitchance > LuxUtils.GetHitChance("Hitchance.Q"))
+                if (pred.CollisionObjects.Count <= 1 && pred.Hitchance > LuxUtils.GetHitChance("Hitchance.Q"))
                 {
                     Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
@@ -310,7 +310,7 @@ namespace SephLux
             if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Harass.UseQ"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
-                if (pred.CollisionObjects.Count <= 2 && pred.Hitchance > HitChance.VeryHigh)
+                if (pred.CollisionObjects.Count <= 1 && pred.Hitchance > HitChance.VeryHigh)
                 {
                     Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
@@ -350,7 +350,7 @@ namespace SephLux
                     if (qtarget.Health < qdmg)
                     {
                         var pred = Spells[SpellSlot.Q].GetPrediction(qtarget, false);
-                        if (pred != null && pred.Hitchance > HitChance.Medium)
+                        if (pred != null && pred.Hitchance > HitChance.Medium && pred.CollisionObjects.Count <= 1)
                         {
                             Spells[SpellSlot.Q].Cast(pred.CastPosition);
                             return;
@@ -544,10 +544,6 @@ namespace SephLux
             if (LuxUtils.Active("Drawing.DrawQ"))
             {
                 Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.Q].Range, System.Drawing.Color.White);
-            }
-            if (LuxUtils.Active("Drawing.DrawW"))
-            {
-                Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.W].Range, System.Drawing.Color.Green);
             }
             if (LuxUtils.Active("Drawing.DrawE"))
             {
