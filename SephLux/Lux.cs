@@ -153,7 +153,7 @@ namespace SephLux
                 if (ulttarget != null)
                 {
                     var pred = Spells[SpellSlot.R].GetPrediction(ulttarget);
-                    if (pred.Hitchance >= HitChance.VeryHigh)
+                    if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.R"))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
                     }
@@ -310,7 +310,7 @@ namespace SephLux
             if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Harass.UseQ"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
-                if (pred.CollisionObjects.Count <= 1 && pred.Hitchance > HitChance.VeryHigh)
+                if (pred.CollisionObjects.Count <= 1 && pred.Hitchance > LuxUtils.GetHitChance("Hitchance.Q"))
                 {
                     Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
@@ -318,7 +318,7 @@ namespace SephLux
             if (Spells[SpellSlot.E].IsReady() && LuxE == null && LuxUtils.Active("Harass.UseE"))
             {
                 var pred = Spells[SpellSlot.E].GetPrediction(target, true);
-                if (pred.Hitchance >= HitChance.High)
+                if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.E"))
                 {
                     Spells[SpellSlot.E].Cast(pred.CastPosition);
                 }
@@ -387,15 +387,20 @@ namespace SephLux
                 }
             }
 
+
             if (SpellSlot.R.IsReady() && LuxUtils.Active("Killsteal.UseR"))
             {
-                var targ =
-                    HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget() &&
-                            Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Spells[SpellSlot.R].Range && x.Health < Player.GetSpellDamage(x, SpellSlot.R));
+                var targ = HeroManager.Enemies.FirstOrDefault(h => h.HasBuff("LuxLightBindingMis") && h.IsValidTarget(Spells[SpellSlot.R].Range));
+
+                if (targ == null)
+                {
+                    targ = HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Spells[SpellSlot.R].Range && x.Health < Player.GetSpellDamage(x, SpellSlot.R));
+                }
+               
                 if (targ != null)
                 {
                     var pred = Spells[SpellSlot.R].GetPrediction(targ, true);
-                    if (pred.Hitchance >= HitChance.VeryHigh)
+                    if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.R"))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
                     }
@@ -509,19 +514,25 @@ namespace SephLux
             {
                 GameObject.OnCreate += (sender, args) =>
                 {
-                    var miss = sender as Obj_SpellCircleMissile;
-                    if (sender is Obj_SpellCircleMissile && sender.IsValid && miss.SpellCaster.IsMe)
+                    if (sender.Name.Contains("LuxLightstrike_tar"))
                     {
-                        LuxE = miss;
+                        var miss = sender as Obj_SpellCircleMissile;
+                        if (sender is Obj_SpellCircleMissile && sender.IsValid && miss.SpellCaster.IsMe)
+                        {
+                            LuxE = miss;
+                        }
                     }
                 };
 
                 GameObject.OnDelete += (sender, args) =>
                 {
-                    var miss = sender as Obj_SpellCircleMissile;
-                    if (sender is Obj_SpellCircleMissile && sender.IsValid && miss.SpellCaster.IsMe)
+                    if (sender.Name.Contains("LuxLightstrike_tar"))
                     {
-                        LuxE = null;
+                        var miss = sender as Obj_SpellCircleMissile;
+                        if (sender is Obj_SpellCircleMissile && sender.IsValid && miss.SpellCaster.IsMe)
+                        {
+                            LuxE = null;
+                        }
                     }
                 };
             }
