@@ -106,53 +106,60 @@ namespace EloSharp_V2
 
         private static void Performlookup()
         {
-            string setwebsite = Misc.getsetwebsite().ToLower();
-            if (setwebsite == "lolnexus")
+            try
             {
-                Console.WriteLine("Looking up using Lolnexus");
-                Lolnexus.lolnexuslookup(nameofplayer, Misc.sortedregion());
-                if (Lolnexus.Ranksloading.Any())
+                string setwebsite = Misc.getsetwebsite().ToLower();
+                if (setwebsite == "lolnexus")
                 {
-                    DoDrawings();
-                    Game.OnWndProc += Game_OnWndProc;
-                    if (Timer != null)
+                    Console.WriteLine("Looking up using Lolnexus");
+                    Lolnexus.lolnexuslookup(nameofplayer, Misc.sortedregion());
+                    if (Lolnexus.Ranksloading.Any())
                     {
-                        Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
-                        Timer.Enabled = false;
+                        DoDrawings();
+                        Game.OnWndProc += Game_OnWndProc;
+                        if (Timer != null)
+                        {
+                            Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+                            Timer.Enabled = false;
+                        }
+                    }
+                    return;
+                }
+                if (setwebsite == "lolskill")
+                {
+                    Console.WriteLine("Looking up using Lolskill");
+                    LolSkill.lolskilllookup(nameofplayer);
+                    if (LolSkill.Ranksloading.Any())
+                    {
+                        DoDrawings();
+                        Game.OnWndProc += Game_OnWndProc;
+                        if (Timer != null)
+                        {
+                            Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+                            Timer.Enabled = false;
+                        }
+                    }
+                    return;
+                }
+                if (setwebsite == "opgg")
+                {
+                    Console.WriteLine("Looking up using OPGG Live");
+                    OPGGLIVE.PerformLookup(nameofplayer);
+                    if (OPGGLIVE.Ranks.Any())
+                    {
+                        DoDrawings();
+                        Game.OnWndProc += Game_OnWndProc;
+                        if (Timer != null)
+                        {
+                            Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+                            Timer.Enabled = false;
+                        }
                     }
                 }
-                return;
             }
-            if (setwebsite == "lolskill")
+            catch (Exception e)
             {
-                Console.WriteLine("Looking up using Lolskill");
-                LolSkill.lolskilllookup(nameofplayer);
-                if (LolSkill.Ranksloading.Any())
-                {
-                    DoDrawings();
-                    Game.OnWndProc += Game_OnWndProc;
-                    if (Timer != null)
-                    {
-                        Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
-                        Timer.Enabled = false;
-                    }
-                }
-                return;
-            }
-            if (setwebsite == "opgg")
-            {
-                Console.WriteLine("Looking up using OPGG Live");
-                 OPGGLIVE.PerformLookup(nameofplayer);
-                 if (OPGGLIVE.Ranks.Any())
-                 {
-                     DoDrawings();
-                     Game.OnWndProc += Game_OnWndProc;
-                     if (Timer != null)
-                     {
-                         Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
-                         Timer.Enabled = false;
-                     }
-                 }
+                Console.Write(e + e.StackTrace);
             }
         }
 

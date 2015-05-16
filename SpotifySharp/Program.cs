@@ -118,7 +118,7 @@ namespace SpotifySharp
         {
             if (SpotifyOpen())
             {
-                ShowWindow(FindSpotify(), 1);
+                WinAPI.ShowWindow(FindSpotify(), 1);
                 SetForegroundWindow(FindSpotify());
                 SetFocus(FindSpotify());
             }

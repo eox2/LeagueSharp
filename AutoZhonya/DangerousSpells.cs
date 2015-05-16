@@ -320,7 +320,7 @@ namespace AutoZhonya
                     Name = "LissandraR",
                     DisplayName = "Lissandra R",
                     Source = "Lissandra",
-                    BaseDelay = 0, //Zhonya lasts 2.5 seconds 
+                    BaseDelay = 0.1, //Zhonya lasts 2.5 seconds 
                     SSDelay = 1,
                     Zhonyable = true,
                     SpellShieldable = true,
@@ -407,9 +407,9 @@ namespace AutoZhonya
             AvoidableSpells.Add(
                 new Data
                 {
-                    Name = "JarvanIVCataclysm",
-                    DisplayName = "Jarvan R",
-                    Source = "JarvanIV",
+                    Name = "MonkeyKingSpinToWin",
+                    DisplayName = "Wukong R",
+                    Source = "MonkeyKing",
                     BaseDelay = 0, //Zhonya lasts 2.5 seconds 
                     SSDelay = 0,
                     Zhonyable = true,
@@ -517,7 +517,7 @@ namespace AutoZhonya
             AvoidableSpells.Add(
                 new Data
                 {
-                    Name = "katarianr",
+                    Name = "KatarinaR",
                     DisplayName = "Katarina R",
                     Source = "Katarina",
                     BaseDelay = 0, //Zed untargettable for 0.75 seconds
@@ -565,6 +565,96 @@ namespace AutoZhonya
                 });
 
             #endregion Nocturne R
+
+            #region Yasuo
+
+            AvoidableSpells.Add(
+                new Data
+                {
+                    Name = "YasuoRKnockUpComboW",
+                    DisplayName = "Yasuo R",
+                    Source = "Yasuo",
+                    BaseDelay = 0,
+                    SSDelay = 1.0,
+                    Zhonyable = true,
+                    SpellShieldable = false,
+                    Buffrequirement = false,
+                    RequiredBuff = "" 
+                });
+
+            #endregion Yasuo
+
+            #region Orianna
+
+            AvoidableSpells.Add(
+                new Data
+                {
+                    Name = "OrianaDetonateCommand",
+                    DisplayName = "Orianna R",
+                    Source = "Orianna",
+                    BaseDelay = 0,
+                    SSDelay = 1.0,
+                    Zhonyable = true,
+                    SpellShieldable = false,
+                    Buffrequirement = false,
+                    RequiredBuff = ""
+                });
+
+            #endregion Orianna
+
+            #region Riven
+
+            AvoidableSpells.Add(
+                new Data
+                {
+                    Name = "RivenFengShuiEngine",
+                    DisplayName = "Riven R",
+                    Source = "Riven",
+                    BaseDelay = 0,
+                    SSDelay = 1.0,
+                    Zhonyable = true,
+                    SpellShieldable = false,
+                    Buffrequirement = false,
+                    RequiredBuff = ""
+                });
+
+            #endregion Riven
+
+            #region Velkoz
+
+            AvoidableSpells.Add(
+                new Data
+                {
+                    Name = "VelkozR",
+                    DisplayName = "Velkoz R",
+                    Source = "Velkoz",
+                    BaseDelay = 0,
+                    SSDelay = 1.0,
+                    Zhonyable = true,
+                    SpellShieldable = false,
+                    Buffrequirement = false,
+                    RequiredBuff = ""
+                });
+
+            #endregion Velkoz
+
+            #region Velkoz
+
+            AvoidableSpells.Add(
+                new Data
+                {
+                    Name = "ViktorChaosStorm",
+                    DisplayName = "Viktor R",
+                    Source = "Viktor",
+                    BaseDelay = 0,
+                    SSDelay = 1.0,
+                    Zhonyable = true,
+                    SpellShieldable = false,
+                    Buffrequirement = false,
+                    RequiredBuff = ""
+                });
+
+            #endregion Velkoz
 
 
 

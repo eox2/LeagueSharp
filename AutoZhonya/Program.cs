@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
@@ -13,6 +14,7 @@ namespace AutoZhonya
 
         private static Obj_AI_Hero Player;
         private static readonly Items.Item Zhonya = new Items.Item(3157, 0);
+        private static readonly Items.Item Seraph = new Items.Item(3040, 0);
         private static readonly string Version = "1.0";
         public static Menu Menu;
         static void Main(string[] args)
@@ -25,10 +27,12 @@ namespace AutoZhonya
             Game.PrintChat("<font color=\"#12FA54\"><b>AutoZhonya v." + Version + " by Seph</font></b>");
             Player = ObjectManager.Player;
             EventSubscriptions();
+
             Menu = new Menu("AutoZhonya", "AutoZhonya", true);
             var spellmenu = new Menu("Spells", "Spells");
             var miscmenu = new Menu("Misc", "Misc");
             miscmenu.AddItem(new MenuItem("enablehpzhonya", "Zhonya when low HP").SetValue(true));
+            miscmenu.AddItem(new MenuItem("enableseraph", "Use Seraph").SetValue(true));
             miscmenu.AddItem(new MenuItem("hptozhonya", "HP % to Zhonya")).SetValue(new Slider(25, 0, 100));
             miscmenu.AddItem(new MenuItem("minspelldmg", "Spell Damage % (non dangerous)")).SetValue(new Slider(45, 0, 100));
             miscmenu.AddItem(new MenuItem("remaininghealth", "Remaining Health %")).SetValue(new Slider(15, 0, 100));
@@ -61,10 +65,10 @@ namespace AutoZhonya
         static void EventSubscriptions()
         {
             Obj_AI_Base.OnProcessSpellCast += SpellDetector;
-          //  Game.OnUpdate += BuffDetector;
+            Game.OnUpdate += GameUpdate;
         }
 
-        static void GameUpdate()
+        static void GameUpdate(EventArgs args)
         {
             if (Menu.Item("enablehpzhonya").GetValue<bool>() && zhonyaready())
             {
@@ -78,28 +82,46 @@ namespace AutoZhonya
         {
             // return if ally or non hero spell
         
-            if (Player.IsDead || !zhonyaready() || sender.IsAlly || !(sender is Obj_AI_Hero) || !args.Target.IsMe || args.SData.IsAutoAttack() || sender.IsMe)
+            if (Player.IsDead || (!zhonyaready() && !seraphready()) || sender.IsAlly || !(sender is Obj_AI_Hero) || !args.Target.IsMe || args.SData.IsAutoAttack() || sender.IsMe)
             {
                 return;
             }
-               // Game.PrintChat(args.SData.Name + " Detected");
-
-                var Spellinfo = DangerousSpells.GetByName2(args.SData.Name);
-
-                if (Spellinfo != null && 
-                    (Menu.Item("Enabled" + Spellinfo.DisplayName).GetValue<bool>()))
+            DangerousSpells.Data Spellinfo = null;
+            try
+            {
+                Spellinfo = DangerousSpells.GetByName(args.SData.Name);
+            }
+            catch (Exception e)
+            {
+                return;
+            }
+          
+      
+            if (Spellinfo != null)
+            {
+                Console.WriteLine(Spellinfo.DisplayName);
+                if (Menu.Item("Enabled" + Spellinfo.DisplayName).GetValue<bool>())
                 {
                     Game.PrintChat("Attempting to Zhonya: " + args.SData.Name);
                     var delay = Spellinfo.BaseDelay * 1000;
-                    Utility.DelayAction.Add((int) delay, () => Zhonya.Cast());
+                    if (zhonyaready())
+                    {
+                        Utility.DelayAction.Add((int) delay, () => Zhonya.Cast());
+                        return;
+                    }
+                    if (seraphready() && Menu.Item("enableseraph").GetValue<bool>())
+                    {
+                        Utility.DelayAction.Add((int) delay, () => Seraph.Cast());
+                    }
                     return;
                 }
+            }
 
-                if (Menu.Item("enablehpzhonya").GetValue<bool>() && zhonyaready())
+            if (Menu.Item("enablehpzhonya").GetValue<bool>() && (zhonyaready() || seraphready()))
                 {
                     var incomingspelldmg = sender.GetSpellDamage(Player, args.SData.Name);
-                    var calcdmg = Damage.CalcDamage(
-                        sender, Player, sender.GetDamageSpell(Player, args.SData.Name).DamageType, incomingspelldmg);
+                    var calcdmg = sender.CalcDamage(
+                        Player, sender.GetDamageSpell(Player, args.SData.Name).DamageType, incomingspelldmg);
                     var remaininghealth = Player.Health - calcdmg;
                     var slidervalue = Menu.Item("minspelldmg").GetValue<Slider>().Value / 100f;
                     var hptozhonya = Menu.Item("hptozhonya").GetValue<Slider>().Value;
@@ -108,20 +130,69 @@ namespace AutoZhonya
                     {
                         Console.WriteLine("Attempting to Zhonya because incoming spell costs " + calcdmg / Player.Health
                             + " of our health.");
-                        Zhonya.Cast();
+                        if (zhonyaready())
+                        {
+                            Zhonya.Cast();
+                            return;
+                        }
+                        if (seraphready() && Menu.Item("enableseraph").GetValue<bool>())
+                        {
+                            Seraph.Cast();
+                        }
                     }
                 }
         }
 
+        private static bool delayingzhonya;
+
         static void BuffDetector(EventArgs args)
         {
+            foreach (var buff in Player.Buffs)
+            {
+                var isbadbuff = DangerousBuffs.ScaryBuffs.ContainsKey(buff.Name);
 
+                if (isbadbuff)
+                {
+                     var bufftime = DangerousBuffs.ScaryBuffs[buff.Name];
+                    if (zhonyaready())
+                    {
+                        if (bufftime.Equals(0))
+                        {
+                            Zhonya.Cast();
+                            return;
+                        }
+                        delayingzhonya = true;
+                        Utility.DelayAction.Add(
+                            (int) bufftime, () =>
+                            {
+                                Zhonya.Cast();
+                                delayingzhonya = false;
+                            });
+                            return;
+                     }
+
+                    if (seraphready() && Menu.Item("enableseraph").GetValue<bool>() && !delayingzhonya)
+                    {
+                        if (bufftime.Equals(0))
+                        {
+                            Seraph.Cast();
+                            return;
+                        }
+                        Utility.DelayAction.Add((int) bufftime, () => Seraph.Cast());
+                    }
+                }
+            }
         }
 
 
         public static bool zhonyaready()
         {
-            return Items.HasItem(3157) && Zhonya.IsReady();
+            return Zhonya.IsReady();
+        }
+
+        public static bool seraphready()
+        {
+            return Seraph.IsReady();
         }
     }
 

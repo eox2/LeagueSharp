@@ -57,7 +57,7 @@ namespace EloSharp_V2
                 //Get raw information 
                 string htmlcode =
                     new WebClient().DownloadString("http://www.lolnexus.com/ajax/get-game-info/" + region + ".json?name=" + name);
-                System.IO.File.WriteAllText(@"C:\Users\Laptop\Desktop\lolnexus.txt", htmlcode); // Testing purposes
+               // System.IO.File.WriteAllText(@"C:\Users\Laptop\Desktop\lolnexus.txt", htmlcode); // Testing purposes
                 //Extract information 
                 foreach (
                     Match playerregex in

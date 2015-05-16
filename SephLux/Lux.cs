@@ -44,7 +44,7 @@ namespace SephLux
         {
             Spells[SpellSlot.Q].SetSkillshot(0.250f, 70f, 1300f, false, SkillshotType.SkillshotLine);
             Spells[SpellSlot.E].SetSkillshot(0.250f, 275f, 1300f, false, SkillshotType.SkillshotCircle);
-            Spells[SpellSlot.R].SetSkillshot(1000f, 150f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            Spells[SpellSlot.R].SetSkillshot(1f, 150f, float.MaxValue, false, SkillshotType.SkillshotCircle);
         }
 
         private static void LuxMain(EventArgs args)
@@ -82,7 +82,7 @@ namespace SephLux
 
         private static void OnUpdate(EventArgs args)
         {
-            if (Player.IsDead)
+            if (Player.IsDead || Player.IsRecalling())
             {
                 return;
             }
@@ -152,7 +152,7 @@ namespace SephLux
                 var ulttarget = HeroManager.Enemies.FirstOrDefault(h => h.HasBuff("LuxLightBindingMis"));
                 if (ulttarget != null)
                 {
-                    var pred = Spells[SpellSlot.R].GetPrediction(ulttarget);
+                    var pred = Spells[SpellSlot.R].GetPrediction(ulttarget, true);
                     if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.R"))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
@@ -160,8 +160,8 @@ namespace SephLux
                 }
                 else
                 {
-                    var pred = Spells[SpellSlot.R].GetPrediction(target);
-                    if (pred.Hitchance >= HitChance.VeryHigh ||
+                    var pred = Spells[SpellSlot.R].GetPrediction(target, true);
+                    if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.R") ||
                         pred.CollisionObjects.Count(x => x.Type == GameObjectType.obj_AI_Hero && x.IsEnemy) > 2 &&
                         pred.Hitchance >= HitChance.High)
                     {
@@ -172,18 +172,6 @@ namespace SephLux
 
         }
 
-        static void Explode(EventArgs args)
-        {
-            foreach (var target in HeroManager.Enemies)
-            {
-                if (LuxUtils.Active("Combo.UseE2") && LuxE != null &&
-                    Vector3.Distance(LuxE.Position, target.ServerPosition) <=
-                    LuxE.BoundingRadius + target.BoundingRadius)
-                {
-                    Spells[SpellSlot.E].Cast();
-                }
-            }
-        }
 
         #endregion
 
@@ -264,9 +252,7 @@ namespace SephLux
             {
                 return;
             }
-        
-            Harass(target);
-            
+
             var Minions =
                 ObjectManager.Get<Obj_AI_Minion>()
                     .Where(
@@ -349,7 +335,7 @@ namespace SephLux
                     var qdmg = Player.GetSpellDamage(qtarget, SpellSlot.Q);
                     if (qtarget.Health < qdmg)
                     {
-                        var pred = Spells[SpellSlot.Q].GetPrediction(qtarget, false);
+                        var pred = Spells[SpellSlot.Q].GetPrediction(qtarget, true);
                         if (pred != null && pred.Hitchance > HitChance.Medium && pred.CollisionObjects.Count <= 1)
                         {
                             Spells[SpellSlot.Q].Cast(pred.CastPosition);
@@ -390,7 +376,7 @@ namespace SephLux
 
             if (SpellSlot.R.IsReady() && LuxUtils.Active("Killsteal.UseR"))
             {
-                var targ = HeroManager.Enemies.FirstOrDefault(h => h.HasBuff("LuxLightBindingMis") && h.IsValidTarget(Spells[SpellSlot.R].Range));
+                var targ = HeroManager.Enemies.FirstOrDefault(h => h.HasBuff("LuxLightBindingMis") && h.IsValidTarget(Spells[SpellSlot.R].Range) && h.Health < Player.GetSpellDamage(h, SpellSlot.R));
 
                 if (targ == null)
                 {
@@ -431,7 +417,7 @@ namespace SephLux
         public static List<Obj_AI_Hero> Killable = new List<Obj_AI_Hero>();
         private static void CheckKillable(EventArgs args)
         {
-            if (Player.IsDead)
+            if (Player.IsDead || Player.IsRecalling())
             {
                 return;
             }
@@ -475,7 +461,7 @@ namespace SephLux
 
         static void OnGapClose(ActiveGapcloser args)
         {
-            if (Player.IsDead)
+            if (Player.IsDead || Player.IsRecalling())
             {
                 return;
             }
@@ -495,7 +481,7 @@ namespace SephLux
         #region Interrupter
         static void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (Player.IsDead)
+            if (Player.IsDead || Player.IsRecalling())
             {
                 return;
             }
@@ -542,7 +528,7 @@ namespace SephLux
 
         static void OnDraw(EventArgs args)
         {
-            if (Player.IsDead || LuxUtils.Active("Drawing.Disable"))
+            if (Player.IsDead || Player.IsRecalling() || LuxUtils.Active("Drawing.Disable"))
             {
                 return;
             }
