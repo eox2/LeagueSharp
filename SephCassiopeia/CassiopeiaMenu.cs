@@ -71,7 +71,7 @@ namespace SephCassiopeia
             Menu Interrupter = new Menu("Interrupter", "Interrupter +", false);
             Interrupter.AddItem(new MenuItem("Interrupter.UseR", "Interrupt with R").SetValue(true));
             Interrupter.AddItem(new MenuItem("Interrupter.AntiGapClose", "AntiGapClosers").SetValue(true));
-            Interrupter.AddItem(new MenuItem("Interrupter.AG.UseR", "AntiGapClose with Q").SetValue(true));
+            Interrupter.AddItem(new MenuItem("Interrupter.AG.UseR", "AntiGapClose with R").SetValue(true));
             Config.AddSubMenu(Interrupter);
             
             Menu Blist = new Menu("BlackList", "BlackList", false);
