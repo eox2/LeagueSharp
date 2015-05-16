@@ -64,7 +64,7 @@ namespace SephCassiopeia
             Waveclear.AddItem(new MenuItem("Waveclear.UseQ", "Use Q").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseW", "Use W").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseE", "Use E").SetValue(true));
-            Waveclear.AddItem(new MenuItem("Waveclear.UseR", "Use R").SetValue(true));
+            Waveclear.AddItem(new MenuItem("Waveclear.UseR", "Use R").SetValue(false));
             Waveclear.AddItem(new MenuItem("Waveclear.Rcount", "Minions for R").SetValue(new Slider(10, 0, 20)));
             Config.AddSubMenu(Waveclear);
 
@@ -96,8 +96,8 @@ namespace SephCassiopeia
              
 
             Menu Misc = new Menu("Hitchance Settings", "Misc", false);
-            Misc.AddItem(new MenuItem("Hitchance.Q", "Q Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 1)));
-            Misc.AddItem(new MenuItem("Hitchance.W", "E Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString() , HitChance.Immobile.ToString() }, 1)));
+            Misc.AddItem(new MenuItem("Hitchance.Q", "Q Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 2)));
+            Misc.AddItem(new MenuItem("Hitchance.W", "E Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString() , HitChance.Immobile.ToString() }, 2)));
             Misc.AddItem(new MenuItem("Hitchance.R", "R Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 3)));
             Misc.AddItem(new MenuItem("Misc.Debug", "Debug", false).SetValue(false));
             Config.AddSubMenu(Misc);

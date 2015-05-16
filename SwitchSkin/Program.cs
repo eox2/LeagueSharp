@@ -24,29 +24,45 @@ namespace SwitchSkin
 
              menu.AddItem(new MenuItem("forall", "Enable for all (reload required)").SetValue(true));
 
-            foreach (var hero in HeroManager.AllHeroes)
+            try
             {
-                if (!menu.Item("forall").GetValue<bool>() && hero.Name != ObjectManager.Player.Name)
+                foreach (var hero in HeroManager.AllHeroes)
                 {
-                    continue;
-                } 
+                    if (!menu.Item("forall").GetValue<bool>() && hero.Name != ObjectManager.Player.Name)
+                    {
+                        continue;
+                    }
 
-                var currenthero = hero;
+                    var currenthero = hero;
 
-                var herosubmenu = new Menu(hero.ChampionName + " (" + hero.Name + ") ", hero.Name);
-                var skinselect = herosubmenu.AddItem(new MenuItem("skin." + hero.ChampionName, hero.ChampionName + " (" + hero.Name + ")").SetValue(new StringList(new[] { "Skin 0", "Skin 1", "Skin 2", "Skin 3", "Skin 4", "Skin 5", "Skin 6", "Skin 7", "Skin 8", "Skin 9", "Skin 10" }, 0)));
+                    var herosubmenu = new Menu(hero.ChampionName + " (" + hero.Name + ") ", hero.Name);
+                    var skinselect =
+                        herosubmenu.AddItem(
+                            new MenuItem("skin." + hero.ChampionName, hero.ChampionName + " (" + hero.Name + ")")
+                                .SetValue(
+                                    new StringList(
+                                        new[]
+                                        {
+                                            "Skin 0", "Skin 1", "Skin 2", "Skin 3", "Skin 4", "Skin 5", "Skin 6", "Skin 7",
+                                            "Skin 8", "Skin 9", "Skin 10"
+                                        }, 0)));
 
-                ChampSkins.Add(hero.Name, skinselect.GetValue<StringList>().SelectedIndex);
+                    ChampSkins.Add(hero.Name, skinselect.GetValue<StringList>().SelectedIndex);
 
-                hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
+                    hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
 
-                menu.AddSubMenu(herosubmenu);
+                    menu.AddSubMenu(herosubmenu);
 
-                skinselect.ValueChanged += delegate(Object sender, OnValueChangeEventArgs args)
-                {
-                   ChampSkins[currenthero.Name] = args.GetNewValue<StringList>().SelectedIndex;
-                   currenthero.SetSkin(currenthero.ChampionName, ChampSkins[currenthero.Name]);
-                };
+                    skinselect.ValueChanged += delegate(Object sender, OnValueChangeEventArgs args)
+                    {
+                        ChampSkins[currenthero.Name] = args.GetNewValue<StringList>().SelectedIndex;
+                        currenthero.SetSkin(currenthero.ChampionName, ChampSkins[currenthero.Name]);
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Write(e + " " + e.StackTrace);
             }
             menu.AddToMainMenu();
         }
