@@ -72,6 +72,7 @@ namespace AutoZhonya
         {
             if (Menu.Item("enablehpzhonya").GetValue<bool>() && zhonyaready())
             {
+                BuffDetector();
                 if (Player.Health < Player.MaxHealth * 0.35 && Player.CountEnemiesInRange(300) >= 1 && (!SpellSlot.Q.IsReady() || !SpellSlot.W.IsReady() || !SpellSlot.E.IsReady() || !SpellSlot.R.IsReady()) && Player.Mana < Player.MaxMana * 80) {
                     Zhonya.Cast();
                 }
@@ -145,7 +146,7 @@ namespace AutoZhonya
 
         private static bool delayingzhonya;
 
-        static void BuffDetector(EventArgs args)
+        static void BuffDetector()
         {
             foreach (var buff in Player.Buffs)
             {

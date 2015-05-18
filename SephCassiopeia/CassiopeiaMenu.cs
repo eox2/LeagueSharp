@@ -21,6 +21,7 @@ namespace SephCassiopeia
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
             Menu Combo = new Menu("Combo", "Combo", false);
+            Combo.AddItem(new MenuItem("Combo.Disableauto", "Disable autos when spells up", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseQ", "Use Q", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseW", "Use W", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseE", "Use E", false).SetValue(true));
@@ -46,6 +47,7 @@ namespace SephCassiopeia
 
             Menu Harass = new Menu("Harass", "Harass", false);
             Harass.AddItem(new MenuItem("Keys.HarassT", "Harass Toggle", false).SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
+            Harass.AddItem(new MenuItem("Harass.InMixed", "Harass in Mixed Mode", false).SetValue(true));
             Harass.AddItem(new MenuItem("Harass.UseQ", "Use Q", false).SetValue(true));
             Harass.AddItem(new MenuItem("Harass.UseW", "Use W", false).SetValue(true));
             Harass.AddItem(new MenuItem("Harass.UseE", "Use E", false).SetValue(true));
@@ -58,12 +60,14 @@ namespace SephCassiopeia
             Farm.AddItem(new MenuItem("Farm.UseQ", "Use Q").SetValue(true));
             Farm.AddItem(new MenuItem("Farm.UseW", "Use W").SetValue(true));
             Farm.AddItem(new MenuItem("Farm.UseE", "Use E").SetValue(true));
+            Farm.AddItem(new MenuItem("Farm.useepoison", "Use E only if poisoned").SetValue(true));
             Config.AddSubMenu(Farm);
 
             Menu Waveclear = new Menu("Waveclear", "Waveclear", false);
             Waveclear.AddItem(new MenuItem("Waveclear.UseQ", "Use Q").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseW", "Use W").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseE", "Use E").SetValue(true));
+            Farm.AddItem(new MenuItem("Waveclear.useepoison", "Use E only if poisoned").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseR", "Use R").SetValue(false));
             Waveclear.AddItem(new MenuItem("Waveclear.Rcount", "Minions for R").SetValue(new Slider(10, 0, 20)));
             Config.AddSubMenu(Waveclear);

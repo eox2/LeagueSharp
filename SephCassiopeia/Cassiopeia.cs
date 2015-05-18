@@ -1,10 +1,13 @@
 ﻿#region imports
 using System;
+using System.Windows;
 using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using Color = System.Drawing.Color;
+
 #endregion;
 
 
@@ -74,12 +77,28 @@ namespace SephCassiopeia
             Game.OnUpdate += CheckKillable;
             Game.OnUpdate += AutoSpells;
             Drawing.OnDraw += OnDraw;
+            Orbwalking.BeforeAttack += BeforeAuto;
         }
 
         #endregion
 
         #endregion
 
+
+        #region BeforeAuto
+
+        private static void BeforeAuto(Orbwalking.BeforeAttackEventArgs args)
+        {
+            if (CassioUtils.Active("Combo.Disableauto") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            {
+                if (SpellSlot.Q.IsReady() || SpellSlot.W.IsReady() || SpellSlot.E.IsReady() || SpellSlot.R.IsReady())
+                {
+                    args.Process = false;
+                }
+            }
+        }
+
+        #endregion
 
         #region AutoSpells
 
@@ -163,7 +182,7 @@ namespace SephCassiopeia
             var target = TargetSelector.GetTarget(
                 Spells[SpellSlot.Q].Range, TargetSelector.DamageType.Magical, true, CassiopeiaMenu.BlackList);
 
-            if (target != null && CassioUtils.ActiveKeyBind("Keys.HarassT"))
+            if (target != null && CassioUtils.ActiveKeyBind("Keys.HarassT") && Player.ManaPercent > CassioUtils.GetSlider("Harass.Mana"))
             {
                 Harass(target);
             }
@@ -241,7 +260,6 @@ namespace SephCassiopeia
 
         #endregion
 
-
         #region ExaminetargetWP
 
         static bool isMovingToMe(this Obj_AI_Base target)
@@ -298,7 +316,7 @@ namespace SephCassiopeia
                     MinionManager.GetBestCircularFarmLocation(
                         wminions.Select(m => m.ServerPosition.To2D()).ToList(), Spells[SpellSlot.W].Width,
                         Spells[SpellSlot.W].Range);
-                if (WLocation.MinionsHit > 1)
+                if (WLocation.MinionsHit >= 2)
                 {
                     Spells[SpellSlot.W].Cast(WLocation.Position);
                 }
@@ -311,7 +329,15 @@ namespace SephCassiopeia
                 
                 if (KillableMinionE != null)
                 {
-                    Spells[SpellSlot.E].Cast(KillableMinionE);
+                    if (CassioUtils.Active("Waveclear.useepoison"))
+                    {
+                        if (KillableMinionE.isPoisoned())
+                            Spells[SpellSlot.E].Cast(KillableMinionE);
+                    }
+                    else
+                    {
+                        Spells[SpellSlot.E].Cast(KillableMinionE);
+                    }
                 }
             }
 
@@ -334,7 +360,12 @@ namespace SephCassiopeia
 
         static void MixedModeLogic(Obj_AI_Hero target, bool isMixed)
         {
-   
+            if (isMixed && CassioUtils.Active("Harass.InMixed") && Player.ManaPercent > CassioUtils.GetSlider("Harass.Mana"))
+            {
+                if (target != null) 
+                Harass(target);
+            }
+
             if (!CassioUtils.Active("Farm.Enable") || Player.ManaPercent < CassioUtils.GetSlider("Farm.Mana"))
             {
                 return;
@@ -353,7 +384,7 @@ namespace SephCassiopeia
             }
             if (SpellSlot.Q.IsReady() && CassioUtils.Active("Farm.UseQ"))
             {
-                var KillableMinionsQ = Minions.Where(m => m.Health < Player.GetSpellDamage(m, SpellSlot.Q) && Vector3.Distance(m.ServerPosition, Player.ServerPosition) > Player.AttackRange);
+                var KillableMinionsQ = Minions.Where(m => m.Health < Player.GetSpellDamage(m, SpellSlot.Q));
                 if (KillableMinionsQ.Any())
                 {
                     Spells[SpellSlot.Q].Cast(KillableMinionsQ.FirstOrDefault().ServerPosition);
@@ -361,7 +392,7 @@ namespace SephCassiopeia
             }
             if (SpellSlot.W.IsReady() && CassioUtils.Active("Farm.UseW"))
             {
-                var KillableMinionsW = Minions.Where(m => m.Health < Player.GetSpellDamage(m, SpellSlot.W) && Vector3.Distance(m.ServerPosition, Player.ServerPosition) > Player.AttackRange);
+                var KillableMinionsW = Minions.Where(m => m.Health < Player.GetSpellDamage(m, SpellSlot.W));
                 if (KillableMinionsW.Any())
                 {
                     Spells[SpellSlot.W].Cast(KillableMinionsW.FirstOrDefault().ServerPosition);
@@ -370,10 +401,18 @@ namespace SephCassiopeia
             if (SpellSlot.E.IsReady() && CassioUtils.Active("Farm.UseE"))
             {
 
-                var KillableMinionE = Minions.Where(m => m.Health < Player.GetSpellDamage(m, SpellSlot.E));
-                if (KillableMinionE.Any())
+                var KillableMinionE = Minions.FirstOrDefault(m => m.Health < Player.GetSpellDamage(m, SpellSlot.E));
+                if (KillableMinionE != null)
                 {
-                    Spells[SpellSlot.E].Cast(KillableMinionE.FirstOrDefault());
+                    if (CassioUtils.Active("Farm.useepoison"))
+                    {
+                        if (KillableMinionE.isPoisoned())
+                            Spells[SpellSlot.E].Cast(KillableMinionE);
+                    }
+                    else
+                    {
+                        Spells[SpellSlot.E].Cast(KillableMinionE);
+                    }
                 }
             }
         }
@@ -632,6 +671,7 @@ namespace SephCassiopeia
                 var pos = Drawing.WorldToScreen(x.ServerPosition);
                 Drawing.DrawText(pos.X, pos.Y, System.Drawing.Color.Azure, "Killable");
             }
+
 
             if (CassioUtils.Active("Drawing.DrawQ"))
             {
