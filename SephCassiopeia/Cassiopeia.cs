@@ -80,27 +80,11 @@ namespace SephCassiopeia
             Game.OnUpdate += AutoSpells;
             Drawing.OnDraw += OnDraw;
             Orbwalking.BeforeAttack += BeforeAuto;
-            Obj_AI_Hero.OnIssueOrder += IssueOrder;
         }
 
         #endregion
 
         #endregion
-
-        #region IssueOrder
-
-        static void IssueOrder(Obj_AI_Base sender, GameObjectIssueOrderEventArgs args)
-        {
-            if (sender is Obj_AI_Hero && sender.IsMe)
-            {
-                if (DontMove)
-                {
-                    args.Process = false;
-                }
-            }
-        }
-        #endregion IssueOrder
-
 
         #region BeforeAuto
 
@@ -143,17 +127,21 @@ namespace SephCassiopeia
                 }
             }
 
-            if (target != null && SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") &&
+
+            var targets = HeroManager.Enemies.Where(x => x.IsValidTarget(Spells[SpellSlot.R].Range) && !x.IsZombie).OrderBy(x => x.Health);
+
+            foreach (var targ in targets) {
+            if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") &&
                 CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
-                if (target.IsFacing(Player) && target.IsValidTarget(Spells[SpellSlot.R].Range))
+                if (targ.IsFacing(Player))
                 {
-                    var pred = Spells[SpellSlot.R].GetPrediction(target);
+                    var pred = Spells[SpellSlot.R].GetPrediction(targ);
                     if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.R"))
                     {
                         int enemhitpred = 0;
                         int enemfacingpred = 0;
-                        foreach (var hero in HeroManager.Enemies)
+                        foreach (var hero in targets)
                         {
                             if (Spells[SpellSlot.R].WillHit(hero, pred.CastPosition, 0))
                             {
@@ -177,6 +165,7 @@ namespace SephCassiopeia
                             return;
                         }
                     }
+                }
                 }
             }
 
@@ -634,7 +623,7 @@ namespace SephCassiopeia
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Killsteal.UseR"))
             {
            
-                var targ = HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Spells[SpellSlot.R].Range && x.Health < Player.GetSpellDamage(x, SpellSlot.R));
+                var targ = HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Spells[SpellSlot.R].Range - 200 && x.Health < Player.GetSpellDamage(x, SpellSlot.R) && !x.IsZombie);
 
                 if (targ != null)
                 {
@@ -642,9 +631,6 @@ namespace SephCassiopeia
                     if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.R"))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
-                        DontMove = true;
-                        Utility.DelayAction.Add(100, () => DontMove = false);
-
                     }
                 }
             }
@@ -734,8 +720,6 @@ namespace SephCassiopeia
                     if (pred.Hitchance >= HitChance.VeryHigh && sender.IsFacing(Player))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
-                        DontMove = true;
-                        Utility.DelayAction.Add(100, () => DontMove = false);
                     }
                 }
             }
@@ -758,8 +742,6 @@ namespace SephCassiopeia
                     if (pred.Hitchance >= HitChance.VeryHigh && sender.IsFacing(Player))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
-                        DontMove = true;
-                        Utility.DelayAction.Add(100, () => DontMove = false);
                     }
                 }
             }
