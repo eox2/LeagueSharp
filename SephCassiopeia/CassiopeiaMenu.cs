@@ -67,7 +67,7 @@ namespace SephCassiopeia
             Waveclear.AddItem(new MenuItem("Waveclear.UseQ", "Use Q").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseW", "Use W").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseE", "Use E").SetValue(true));
-            Farm.AddItem(new MenuItem("Waveclear.useepoison", "Use E only if poisoned").SetValue(true));
+            Waveclear.AddItem(new MenuItem("Waveclear.useepoison", "Use E only if poisoned").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseR", "Use R").SetValue(false));
             Waveclear.AddItem(new MenuItem("Waveclear.Rcount", "Minions for R").SetValue(new Slider(10, 0, 20)));
             Config.AddSubMenu(Waveclear);

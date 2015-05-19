@@ -3,6 +3,7 @@ using System;
 using System.Windows;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -21,6 +22,7 @@ namespace SephCassiopeia
         #region vars
 
         public static Obj_AI_Hero Player;
+        private static Obj_AI_Hero target;
         public static Menu Config;
         private static SpellSlot IgniteSlot = SpellSlot.Summoner1;
         private static bool DontMove;
@@ -78,11 +80,26 @@ namespace SephCassiopeia
             Game.OnUpdate += AutoSpells;
             Drawing.OnDraw += OnDraw;
             Orbwalking.BeforeAttack += BeforeAuto;
+            Obj_AI_Hero.OnIssueOrder += IssueOrder;
         }
 
         #endregion
 
         #endregion
+
+        #region IssueOrder
+
+        static void IssueOrder(Obj_AI_Base sender, GameObjectIssueOrderEventArgs args)
+        {
+            if (sender is Obj_AI_Hero && sender.IsMe)
+            {
+                if (DontMove)
+                {
+                    args.Process = false;
+                }
+            }
+        }
+        #endregion IssueOrder
 
 
         #region BeforeAuto
@@ -110,8 +127,13 @@ namespace SephCassiopeia
             }
             if (SpellSlot.E.IsReady() && CassioUtils.Active("Combo.UseE"))
             {
-                var etarg = HeroManager.Enemies.FirstOrDefault(h => h.IsValidTarget(Spells[SpellSlot.E].Range) && h.isPoisoned());
-                if (etarg != null)
+                Obj_AI_Hero etarg;
+                etarg = target;
+                if (etarg == null)
+                {
+                    etarg = HeroManager.Enemies.FirstOrDefault(h => h.IsValidTarget(Spells[SpellSlot.E].Range) && h.isPoisoned() && !h.IsInvulnerable && !h.IsZombie);
+                }
+                if (etarg != null && etarg.isPoisoned())
                 {
                     if ((Utils.GameTimeTickCount - laste) > edelay)
                     {
@@ -120,8 +142,60 @@ namespace SephCassiopeia
                     }
                 }
             }
+
+            if (target != null && SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") &&
+                CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            {
+                if (target.IsFacing(Player) && target.IsValidTarget(Spells[SpellSlot.R].Range))
+                {
+                    var pred = Spells[SpellSlot.R].GetPrediction(target);
+                    if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.R"))
+                    {
+                        int enemhitpred = 0;
+                        int enemfacingpred = 0;
+                        foreach (var hero in HeroManager.Enemies)
+                        {
+                            if (Spells[SpellSlot.R].WillHit(hero, pred.CastPosition, 0))
+                            {
+                                enemhitpred++;
+
+                                if (hero.IsFacing(Player))
+                                {
+                                    enemfacingpred++;
+                                }
+                            }
+                        }
+
+                        if (enemfacingpred >= CassioUtils.GetSlider("Combo.Rcount"))
+                        {
+                            Spells[SpellSlot.R].Cast(pred.CastPosition);
+                            return;
+                        }
+                        if (enemhitpred >= CassioUtils.GetSlider("Combo.Rcountnf") && CassioUtils.Active("Combo.UseRNF"))
+                        {
+                            Spells[SpellSlot.R].Cast(pred.CastPosition);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            /* © ® ™ Work on patented algorithms in the future! © ® ™ 
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
+                var easycheck =
+                    HeroManager.Enemies.FirstOrDefault(
+                        x =>
+                            !x.IsInvulnerable && !x.IsZombie && x.IsValidTarget(Spells[SpellSlot.R].Range) &&
+                            x.IsFacing(Player) && x.isImmobile());
+
+                if (easycheck != null)
+                {
+                    Spells[SpellSlot.R].Cast(easycheck.ServerPosition);
+                    DontMove = true;
+                    Utility.DelayAction.Add(100, () => DontMove = false);
+                    return;
+                }
                 var targs = HeroManager.Enemies.Where(h => h.IsValidTarget(Spells[SpellSlot.R].Range));
                 Dictionary<Vector3, double> Hitatpos = new Dictionary<Vector3, double>();
                 Dictionary<Vector3, double> Hitatposfacing = new Dictionary<Vector3, double>();
@@ -130,9 +204,8 @@ namespace SephCassiopeia
                     var pred = Spells[SpellSlot.R].GetPrediction(t, true);
                     var enemshit = pred.CastPosition.GetEnemiesInRange(Spells[SpellSlot.R].Width);
                     var counthit = enemshit.Count;
-                    var hitfacing = enemshit.Count(x => x.IsFacing(Player));
+                    var hitfacing = enemshit.Count(x => x.IsFacing(Player) && !x.IsDashing() && !x.IsZombie && !x.IsInvulnerable);
                     var anymovingtome = enemshit.Any(x => x.isMovingToMe());
-
 
                     if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.R") && anymovingtome)
                     {
@@ -149,6 +222,8 @@ namespace SephCassiopeia
                     if (bestpos.IsValid() && bestpos.CountEnemiesInRange(Spells[SpellSlot.R].Width) >= 1)
                     {
                         Spells[SpellSlot.R].Cast(bestpos);
+                        DontMove = true;
+                        Utility.DelayAction.Add(100, () => DontMove = false);
                     }
                 }
                 else if (Hitatpos.Any() && CassioUtils.Active("Combo.UseRNF") &&
@@ -158,17 +233,46 @@ namespace SephCassiopeia
                     if (bestposnf.IsValid() && bestposnf.CountEnemiesInRange(Spells[SpellSlot.R].Width) >= 1)
                     {
                         Spells[SpellSlot.R].Cast(bestposnf);
+                        DontMove = true;
+                        Utility.DelayAction.Add(100, () => DontMove = false);
                     }
                 }
+            
             }   
+             */
+           
     }
             
-
-        
         #endregion
-        #region OnUpdate
 
-        private static void OnUpdate(EventArgs args)
+        #region Immobility Check
+
+        private static bool isImmobile(this Obj_AI_Hero hero)
+        {
+            foreach (var buff in hero.Buffs)
+            {
+                if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Charm ||
+                    buff.Type == BuffType.Fear || buff.Type == BuffType.Knockup || buff.Type == BuffType.Polymorph ||
+                    buff.Type == BuffType.Snare || buff.Type == BuffType.Suppression || buff.Type == BuffType.Flee ||
+                    buff.Type == BuffType.Slow && target.MoveSpeed <= 0.90 * target.MoveSpeed)
+                {
+                    var tenacity = hero.PercentCCReduction;
+                    var buffEndTime = buff.EndTime - (tenacity * (buff.EndTime - buff.StartTime));
+                    var cctimeleft = buffEndTime - Game.Time;
+                    if (cctimeleft > Game.Ping / 1000f + Spells[SpellSlot.R].Delay)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        #endregion
+
+          #region OnUpdate
+
+            private static void OnUpdate(EventArgs args)
         {
             if (Player.IsDead || Player.IsRecalling())
             {
@@ -179,10 +283,9 @@ namespace SephCassiopeia
 
             Killsteal();
 
-            var target = TargetSelector.GetTarget(
-                Spells[SpellSlot.Q].Range, TargetSelector.DamageType.Magical, true, CassiopeiaMenu.BlackList);
+            target = TargetSelector.GetTarget(Spells[SpellSlot.Q].Range, TargetSelector.DamageType.Magical, true, CassiopeiaMenu.BlackList);
 
-            if (target != null && CassioUtils.ActiveKeyBind("Keys.HarassT") && Player.ManaPercent > CassioUtils.GetSlider("Harass.Mana"))
+            if (target != null && CassioUtils.ActiveKeyBind("Keys.HarassT") && Player.ManaPercent >= CassioUtils.GetSlider("Harass.Mana") && !target.IsInvulnerable && !target.IsZombie)
             {
                 Harass(target);
             }
@@ -190,7 +293,7 @@ namespace SephCassiopeia
             switch (Orbwalkmode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
-                    if (target != null)
+                    if (target != null && !target.IsInvulnerable && !target.IsZombie)
                     {
                         Combo(target);
                     }
@@ -266,11 +369,9 @@ namespace SephCassiopeia
         {
             var x = target.GetWaypoints().Last();
             var mypos2d = Player.ServerPosition.To2D();
-            if (Vector2.Distance(mypos2d, x) <= Vector2.Distance(mypos2d, target.ServerPosition.To2D()))
+            if (Vector2.Distance(mypos2d, x) <= Vector2.Distance(mypos2d, target.ServerPosition.To2D()) && target.GetWaypoints().Count >= 3 || !target.IsMoving)
             {
-               
                 return true;
-
             }
             return false;
         }
@@ -298,7 +399,7 @@ namespace SephCassiopeia
                     MinionManager.GetBestCircularFarmLocation(
                         qminions.Select(m => m.ServerPosition.To2D()).ToList(), Spells[SpellSlot.Q].Width,
                         Spells[SpellSlot.Q].Range);
-                if (QLocation.MinionsHit > 1)
+                if (QLocation.MinionsHit >= 1)
                 {
                     Spells[SpellSlot.Q].Cast(QLocation.Position);
                 }
@@ -316,7 +417,7 @@ namespace SephCassiopeia
                     MinionManager.GetBestCircularFarmLocation(
                         wminions.Select(m => m.ServerPosition.To2D()).ToList(), Spells[SpellSlot.W].Width,
                         Spells[SpellSlot.W].Range);
-                if (WLocation.MinionsHit >= 2)
+                if (WLocation.MinionsHit >= 1)
                 {
                     Spells[SpellSlot.W].Cast(WLocation.Position);
                 }
@@ -325,7 +426,7 @@ namespace SephCassiopeia
             if (SpellSlot.E.IsReady() && CassioUtils.Active("Waveclear.UseE"))
             {
 
-                var KillableMinionE = Minions.FirstOrDefault(m => m.Health < Player.GetSpellDamage(m, SpellSlot.E));
+                var KillableMinionE = Minions.OrderBy(x => x.Health).FirstOrDefault();
                 
                 if (KillableMinionE != null)
                 {
@@ -350,6 +451,8 @@ namespace SephCassiopeia
                 if (RLocation.MinionsHit > CassioUtils.GetSlider("Waveclear.Rcount"))
                 {
                     Spells[SpellSlot.R].Cast(RLocation.Position);
+                    DontMove = true;
+                    Utility.DelayAction.Add(100, () => DontMove = false);
                 }
             }
         }
@@ -362,7 +465,7 @@ namespace SephCassiopeia
         {
             if (isMixed && CassioUtils.Active("Harass.InMixed") && Player.ManaPercent > CassioUtils.GetSlider("Harass.Mana"))
             {
-                if (target != null) 
+                if (target != null && !target.IsInvulnerable && !target.IsZombie) 
                 Harass(target);
             }
 
@@ -539,6 +642,8 @@ namespace SephCassiopeia
                     if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.R"))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
+                        DontMove = true;
+                        Utility.DelayAction.Add(100, () => DontMove = false);
 
                     }
                 }
@@ -615,7 +720,7 @@ namespace SephCassiopeia
 
         static void OnGapClose(ActiveGapcloser args)
         {
-            if (Player.IsDead)
+            if (Player.IsDead || Player.IsRecalling())
             {
                 return;
             }
@@ -629,6 +734,8 @@ namespace SephCassiopeia
                     if (pred.Hitchance >= HitChance.VeryHigh && sender.IsFacing(Player))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
+                        DontMove = true;
+                        Utility.DelayAction.Add(100, () => DontMove = false);
                     }
                 }
             }
@@ -651,6 +758,8 @@ namespace SephCassiopeia
                     if (pred.Hitchance >= HitChance.VeryHigh && sender.IsFacing(Player))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
+                        DontMove = true;
+                        Utility.DelayAction.Add(100, () => DontMove = false);
                     }
                 }
             }

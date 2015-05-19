@@ -298,7 +298,7 @@ namespace SephKhazix
 
         private static void OnGameUpdate(EventArgs args)
         {
-            if (Player.IsDead)
+            if (Player.IsDead || Player.IsRecalling())
             {
                 return;
             }
@@ -544,7 +544,7 @@ namespace SephKhazix
 
         private static void DoubleJump(EventArgs args)
         {
-            if (!E.IsReady() || !Eevolved || !Config.Item("djumpenabled").GetValue<bool>() || Player.IsDead)
+            if (!E.IsReady() || !Eevolved || !Config.Item("djumpenabled").GetValue<bool>() || Player.IsDead || Player.IsRecalling())
             {
                 return;
             }
@@ -945,7 +945,7 @@ namespace SephKhazix
 
         private static void Combo()
         {
-            if (Player.IsDead)
+            if (Player.IsDead || Player.IsRecalling())
             {
                 return;
             }
@@ -1090,7 +1090,7 @@ namespace SephKhazix
 
         private static void OnDraw(EventArgs args)
         {
-            if (Player.IsDead)
+            if (Player.IsDead || Player.IsRecalling())
             {
                 return;
             }

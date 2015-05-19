@@ -9,20 +9,21 @@ namespace SwitchSkin
     {
         private static Menu menu;
         private static Dictionary<String, int> ChampSkins = new Dictionary<String, int>();
-  
+        private static bool setupdone;
 
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += GameLoad;
-            Obj_AI_Hero.OnFloatPropertyChange += FloatPropertyChange;
+            GameObject.OnFloatPropertyChange += FloatPropertyChange;
         }
 
 
         static void GameLoad(EventArgs argss)
         {
+            
              menu = new Menu("SwitchSkins", "Skinswitcher", true);
 
-             menu.AddItem(new MenuItem("forall", "Enable for all (reload required)").SetValue(true));
+             menu.AddItem(new MenuItem("forall", "Enable for all (reload required)", false).SetValue(true));
 
             try
             {
@@ -35,9 +36,8 @@ namespace SwitchSkin
 
                     var currenthero = hero;
 
-                    var herosubmenu = new Menu(hero.ChampionName + " (" + hero.Name + ") ", hero.Name);
-                    var skinselect =
-                        herosubmenu.AddItem(
+                    var herosubmenu = new Menu(hero.ChampionName + " (" + hero.Name + ") ", hero.ChampionName);
+                    var skinselect = herosubmenu.AddItem(
                             new MenuItem("skin." + hero.ChampionName, hero.ChampionName + " (" + hero.Name + ")")
                                 .SetValue(
                                     new StringList(
@@ -65,20 +65,29 @@ namespace SwitchSkin
                 Console.Write(e + " " + e.StackTrace);
             }
             menu.AddToMainMenu();
+            setupdone = true;
         }
 
-
+  
         static void FloatPropertyChange(GameObject sender, GameObjectFloatPropertyChangeEventArgs args)
         {
-            if (!(sender is Obj_AI_Hero) || args.Property != "mHP" || sender.Name != ObjectManager.Player.Name && !menu.Item("forall").GetValue<bool>())
+            try
             {
-                return; 
+                if (!setupdone || !(sender is Obj_AI_Hero) || args.Property != "mHP" || sender.Name != ObjectManager.Player.Name && !menu.Item("forall").GetValue<bool>())
+                {
+                    return;
+                }
+
+                var hero = (Obj_AI_Hero) sender;
+
+                if (args.OldValue.Equals(args.NewValue) && args.NewValue.Equals(hero.MaxHealth) && !hero.IsDead)
+                {
+                    hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
+                }
             }
-            var hero = (Obj_AI_Hero) sender;
- 
-            if (args.OldValue.Equals(args.NewValue) && args.NewValue.Equals(hero.MaxHealth) && !hero.IsDead)
+            catch (Exception e)
             {
-                hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
+                Console.WriteLine(e);
             }
         }
     }
