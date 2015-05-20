@@ -281,18 +281,19 @@ namespace SephCassiopeia
 
         #endregion
 
-          
-            #region OnUpdate
+          #region OnUpdate
 
             private static void OnUpdate(EventArgs args) {
 
             if (Player.IsDead || Player.recalling())
             {
+                Console.WriteLine("return");
                 return;
             }
 
 
             edelay = CassioUtils.GetSlider("Combo.edelay");
+
             Killsteal();
             target = TargetSelector.GetTarget(Spells[SpellSlot.Q].Range, TargetSelector.DamageType.Magical, true, CassiopeiaMenu.BlackList);
             if (target != null && CassioUtils.ActiveKeyBind("Keys.HarassT") && Player.ManaPercent >= CassioUtils.GetSlider("Harass.Mana") && !target.IsInvulnerable && !target.IsZombie)
@@ -443,9 +444,16 @@ namespace SephCassiopeia
 
             if (SpellSlot.E.IsReady() && CassioUtils.Active("Waveclear.UseE"))
             {
+                Obj_AI_Minion KillableMinionE = null;
+                if (CassioUtils.Active("Waveclear.useekillable"))
+                {
+                    KillableMinionE = Minions.FirstOrDefault(m => m.Health < Player.GetSpellDamage(m, SpellSlot.E));
+                }
+                else
+                {
+                    KillableMinionE = Minions.OrderBy(x => x.Health).FirstOrDefault();
+                }
 
-                var KillableMinionE = Minions.OrderBy(x => x.Health).FirstOrDefault();
-                
                 if (KillableMinionE != null)
                 {
                     if (CassioUtils.Active("Waveclear.useepoison"))
