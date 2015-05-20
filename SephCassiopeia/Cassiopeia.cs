@@ -74,8 +74,6 @@ namespace SephCassiopeia
           
             new CommonAutoLevel(skillorder);
             
-
-
             AntiGapcloser.OnEnemyGapcloser += OnGapClose;
 
             Interrupter2.OnInterruptableTarget += OnInterruptableTarget;
@@ -283,18 +281,13 @@ namespace SephCassiopeia
 
         #endregion
 
-          #region OnUpdate
+          
+            #region OnUpdate
 
             private static void OnUpdate(EventArgs args) {
 
-                if (Player.recalling())
-                {
-                    var buffy = Player.Buffs.FirstOrDefault(buff => buff.Name.ToLower().Contains("recall"));
-                    Console.WriteLine(buffy.Name + " " + " " + buffy.DisplayName + " " + buffy.SourceName + " " + buffy.Type);
-                }
-            if (Player.IsDead)
+            if (Player.IsDead || Player.recalling())
             {
-                Console.WriteLine("return");
                 return;
             }
 
