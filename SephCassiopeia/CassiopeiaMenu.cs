@@ -21,7 +21,8 @@ namespace SephCassiopeia
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
             Menu Combo = new Menu("Combo", "Combo", false);
-            Combo.AddItem(new MenuItem("Combo.Disableauto", "Disable autos when spells up", false).SetValue(true));
+            Combo.AddItem(new MenuItem("Combo.Disableautoifspellsready", "Disable autos only when spells up", false).SetValue(true));
+            Combo.AddItem(new MenuItem("Combo.Useauto", "Use auto attacks", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseQ", "Use Q", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseW", "Use W", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseE", "Use E", false).SetValue(true));
@@ -57,6 +58,7 @@ namespace SephCassiopeia
             Menu Farm = new Menu("Farm (LH)", "Farm", false);
             Farm.AddItem(new MenuItem("Farm.Enable", "Enable abilities for farming").SetValue(true));
             Farm.AddItem(new MenuItem("Farm.Mana", "Minimum Mana %").SetValue(new Slider(50, 0, 100)));
+            Farm.AddItem(new MenuItem("Farm.Useauto", "Enable autos").SetValue(true));
             Farm.AddItem(new MenuItem("Farm.UseQ", "Use Q").SetValue(true));
             Farm.AddItem(new MenuItem("Farm.UseW", "Use W").SetValue(true));
             Farm.AddItem(new MenuItem("Farm.UseE", "Use E").SetValue(true));
@@ -64,6 +66,7 @@ namespace SephCassiopeia
             Config.AddSubMenu(Farm);
 
             Menu Waveclear = new Menu("Waveclear", "Waveclear", false);
+            Waveclear.AddItem(new MenuItem("Waveclear.Useauto", "Enable autos").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseQ", "Use Q").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseW", "Use W").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseE", "Use E").SetValue(true));
@@ -99,12 +102,29 @@ namespace SephCassiopeia
             Config.AddSubMenu(Blist);
              
 
-            Menu Misc = new Menu("Hitchance Settings", "Misc", false);
-            Misc.AddItem(new MenuItem("Hitchance.Q", "Q Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 2)));
-            Misc.AddItem(new MenuItem("Hitchance.W", "E Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString() , HitChance.Immobile.ToString() }, 2)));
-            Misc.AddItem(new MenuItem("Hitchance.R", "R Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 3)));
-            Misc.AddItem(new MenuItem("Misc.Debug", "Debug", false).SetValue(false));
-            Config.AddSubMenu(Misc);
+            Menu hc = new Menu("Hitchance Settings", "hc", false);
+            hc.AddItem(new MenuItem("Hitchance.Q", "Q Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 2)));
+            hc.AddItem(new MenuItem("Hitchance.W", "E Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString() , HitChance.Immobile.ToString() }, 2)));
+            hc.AddItem(new MenuItem("Hitchance.R", "R Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 3)));
+            Config.AddSubMenu(hc);
+
+            Menu misc = new Menu("Misc", "Misc", false);
+            var autolvl = misc.AddItem(new MenuItem("Misc.autolevel", "Autolevel", false).SetValue(false));
+            autolvl.ValueChanged += (sender, args) =>
+            {
+                if (args.GetNewValue<bool>())
+                {
+                    CommonAutoLevel.Enabled(true);
+                }
+                else
+                {
+                    CommonAutoLevel.Enabled(false);
+                }
+            };
+            misc.AddItem(new MenuItem("Misc.autoe", "Auto use e when possible (no buttons pressed)", false).SetValue(false));
+            misc.AddItem(new MenuItem("Misc.Debug", "Debug", false).SetValue(false));
+            Config.AddSubMenu(misc);
+
 
             Menu Drawings = new Menu("Drawings", "Drawing", false);
             Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable all").SetValue(false));

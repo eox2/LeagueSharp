@@ -58,6 +58,7 @@
     <Compile Include="Cassiopeia.cs" />
     <Compile Include="CassiopeiaMenu.cs" />
     <Compile Include="CassioUtils.cs" />
+    <Compile Include="CommonAutoLevel.cs" />
     <Compile Include="Program.cs">
       <SubType>
       </SubType>

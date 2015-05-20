@@ -28,6 +28,7 @@ namespace SephCassiopeia
         private static bool DontMove;
         private static float edelay = 0;
         private static float laste = 0;
+        private static int[] skillorder = { 1, 3, 2, 3, 3, 4, 3, 1, 3, 1, 4, 1, 1, 2, 2, 4, 2, 2 };
 
         #endregion
 
@@ -70,6 +71,10 @@ namespace SephCassiopeia
 
             InitializeSpells();
 
+          
+            new CommonAutoLevel(skillorder);
+            
+
 
             AntiGapcloser.OnEnemyGapcloser += OnGapClose;
 
@@ -90,13 +95,32 @@ namespace SephCassiopeia
 
         private static void BeforeAuto(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (CassioUtils.Active("Combo.Disableauto") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            if (!CassioUtils.Active("Combo.Useauto") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            {
+                    args.Process = false;
+                    return;
+                
+            }
+            if (CassioUtils.Active("Combo.Disableautoifspellsready") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 if (SpellSlot.Q.IsReady() || SpellSlot.W.IsReady() || SpellSlot.E.IsReady() || SpellSlot.R.IsReady())
                 {
                     args.Process = false;
+                    return;
                 }
             }
+            if (!CassioUtils.Active("Waveclear.Useauto") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+            {
+                    args.Process = false;
+                    return;
+            }
+            if (!CassioUtils.Active("Farm.Useauto") && (CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit))
+            {
+                args.Process = false;
+                return;
+            }
+
+
         }
 
         #endregion
@@ -105,11 +129,11 @@ namespace SephCassiopeia
 
         static void AutoSpells(EventArgs args)
         {
-            if (Player.IsDead || Player.IsRecalling())
+            if (Player.IsDead || Player.recalling())
             {
                 return;
             }
-            if (SpellSlot.E.IsReady() && CassioUtils.Active("Combo.UseE"))
+            if (SpellSlot.E.IsReady() && CassioUtils.Active("Combo.UseE") && (CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || CassioUtils.Active("Misc.autoe")))
             {
                 Obj_AI_Hero etarg;
                 etarg = target;
@@ -261,24 +285,30 @@ namespace SephCassiopeia
 
           #region OnUpdate
 
-            private static void OnUpdate(EventArgs args)
-        {
-            if (Player.IsDead || Player.IsRecalling())
+            private static void OnUpdate(EventArgs args) {
+
+                if (Player.recalling())
+                {
+                    var buffy = Player.Buffs.FirstOrDefault(buff => buff.Name.ToLower().Contains("recall"));
+                    Console.WriteLine(buffy.Name + " " + " " + buffy.DisplayName + " " + buffy.SourceName + " " + buffy.Type);
+                }
+            if (Player.IsDead)
             {
+                Console.WriteLine("return");
                 return;
             }
 
+
             edelay = CassioUtils.GetSlider("Combo.edelay");
-
             Killsteal();
-
             target = TargetSelector.GetTarget(Spells[SpellSlot.Q].Range, TargetSelector.DamageType.Magical, true, CassiopeiaMenu.BlackList);
-
             if (target != null && CassioUtils.ActiveKeyBind("Keys.HarassT") && Player.ManaPercent >= CassioUtils.GetSlider("Harass.Mana") && !target.IsInvulnerable && !target.IsZombie)
             {
                 Harass(target);
             }
+ 
             var Orbwalkmode = CassiopeiaMenu.Orbwalker.ActiveMode;
+            
             switch (Orbwalkmode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -301,10 +331,16 @@ namespace SephCassiopeia
 
         #endregion
 
+            #region Recallcheck
+            public static bool recalling(this Obj_AI_Hero unit)
+            {
+                return unit.Buffs.Any(buff => buff.Name.ToLower().Contains("recall") && buff.Name != "MasteryImprovedRecallBuff");
+            }
+            #endregion Recallcheck
 
-        #region Combo
+            #region Combo
 
-        private static void Combo(Obj_AI_Hero target)
+            private static void Combo(Obj_AI_Hero target)
         {
             if (Spells[SpellSlot.Q].IsReady() && CassioUtils.Active("Combo.UseQ"))
             {
@@ -441,7 +477,7 @@ namespace SephCassiopeia
                 {
                     Spells[SpellSlot.R].Cast(RLocation.Position);
                     DontMove = true;
-                    Utility.DelayAction.Add(100, () => DontMove = false);
+                    Utility.DelayAction.Add(200, () => DontMove = false);
                 }
             }
         }
@@ -706,7 +742,7 @@ namespace SephCassiopeia
 
         static void OnGapClose(ActiveGapcloser args)
         {
-            if (Player.IsDead || Player.IsRecalling())
+            if (Player.IsDead || Player.recalling())
             {
                 return;
             }
