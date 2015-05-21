@@ -100,7 +100,7 @@ namespace AutoZhonya
                     Name = "VeigarPrimordialBurst",
                     DisplayName = "Veigar R",
                     Source = "Veigar",
-                    BaseDelay = 0,
+                    BaseDelay = 0.1,
                     SSDelay = 0,
                     Zhonyable = true,
                     SpellShieldable = true
@@ -124,21 +124,6 @@ namespace AutoZhonya
 
             #endregion MorganaR
 
-            #region VeigarR
-
-            AvoidableSpells.Add(
-                new Data
-                {
-                    Name = "VeigarPrimordialBurst",
-                    DisplayName = "Veigar R",
-                    Source = "Veigar",
-                    BaseDelay = 0,
-                    SSDelay = 0,
-                    Zhonyable = true,
-                    SpellShieldable = true
-                });
-
-            #endregion VeigarR
 
             #region MalzaharR
 

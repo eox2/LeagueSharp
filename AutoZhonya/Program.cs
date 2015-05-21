@@ -83,7 +83,7 @@ namespace AutoZhonya
         {
             // return if ally or non hero spell
         
-            if (Player.IsDead || (!zhonyaready() && !seraphready()) || sender.IsAlly || !(sender is Obj_AI_Hero) || !args.Target.IsMe || args.SData.IsAutoAttack() || sender.IsMe)
+            if (Player.IsDead || (!zhonyaready() && !seraphready()) || !(sender is Obj_AI_Hero) || sender.IsAlly || !args.Target.IsMe || args.SData.IsAutoAttack() || sender.IsMe)
             {
                 return;
             }
@@ -94,6 +94,7 @@ namespace AutoZhonya
             }
             catch (Exception e)
             {
+                Console.WriteLine(e + e.StackTrace);
                 return;
             }
           

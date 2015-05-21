@@ -287,7 +287,6 @@ namespace SephCassiopeia
 
             if (Player.IsDead || Player.recalling())
             {
-                Console.WriteLine("return");
                 return;
             }
 
@@ -491,8 +490,10 @@ namespace SephCassiopeia
         {
             if (isMixed && CassioUtils.Active("Harass.InMixed") && Player.ManaPercent > CassioUtils.GetSlider("Harass.Mana"))
             {
-                if (target != null && !target.IsInvulnerable && !target.IsZombie) 
-                Harass(target);
+                if (target != null && !target.IsInvulnerable && !target.IsZombie)
+                {
+                    Harass(target);
+                }
             }
 
             if (!CassioUtils.Active("Farm.Enable") || Player.ManaPercent < CassioUtils.GetSlider("Farm.Mana"))
@@ -551,14 +552,11 @@ namespace SephCassiopeia
 
         static void Harass(Obj_AI_Hero target)
         {
-            if (!CassioUtils.ActiveKeyBind("Keys.HarassT"))
-            {
-                return;
-            }
+  
             if (Spells[SpellSlot.Q].IsReady() && CassioUtils.Active("Harass.UseQ"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
-                if (pred.Hitchance > CassioUtils.GetHitChance("Hitchance.Q"))
+                if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.Q"))
                 {
                     Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
@@ -566,7 +564,7 @@ namespace SephCassiopeia
             if (Spells[SpellSlot.W].IsReady() && CassioUtils.Active("Harass.UseW"))
             {
                 var pred = Spells[SpellSlot.W].GetPrediction(target, true);
-                if (pred.Hitchance > CassioUtils.GetHitChance("Hitchance.W"))
+                if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.W"))
                 {
                     Spells[SpellSlot.W].Cast(pred.CastPosition);
                 }
@@ -607,7 +605,7 @@ namespace SephCassiopeia
                     if (qtarget.Health < qdmg)
                     {
                         var pred = Spells[SpellSlot.Q].GetPrediction(qtarget, false);
-                        if (pred != null && pred.Hitchance > HitChance.Medium)
+                        if (pred != null && pred.Hitchance >= HitChance.Medium)
                         {
                             Spells[SpellSlot.Q].Cast(pred.CastPosition);
                             return;
@@ -627,7 +625,7 @@ namespace SephCassiopeia
                     if (wtarget.Health < wdmg)
                     {
                         var pred = Spells[SpellSlot.Q].GetPrediction(wtarget, false);
-                        if (pred != null && pred.Hitchance > HitChance.Medium)
+                        if (pred != null && pred.Hitchance >= HitChance.Medium)
                         {
                             Spells[SpellSlot.W].Cast(pred.CastPosition);
                             return;
@@ -660,7 +658,7 @@ namespace SephCassiopeia
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Killsteal.UseR"))
             {
            
-                var targ = HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Spells[SpellSlot.R].Range - 200 && x.Health < Player.GetSpellDamage(x, SpellSlot.R) && !x.IsZombie);
+                var targ = HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Spells[SpellSlot.R].Range - 200 && x.Health < Player.GetSpellDamage(x, SpellSlot.R) && !x.IsZombie && !x.IsInvulnerable);
 
                 if (targ != null)
                 {
