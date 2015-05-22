@@ -74,6 +74,7 @@ namespace SephCassiopeia
           
             new CommonAutoLevel(skillorder);
             
+            
             AntiGapcloser.OnEnemyGapcloser += OnGapClose;
 
             Interrupter2.OnInterruptableTarget += OnInterruptableTarget;
@@ -294,6 +295,7 @@ namespace SephCassiopeia
             edelay = CassioUtils.GetSlider("Combo.edelay");
 
             Killsteal();
+
             target = TargetSelector.GetTarget(Spells[SpellSlot.Q].Range, TargetSelector.DamageType.Magical, true, CassiopeiaMenu.BlackList);
             if (target != null && CassioUtils.ActiveKeyBind("Keys.HarassT") && Player.ManaPercent >= CassioUtils.GetSlider("Harass.Mana") && !target.IsInvulnerable && !target.IsZombie)
             {
@@ -399,11 +401,12 @@ namespace SephCassiopeia
 
         private static void WaveClear()
         {
+            var PlayerTeam = Player.Team;
             var Minions =
                 ObjectManager.Get<Obj_AI_Minion>()
                     .Where(
                         m =>
-                            m.IsValidTarget() &&
+                            (m.Team != PlayerTeam) &&
                             (Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.R].Range));
 
             if (SpellSlot.Q.IsReady() && CassioUtils.Active("Waveclear.UseQ"))
@@ -412,7 +415,7 @@ namespace SephCassiopeia
                     Minions.Where(
                         m =>
                             Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.Q].Range &&
-                            m.IsValidTarget());
+                            m.Team != PlayerTeam);
                 MinionManager.FarmLocation QLocation =
                     MinionManager.GetBestCircularFarmLocation(
                         qminions.Select(m => m.ServerPosition.To2D()).ToList(), Spells[SpellSlot.Q].Width,
@@ -426,11 +429,9 @@ namespace SephCassiopeia
 
             if (SpellSlot.W.IsReady() && CassioUtils.Active("Waveclear.UseW"))
             {
-                var wminions =
-                    Minions.Where(
-                        m =>
+                var wminions = Minions.Where(m =>
                             Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.W].Range &&
-                            m.IsValidTarget());
+                            m.Team != PlayerTeam);
                 MinionManager.FarmLocation WLocation =
                     MinionManager.GetBestCircularFarmLocation(
                         wminions.Select(m => m.ServerPosition.To2D()).ToList(), Spells[SpellSlot.W].Width,
@@ -444,13 +445,16 @@ namespace SephCassiopeia
             if (SpellSlot.E.IsReady() && CassioUtils.Active("Waveclear.UseE"))
             {
                 Obj_AI_Minion KillableMinionE = null;
+                var eminions = Minions.Where(m =>
+                          Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.E].Range &&
+                          m.Team != PlayerTeam);
                 if (CassioUtils.Active("Waveclear.useekillable"))
                 {
-                    KillableMinionE = Minions.FirstOrDefault(m => m.Health < Player.GetSpellDamage(m, SpellSlot.E));
+                    KillableMinionE = eminions.FirstOrDefault(m => m.Health < Player.GetSpellDamage(m, SpellSlot.E));
                 }
                 else
                 {
-                    KillableMinionE = Minions.OrderBy(x => x.Health).FirstOrDefault();
+                    KillableMinionE = eminions.OrderBy(x => x.Health).FirstOrDefault();
                 }
 
                 if (KillableMinionE != null)
@@ -552,7 +556,6 @@ namespace SephCassiopeia
 
         static void Harass(Obj_AI_Hero target)
         {
-  
             if (Spells[SpellSlot.Q].IsReady() && CassioUtils.Active("Harass.UseQ"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);

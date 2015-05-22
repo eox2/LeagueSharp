@@ -58,7 +58,7 @@ namespace SephCassiopeia
             Menu Farm = new Menu("Farm (LH)", "Farm", false);
             Farm.AddItem(new MenuItem("Farm.Enable", "Enable abilities for farming").SetValue(true));
             Farm.AddItem(new MenuItem("Farm.Mana", "Minimum Mana %").SetValue(new Slider(50, 0, 100)));
-            Farm.AddItem(new MenuItem("Farm.Useauto", "Enable autos").SetValue(true));
+            Farm.AddItem(new MenuItem("Farm.Useauto", "Enable auto attacks").SetValue(true));
             Farm.AddItem(new MenuItem("Farm.UseQ", "Use Q").SetValue(true));
             Farm.AddItem(new MenuItem("Farm.UseW", "Use W").SetValue(true));
             Farm.AddItem(new MenuItem("Farm.UseE", "Use E").SetValue(true));
@@ -110,6 +110,7 @@ namespace SephCassiopeia
             Config.AddSubMenu(hc);
 
             Menu misc = new Menu("Misc", "Misc", false);
+            
             var autolvl = misc.AddItem(new MenuItem("Misc.autolevel", "Autolevel", false).SetValue(false));
             autolvl.ValueChanged += (sender, args) =>
             {
@@ -122,6 +123,7 @@ namespace SephCassiopeia
                     CommonAutoLevel.Enabled(false);
                 }
             };
+             
             misc.AddItem(new MenuItem("Misc.autoe", "Auto use e when possible (no buttons pressed)", false).SetValue(false));
             misc.AddItem(new MenuItem("Misc.Debug", "Debug", false).SetValue(false));
             Config.AddSubMenu(misc);

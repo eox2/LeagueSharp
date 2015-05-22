@@ -67,6 +67,11 @@ namespace EloSharp_V2
             {
                 nameofplayer = File.ReadAllText(Config.AppDataDirectory + "\\elosharp.txt").ToLower();
             }
+            else
+            {
+                Console.WriteLine("Elosharp.txt not found. Waiting for game to load to setup.");
+                CustomEvents.Game.OnGameLoad += Setup;
+            }
 
             if (Misc.Validregion() && (nameofplayer != ""))
             {
@@ -190,7 +195,11 @@ namespace EloSharp_V2
             SubEvents();
 
             GetHeroHandles(setwebsite);
-             
+        }
+
+
+        private static void Setup(EventArgs args)
+        {
 
             if (File.Exists(Config.AppDataDirectory + "\\elosharp.txt") &&
                 Misc.Config.Item("autoupdate").GetValue<bool>())
@@ -207,8 +216,7 @@ namespace EloSharp_V2
             }
             if (!File.Exists(LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt"))
             {
-                File.WriteAllText(
-                    LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
+                File.WriteAllText(LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
             }
         }
 

@@ -24,10 +24,12 @@
 
 using System;
 using System.Collections.Generic;
+using LeagueSharp;
+using LeagueSharp.Common;
 
 #endregion
 
-namespace LeagueSharp.Common
+namespace SephCassiopeia
 {
     public class CommonAutoLevel
     {
