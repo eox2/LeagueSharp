@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Security.Permissions;
 using EloSharp_V2.Properties;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -109,6 +110,7 @@ namespace EloSharp_V2
             Performlookup();
         }
 
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static void Performlookup()
         {
             try
