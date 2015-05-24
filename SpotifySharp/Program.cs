@@ -2,6 +2,8 @@
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using LeagueSharp;
@@ -114,17 +116,18 @@ namespace SpotifySharp
             Drawing.OnDraw += OnDraw;
         }
 
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static void Bringtofront()
         {
             if (SpotifyOpen())
             {
-                WinAPI.ShowWindow(FindSpotify(), 1);
+                ShowWindow(FindSpotify(), 1);
                 SetForegroundWindow(FindSpotify());
                 SetFocus(FindSpotify());
             }
         }
 
-
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static void Game_OnWndProc(WndEventArgs args)
         {
             if (!_config.Item("showhide").GetValue<KeyBind>().Active)
@@ -298,13 +301,13 @@ namespace SpotifySharp
             return Vector2.Multiply(Scale, vector);
         }
 
-
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static IntPtr FindSpotify()
         {
             return FindWindow("SpotifyMainWindow", null);
         }
 
-
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static String GetTitle()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
@@ -319,14 +322,14 @@ namespace SpotifySharp
         }
 
 
-
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static bool SpotifyOpen()
         {
             IntPtr Spotify = FindWindow("SpotifyMainWindow", null);
             return Spotify != null;
         }
 
-
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static String GetSongName()
         {
             String[] title = GetTitle().Split('–');
@@ -337,7 +340,7 @@ namespace SpotifySharp
             return "";
         }
 
-
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static String GetArtistName()
         {
             String[] title = GetTitle().Split('–');
@@ -348,10 +351,11 @@ namespace SpotifySharp
             return "";
         }
 
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void PausePlay()
         {
             var spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(PlaypauseKey));
+             PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(PlaypauseKey));
         }
 
         public static void NextTrackkeys()
@@ -361,7 +365,7 @@ namespace SpotifySharp
                 return;
             }
             var spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(NexttrackKey));
+             PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(NexttrackKey));
         }
 
         public static void PreviousTrackkeys()
@@ -371,7 +375,7 @@ namespace SpotifySharp
                 return;
             }
             var spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(PreviousKey));
+             PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(PreviousKey));
         }
 
         public static void VolumeUpkeys()
@@ -381,10 +385,10 @@ namespace SpotifySharp
                 return;
             }
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            keybd_event(ControlKey, 0x1D, 0, 0);
-            PostMessage(spotifyWindow, 0x100, new IntPtr(0x26), IntPtr.Zero);
+             keybd_event(ControlKey, 0x1D, 0, 0);
+             PostMessage(spotifyWindow, 0x100, new IntPtr(0x26), IntPtr.Zero);
             Thread.Sleep(1);
-            keybd_event(ControlKey, 0x1D, 0x2, 0);
+             keybd_event(ControlKey, 0x1D, 0x2, 0);
         }
 
         public static void VolumeDownkeys()
@@ -394,52 +398,54 @@ namespace SpotifySharp
                 return;
             }
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            keybd_event(ControlKey, 0x1D, 0, 0);
-            PostMessage(spotifyWindow, 0x100, new IntPtr(0x28), IntPtr.Zero);
+             keybd_event(ControlKey, 0x1D, 0, 0);
+             PostMessage(spotifyWindow, 0x100, new IntPtr(0x28), IntPtr.Zero);
             Thread.Sleep(1);
-            keybd_event(ControlKey, 0x1D, 0x2, 0);
+             keybd_event(ControlKey, 0x1D, 0x2, 0);
         }
 
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void VollUp()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(VolumeUpKey));
+             PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(VolumeUpKey));
         }
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void VollDown()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(VolumeDownKey));
+             PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(VolumeDownKey));
         }
 
-
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void NextTrack()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(NexttrackKey));
+             PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(NexttrackKey));
         }
-
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void PreviousTrack()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(PreviousKey));
+             PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(PreviousKey));
         }
-
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void VolumeUp()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            keybd_event(ControlKey, 0x1D, 0, 0);
-            PostMessage(spotifyWindow, 0x100, new IntPtr(0x26), IntPtr.Zero);
+             keybd_event(ControlKey, 0x1D, 0, 0);
+             PostMessage(spotifyWindow, 0x100, new IntPtr(0x26), IntPtr.Zero);
             Thread.Sleep(1);
-            keybd_event(ControlKey, 0x1D, 0x2, 0);
+             keybd_event(ControlKey, 0x1D, 0x2, 0);
         }
-
+         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void VolumeDown()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
-            keybd_event(ControlKey, 0x1D, 0, 0);
-            PostMessage(spotifyWindow, 0x100, new IntPtr(0x28), IntPtr.Zero);
+             keybd_event(ControlKey, 0x1D, 0, 0);
+             PostMessage(spotifyWindow, 0x100, new IntPtr(0x28), IntPtr.Zero);
             Thread.Sleep(1);
-            keybd_event(ControlKey, 0x1D, 0x2, 0);
+             keybd_event(ControlKey, 0x1D, 0x2, 0);
         }
 
 
@@ -591,6 +597,7 @@ namespace SpotifySharp
                 }
             }
         }
+
 
         [DllImport("user32.dll")]
         internal static extern IntPtr SetFocus(IntPtr hWnd);

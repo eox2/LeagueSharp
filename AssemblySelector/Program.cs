@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using AssemblySelector.Properties;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -33,6 +34,7 @@ namespace AssemblySelector
             Game.OnWndProc += Game_OnWndProc;
         }
 
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static void Game_OnWndProc(WndEventArgs args)
         {
             if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && mouseonlsharp())
@@ -51,7 +53,7 @@ namespace AssemblySelector
             return FindWindow(null, "LeagueSharp");
         }
 
-
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static void bringtofront()
         {
             ShowWindow(FindLeagueSharp(), 1);

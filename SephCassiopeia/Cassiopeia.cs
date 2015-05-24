@@ -151,13 +151,11 @@ namespace SephCassiopeia
             }
 
 
-            var targets = HeroManager.Enemies.Where(x => x.IsValidTarget(Spells[SpellSlot.R].Range) && !x.IsZombie).OrderBy(x => x.Health);
-
-            foreach (var targ in targets) {
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") &&
                 CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
-                if (targ.IsFacing(Player))
+                var targets = HeroManager.Enemies.Where(x => x.IsValidTarget(Spells[SpellSlot.R].Range) && !x.IsZombie).OrderBy(x => x.Health);
+                foreach (var targ in targets)
                 {
                     var pred = Spells[SpellSlot.R].GetPrediction(targ);
                     if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.R"))
@@ -166,7 +164,7 @@ namespace SephCassiopeia
                         int enemfacingpred = 0;
                         foreach (var hero in targets)
                         {
-                            if (Spells[SpellSlot.R].WillHit(hero, pred.CastPosition, 0))
+                            if (Spells[SpellSlot.R].WillHit(hero, pred.CastPosition, 0, CassioUtils.GetHitChance("Hitchance.R")))
                             {
                                 enemhitpred++;
 
@@ -189,6 +187,15 @@ namespace SephCassiopeia
                         }
                     }
                 }
+
+                var easycheck = HeroManager.Enemies.FirstOrDefault(x =>
+                     !x.IsInvulnerable && !x.IsZombie && x.IsValidTarget(Spells[SpellSlot.R].Range) &&
+                     x.IsFacing(Player) && x.isImmobile());
+
+                if (easycheck != null)
+                {
+                    Spells[SpellSlot.R].Cast(easycheck.ServerPosition);
+                    return;
                 }
             }
 
@@ -401,12 +408,11 @@ namespace SephCassiopeia
 
         private static void WaveClear()
         {
-            var PlayerTeam = Player.Team;
             var Minions =
                 ObjectManager.Get<Obj_AI_Minion>()
                     .Where(
                         m =>
-                            (m.Team != PlayerTeam) &&
+                            (m.IsValidTarget()) &&
                             (Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.R].Range));
 
             if (SpellSlot.Q.IsReady() && CassioUtils.Active("Waveclear.UseQ"))
@@ -414,8 +420,7 @@ namespace SephCassiopeia
                 var qminions =
                     Minions.Where(
                         m =>
-                            Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.Q].Range &&
-                            m.Team != PlayerTeam);
+                            Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.Q].Range);
                 MinionManager.FarmLocation QLocation =
                     MinionManager.GetBestCircularFarmLocation(
                         qminions.Select(m => m.ServerPosition.To2D()).ToList(), Spells[SpellSlot.Q].Width,
@@ -430,8 +435,7 @@ namespace SephCassiopeia
             if (SpellSlot.W.IsReady() && CassioUtils.Active("Waveclear.UseW"))
             {
                 var wminions = Minions.Where(m =>
-                            Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.W].Range &&
-                            m.Team != PlayerTeam);
+                            Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.W].Range);
                 MinionManager.FarmLocation WLocation =
                     MinionManager.GetBestCircularFarmLocation(
                         wminions.Select(m => m.ServerPosition.To2D()).ToList(), Spells[SpellSlot.W].Width,
@@ -446,8 +450,7 @@ namespace SephCassiopeia
             {
                 Obj_AI_Minion KillableMinionE = null;
                 var eminions = Minions.Where(m =>
-                          Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.E].Range &&
-                          m.Team != PlayerTeam);
+                          Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.E].Range);
                 if (CassioUtils.Active("Waveclear.useekillable"))
                 {
                     KillableMinionE = eminions.FirstOrDefault(m => m.Health < Player.GetSpellDamage(m, SpellSlot.E));

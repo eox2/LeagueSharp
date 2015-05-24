@@ -95,7 +95,6 @@ namespace AutoZhonya
             catch (Exception e)
             {
                 Console.WriteLine(e + e.StackTrace);
-                return;
             }
           
       

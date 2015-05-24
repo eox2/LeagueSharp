@@ -38,7 +38,7 @@ namespace SwitchSkin
 
                     var herosubmenu = new Menu(hero.ChampionName + " (" + hero.Name + ") ", hero.ChampionName);
                     var skinselect = herosubmenu.AddItem(
-                            new MenuItem("skin." + hero.ChampionName, hero.ChampionName + " (" + hero.Name + ")")
+                            new MenuItem("skin." + hero.ChampionName, "Change Skin")
                                 .SetValue(
                                     new StringList(
                                         new[]
