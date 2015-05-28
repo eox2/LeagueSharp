@@ -379,18 +379,21 @@ namespace EloSharp_V2
                 {
                     foreach (Lolnexus.Infoloading infoloading in Lolnexus.Ranksloading.ToList())
                     {
+                        Console.WriteLine(infoloading.Name);
                         int indexof = 0;
                         indexof = Lolnexus.Ranksloading.IndexOf(infoloading);
                         bool isTop = indexof < 5;
                         int ystart = isTop ? 15 : 411;
                         int xformula = isTop ? 210 + (indexof * 200) : 210 + ((indexof - 5) * 200);
 
+                        /*
                         if (Misc.Config.Item("drawicons").GetValue<bool>())
                         {
                             Drawsprite(
                                 infoloading.champsprite, Newspriteposition(xformula, ystart),
                                 Newspriteposition(xformula - 20, ystart + 5));
                         }
+                         * */
 
                         RenderText(
                             Misc.FormatString(infoloading.Name) + " " + infoloading.seriescheck, isTop, indexof, 15,
@@ -417,7 +420,6 @@ namespace EloSharp_V2
                                 "" + Misc.StripHTML(infoloading.currentrunes[i]), isTop, indexof, 135 + (i * 20),
                                 Color2.White);
                         }
-                        return;
                     }
 
                 }

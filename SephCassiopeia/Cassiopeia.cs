@@ -158,10 +158,6 @@ namespace SephCassiopeia
                 }
             }
             
-
-
-
-
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") &&
                 CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
