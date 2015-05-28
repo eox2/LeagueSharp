@@ -32,7 +32,6 @@ namespace EloSharp_V2
         public class Infoloading
         {
             public String Name { get; set; }
-            public String Ranking { get; set; }
             public String lpamount { get; set; }
             public Obj_AI_Hero herohandle { get; set; }
             public String rankedwins { get; set; }
@@ -57,7 +56,7 @@ namespace EloSharp_V2
                 //Get raw information 
                 string htmlcode =
                     new WebClient().DownloadString("http://www.lolnexus.com/ajax/get-game-info/" + region + ".json?name=" + name);
-               // System.IO.File.WriteAllText(@"C:\Users\Laptop\Desktop\lolnexus.txt", htmlcode); // Testing purposes
+                System.IO.File.WriteAllText(@"C:\Users\Laptop\Desktop\lolnexus.txt", htmlcode); // Testing purposes
                 //Extract information 
                 foreach (
                     Match playerregex in

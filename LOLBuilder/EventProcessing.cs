@@ -23,7 +23,7 @@ namespace LolBuilder
                 if (AutoLevOn())
                 {
                     var sequence = BuildData.SkillSequence;
-                   // new CommonAutoLevel(sequence);
+                    new CommonAutoLevel(sequence);
                 }
             });
 
@@ -39,7 +39,6 @@ namespace LolBuilder
             try
             {
                 Data = pbClient.DownloadString("http://lolbuilder.net/" + cname);
-                Console.Write(Data);
             }
             catch (Exception e)
             {

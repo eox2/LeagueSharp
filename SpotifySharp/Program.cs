@@ -52,7 +52,14 @@ namespace SpotifySharp
 
         public static void Main(string[] args)
         {
-            CustomEvents.Game.OnGameLoad += OnGameLoad;
+            try
+            {
+                CustomEvents.Game.OnGameLoad += OnGameLoad;
+            }
+            catch (Exception e)
+            {
+                Console.Write(e);
+            }
         }
 
         public static void OnGameLoad(EventArgs args)
@@ -93,7 +100,7 @@ namespace SpotifySharp
 
             if (SpotifyOpen())
             {
-                Game.PrintChat("::: Spotify has been detected :::");
+                Console.WriteLine("::: Spotify has been detected :::");
             }
 
 
@@ -106,10 +113,10 @@ namespace SpotifySharp
 
             changePrev.ValueChanged += delegate { PreviousTrackkeys(); };
 
-            Game.PrintChat("Loaded Spotify Controller by Seph");
+            Console.WriteLine("Loaded Spotify Controller by Seph");
             if (!SpotifyOpen())
             {
-                Game.PrintChat("Spotify isn't running");
+                Console.WriteLine("Spotify isn't running");
             }
 
             Game.OnWndProc += Game_OnWndProc;

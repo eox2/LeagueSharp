@@ -12,7 +12,6 @@ using SharpDX.Direct3D9;
 using Color2 = SharpDX.Color;
 using Font = SharpDX.Direct3D9.Font;
 using System.Timers;
-using System.Text;
 
 namespace EloSharp_V2
 {
@@ -51,6 +50,7 @@ namespace EloSharp_V2
         private static bool delaying;
 
 
+     
         public static void Main(string[] args)
         {
             Console.WriteLine("Elosharp V2 injected");
@@ -251,8 +251,7 @@ namespace EloSharp_V2
             {
                 foreach (Lolnexus.Infoloading infoloading in Lolnexus.Ranksloading)
                 {
-                    infoloading.herohandle = champlist.Find(hero => hero.Name.ToLower() == infoloading.Name.ToLower());
-                    Lolnexus.Ranksloading.Add(infoloading);
+                    infoloading.herohandle = HeroManager.AllHeroes.Find(o => o.Name.ToLower().Equals(infoloading.Name.ToLower()));
                 }
                 return;
             }
@@ -260,7 +259,7 @@ namespace EloSharp_V2
             {
                 foreach (LolSkill.Infoloading infoloading in LolSkill.Ranksloading)
                 {
-                    infoloading.herohandle = champlist.Find(o => o.Name.ToLower() == infoloading.Name.ToLower());
+                    infoloading.herohandle = HeroManager.AllHeroes.Find(o => o.Name.ToLower().Equals(infoloading.Name.ToLower()));
                     LolSkill.Ranksloading.Add(infoloading);
                 }
                 return;
@@ -380,7 +379,6 @@ namespace EloSharp_V2
                 {
                     foreach (Lolnexus.Infoloading infoloading in Lolnexus.Ranksloading.ToList())
                     {
-                        Console.WriteLine(infoloading.Name);
                         int indexof = 0;
                         indexof = Lolnexus.Ranksloading.IndexOf(infoloading);
                         bool isTop = indexof < 5;
@@ -428,7 +426,6 @@ namespace EloSharp_V2
                 {
                     foreach (LolSkill.Infoloading infoloading in LolSkill.Ranksloading.ToList())
                     {
-                        Console.WriteLine(infoloading.Name);
                         int indexof = 0;
                         indexof = LolSkill.Ranksloading.IndexOf(infoloading);
                         bool isTop = indexof < 5;
@@ -546,15 +543,23 @@ namespace EloSharp_V2
                 {
                     foreach (Lolnexus.Infoloading infoloading in Lolnexus.Ranksloading.ToList())
                     {
-
                         var indicator = new Misc.HpBarIndicator { Unit = infoloading.herohandle };
                         X = (int)indicator.Position.X;
                         Y = (int)indicator.Position.Y;
                         var startX = X + 50;
                         var startY = Y - 60;
-                        Text.DrawText(
-                            null, infoloading.soloqrank, startX + (15 - infoloading.soloqrank.Length * 4) / 2,
-                            startY + 6, Misc.ColorRank(infoloading.soloqrank));
+                        if (Misc.Config.Item("enablerank").GetValue<bool>())
+                        {
+                            Text.DrawText(null, infoloading.soloqrank, startX + (15 - infoloading.soloqrank.Length * 4) / 2, startY, Misc.ColorRank(infoloading.soloqrank));
+                        }
+        
+                        if (Misc.Config.Item("enablekdaratio").GetValue<bool>())
+                        {
+                            Text.DrawText(
+                                null, "KDA: " + infoloading.kda,
+                                startX + (15 - infoloading.soloqrank.Length * 4) / 2, startY + 15, Misc.ColorRank(infoloading.soloqrank));
+                        }
+
                     }
                 }
 
@@ -607,7 +612,7 @@ namespace EloSharp_V2
 
             catch (Exception e)
             {
-                Console.WriteLine(@"Error drawing text loading screen " + e);
+                Console.WriteLine(@"Error drawing text overheads " + e);
             }
         }
 

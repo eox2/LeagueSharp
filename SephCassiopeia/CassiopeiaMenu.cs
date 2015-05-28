@@ -26,6 +26,7 @@ namespace SephCassiopeia
             Combo.AddItem(new MenuItem("Combo.UseQ", "Use Q", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseW", "Use W", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseE", "Use E", false).SetValue(true));
+            Combo.AddItem(new MenuItem("Combo.useepoison", "Use E only if poison", false).SetValue(true));
             Combo.AddItem((new MenuItem("Combo.edelay", "Edelay").SetValue(new Slider(0, 0, 1000))));
             Combo.AddItem(new MenuItem("Combo.UseR", "Use R", false).SetValue(true));
             Combo.AddItem((new MenuItem("Combo.Rcount", "Enemies count for Ult").SetValue(new Slider(1, 0, 5))));

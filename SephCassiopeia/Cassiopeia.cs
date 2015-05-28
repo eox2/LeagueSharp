@@ -140,7 +140,7 @@ namespace SephCassiopeia
                 {
                     etarg = HeroManager.Enemies.FirstOrDefault(h => h.IsValidTarget(Spells[SpellSlot.E].Range) && h.isPoisoned() && !h.IsInvulnerable && !h.IsZombie);
                 }
-                if (etarg != null && etarg.isPoisoned())
+                if (etarg != null && CassioUtils.Active("Combo.useepoison") && etarg.isPoisoned())
                 {
                     if ((Utils.GameTimeTickCount - laste) > edelay)
                     {
@@ -148,7 +148,18 @@ namespace SephCassiopeia
                         laste = Utils.GameTimeTickCount;
                     }
                 }
+                 else if (!CassioUtils.Active("Combo.useepoison"))
+                {
+                    if ((Utils.GameTimeTickCount - laste) > edelay)
+                    {
+                        Spells[SpellSlot.E].Cast(target);
+                        laste = Utils.GameTimeTickCount;
+                    }
+                }
             }
+            
+
+
 
 
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") &&
@@ -342,8 +353,8 @@ namespace SephCassiopeia
 
             #region Combo
 
-            private static void Combo(Obj_AI_Hero target)
-        {
+          private static void Combo(Obj_AI_Hero target) 
+          {
             if (Spells[SpellSlot.Q].IsReady() && CassioUtils.Active("Combo.UseQ"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
@@ -362,7 +373,15 @@ namespace SephCassiopeia
             }
             if (Spells[SpellSlot.E].IsReady() && CassioUtils.Active("Combo.UseE"))
             {
-                if (target.isPoisoned())
+                if (CassioUtils.Active("Combo.useepoison") && target.isPoisoned())
+                {
+                    if ((Utils.GameTimeTickCount - laste) > edelay)
+                    {
+                        Spells[SpellSlot.E].Cast(target);
+                        laste = Utils.GameTimeTickCount;
+                    }
+                }
+                else if (!CassioUtils.Active("Combo.useepoison"))
                 {
                     if ((Utils.GameTimeTickCount - laste) > edelay)
                     {
