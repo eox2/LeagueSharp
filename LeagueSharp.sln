@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephElise", "SephElise\SephElise.csproj", "{36D5B533-9C99-4EB5-8A07-31C0D5BBA38A}"
 EndProject
@@ -33,9 +33,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephLux", "SephLux\SephLux.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WIP", "WIP", "{41F80BC0-57F1-47FE-A3B7-F884C2F80B80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwitchSkin", "SwitchSkin\SwitchSkin.csproj", "{BE063022-17CD-4B73-A719-1982718F452D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephCassiopeia", "SephCassiopeia\SephCassiopeia.csproj", "{C422B64C-826F-44BF-B02C-08DF3CC7CB20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkinsSharp", "SwitchSkin\SkinsSharp.csproj", "{BE063022-17CD-4B73-A719-1982718F452D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,14 +99,14 @@ Global
 		{18D10F95-C6D0-47EE-A415-CB461C559F67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18D10F95-C6D0-47EE-A415-CB461C559F67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18D10F95-C6D0-47EE-A415-CB461C559F67}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BE063022-17CD-4B73-A719-1982718F452D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE063022-17CD-4B73-A719-1982718F452D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE063022-17CD-4B73-A719-1982718F452D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE063022-17CD-4B73-A719-1982718F452D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C422B64C-826F-44BF-B02C-08DF3CC7CB20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C422B64C-826F-44BF-B02C-08DF3CC7CB20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C422B64C-826F-44BF-B02C-08DF3CC7CB20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C422B64C-826F-44BF-B02C-08DF3CC7CB20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE063022-17CD-4B73-A719-1982718F452D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE063022-17CD-4B73-A719-1982718F452D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE063022-17CD-4B73-A719-1982718F452D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE063022-17CD-4B73-A719-1982718F452D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

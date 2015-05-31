@@ -849,20 +849,21 @@ namespace SephKhazix
 
         private static void CheckSpells(EventArgs args)
         {
+            var minion = new Obj_AI_Minion();
             //check for evolutions
-            if (ObjectManager.Player.HasBuff("khazixqevo", true) && !EvolvedQ)
+            if (Player.HasBuff("khazixqevo") && !EvolvedQ)
             {
                 Q.Range = 375;
                 EvolvedQ = true;
             }
-            if (ObjectManager.Player.HasBuff("khazixwevo", true) && !Wevolved)
+            if (Player.HasBuff("khazixwevo") && !Wevolved)
             {
                 Wevolved = true;
                 Wnorm = false;
                 W.SetSkillshot(0.225f, 100f, 828.5f, true, SkillshotType.SkillshotLine);
             }
             
-            if (ObjectManager.Player.HasBuff("khazixeevo", true) && !Eevolved)
+            if (Player.HasBuff("khazixeevo") && !Eevolved)
             {
                 E.Range = 1000;
                 Eevolved = true;

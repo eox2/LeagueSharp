@@ -231,16 +231,15 @@ namespace SephKayle
             {
                 return;}
                 var damage = Damage.GetAutoAttackDamage(sender, hero);
-              //  Game.PrintChat("Withherochek" + damage);
                 float setvaluehealth = (int) GetSettings("hpct" + hero.ChampionName, false, true);
                 float setvalueult = (int) GetSettings("hpct" + hero.ChampionName, false, true);
-                if (Config.Item("UseEwc").GetValue<bool>() && (hero.HealthPercentage() <= setvaluehealth || (hero.Health - damage) / hero.MaxHealth <= setvaluehealth))
+                if (Config.Item("UseEwc").GetValue<bool>() && (hero.HealthPercent <= setvaluehealth || (hero.Health - damage) / hero.MaxHealth <= setvaluehealth))
                 {
                     HealUltManager(true, false, hero);
                     return;
                 }
 
-                if ((bool)GetSettings("ult" + hero.ChampionName, true) && (hero.HealthPercentage() <= setvalueult || (hero.Health - damage) / hero.MaxHealth <= setvalueult))
+                if ((bool)GetSettings("ult" + hero.ChampionName, true) && (hero.HealthPercent <= setvalueult || (hero.Health - damage) / hero.MaxHealth <= setvalueult))
                 {
                     HealUltManager(false, true, hero);
                     return;

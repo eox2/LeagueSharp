@@ -3,27 +3,25 @@ using System.Collections.Generic;
 using LeagueSharp;
 using LeagueSharp.Common;
 
-namespace SwitchSkin
+namespace SkinsSharp
 {
     class Program
     {
         private static Menu menu;
         private static Dictionary<String, int> ChampSkins = new Dictionary<String, int>();
-        private static bool setupdone;
 
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += GameLoad;
-            GameObject.OnFloatPropertyChange += FloatPropertyChange;
         }
 
 
         static void GameLoad(EventArgs argss)
         {
-            
-             menu = new Menu("SwitchSkins", "Skinswitcher", true);
 
-             menu.AddItem(new MenuItem("forall", "Enable for all (reload required)", false).SetValue(true));
+            menu = new Menu("Skins#", "Skinswitcher", true);
+
+            menu.AddItem(new MenuItem("forall", "Enable for all (reload required)", false).SetValue(true));
 
             try
             {
@@ -53,7 +51,7 @@ namespace SwitchSkin
 
                     menu.AddSubMenu(herosubmenu);
 
-                    skinselect.ValueChanged += delegate(Object sender, OnValueChangeEventArgs args)
+                    skinselect.ValueChanged += delegate (Object sender, OnValueChangeEventArgs args)
                     {
                         ChampSkins[currenthero.Name] = args.GetNewValue<StringList>().SelectedIndex;
                         currenthero.SetSkin(currenthero.ChampionName, ChampSkins[currenthero.Name]);
@@ -65,15 +63,15 @@ namespace SwitchSkin
                 Console.Write(e + " " + e.StackTrace);
             }
             menu.AddToMainMenu();
-            setupdone = true;
+            GameObject.OnFloatPropertyChange += FloatPropertyChange;
         }
 
-  
+
         static void FloatPropertyChange(GameObject sender, GameObjectFloatPropertyChangeEventArgs args)
         {
             try
             {
-                if (!setupdone || !(sender is Obj_AI_Hero) || args.Property != "mHP" || sender.Name != ObjectManager.Player.Name && !menu.Item("forall").GetValue<bool>())
+                if (!(sender is Obj_AI_Hero) || args.Property != "mHP" || sender.Name != ObjectManager.Player.Name && !menu.Item("forall").GetValue<bool>())
                 {
                     return;
                 }
@@ -92,5 +90,4 @@ namespace SwitchSkin
         }
     }
 }
-
 
