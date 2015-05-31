@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Security.Permissions;
 using System.Text.RegularExpressions;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -30,7 +29,6 @@ namespace LolBuilder
             main.Start();
         }
 
-       [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void ProBuilds(string cname)
         {
             BuildData.BuildsList = new List<BuildData.BuildInfo>();

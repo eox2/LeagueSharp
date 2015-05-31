@@ -62,6 +62,7 @@ namespace SpotifySharp
             }
         }
 
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void OnGameLoad(EventArgs args)
         {
             _spotifyicon = Loadspotify();
@@ -123,7 +124,6 @@ namespace SpotifySharp
             Drawing.OnDraw += OnDraw;
         }
 
-        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static void Bringtofront()
         {
             if (SpotifyOpen())
@@ -308,13 +308,11 @@ namespace SpotifySharp
             return Vector2.Multiply(Scale, vector);
         }
 
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static IntPtr FindSpotify()
         {
             return FindWindow("SpotifyMainWindow", null);
         }
 
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static String GetTitle()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
@@ -329,14 +327,12 @@ namespace SpotifySharp
         }
 
 
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static bool SpotifyOpen()
         {
             IntPtr Spotify = FindWindow("SpotifyMainWindow", null);
             return Spotify != null;
         }
 
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static String GetSongName()
         {
             String[] title = GetTitle().Split('–');
@@ -347,7 +343,6 @@ namespace SpotifySharp
             return "";
         }
 
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static String GetArtistName()
         {
             String[] title = GetTitle().Split('–');
@@ -358,7 +353,6 @@ namespace SpotifySharp
             return "";
         }
 
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void PausePlay()
         {
             var spotifyWindow = FindWindow("SpotifyMainWindow", null);
@@ -411,32 +405,27 @@ namespace SpotifySharp
              keybd_event(ControlKey, 0x1D, 0x2, 0);
         }
 
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void VollUp()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
              PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(VolumeUpKey));
         }
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void VollDown()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
              PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(VolumeDownKey));
         }
 
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void NextTrack()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
              PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(NexttrackKey));
         }
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void PreviousTrack()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
              PostMessage(spotifyWindow, KeyMessage, IntPtr.Zero, new IntPtr(PreviousKey));
         }
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void VolumeUp()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
@@ -445,7 +434,6 @@ namespace SpotifySharp
             Thread.Sleep(1);
              keybd_event(ControlKey, 0x1D, 0x2, 0);
         }
-         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void VolumeDown()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
@@ -580,6 +568,7 @@ namespace SpotifySharp
                     pos.Y >= voldbuttonpos.Y && pos.Y <= (voldbuttonpos.Y + loadvoldown.Height));
         }
 
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void OnDraw(EventArgs args)
         {
             if (_config.Item("showtrack").GetValue<bool>())

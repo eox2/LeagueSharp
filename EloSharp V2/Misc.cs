@@ -45,7 +45,7 @@ namespace EloSharp_V2
 
             Config.AddItem(new MenuItem("enabledebug", "Enable Debug").SetValue(false));
             Config.AddItem(new MenuItem("autoupdate", "Auto change name").SetValue(true));
-            Config.AddItem(new MenuItem("choosewebsite", "Choose Website").SetValue(new StringList(new[] { "LolNexus", "LolSkill - NOT WORKING", "OPGG Live", "Old EloSharp" }, 1)));
+            Config.AddItem(new MenuItem("choosewebsite", "Choose Website").SetValue(new StringList(new[] { "LolNexus", "OPGG Live", "Old EloSharp" }, 0)));
             SetWebsite = Config.Item("choosewebsite").GetValue<StringList>().SelectedIndex;
             Config.AddSubMenu(new Menu("Loading Screen", "loadingscreen"));
             Config.SubMenu("loadingscreen")
@@ -214,10 +214,9 @@ namespace EloSharp_V2
         public static string getsetwebsite()
         {
             if (SetWebsite == 0) { return "lolnexus"; }
-            if (SetWebsite == 1) { return "lolskill"; }
-            if (SetWebsite == 2) { return "opgg"; }
-            if (SetWebsite == 3) { return "opgg2"; }
-            return "opgg2";
+            if (SetWebsite == 1) { return "opgg"; }
+            if (SetWebsite == 2) { return "opgg2"; }
+            return "lolnexus";
         }
 
         public static Color rankincolorls(string rank)

@@ -9,6 +9,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
+using System.Security.Permissions;
 
 namespace iTunes
 {
@@ -44,10 +45,6 @@ namespace iTunes
         private static Menu Config;
         public static string songname = "Not initialized - Press Play";
 
-        //  private static int currvol = 0;
-
-
-        //   private static Obj_AI_Hero Player;
 
         [DllImport("user32.dll")]
         internal static extern IntPtr SetFocus(IntPtr hWnd);
@@ -82,6 +79,7 @@ namespace iTunes
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
 
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void Game_OnGameLoad(EventArgs args)
         {
             itunesicon = loaditunes();
@@ -141,7 +139,7 @@ namespace iTunes
             Game.PrintChat("Loaded iTunes Controller by Seph");
             if (!isitunesOpen())
             {
-                Game.PrintChat("iTunes isn't running");
+                Console.WriteLine("iTunes isn't running");
             }
 
             //  Game.OnGameUpdate += OnGameUpdate;
@@ -164,34 +162,9 @@ namespace iTunes
         }
 
 
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static void Game_OnWndProc(WndEventArgs args)
         {
-            /*
-            if (Config.Item("spriteshow").GetValue<KeyBind>().Active && (!Config.Item("showhide").GetValue<KeyBind>().Active))
-            {
-                itunesicon.Show();
-                play.Show();
-                prev.Show();
-                next.Show();
-
-
-                volup1.Show();
-                voldown1.Show();
-            }
-
-            if ((!Config.Item("spriteshow").GetValue<KeyBind>().Active) || (Config.Item("showhide").GetValue<KeyBind>().Active))
-            {
-                itunesicon.Hide();
-                play.Hide();
-                prev.Hide();
-                next.Hide();
-
-
-                volup1.Hide();
-                voldown1.Hide();
-            }
-            */
-
             if (!Config.Item("showhide").GetValue<KeyBind>().Active)
             {
                 itunesicon.Show();
@@ -367,7 +340,7 @@ namespace iTunes
             return Vector2.Multiply(_scale, vector);
         }
 
-
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static void OnSongCheck(Object source, ElapsedEventArgs e)
         {
             if (isitunesOpen())
@@ -644,22 +617,11 @@ namespace iTunes
 
         public static void OnDraw(EventArgs args)
         {
-            // try {
             if (Config.Item("showtrack").GetValue<bool>())
             {
                 var font = new Font("Calibri", 12.5F);
                 Drawing.DrawText(Drawing.Width/2f - TextWidth(songname, font)/2f, 50, Color.White, songname);
-
-                //   if (songname == null)
-                //  {
-                //    Drawing.DrawText(Drawing.Width / 2f - TextWidth("null", font) / 2f, 50, Color.White, "null");
-                // } 
             }
-            //   catch {
-            // Console.WriteLine("Exception in Drawing");
-            // }
         }
     }
 }
-
-// }

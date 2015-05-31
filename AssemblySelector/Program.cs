@@ -53,7 +53,7 @@ namespace AssemblySelector
             return FindWindow(null, "LeagueSharp");
         }
 
-        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
+   
         private static void bringtofront()
         {
             ShowWindow(FindLeagueSharp(), 1);
