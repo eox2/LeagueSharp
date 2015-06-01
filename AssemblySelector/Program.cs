@@ -25,8 +25,8 @@ namespace AssemblySelector
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
         [return: MarshalAs(UnmanagedType.Bool)]
+
         private static void Main(string[] args)
         {
             Leaguesharpicon = loadleaguesharp();

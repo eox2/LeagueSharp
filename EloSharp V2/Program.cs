@@ -11,6 +11,7 @@ using SharpDX.Direct3D9;
 using Color2 = SharpDX.Color;
 using Font = SharpDX.Direct3D9.Font;
 using System.Timers;
+using System.Security.Permissions;
 
 namespace EloSharp_V2
 {
@@ -109,6 +110,7 @@ namespace EloSharp_V2
             Performlookup();
         }
 
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static void Performlookup()
         {
             try

@@ -71,10 +71,10 @@ namespace SephCassiopeia
 
             InitializeSpells();
 
-          
+
             new CommonAutoLevel(skillorder);
-            
-            
+
+
             AntiGapcloser.OnEnemyGapcloser += OnGapClose;
 
             Interrupter2.OnInterruptableTarget += OnInterruptableTarget;
@@ -88,7 +88,7 @@ namespace SephCassiopeia
 
         #endregion
 
-        #endregion
+    #endregion
 
         #region BeforeAuto
 
@@ -96,9 +96,9 @@ namespace SephCassiopeia
         {
             if (!CassioUtils.Active("Combo.Useauto") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
-                    args.Process = false;
-                    return;
-                
+                args.Process = false;
+                return;
+
             }
             if (CassioUtils.Active("Combo.Disableautoifspellsready") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
@@ -110,8 +110,8 @@ namespace SephCassiopeia
             }
             if (!CassioUtils.Active("Waveclear.Useauto") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
-                    args.Process = false;
-                    return;
+                args.Process = false;
+                return;
             }
             if (!CassioUtils.Active("Farm.Useauto") && (CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit))
             {
@@ -148,7 +148,7 @@ namespace SephCassiopeia
                         laste = Utils.GameTimeTickCount;
                     }
                 }
-                 else if (!CassioUtils.Active("Combo.useepoison"))
+                else if (!CassioUtils.Active("Combo.useepoison"))
                 {
                     if ((Utils.GameTimeTickCount - laste) > edelay)
                     {
@@ -157,7 +157,7 @@ namespace SephCassiopeia
                     }
                 }
             }
-            
+
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") &&
                 CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
@@ -266,9 +266,9 @@ namespace SephCassiopeia
             
             }   
              */
-           
-    }
-            
+
+        }
+
         #endregion
 
         #region Immobility Check
@@ -296,9 +296,9 @@ namespace SephCassiopeia
 
         #endregion
 
-          #region OnUpdate
+        #region OnUpdate
 
-            private static void OnUpdate(EventArgs args) {
+        private static void OnUpdate(EventArgs args) {
 
             if (Player.IsDead || Player.recalling())
             {
@@ -315,9 +315,9 @@ namespace SephCassiopeia
             {
                 Harass(target);
             }
- 
+
             var Orbwalkmode = CassiopeiaMenu.Orbwalker.ActiveMode;
-            
+
             switch (Orbwalkmode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -340,17 +340,17 @@ namespace SephCassiopeia
 
         #endregion
 
-            #region Recallcheck
-            public static bool recalling(this Obj_AI_Hero unit)
-            {
-                return unit.Buffs.Any(buff => buff.Name.ToLower().Contains("recall") && buff.Name != "MasteryImprovedRecallBuff");
-            }
-            #endregion Recallcheck
+        #region Recallcheck
+        public static bool recalling(this Obj_AI_Hero unit)
+        {
+            return unit.Buffs.Any(buff => buff.Name.ToLower().Contains("recall") && buff.Name != "MasteryImprovedRecallBuff");
+        }
+        #endregion Recallcheck
 
-            #region Combo
+        #region Combo
 
-          private static void Combo(Obj_AI_Hero target) 
-          {
+        private static void Combo(Obj_AI_Hero target)
+        {
             if (Spells[SpellSlot.Q].IsReady() && CassioUtils.Active("Combo.UseQ"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
@@ -385,7 +385,7 @@ namespace SephCassiopeia
                         laste = Utils.GameTimeTickCount;
                     }
                 }
-      
+
             }
             /*
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR"))
@@ -401,7 +401,7 @@ namespace SephCassiopeia
                     }
                 }
              * */
-            }
+        }
 
         #endregion
 
@@ -503,7 +503,7 @@ namespace SephCassiopeia
                 }
             }
         }
-    #endregion Waveclear
+        #endregion Waveclear
 
 
         #region MixedModeLogic
@@ -601,8 +601,8 @@ namespace SephCassiopeia
                     }
                 }
             }
-            }
-        
+        }
+
         #endregion
 
         #region KillSteal
@@ -660,25 +660,25 @@ namespace SephCassiopeia
                 Obj_AI_Hero etarget =
                     targets.Where(x => x.Distance(Player.Position) < Spells[SpellSlot.E].Range)
                     .MinOrDefault(x => x.Health);
-                    if (etarget != null)
+                if (etarget != null)
+                {
+                    var edmg = Player.GetSpellDamage(etarget, SpellSlot.E);
+                    if (etarget.Health < edmg)
                     {
-                            var edmg = Player.GetSpellDamage(etarget, SpellSlot.E);
-                            if (etarget.Health < edmg)
-                            {
-                                if ((Utils.GameTimeTickCount - laste) > edelay)
-                                {
-                                    Spells[SpellSlot.E].Cast(etarget);
-                                    laste = Utils.GameTimeTickCount;
-                                }
-                            }
+                        if ((Utils.GameTimeTickCount - laste) > edelay)
+                        {
+                            Spells[SpellSlot.E].Cast(etarget);
+                            laste = Utils.GameTimeTickCount;
                         }
+                    }
                 }
-            
+            }
+
 
 
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Killsteal.UseR"))
             {
-           
+
                 var targ = HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Spells[SpellSlot.R].Range - 200 && x.Health < Player.GetSpellDamage(x, SpellSlot.R) && !x.IsZombie && !x.IsInvulnerable);
 
                 if (targ != null)
@@ -693,14 +693,14 @@ namespace SephCassiopeia
 
             if (Spells[IgniteSlot].IsReady() && CassioUtils.Active("Killsteal.UseIgnite"))
             {
-               var targ =
-                    HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget() &&
-                            Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Spells[IgniteSlot].Range && x.Health < (Player.GetSummonerSpellDamage(x, Damage.SummonerSpell.Ignite)));
+                var targ =
+                     HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget() &&
+                             Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Spells[IgniteSlot].Range && x.Health < (Player.GetSummonerSpellDamage(x, Damage.SummonerSpell.Ignite)));
                 if (targ != null)
                 {
                     Spells[IgniteSlot].Cast(targ);
                 }
-              
+
             }
         }
         #endregion KillSteal
@@ -712,7 +712,7 @@ namespace SephCassiopeia
         {
             return target.HasBuffOfType(BuffType.Poison);
         }
-        #endregion 
+        #endregion
 
         #region Killable
 
@@ -755,7 +755,7 @@ namespace SephCassiopeia
             }
             return totaldmgavailable > target.Health;
         }
-        #endregion 
+        #endregion
 
 
         #region AntiGapcloser
@@ -841,9 +841,9 @@ namespace SephCassiopeia
         #endregion
 
     }
-   }
+}
 
 
 
-    
+
 

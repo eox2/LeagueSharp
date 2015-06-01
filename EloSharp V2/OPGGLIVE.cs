@@ -41,7 +41,7 @@ namespace EloSharp_V2
             Getinfo.Headers = WHC;
             WHC.Add("Accept-Language: en-US,en;q=0.8"); // Don't want any korean shit
             String source = Getinfo.DownloadString(Misc.getregionurl() + "summoner/ajax/spectator/userName=" + name + "&force=true");
-            System.IO.File.WriteAllText(Path.Combine(LeagueSharp.Common.Config.AppDataDirectory, "webpage.txt"), Misc.RemoveSpaces(source)); // Testing purposes
+           // System.IO.File.WriteAllText(Path.Combine(LeagueSharp.Common.Config.AppDataDirectory, "webpage.txt"), Misc.RemoveSpaces(source)); // Testing purposes
             ParseIt(source);
         }
 

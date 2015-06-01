@@ -82,7 +82,7 @@ namespace SephCassiopeia
             Interrupter.AddItem(new MenuItem("Interrupter.AntiGapClose", "AntiGapClosers").SetValue(true));
             Interrupter.AddItem(new MenuItem("Interrupter.AG.UseR", "AntiGapClose with R").SetValue(true));
             Config.AddSubMenu(Interrupter);
-            
+
             Menu Blist = new Menu("BlackList", "BlackList", false);
             foreach (var hero in HeroManager.Enemies)
             {

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.22823.1
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephElise", "SephElise\SephElise.csproj", "{36D5B533-9C99-4EB5-8A07-31C0D5BBA38A}"
 EndProject
@@ -36,6 +36,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephCassiopeia", "SephCassiopeia\SephCassiopeia.csproj", "{C422B64C-826F-44BF-B02C-08DF3CC7CB20}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkinsSharp", "SkinSharp\SkinsSharp.csproj", "{BE063022-17CD-4B73-A719-1982718F452D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WatIsScript", "WatIsScript\WatIsScript.csproj", "{FBE2ACE2-119F-48A7-ACFE-7D59E4268D5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -107,6 +109,10 @@ Global
 		{BE063022-17CD-4B73-A719-1982718F452D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE063022-17CD-4B73-A719-1982718F452D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE063022-17CD-4B73-A719-1982718F452D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBE2ACE2-119F-48A7-ACFE-7D59E4268D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBE2ACE2-119F-48A7-ACFE-7D59E4268D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBE2ACE2-119F-48A7-ACFE-7D59E4268D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBE2ACE2-119F-48A7-ACFE-7D59E4268D5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

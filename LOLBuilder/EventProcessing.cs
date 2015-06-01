@@ -4,6 +4,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using LeagueSharp;
 using LeagueSharp.Common;
+using System.Security.Permissions;
 
 namespace LolBuilder
 {
@@ -29,6 +30,7 @@ namespace LolBuilder
             main.Start();
         }
 
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void ProBuilds(string cname)
         {
             BuildData.BuildsList = new List<BuildData.BuildInfo>();
