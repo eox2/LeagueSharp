@@ -215,7 +215,9 @@ namespace EloSharp_V2
             }
             if (!File.Exists(LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt"))
             {
+                Console.WriteLine("Creating elosharp.txt because first use");
                 File.WriteAllText(LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
+                Performlookup();
             }
         }
 
@@ -376,7 +378,6 @@ namespace EloSharp_V2
                 {
                     foreach (Lolnexus.Infoloading infoloading in Lolnexus.Ranksloading.ToList())
                     {
-                        Console.WriteLine(infoloading.Name);
                         int indexof = 0;
                         indexof = Lolnexus.Ranksloading.IndexOf(infoloading);
                         bool isTop = indexof < 5;
