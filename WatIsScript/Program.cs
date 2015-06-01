@@ -39,17 +39,17 @@ namespace WatIsScript
             antiswitchenabled.Permashow();
 
 
-            menu.AddItem(new MenuItem("mindelay", "Minimum Delay between switching targets").SetValue(new Slider(0, 500, 3000)));
+            menu.AddItem(new MenuItem("mindelay", "Minimum Delay between switching targets").SetValue(new Slider(500, 0, 3000)));
 
             var spellssubmenu = new Menu("Enabled Spells", "spells");
-            spellssubmenu.AddItem(new MenuItem("Spells.Q", "Q"));
-            menu.AddItem(new MenuItem("Qdelay", "Q delay").SetValue(new Slider(0, 500, 3000)));
-            spellssubmenu.AddItem(new MenuItem("Spells.W", "W"));
-            menu.AddItem(new MenuItem("Wdelay", "W delay").SetValue(new Slider(0, 500, 3000)));
-            spellssubmenu.AddItem(new MenuItem("Spells.E", "E"));
-            menu.AddItem(new MenuItem("Edelay", "E delay").SetValue(new Slider(0, 500, 3000)));
-            spellssubmenu.AddItem(new MenuItem("Spells.R", "R"));
-            menu.AddItem(new MenuItem("Rdelay", "R delay").SetValue(new Slider(0, 500, 3000)));
+            spellssubmenu.AddItem(new MenuItem("Spells.Q", "Q").SetValue(true));
+            menu.AddItem(new MenuItem("Qdelay", "Q delay").SetValue(new Slider(500, 0, 1500)));
+            spellssubmenu.AddItem(new MenuItem("Spells.W", "W").SetValue(true));
+            menu.AddItem(new MenuItem("Wdelay", "W delay").SetValue(new Slider(500, 0, 1500)));
+            spellssubmenu.AddItem(new MenuItem("Spells.E", "E").SetValue(true));
+            menu.AddItem(new MenuItem("Edelay", "E delay").SetValue(new Slider(500, 0, 1500)));
+            spellssubmenu.AddItem(new MenuItem("Spells.R", "R").SetValue(true));
+            menu.AddItem(new MenuItem("Rdelay", "R delay").SetValue(new Slider(500, 0, 1500)));
 
             menu.AddSubMenu(spellssubmenu);
 

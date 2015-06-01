@@ -55,6 +55,8 @@ namespace EloSharp_V2
         {
             Console.WriteLine("Elosharp V2 injected");
 
+            CustomEvents.Game.OnGameLoad += Setup;
+
             PrepareDrawing();
 
             Misc.MenuAttach(Misc.Config);
@@ -71,7 +73,6 @@ namespace EloSharp_V2
             else
             {
                 Console.WriteLine("Elosharp.txt not found. Waiting for game to load to setup.");
-                CustomEvents.Game.OnGameLoad += Setup;
             }
 
             if (Misc.Validregion() && (nameofplayer != ""))
@@ -199,7 +200,6 @@ namespace EloSharp_V2
 
         private static void Setup(EventArgs args)
         {
-
             if (File.Exists(Config.AppDataDirectory + "\\elosharp.txt") &&
                 Misc.Config.Item("autoupdate").GetValue<bool>())
             {

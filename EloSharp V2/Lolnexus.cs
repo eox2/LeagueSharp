@@ -7,6 +7,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using Color2 = SharpDX.Color;
+using System.IO;
 
 namespace EloSharp_V2
 {
@@ -56,7 +57,8 @@ namespace EloSharp_V2
                 //Get raw information 
                 string htmlcode =
                     new WebClient().DownloadString("http://www.lolnexus.com/ajax/get-game-info/" + region + ".json?name=" + name);
-               // System.IO.File.WriteAllText(@"C:\Users\Laptop\Desktop\lolnexus.txt", htmlcode); // Testing purposes
+
+               // File.WriteAllText(LeagueSharp.Common.Config.AppDataDirectory + "\\lolnexusdata.txt", htmlcode);
                 //Extract information 
                 foreach (
                     Match playerregex in
