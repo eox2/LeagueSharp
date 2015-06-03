@@ -364,6 +364,7 @@ namespace EloSharp_V2
         }
 
 
+
         private static Render.Sprite loadbackground()
         {
             _posbackground = GetScaledVector(_posbackground, _scalebackground);
@@ -388,15 +389,17 @@ namespace EloSharp_V2
         {
             try
             {
+                var screenheight = Drawing.Height;
+                var screenwidth = Drawing.Width;
+
                 if (Lolnexus.Ranksloading != null && Misc.getsetwebsite() == "lolnexus")
                 {
                     foreach (Lolnexus.Infoloading infoloading in Lolnexus.Ranksloading)
                     {
+                        Console.WriteLine("Width x Height" + Drawing.Width + "x" + Drawing.Height);
                         int indexof = 0;
                         indexof = Lolnexus.Ranksloading.IndexOf(infoloading);
                         bool isTop = indexof < 5;
-                        int ystart = isTop ? 15 : 411;
-                        int xformula = isTop ? 210 + (indexof * 200) : 210 + ((indexof - 5) * 200);
 
                         /*
                         if (Misc.Config.Item("drawicons").GetValue<bool>())
@@ -632,13 +635,13 @@ namespace EloSharp_V2
         }
 
 
-        private static Render.Text RenderText(string text, bool isTop, int indexof, int toffset, Color2 color)
+        private static Render.Text RenderText(string text, bool isTop, int indexof, double toffset, Color2 color)
         {
-            int ystart = isTop ? 15 + toffset : 411 + toffset;
+            double ystart = isTop ? 15 / 768 * Drawing.Height + (toffset / 768 * Drawing.Height) : 411 / 768 * Drawing.Height + (toffset / 768 * Drawing.Height);
             const int size = 20;
-            int xformula = isTop ? 210 + (indexof * 200) : 210 + ((indexof - 5) * 200);
-            var texty = new Render.Text(text, xformula, ystart, size, color);
-
+            double xformula = isTop ? (210f / 1366) * Drawing.Width + ((indexof * 200 / 1366) * Drawing.Width) : 210 / 1366 * Drawing.Width + ((indexof - 5) * 200 / 1366 * Drawing.Width);
+            
+            var texty = new Render.Text(text, (int) xformula, (int) ystart, size, color);
 
             texty.VisibleCondition = sender => (!disabletext && !Misc.Config.Item("OnlyKeyShow").GetValue<bool>() || Misc.Config.Item("ShowKey").GetValue<KeyBind>().Active && (Game.Mode != GameMode.Running || !Misc.Config.Item("notingame").GetValue<bool>()));
             
