@@ -51,7 +51,7 @@ namespace EloSharp_V2
         private static bool delaying;
 
 
-     
+       [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void Main(string[] args)
         {
             Console.WriteLine("Elosharp V2 injected");
@@ -86,9 +86,10 @@ namespace EloSharp_V2
                     try
                     {
                         Console.WriteLine("performing instant lookup");
-                        Performlookup();
-                        delaying = false;
-                        Game_OnGameLoad(new EventArgs());
+                            Performlookup();
+                            delaying = false;
+                            Game_OnGameLoad(new EventArgs());
+        
          
                     }
                     catch (Exception e)
@@ -108,6 +109,7 @@ namespace EloSharp_V2
             }
         }
 
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         static void TriggerLookup(object sender, ElapsedEventArgs e) 
         {
             Performlookup();
@@ -178,7 +180,12 @@ namespace EloSharp_V2
         {
 
             Console.WriteLine("<<EloSharp V2 Loaded>> by Seph.");
-            
+
+            if (Timer != null)
+            {
+                Timer.Elapsed -= new ElapsedEventHandler(TriggerLookup);
+                Timer.Enabled = false;
+            }
 
             string setwebsite = Misc.getsetwebsite().ToLower();
 
@@ -193,10 +200,12 @@ namespace EloSharp_V2
 
                 return;
             }
-             
-            SubEvents();
 
-            GetHeroHandles(setwebsite);
+            if (Lolnexus.Ranksloading.Any() || LolSkill.Ranksloading.Any() || OPGGLIVE.Ranks.Any())
+            {
+                SubEvents();
+                GetHeroHandles(setwebsite);
+            }
         }
 
 
@@ -337,20 +346,17 @@ namespace EloSharp_V2
 
         private static void Game_OnWndProc(WndEventArgs args)
         {
-  
-            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonload())
+            if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonload() && !Misc.Config.Item("OnlyKeyShow").GetValue<bool>())
             {
-                if (background.Visible)
+                if (!disabletext)
                 {
                     // Game.PrintChat("Disabling");
-                    background.Visible = false;
                     disabletext = true;
                 }
 
-                else if (!background.Visible)
+                else if (disabletext)
                 {
                     // Game.PrintChat("Showing now");
-                    background.Visible = true;
                     disabletext = false;
                 }
 
@@ -368,9 +374,10 @@ namespace EloSharp_V2
                 Scale = _scalebackground,
                 Color = new ColorBGRA(255f, 255f, 255f, visibility)
             };
+
             loadbackground.Position = GetPosition(loadbackground.Width, 20);
 
-            loadbackground.VisibleCondition = sender => (!disabletext && !Misc.Config.Item("OnlyKeyShow").GetValue<bool>() || Misc.Config.Item("ShowKey").GetValue<KeyBind>().Active);
+            loadbackground.VisibleCondition = sender => (!disabletext && !Misc.Config.Item("OnlyKeyShow").GetValue<bool>() || Misc.Config.Item("ShowKey").GetValue<KeyBind>().Active && (Game.Mode != GameMode.Running || !Misc.Config.Item("notingame").GetValue<bool>()));
 
             loadbackground.Add(0);
             return loadbackground;
@@ -631,9 +638,9 @@ namespace EloSharp_V2
             const int size = 20;
             int xformula = isTop ? 210 + (indexof * 200) : 210 + ((indexof - 5) * 200);
             var texty = new Render.Text(text, xformula, ystart, size, color);
-                        
 
-            texty.VisibleCondition = sender => (!disabletext && !Misc.Config.Item("OnlyKeyShow").GetValue<bool>() || Misc.Config.Item("ShowKey").GetValue<KeyBind>().Active);
+
+            texty.VisibleCondition = sender => (!disabletext && !Misc.Config.Item("OnlyKeyShow").GetValue<bool>() || Misc.Config.Item("ShowKey").GetValue<KeyBind>().Active && (Game.Mode != GameMode.Running || !Misc.Config.Item("notingame").GetValue<bool>()));
             
             texty.Add(1);
             return texty;

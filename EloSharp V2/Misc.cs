@@ -54,6 +54,7 @@ namespace EloSharp_V2
                 .SetValue(true);
             Config.SubMenu("loadingscreen").AddItem(new MenuItem("OnlyKeyShow", "Only Show If Keypressed").SetValue(false));
             Config.SubMenu("loadingscreen").AddItem(new MenuItem("ShowKey", "Key To Show Info").SetValue(new KeyBind(16, KeyBindType.Press)));
+            Config.SubMenu("loadingscreen").AddItem(new MenuItem("notingame", "Disable ingame").SetValue(false));
 
             Config.SubMenu("loadingscreen")
                 .AddItem(new MenuItem("opacity", "Background").SetValue(new Slider(58, 0, 100)));
