@@ -38,22 +38,25 @@ namespace EloSharp_V2
             Config.SubMenu("General").AddItem(new MenuItem("enablewinratio", "Draw Win Ratio").SetValue(false));
             Config.SubMenu("General").AddItem(new MenuItem("enablekdaratio", "Draw KDA Ratio").SetValue(false));
             Config.SubMenu("General").AddItem(new MenuItem("drawicons", "Draw Icons").SetValue(false));
-            Config.SubMenu("General").AddItem(new MenuItem("printranks", "Print at the beginning").SetValue(true));
+
 
 
             Config.AddItem(new MenuItem("showunknown", "Show Unknown").SetValue(true));
 
             Config.AddItem(new MenuItem("enabledebug", "Enable Debug").SetValue(false));
             Config.AddItem(new MenuItem("autoupdate", "Auto change name").SetValue(true));
+
             Config.AddItem(new MenuItem("choosewebsite", "Choose Website").SetValue(new StringList(new[] { "LolNexus", "OPGG Live", "Old EloSharp" }, 0)));
             SetWebsite = Config.Item("choosewebsite").GetValue<StringList>().SelectedIndex;
             Config.AddSubMenu(new Menu("Loading Screen", "loadingscreen"));
             Config.SubMenu("loadingscreen")
                 .AddItem(new MenuItem("enablechampdrawings", "Enable drawings"))
                 .SetValue(true);
+            Config.SubMenu("loadingscreen").AddItem(new MenuItem("OnlyKeyShow", "Only Show If Keypressed").SetValue(false));
+            Config.SubMenu("loadingscreen").AddItem(new MenuItem("ShowKey", "Key To Show Info").SetValue(new KeyBind(16, KeyBindType.Press)));
+
             Config.SubMenu("loadingscreen")
                 .AddItem(new MenuItem("opacity", "Background").SetValue(new Slider(58, 0, 100)));
-
 
             Config.AddToMainMenu();
         }

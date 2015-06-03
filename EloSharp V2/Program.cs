@@ -12,6 +12,7 @@ using Color2 = SharpDX.Color;
 using Font = SharpDX.Direct3D9.Font;
 using System.Timers;
 using System.Security.Permissions;
+using System.Web;
 
 namespace EloSharp_V2
 {
@@ -69,6 +70,7 @@ namespace EloSharp_V2
             if (File.Exists(Config.AppDataDirectory + "\\elosharp.txt"))
             {
                 nameofplayer = File.ReadAllText(Config.AppDataDirectory + "\\elosharp.txt").ToLower();
+                nameofplayer = HttpUtility.UrlEncode(nameofplayer);
             }
             else
             {
@@ -203,13 +205,14 @@ namespace EloSharp_V2
             if (File.Exists(Config.AppDataDirectory + "\\elosharp.txt") &&
                 Misc.Config.Item("autoupdate").GetValue<bool>())
             {
-                string getplayername =
-                    File.ReadAllText(Config.AppDataDirectory + "\\elosharp.txt");
+                string getplayername = File.ReadAllText(Config.AppDataDirectory + "\\elosharp.txt");
                 if (getplayername != ObjectManager.Player.Name)
                 {
-                    Console.WriteLine("[EloSharp] has set the default name as the default user for faster lookups!");
+                    Console.WriteLine("[EloSharp] has set the default name as the current user for faster lookups!");
                     File.WriteAllText(
                         LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
+                    nameofplayer = HttpUtility.UrlEncode(ObjectManager.Player.Name);
+                    Performlookup();
                 }
                 return;
             }
@@ -217,6 +220,7 @@ namespace EloSharp_V2
             {
                 Console.WriteLine("Creating elosharp.txt because first use");
                 File.WriteAllText(LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
+                nameofplayer = HttpUtility.UrlEncode(ObjectManager.Player.Name);
                 Performlookup();
             }
         }
@@ -333,6 +337,7 @@ namespace EloSharp_V2
 
         private static void Game_OnWndProc(WndEventArgs args)
         {
+  
             if ((args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN) && mouseonload())
             {
                 if (background.Visible)
@@ -364,7 +369,9 @@ namespace EloSharp_V2
                 Color = new ColorBGRA(255f, 255f, 255f, visibility)
             };
             loadbackground.Position = GetPosition(loadbackground.Width, 20);
-            loadbackground.Show();
+
+            loadbackground.VisibleCondition = sender => (!disabletext && !Misc.Config.Item("OnlyKeyShow").GetValue<bool>() || Misc.Config.Item("ShowKey").GetValue<KeyBind>().Active);
+
             loadbackground.Add(0);
             return loadbackground;
         }
@@ -376,7 +383,7 @@ namespace EloSharp_V2
             {
                 if (Lolnexus.Ranksloading != null && Misc.getsetwebsite() == "lolnexus")
                 {
-                    foreach (Lolnexus.Infoloading infoloading in Lolnexus.Ranksloading.ToList())
+                    foreach (Lolnexus.Infoloading infoloading in Lolnexus.Ranksloading)
                     {
                         int indexof = 0;
                         indexof = Lolnexus.Ranksloading.IndexOf(infoloading);
@@ -424,7 +431,7 @@ namespace EloSharp_V2
 
                 if (LolSkill.Ranksloading != null && Misc.getsetwebsite() == "lolskill")
                 {
-                    foreach (LolSkill.Infoloading infoloading in LolSkill.Ranksloading.ToList())
+                    foreach (LolSkill.Infoloading infoloading in LolSkill.Ranksloading)
                     {
                         int indexof = 0;
                         indexof = LolSkill.Ranksloading.IndexOf(infoloading);
@@ -479,6 +486,7 @@ namespace EloSharp_V2
                       //  Drawsprite(
                          //   hero.champsprite, Newspriteposition(xformula, ystart),
                            // Newspriteposition(xformula - 20, ystart + 5));
+
 
                         RenderText(
                             Misc.FormatString(hero.Name) + " ", isTop, indexof, 15,
@@ -623,7 +631,10 @@ namespace EloSharp_V2
             const int size = 20;
             int xformula = isTop ? 210 + (indexof * 200) : 210 + ((indexof - 5) * 200);
             var texty = new Render.Text(text, xformula, ystart, size, color);
-            texty.VisibleCondition = sender => !disabletext;
+                        
+
+            texty.VisibleCondition = sender => (!disabletext && !Misc.Config.Item("OnlyKeyShow").GetValue<bool>() || Misc.Config.Item("ShowKey").GetValue<KeyBind>().Active);
+            
             texty.Add(1);
             return texty;
         }
