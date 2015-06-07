@@ -49,12 +49,6 @@
     <Reference Include="SharpDX">
       <HintPath>C:\Users\Laptop\Desktop\L#\System\SharpDX.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.Toolkit">
-      <HintPath>C:\Users\Laptop\Desktop\L#\System\SharpDX.Toolkit.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Toolkit.Graphics">
-      <HintPath>C:\Users\Laptop\Desktop\L#\System\SharpDX.Toolkit.Graphics.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />

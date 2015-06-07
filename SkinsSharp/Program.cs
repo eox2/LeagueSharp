@@ -9,12 +9,12 @@ namespace SkinsSharp
     {
         private static Menu menu;
         private static Dictionary<String, int> ChampSkins = new Dictionary<String, int>();
+        private static Dictionary<Obj_AI_Hero, bool> WasDead = new Dictionary<Obj_AI_Hero, bool>();
 
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += GameLoad;
         }
-
 
         static void GameLoad(EventArgs argss)
         {
@@ -27,10 +27,13 @@ namespace SkinsSharp
             {
                 foreach (var hero in HeroManager.AllHeroes)
                 {
-                    if (!menu.Item("forall").GetValue<bool>() && hero.Name != ObjectManager.Player.Name)
+                   
+                    if (!menu.Item("forall").GetValue<bool>() && hero.Name != ObjectManager.Player.Name || ChampSkins.ContainsKey(hero.Name))
                     {
                         continue;
                     }
+
+                    WasDead.Add(hero, false);
 
                     var currenthero = hero;
 
@@ -63,7 +66,32 @@ namespace SkinsSharp
                 Console.Write(e + " " + e.StackTrace);
             }
             menu.AddToMainMenu();
-            GameObject.OnFloatPropertyChange += FloatPropertyChange;
+            Game.OnUpdate += RenewSkins;
+            //GameObject.OnFloatPropertyChange += FloatPropertyChange;
+        }
+
+
+        static void RenewSkins(EventArgs args)
+        {
+            foreach (var hero in HeroManager.AllHeroes)
+            {
+                if (!menu.Item("forall").GetValue<bool>() && !hero.IsMe)
+                {
+                    return;
+                }
+                if (hero.IsDead && !WasDead[hero])
+                {
+                    Console.WriteLine("just set to dead " + hero.Name);
+                    WasDead[hero] = true;
+                    return;
+                }
+                else if (!hero.IsDead && WasDead[hero])
+                {
+                    Console.WriteLine("just renewd" + hero.ChampionName);
+                    hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
+                    WasDead[hero] = false;
+                }
+            }
         }
 
 
