@@ -81,13 +81,11 @@ namespace SkinsSharp
                 }
                 if (hero.IsDead && !WasDead[hero])
                 {
-                    Console.WriteLine("just set to dead " + hero.Name);
                     WasDead[hero] = true;
                     return;
                 }
                 else if (!hero.IsDead && WasDead[hero])
                 {
-                    Console.WriteLine("just renewd" + hero.ChampionName);
                     hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
                     WasDead[hero] = false;
                 }
