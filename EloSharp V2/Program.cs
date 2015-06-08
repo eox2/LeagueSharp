@@ -51,7 +51,7 @@ namespace EloSharp_V2
         private static bool delaying;
 
 
-       [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static void Main(string[] args)
         {
             Console.WriteLine("Elosharp V2 injected");
@@ -86,11 +86,11 @@ namespace EloSharp_V2
                     try
                     {
                         Console.WriteLine("performing instant lookup");
-                            Performlookup();
-                            delaying = false;
-                            Game_OnGameLoad(new EventArgs());
-        
-         
+                        Performlookup();
+                        delaying = false;
+                        Game_OnGameLoad(new EventArgs());
+
+
                     }
                     catch (Exception e)
                     {
@@ -110,7 +110,7 @@ namespace EloSharp_V2
         }
 
         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
-        static void TriggerLookup(object sender, ElapsedEventArgs e) 
+        static void TriggerLookup(object sender, ElapsedEventArgs e)
         {
             Performlookup();
         }
@@ -189,7 +189,7 @@ namespace EloSharp_V2
 
             string setwebsite = Misc.getsetwebsite().ToLower();
 
-            
+
             if (setwebsite == "opgg2")
             {
                 new System.Threading.Thread(() =>
@@ -215,13 +215,17 @@ namespace EloSharp_V2
                 Misc.Config.Item("autoupdate").GetValue<bool>())
             {
                 string getplayername = File.ReadAllText(Config.AppDataDirectory + "\\elosharp.txt");
-                if (getplayername != ObjectManager.Player.Name)
+                if (getplayername.ToLower() != ObjectManager.Player.Name.ToLower())
                 {
                     Console.WriteLine("[EloSharp] has set the default name as the current user for faster lookups!");
                     File.WriteAllText(
                         LeagueSharp.Common.Config.AppDataDirectory + "\\elosharp.txt", ObjectManager.Player.Name);
                     nameofplayer = HttpUtility.UrlEncode(ObjectManager.Player.Name);
-                    Performlookup();
+                    if (!Lolnexus.Ranksloading.Any() || !OPGGLIVE.Ranks.Any())
+                    {
+                        Performlookup();
+                    }
+
                 }
                 return;
             }
@@ -494,9 +498,9 @@ namespace EloSharp_V2
                         int ystart = isTop ? 15 : 411;
                         int xformula = isTop ? 210 + (indexof * 200) : 210 + ((indexof - 5) * 200);
 
-                      //  Drawsprite(
-                         //   hero.champsprite, Newspriteposition(xformula, ystart),
-                           // Newspriteposition(xformula - 20, ystart + 5));
+                        //  Drawsprite(
+                        //   hero.champsprite, Newspriteposition(xformula, ystart),
+                        // Newspriteposition(xformula - 20, ystart + 5));
 
 
                         RenderText(
@@ -571,7 +575,7 @@ namespace EloSharp_V2
                         {
                             Text.DrawText(null, infoloading.soloqrank, startX + (15 - infoloading.soloqrank.Length * 4) / 2, startY, Misc.ColorRank(infoloading.soloqrank));
                         }
-        
+
                         if (Misc.Config.Item("enablekdaratio").GetValue<bool>())
                         {
                             Text.DrawText(
@@ -638,13 +642,13 @@ namespace EloSharp_V2
 
         private static Render.Text RenderText(string text, bool isTop, int indexof, double toffset, Color2 color)
         {
-            int ystart = isTop ? (int) ((15f / 768f) * Drawing.Height + (toffset / 768f * Drawing.Height)) : (int) ((411f / 768f) * Drawing.Height + (toffset / 768f * Drawing.Height));
-            int xformula = isTop ? (int) ((210f / 1366f) * Drawing.Width + ((indexof * 200f / 1366f) * Drawing.Width)) : (int) ((210f / 1366f) * Drawing.Width + ((indexof - 5) * 200f / 1366f * Drawing.Width));
+            int ystart = isTop ? (int)((15f / 768f) * Drawing.Height + (toffset / 768f * Drawing.Height)) : (int)((411f / 768f) * Drawing.Height + (toffset / 768f * Drawing.Height));
+            int xformula = isTop ? (int)((210f / 1366f) * Drawing.Width + ((indexof * 200f / 1366f) * Drawing.Width)) : (int)((210f / 1366f) * Drawing.Width + ((indexof - 5) * 200f / 1366f * Drawing.Width));
             const int size = 20;
-            var texty = new Render.Text(text, xformula,  ystart, size, color);
+            var texty = new Render.Text(text, xformula, ystart, size, color);
 
             texty.VisibleCondition = sender => (!disabletext && !Misc.Config.Item("OnlyKeyShow").GetValue<bool>() || Misc.Config.Item("ShowKey").GetValue<KeyBind>().Active && (Game.Mode != GameMode.Running || !Misc.Config.Item("notingame").GetValue<bool>()));
-            
+
             texty.Add(1);
             return texty;
         }
