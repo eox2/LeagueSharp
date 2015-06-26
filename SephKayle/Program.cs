@@ -91,7 +91,7 @@ namespace SephKayle
         static void OnGameLoad(EventArgs args)
         {
             Player = ObjectManager.Player;
-            if (Player.BaseSkinName != "Kayle")
+            if (Player.CharData.BaseSkinName != "Kayle")
             {
                 return;
             }
@@ -267,7 +267,7 @@ namespace SephKayle
                             .Where(
                                 h =>
                                     (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead && (bool) GetSettings("heal" + h.ChampionName, true) &&
-                                    h.HealthPercentage() <= (int) GetSettings("hpct" + h.ChampionName, false, true) && Player.Distance(h) <= R.Range).OrderByDescending(i => i == Player).ThenBy(i => i);
+                                    h.HealthPercent <= (int) GetSettings("hpct" + h.ChampionName, false, true) && Player.Distance(h) <= R.Range).OrderByDescending(i => i == Player).ThenBy(i => i);
                 
                 if (W.IsReady())
                 {
@@ -297,7 +297,7 @@ namespace SephKayle
                             h =>
                                 (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead &&
                                 (bool) GetSettings("ult" + h.ChampionName, true) &&
-                                h.HealthPercentage() <= (int) GetSettings("upct" + h.ChampionName, false, true) &&
+                                h.HealthPercent <= (int) GetSettings("upct" + h.ChampionName, false, true) &&
                                 Player.Distance(h) <= R.Range && Player.CountEnemiesInRange(500) > 0).OrderByDescending(i => i == Player).ThenBy(i => i);
 
                     if (R.IsReady())

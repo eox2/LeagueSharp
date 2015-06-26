@@ -77,7 +77,7 @@ namespace SkinsSharp
             {
                 if (!menu.Item("forall").GetValue<bool>() && !hero.IsMe)
                 {
-                    return;
+                    continue;
                 }
                 if (hero.IsDead && !WasDead[hero])
                 {

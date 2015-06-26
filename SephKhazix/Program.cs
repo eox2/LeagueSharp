@@ -42,7 +42,7 @@ namespace SephKhazix
             Player = ObjectManager.Player;
 
             
-            if (Player.BaseSkinName != ChampionName)
+            if (Player.CharData.BaseSkinName != ChampionName)
             {
                 return;
             }

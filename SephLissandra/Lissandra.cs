@@ -43,7 +43,7 @@ namespace SephLissandra
         static void OnLoad(EventArgs args)
         {
             Player = ObjectManager.Player;
-            if (Player.BaseSkinName != "Lissandra")
+            if (Player.CharData.BaseSkinName != "Lissandra")
             {
                 return;
             }
