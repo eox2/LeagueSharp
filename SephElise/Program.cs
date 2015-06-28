@@ -29,7 +29,7 @@ namespace SephElise
         {
 
             Player = ObjectManager.Player;
-            if (Player.CharData.BaseSkinName != ChampionName && Player.CharData.BaseSkinName != "elisespider")
+            if (Player.BaseSkinName != ChampionName && Player.BaseSkinName != "elisespider")
             {
                 return;
             }

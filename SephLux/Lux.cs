@@ -51,7 +51,7 @@ namespace SephLux
         {
             Player = ObjectManager.Player;
 
-            if (Player.CharData.BaseSkinName != "Lux")
+            if (Player.BaseSkinName != "Lux")
             {
                 return;
             }
