@@ -142,7 +142,7 @@ namespace LolBuilder
             Config.Item("leveler").ValueChanged += (s, e) =>
             {
                 AutoLevel.Enabled(e.GetNewValue<bool>());
-                Game.PrintChat("ProLeveler: " + e.GetNewValue<bool>());
+                Console.WriteLine("ProLeveler: " + e.GetNewValue<bool>());
                 if (e.GetNewValue<bool>())
                 {
                     var sequence = BuildData.SkillSequence;

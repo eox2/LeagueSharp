@@ -52,7 +52,7 @@ namespace SephCassiopeia
         {
             Spells[SpellSlot.Q].SetSkillshot(0.6f, 70f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             Spells[SpellSlot.W].SetSkillshot(0.5f, 275f, 2500f, false, SkillshotType.SkillshotCircle);
-            Spells[SpellSlot.R].SetSkillshot(0.3f, 150f, float.MaxValue, false, SkillshotType.SkillshotCone);
+            Spells[SpellSlot.R].SetSkillshot(0.3f, (float)(80 * Math.PI / 180), float.MaxValue, false, SkillshotType.SkillshotCone); //Credits to InjectionDev for Width Value
         }
 
         private static void CassMain(EventArgs args)
@@ -173,11 +173,13 @@ namespace SephCassiopeia
                         {
                             if (Spells[SpellSlot.R].WillHit(hero, pred.CastPosition, 0, CassioUtils.GetHitChance("Hitchance.R")))
                             {
+                                Console.WriteLine("will hit " + hero.Name);
                                 enemhitpred++;
-
+                                Console.WriteLine(enemhitpred + " " + enemfacingpred);
                                 if (hero.IsFacing(Player))
                                 {
                                     enemfacingpred++;
+                                    Console.WriteLine(enemhitpred + " " + enemfacingpred);
                                 }
                             }
                         }

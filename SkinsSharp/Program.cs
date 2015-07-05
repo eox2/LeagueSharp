@@ -16,6 +16,8 @@ namespace SkinsSharp
             CustomEvents.Game.OnGameLoad += GameLoad;
         }
 
+        private static List<Obj_AI_Hero> HeroList = new List<Obj_AI_Hero>();
+
         static void GameLoad(EventArgs argss)
         {
 
@@ -27,17 +29,20 @@ namespace SkinsSharp
             {
                 foreach (var hero in HeroManager.AllHeroes)
                 {
-                   
-                    if (!menu.Item("forall").GetValue<bool>() && hero.Name != ObjectManager.Player.Name || ChampSkins.ContainsKey(hero.Name))
+                    if (!menu.Item("forall").GetValue<bool>() && hero.Name != ObjectManager.Player.Name || hero.ChampionName.Equals("Ezreal"))
                     {
                         continue;
                     }
+
+                    HeroList.Add(hero);
 
                     WasDead.Add(hero, false);
 
                     var currenthero = hero;
 
                     var herosubmenu = new Menu(hero.ChampionName + " (" + hero.Name + ") ", hero.ChampionName);
+
+
                     var skinselect = herosubmenu.AddItem(
                             new MenuItem("skin." + hero.ChampionName, "Change Skin")
                                 .SetValue(
@@ -73,7 +78,7 @@ namespace SkinsSharp
 
         static void RenewSkins(EventArgs args)
         {
-            foreach (var hero in HeroManager.AllHeroes)
+            foreach (var hero in HeroList)
             {
                 if (!menu.Item("forall").GetValue<bool>() && !hero.IsMe)
                 {
@@ -82,9 +87,9 @@ namespace SkinsSharp
                 if (hero.IsDead && !WasDead[hero])
                 {
                     WasDead[hero] = true;
-                    return;
+                    continue;
                 }
-                else if (!hero.IsDead && WasDead[hero])
+                 if (!hero.IsDead && WasDead[hero])
                 {
                     hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
                     WasDead[hero] = false;
