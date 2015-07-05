@@ -173,13 +173,10 @@ namespace SephCassiopeia
                         {
                             if (Spells[SpellSlot.R].WillHit(hero, pred.CastPosition, 0, CassioUtils.GetHitChance("Hitchance.R")))
                             {
-                                Console.WriteLine("will hit " + hero.Name);
                                 enemhitpred++;
-                                Console.WriteLine(enemhitpred + " " + enemfacingpred);
                                 if (hero.IsFacing(Player))
                                 {
                                     enemfacingpred++;
-                                    Console.WriteLine(enemhitpred + " " + enemfacingpred);
                                 }
                             }
                         }
