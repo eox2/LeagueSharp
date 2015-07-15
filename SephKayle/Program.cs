@@ -133,19 +133,16 @@ namespace SephKayle
             get { return ObjectManager.Player.AttackRange > 400f; }
         }
 
-        private static Object GetSettings(string itemname, bool isbool = false, bool isslider = false)
+
+        private static bool GetBool(String itemname)
         {
-            if (isbool)
-            {
-                return Config.Item(itemname).GetValue<bool>();
-            }
-            if (isslider)
-            {
-                return Config.Item(itemname).GetValue<Slider>().Value;
-            }
-            return null;
+            return Config.Item(itemname).GetValue<bool>();
         }
 
+        private static int Getslider(String itemname)
+        {
+            return Config.Item(itemname).GetValue<Slider>().Value;
+        }
 
         private static void Combo()
         {
@@ -157,11 +154,11 @@ namespace SephKayle
             var qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var etarget = TargetSelector.GetTarget(incrange, TargetSelector.DamageType.Magical);
 
-            if ((bool) GetSettings("UseQ", true) && qtarget != null && Q.IsReady())
+            if (GetBool("UseQ") && qtarget != null && Q.IsReady())
             {
                 Q.Cast(qtarget);
             }
-            if ((bool) GetSettings("UseE", true) && etarget != null && E.IsReady() && !Eon)
+            if (GetBool("UseE") && etarget != null && E.IsReady() && !Eon)
             {
                 E.CastOnUnit(Player);
             }
@@ -178,7 +175,7 @@ namespace SephKayle
             }
             
 
-             List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
+            List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
             if (Config.Item("UseQwc").GetValue<bool>() && Q.IsReady())
             {
                 foreach (Obj_AI_Base minion in
@@ -214,26 +211,28 @@ namespace SephKayle
 
         static void HealUltTrigger(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+           // Console.WriteLine((int)GetSettings("upct" + Player.ChampionName, false, true) + " " + Player.HealthPercent);
             var target = args.Target as Obj_AI_Hero;
-            
+            var sendr = sender as Obj_AI_Hero;
             if (sender.IsAlly || (target == null) || !target.IsAlly || sender.IsMinion)
             {
                 return;
             }
-
                 var damage = Damage.GetAutoAttackDamage(sender, target);
-                float setvaluehealth = (int) GetSettings("hpct" + target.ChampionName, false, true);
-                float setvalueult = (int) GetSettings("hpct" + target.ChampionName, false, true);
-                if (W.IsReady() && (bool)GetSettings("heal" + target.ChampionName, true) && (target.HealthPercent <= setvaluehealth || (target.Health - damage) / target.MaxHealth <= setvaluehealth))
+                float setvaluehealth = Getslider("hpct" + target.ChampionName);
+                float setvalueult = Getslider("upct" + target.ChampionName);
+                var afterdmg = ((target.Health - damage) / (target.MaxHealth)) * 100f;
+                if (W.IsReady() && Player.Distance(target) <= W.Range && GetBool("heal" + target.ChampionName) && (target.HealthPercent <= setvaluehealth || (afterdmg <= setvaluehealth)))
                 {
-                   HealUltManager(true, false, target);
-                   return;
-                }
-
-                if (R.IsReady() && (bool)GetSettings("ult" + target.ChampionName, true) && (target.HealthPercent <= setvalueult || (target.Health - damage) / target.MaxHealth <= setvalueult))
+                  //Console.WriteLine("healing:: inc dmg" + damage + " setvalue " + //setvaluehealth + " hpct " + target.HealthPercent + " afterdmg " + afterdmg);
+                HealUltManager(true, false, target);
+            }
+            
+            if (R.IsReady() && Player.Distance(target) <= R.Range && GetBool("ult" + target.ChampionName) && (target.HealthPercent <= setvalueult || (afterdmg) <= setvalueult) && (sendr != null || target.HealthPercent < 5f))
                 {
-                  HealUltManager(false, true, target);
-                  return;
+                //Console.WriteLine("ulting:: inc dmg" + damage + " setvalue " + setvaluehealth //+ " hpct " + target.HealthPercent + " afterdmg " + afterdmg);
+                HealUltManager(false, true, target);
+                return;
                 }
             
         }
@@ -252,13 +251,13 @@ namespace SephKayle
                 return;
             }
 
-            if ((bool)GetSettings("Healingon", true) && !Config.Item("onlyhincdmg").GetValue<bool>())
+            if (GetBool("Healingon") && !GetBool("onlyhincdmg"))
             {
             var herolistheal = ObjectManager.Get<Obj_AI_Hero>()
                             .Where(
                                 h =>
-                                    (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead && (bool) GetSettings("heal" + h.ChampionName, true) &&
-                                    h.HealthPercent <= (int) GetSettings("hpct" + h.ChampionName, false, true) && Player.Distance(h) <= R.Range).OrderByDescending(i => i == Player).ThenBy(i => i);
+                                    (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead && GetBool("heal" + h.ChampionName) &&
+                                    h.HealthPercent <= Getslider("hpct" + h.ChampionName) && Player.Distance(h) <= R.Range).OrderByDescending(i => i == Player).ThenBy(i => i);
                 
                 if (W.IsReady())
                 {
@@ -280,15 +279,15 @@ namespace SephKayle
                 }
             }
 
-            if ((bool)GetSettings("Ultingon", true) && !Config.Item("onlyuincdmg").GetValue<bool>())
+            if (GetBool("Ultingon") && !GetBool("onlyuincdmg"))
                 {
-
+                    Console.WriteLine(Player.HealthPercent);
                     var herolist = ObjectManager.Get<Obj_AI_Hero>()
                         .Where(
                             h =>
                                 (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead &&
-                                (bool) GetSettings("ult" + h.ChampionName, true) &&
-                                h.HealthPercent <= (int) GetSettings("upct" + h.ChampionName, false, true) &&
+                                 GetBool("ult" + h.ChampionName) &&
+                                h.HealthPercent <= Getslider("upct" + h.ChampionName) &&
                                 Player.Distance(h) <= R.Range && Player.CountEnemiesInRange(500) > 0).OrderByDescending(i => i == Player).ThenBy(i => i);
 
                     if (R.IsReady())
@@ -402,7 +401,7 @@ namespace SephKayle
             }
 
             var Targ = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            if (Q.IsReady() && (bool) GetSettings("UseQH", true) && Player.Distance(Targ) <= Q.Range)
+            if (Q.IsReady() && GetBool("UseQH") && Player.Distance(Targ) <= Q.Range)
             {
                 Q.Cast(Targ);
             }
