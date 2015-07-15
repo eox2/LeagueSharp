@@ -214,35 +214,26 @@ namespace SephKayle
 
         static void HealUltTrigger(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            var target = args.Target;
+            var target = args.Target as Obj_AI_Hero;
             
-            if (sender.IsAlly || target.Type != GameObjectType.obj_AI_Hero || !target.IsAlly)
+            if (sender.IsAlly || (target == null) || !target.IsAlly || sender.IsMinion)
             {
                 return;
             }
 
-            var hero = GetHero(target.Name);
-            if (hero == null)
-            {
-                return;
-            }
-
-            if (sender.IsMinion)
-            {
-                return;}
-                var damage = Damage.GetAutoAttackDamage(sender, hero);
-                float setvaluehealth = (int) GetSettings("hpct" + hero.ChampionName, false, true);
-                float setvalueult = (int) GetSettings("hpct" + hero.ChampionName, false, true);
-                if (Config.Item("UseEwc").GetValue<bool>() && (hero.HealthPercent <= setvaluehealth || (hero.Health - damage) / hero.MaxHealth <= setvaluehealth))
+                var damage = Damage.GetAutoAttackDamage(sender, target);
+                float setvaluehealth = (int) GetSettings("hpct" + target.ChampionName, false, true);
+                float setvalueult = (int) GetSettings("hpct" + target.ChampionName, false, true);
+                if (W.IsReady() && (bool)GetSettings("heal" + target.ChampionName, true) && (target.HealthPercent <= setvaluehealth || (target.Health - damage) / target.MaxHealth <= setvaluehealth))
                 {
-                    HealUltManager(true, false, hero);
-                    return;
+                   HealUltManager(true, false, target);
+                   return;
                 }
 
-                if ((bool)GetSettings("ult" + hero.ChampionName, true) && (hero.HealthPercent <= setvalueult || (hero.Health - damage) / hero.MaxHealth <= setvalueult))
+                if (R.IsReady() && (bool)GetSettings("ult" + target.ChampionName, true) && (target.HealthPercent <= setvalueult || (target.Health - damage) / target.MaxHealth <= setvalueult))
                 {
-                    HealUltManager(false, true, hero);
-                    return;
+                  HealUltManager(false, true, target);
+                  return;
                 }
             
         }
