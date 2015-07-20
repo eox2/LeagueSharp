@@ -211,9 +211,10 @@ namespace SephKayle
 
         static void HealUltTrigger(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-           // Console.WriteLine((int)GetSettings("upct" + Player.ChampionName, false, true) + " " + Player.HealthPercent);
             var target = args.Target as Obj_AI_Hero;
-            var sendr = sender as Obj_AI_Hero;
+            var senderhero = sender as Obj_AI_Hero;
+            var senderturret = sender as Obj_AI_Turret;
+
             if (sender.IsAlly || (target == null) || !target.IsAlly || sender.IsMinion)
             {
                 return;
@@ -223,17 +224,15 @@ namespace SephKayle
                 float setvalueult = Getslider("upct" + target.ChampionName);
                 var afterdmg = ((target.Health - damage) / (target.MaxHealth)) * 100f;
                 if (W.IsReady() && Player.Distance(target) <= W.Range && GetBool("heal" + target.ChampionName) && (target.HealthPercent <= setvaluehealth || (afterdmg <= setvaluehealth)))
-                {
-                  //Console.WriteLine("healing:: inc dmg" + damage + " setvalue " + //setvaluehealth + " hpct " + target.HealthPercent + " afterdmg " + afterdmg);
+            {  
                 HealUltManager(true, false, target);
             }
-            
-            if (R.IsReady() && Player.Distance(target) <= R.Range && GetBool("ult" + target.ChampionName) && (target.HealthPercent <= setvalueult || (afterdmg) <= setvalueult) && (sendr != null || target.HealthPercent < 5f))
-                {
-                //Console.WriteLine("ulting:: inc dmg" + damage + " setvalue " + setvaluehealth //+ " hpct " + target.HealthPercent + " afterdmg " + afterdmg);
+
+            if (R.IsReady() && Player.Distance(target) <= R.Range && GetBool("ult" + target.ChampionName) && (target.HealthPercent <= setvalueult || (afterdmg) <= setvalueult) && (senderhero != null || senderturret != null || target.HealthPercent < 5f))
+            {
                 HealUltManager(false, true, target);
                 return;
-                }
+            }
             
         }
 

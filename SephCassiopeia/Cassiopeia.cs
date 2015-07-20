@@ -158,6 +158,8 @@ namespace SephCassiopeia
                 }
             }
 
+            /*
+
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") &&
                 CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
@@ -204,8 +206,9 @@ namespace SephCassiopeia
                     return;
                 }
             }
+            */
 
-            /* © ® ™ Work on patented algorithms in the future! © ® ™ 
+            /* © ® ™ Work on patented algorithms in the future! © ® ™ */
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 var easycheck =
@@ -218,7 +221,7 @@ namespace SephCassiopeia
                 {
                     Spells[SpellSlot.R].Cast(easycheck.ServerPosition);
                     DontMove = true;
-                    Utility.DelayAction.Add(100, () => DontMove = false);
+                    Utility.DelayAction.Add(50, () => DontMove = false);
                     return;
                 }
                 var targs = HeroManager.Enemies.Where(h => h.IsValidTarget(Spells[SpellSlot.R].Range));
@@ -264,7 +267,7 @@ namespace SephCassiopeia
                 }
             
             }   
-             */
+             
 
         }
 
