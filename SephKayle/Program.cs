@@ -282,8 +282,6 @@ namespace SephKayle
                 var damage = sender.GetSpellDamage(target, args.SData.Name);
                 var afterdmg = ((target.Health - damage) / (target.MaxHealth)) * 100f;
 
-                Game.PrintChat("The incoming damage is: " + args.SData.Name + " " + damage + " after " + afterdmg);
-
                 if (W.IsReady() && Player.Distance(target) <= W.Range && GetBool("heal" + target.ChampionName) && (target.HealthPercent <= setvaluehealth || (GetBool("hcheckdmgafter") && afterdmg <= setvaluehealth)))
             {
                 if (GetBool("hdamagedetection")) {
