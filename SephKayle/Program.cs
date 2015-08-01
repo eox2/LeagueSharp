@@ -53,7 +53,7 @@ namespace SephKayle
             Menu HealManager = new Menu("HealManager", "Heal Manager");
             HealManager.AddItem(new MenuItem("onlyhincdmg", "Only heal if incoming damage").SetValue(false));
             HealManager.AddItem(new MenuItem("hdamagedetection", "Disable damage detection").SetValue(false));
-            HealManager.AddItem(new MenuItem("hcheckdmgafter", "Take HP after damage into consideration").SetValue(false));
+            HealManager.AddItem(new MenuItem("hcheckdmgafter", "Take HP after damage into consideration").SetValue(true));
 
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly))
             {
@@ -65,7 +65,7 @@ namespace SephKayle
             Menu UltimateManager = new Menu("UltManager", "Ultimate Manager");
             UltimateManager.AddItem(new MenuItem("onlyuincdmg", "Only ult if incoming damage").SetValue(true));
             UltimateManager.AddItem(new MenuItem("udamagedetection", "Disable damage detection").SetValue(false));
-            UltimateManager.AddItem(new MenuItem("ucheckdmgafter", "Take HP after damage into consideration").SetValue(false));
+            UltimateManager.AddItem(new MenuItem("ucheckdmgafter", "Take HP after damage into consideration").SetValue(true));
 
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly))
             {
@@ -83,10 +83,10 @@ namespace SephKayle
 
             Menu Drawing = new Menu("Drawing", "Drawing");
             Drawing.AddItem(new MenuItem("disableall", "Disable all").SetValue(true));
-            Drawing.AddItem(new MenuItem("drawq", "Killsteal").SetValue(true));
-            Drawing.AddItem(new MenuItem("draww", "Use E to lasthit").SetValue(true));
-            Drawing.AddItem(new MenuItem("drawe", "Healing On").SetValue(true));
-            Drawing.AddItem(new MenuItem("drawr", "Healing On").SetValue(true));
+            Drawing.AddItem(new MenuItem("DrawQ", "Draw Q").SetValue(true));
+            Drawing.AddItem(new MenuItem("DrawW", "Draw W").SetValue(true));
+            Drawing.AddItem(new MenuItem("DrawE", "Draw E").SetValue(true));
+            Drawing.AddItem(new MenuItem("DrawR", "Draw R").SetValue(true));
 
             // Add to Main Menu
             Config.AddSubMenu(targetselector);
@@ -129,15 +129,15 @@ namespace SephKayle
             }
             if (GetBool("DrawW"))
             {
-                Render.Circle.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Aqua);
+                Render.Circle.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Azure);
             }
             if (GetBool("DrawE"))
             {
-                Render.Circle.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Aqua);
+                Render.Circle.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Crimson);
             }
             if (GetBool("DrawR"))
             {
-                Render.Circle.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Aqua);
+                Render.Circle.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Red);
             }
         }
 
@@ -281,6 +281,9 @@ namespace SephKayle
 
                 var damage = sender.GetSpellDamage(target, args.SData.Name);
                 var afterdmg = ((target.Health - damage) / (target.MaxHealth)) * 100f;
+
+                Game.PrintChat("The incoming damage is: " + args.SData.Name + " " + damage + " after " + afterdmg);
+
                 if (W.IsReady() && Player.Distance(target) <= W.Range && GetBool("heal" + target.ChampionName) && (target.HealthPercent <= setvaluehealth || (GetBool("hcheckdmgafter") && afterdmg <= setvaluehealth)))
             {
                 if (GetBool("hdamagedetection")) {
