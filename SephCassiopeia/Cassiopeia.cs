@@ -208,14 +208,14 @@ namespace SephCassiopeia
             }
             */
 
-            /* © ® ™ Work on patented algorithms in the future! © ® ™ */
+            /* © ® ™ Work on patented algorithms in the future! XD © ® ™ */
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 var easycheck =
                     HeroManager.Enemies.FirstOrDefault(
                         x =>
                             !x.IsInvulnerable && !x.IsZombie && x.IsValidTarget(Spells[SpellSlot.R].Range) &&
-                            x.IsFacing(Player) && x.isImmobile());
+                            x.IsFacing(Player) && x.isImmobile() && (Player.HealthPercent <= 20 || x.HealthPercent > 30));
 
                 if (easycheck != null)
                 {
@@ -229,11 +229,11 @@ namespace SephCassiopeia
                 Dictionary<Vector3, double> Hitatposfacing = new Dictionary<Vector3, double>();
                 foreach (var t in targs)
                 {
-                    var pred = Spells[SpellSlot.R].GetPrediction(t, true);
-                    var enemshit = pred.CastPosition.GetEnemiesInRange(Spells[SpellSlot.R].Width);
-                    var counthit = enemshit.Count;
+                    var pred = Spells[SpellSlot.R].GetPrediction(t, false);
+                    var enemshit = pred.CastPosition.GetEnemiesInRange(Spells[SpellSlot.R].Width).Where(x=> x.Distance(Player) <= Spells[SpellSlot.R].Range);
+                    var counthit = enemshit.Count();
                     var hitfacing = enemshit.Count(x => x.IsFacing(Player) && !x.IsDashing() && !x.IsZombie && !x.IsInvulnerable);
-                    var anymovingtome = enemshit.Any(x => x.isMovingToMe());
+                    var anymovingtome = enemshit.Any(x => x.isMovingToMe() || x.IsFacing(Player));
 
                     if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.R") && anymovingtome)
                     {
@@ -247,22 +247,22 @@ namespace SephCassiopeia
                 if (Hitatposfacing.Any())
                 {
                     var bestpos = Hitatposfacing.Find(pos => pos.Value.Equals(Hitatposfacing.Values.Max())).Key;
-                    if (bestpos.IsValid() && bestpos.CountEnemiesInRange(Spells[SpellSlot.R].Width) >= 1)
+                    if (bestpos.IsValid() && bestpos.CountEnemiesInRange(Spells[SpellSlot.R].Width) >= CassioUtils.GetSlider("Combo.Rcount"))
                     {
                         Spells[SpellSlot.R].Cast(bestpos);
                         DontMove = true;
-                        Utility.DelayAction.Add(100, () => DontMove = false);
+                        Utility.DelayAction.Add(50, () => DontMove = false);
                     }
                 }
                 else if (Hitatpos.Any() && CassioUtils.Active("Combo.UseRNF") &&
                          CassioUtils.GetSlider("Combo.Rcountnf") >= Hitatpos.Values.Max())
                 {
                     var bestposnf = Hitatpos.Find(pos => pos.Value.Equals(Hitatpos.Values.Max())).Key;
-                    if (bestposnf.IsValid() && bestposnf.CountEnemiesInRange(Spells[SpellSlot.R].Width) >= 1)
+                    if (bestposnf.IsValid() && bestposnf.CountEnemiesInRange(Spells[SpellSlot.R].Width) >= CassioUtils.GetSlider("Combo.Rcountnf"))
                     {
                         Spells[SpellSlot.R].Cast(bestposnf);
                         DontMove = true;
-                        Utility.DelayAction.Add(100, () => DontMove = false);
+                        Utility.DelayAction.Add(50, () => DontMove = false);
                     }
                 }
             

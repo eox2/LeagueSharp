@@ -51,7 +51,10 @@ namespace SephKayle
 
             // HealManager Options
             Menu HealManager = new Menu("HealManager", "Heal Manager");
-            HealManager.AddItem(new MenuItem("onlyhincdmg", "Only heal if incoming damage").SetValue(false)); 
+            HealManager.AddItem(new MenuItem("onlyhincdmg", "Only heal if incoming damage").SetValue(false));
+            HealManager.AddItem(new MenuItem("hdamagedetection", "Disable damage detection").SetValue(false));
+            HealManager.AddItem(new MenuItem("hcheckdmgafter", "Take HP after damage into consideration").SetValue(false));
+
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly))
             {
                 HealManager.AddItem(new MenuItem("heal" + hero.ChampionName, "Heal " + hero.ChampionName).SetValue(true));
@@ -60,7 +63,10 @@ namespace SephKayle
 
             // UltimateManager Options
             Menu UltimateManager = new Menu("UltManager", "Ultimate Manager");
-            UltimateManager.AddItem(new MenuItem("onlyuincdmg", "Only ult if incoming damage").SetValue(true)); 
+            UltimateManager.AddItem(new MenuItem("onlyuincdmg", "Only ult if incoming damage").SetValue(true));
+            UltimateManager.AddItem(new MenuItem("udamagedetection", "Disable damage detection").SetValue(false));
+            UltimateManager.AddItem(new MenuItem("ucheckdmgafter", "Take HP after damage into consideration").SetValue(false));
+
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly))
             {
                 UltimateManager.AddItem(new MenuItem("ult" + hero.ChampionName, "Ultimate " + hero.ChampionName).SetValue(true));
@@ -75,6 +81,12 @@ namespace SephKayle
             Misc.AddItem(new MenuItem("Ultingon", "Ulting On").SetValue(true));
             //TODO Add Drawings
 
+            Menu Drawing = new Menu("Drawing", "Drawing");
+            Drawing.AddItem(new MenuItem("disableall", "Disable all").SetValue(true));
+            Drawing.AddItem(new MenuItem("drawq", "Killsteal").SetValue(true));
+            Drawing.AddItem(new MenuItem("draww", "Use E to lasthit").SetValue(true));
+            Drawing.AddItem(new MenuItem("drawe", "Healing On").SetValue(true));
+            Drawing.AddItem(new MenuItem("drawr", "Healing On").SetValue(true));
 
             // Add to Main Menu
             Config.AddSubMenu(targetselector);
@@ -84,6 +96,7 @@ namespace SephKayle
             Config.AddSubMenu(HealManager);
             Config.AddSubMenu(UltimateManager);
             Config.AddSubMenu(Misc);
+            Config.AddSubMenu(Drawing);
             Config.AddToMainMenu();
 
         }
@@ -100,6 +113,32 @@ namespace SephKayle
             DefineSpells();
             Game.OnUpdate += GameTick;
             Obj_AI_Base.OnProcessSpellCast += HealUltTrigger;
+            Drawing.OnDraw += OnDraw;
+        }
+
+        static void OnDraw(EventArgs args)
+        {
+            if (GetBool("disableall"))
+            {
+                return;
+            }
+
+            if (GetBool("DrawQ"))
+            {
+                Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Aqua);
+            }
+            if (GetBool("DrawW"))
+            {
+                Render.Circle.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Aqua);
+            }
+            if (GetBool("DrawE"))
+            {
+                Render.Circle.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Aqua);
+            }
+            if (GetBool("DrawR"))
+            {
+                Render.Circle.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Aqua);
+            }
         }
 
         private static void KillSteal()
@@ -215,23 +254,46 @@ namespace SephKayle
             var senderhero = sender as Obj_AI_Hero;
             var senderturret = sender as Obj_AI_Turret;
 
-            if (sender.IsAlly || (target == null) || !target.IsAlly || sender.IsMinion)
+            if (sender.IsAlly || (target == null) || !target.IsAlly)
             {
                 return;
             }
-                var damage = Damage.GetAutoAttackDamage(sender, target);
-                float setvaluehealth = Getslider("hpct" + target.ChampionName);
-                float setvalueult = Getslider("upct" + target.ChampionName);
-                var afterdmg = ((target.Health - damage) / (target.MaxHealth)) * 100f;
-                if (W.IsReady() && Player.Distance(target) <= W.Range && GetBool("heal" + target.ChampionName) && (target.HealthPercent <= setvaluehealth || (afterdmg <= setvaluehealth)))
-            {  
-                HealUltManager(true, false, target);
-            }
+            float setvaluehealth = Getslider("hpct" + target.ChampionName);
+            float setvalueult = Getslider("upct" + target.ChampionName);
 
-            if (R.IsReady() && Player.Distance(target) <= R.Range && GetBool("ult" + target.ChampionName) && (target.HealthPercent <= setvalueult || (afterdmg) <= setvalueult) && (senderhero != null || senderturret != null || target.HealthPercent < 5f))
+            bool triggered = false;
+
+            if (W.IsReady() && GetBool("heal" + target.ChampionName) && (target.HealthPercent <= setvaluehealth))
+            {
+                HealUltManager(true, false, target);
+                triggered = true;
+            }
+            if (R.IsReady() && GetBool("ult" + target.ChampionName) && (target.HealthPercent <= setvaluehealth))
             {
                 HealUltManager(false, true, target);
+                triggered = true;
+            }
+
+            if (triggered)
+            {
                 return;
+            }
+
+                var damage = sender.GetSpellDamage(target, args.SData.Name);
+                var afterdmg = ((target.Health - damage) / (target.MaxHealth)) * 100f;
+                if (W.IsReady() && Player.Distance(target) <= W.Range && GetBool("heal" + target.ChampionName) && (target.HealthPercent <= setvaluehealth || (GetBool("hcheckdmgafter") && afterdmg <= setvaluehealth)))
+            {
+                if (GetBool("hdamagedetection")) {
+                    HealUltManager(true, false, target);
+                }
+            }
+
+            if (R.IsReady() && Player.Distance(target) <= R.Range && GetBool("ult" + target.ChampionName) && (target.HealthPercent <= setvalueult || (GetBool("ucheckdmgafter") && afterdmg <= setvalueult)) && (senderhero != null || senderturret != null || target.HealthPercent < 5f))
+            {
+                if (GetBool("udamagedetection"))
+                {
+                    HealUltManager(false, true, target);
+                }
             }
             
         }

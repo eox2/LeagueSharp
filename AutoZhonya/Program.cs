@@ -120,9 +120,7 @@ namespace AutoZhonya
 
             if (Menu.Item("enablehpzhonya").GetValue<bool>() && (zhonyaready() || seraphready()))
                 {
-                    var incomingspelldmg = sender.GetSpellDamage(Player, args.SData.Name);
-                    var calcdmg = sender.CalcDamage(
-                        Player, sender.GetDamageSpell(Player, args.SData.Name).DamageType, incomingspelldmg);
+                    var calcdmg = sender.GetSpellDamage(Player, args.SData.Name);
                     var remaininghealth = Player.Health - calcdmg;
                     var slidervalue = Menu.Item("minspelldmg").GetValue<Slider>().Value / 100f;
                     var hptozhonya = Menu.Item("hptozhonya").GetValue<Slider>().Value;
