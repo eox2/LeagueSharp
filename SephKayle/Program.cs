@@ -79,7 +79,7 @@ namespace SephKayle
             Misc.AddItem(new MenuItem("UseElh", "Use E to lasthit").SetValue(true));
             Misc.AddItem(new MenuItem("Healingon", "Healing On").SetValue(true));
             Misc.AddItem(new MenuItem("Ultingon", "Ulting On").SetValue(true));
-            //TODO Add Drawings
+            Misc.AddItem(new MenuItem("Debug", "Debug On").SetValue(true));
 
             Menu Drawing = new Menu("Drawing", "Drawing");
             Drawing.AddItem(new MenuItem("disableall", "Disable all").SetValue(true));
@@ -98,7 +98,11 @@ namespace SephKayle
             Config.AddSubMenu(Misc);
             Config.AddSubMenu(Drawing);
             Config.AddToMainMenu();
+        }
 
+        private static bool debug()
+        {
+            return GetBool("Debug");
         }
 
         static void OnGameLoad(EventArgs args)
@@ -268,8 +272,16 @@ namespace SephKayle
                 HealUltManager(true, false, target);
                 triggered = true;
             }
-            if (R.IsReady() && GetBool("ult" + target.ChampionName) && (target.HealthPercent <= setvaluehealth))
+            if (R.IsReady() && GetBool("ult" + target.ChampionName) && (target.HealthPercent <= setvaluehealth) && target.Distance(Player) <= R.Range)
             {
+                if (args.SData.Name.ToLower().Contains("minion") && target.HealthPercent > 5)
+                {
+                    return;
+                }
+                if (debug())
+                {
+                    Game.PrintChat("Ult target: " + target.ChampionName +" Ult reason: Target hp percent below set value of: " + setvaluehealth + " Current value is: " + target.HealthPercent + " Triggered by: Incoming spell: + " + args.SData.Name);
+                }
                 HealUltManager(false, true, target);
                 triggered = true;
             }
@@ -293,6 +305,22 @@ namespace SephKayle
             {
                 if (GetBool("udamagedetection"))
                 {
+                    if (args.SData.Name.ToLower().Contains("minion") && target.HealthPercent > 5)
+                    {
+                        return;
+                    }
+                    if (debug())
+                    {
+                        if (afterdmg <= setvalueult)
+                        {
+                            Game.PrintChat("Ult target: " + target.ChampionName + " Ult reason: Incoming spell damage will leave us below set value of " + setvaluehealth + " Current value is: " + target.HealthPercent + " and after spell health left is: " + afterdmg + " Triggered by: Incoming spell: + " + args.SData.Name);
+                        }
+
+                        else
+                        {
+                         Game.PrintChat("Ult target: " + target.ChampionName + " Ult reason: Incoming spell damage and health below set value of " + setvaluehealth + " Current value is: " + target.HealthPercent + " Triggered by: Incoming spell: + " + args.SData.Name);
+                        }
+                    }
                     HealUltManager(false, true, target);
                 }
             }
@@ -309,6 +337,7 @@ namespace SephKayle
             }
             if (forceult && target != null && R.IsReady() && Player.Distance(target) <= R.Range)
             {
+                Game.PrintChat("Forceult");
                 R.CastOnUnit(target);
                 return;
             }
@@ -356,7 +385,8 @@ namespace SephKayle
                     {
                         if (herolist.Contains(Player))
                         {
-                            R.CastOnUnit(Player);
+                        Game.PrintChat("regultself");
+                        R.CastOnUnit(Player);
                             return;
                         }
 
@@ -366,7 +396,8 @@ namespace SephKayle
 
                             if (Player.Distance(hero) <= R.Range)
                             {
-                                R.CastOnUnit(hero);
+                            Game.PrintChat("regultotherself");
+                            R.CastOnUnit(hero);
                                 return;
                             }
                         }
@@ -424,7 +455,7 @@ namespace SephKayle
             */
 
             List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
-            if (Config.Item("UseQFarm").GetValue<bool>() && Q.IsReady())
+            if (Config.Item("UseQfarm").GetValue<bool>() && Q.IsReady())
             {
                 foreach (Obj_AI_Base minion in
                     allMinions.Where(
@@ -439,7 +470,7 @@ namespace SephKayle
                         Orbwalker.SetAttack(false);
                         Q.CastOnUnit(minion, false);
                         Orbwalker.SetAttack(true);
-                        if (Config.Item("UseEFarm").GetValue<bool>() && E.IsReady() && !Eon)
+                        if (Config.Item("UseEfarm").GetValue<bool>() && E.IsReady() && !Eon)
                         {
                             E.CastOnUnit(Player);
                         }
@@ -456,20 +487,20 @@ namespace SephKayle
             if (Config.Item("UseEfarm").GetValue<bool>())
             {
                 var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && Player.Distance(m) <= incrange);
-                if (minions.Any() && E.IsReady() &&  Config.Item("UseEFarm").GetValue<bool>() && !Eon)
+                if (minions.Any() && E.IsReady() && Config.Item("UseEfarm").GetValue<bool>() && !Eon)
                 {
                     E.CastOnUnit(Player);
                 }
             }
 
             var Targ = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            if (Q.IsReady() && GetBool("UseQH") && Player.Distance(Targ) <= Q.Range)
+            if (Q.IsReady() && GetBool("UseQ") && Player.Distance(Targ) <= Q.Range)
             {
                 Q.Cast(Targ);
             }
 
             List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
-            if (Config.Item("UseQFarm").GetValue<bool>() && Q.IsReady())
+            if (Config.Item("UseQfarm").GetValue<bool>() && Q.IsReady())
             {
                 foreach (Obj_AI_Base minion in
                 allMinions.Where(
