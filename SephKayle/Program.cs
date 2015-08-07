@@ -337,7 +337,10 @@ namespace SephKayle
             }
             if (forceult && target != null && R.IsReady() && Player.Distance(target) <= R.Range)
             {
-                Game.PrintChat("Forceult");
+                if (debug())
+                {
+                    Game.PrintChat("Forceult");
+                }
                 R.CastOnUnit(target);
                 return;
             }
@@ -385,7 +388,10 @@ namespace SephKayle
                     {
                         if (herolist.Contains(Player))
                         {
-                        Game.PrintChat("regultself");
+                        if (debug())
+                        {
+                            Game.PrintChat("regultself");
+                        }
                         R.CastOnUnit(Player);
                             return;
                         }
@@ -396,7 +402,10 @@ namespace SephKayle
 
                             if (Player.Distance(hero) <= R.Range)
                             {
-                            Game.PrintChat("regultotherself");
+                            if (debug())
+                            {
+                                Game.PrintChat("regultotherorself");
+                            }
                             R.CastOnUnit(hero);
                                 return;
                             }
