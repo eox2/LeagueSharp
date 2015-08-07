@@ -272,7 +272,7 @@ namespace SephKayle
                 HealUltManager(true, false, target);
                 triggered = true;
             }
-            if (R.IsReady() && GetBool("ult" + target.ChampionName) && (target.HealthPercent <= setvaluehealth) && target.Distance(Player) <= R.Range)
+            if (R.IsReady() && GetBool("ult" + target.ChampionName) && (target.HealthPercent <= setvalueult) && target.Distance(Player) <= R.Range)
             {
                 if (args.SData.Name.ToLower().Contains("minion") && target.HealthPercent > 5)
                 {
@@ -280,7 +280,7 @@ namespace SephKayle
                 }
                 if (debug())
                 {
-                    Game.PrintChat("Ult target: " + target.ChampionName +" Ult reason: Target hp percent below set value of: " + setvaluehealth + " Current value is: " + target.HealthPercent + " Triggered by: Incoming spell: + " + args.SData.Name);
+                    Game.PrintChat("Ult target: " + target.ChampionName +" Ult reason: Target hp percent below set value of: " + setvalueult + " Current value is: " + target.HealthPercent + " Triggered by: Incoming spell: + " + args.SData.Name);
                 }
                 HealUltManager(false, true, target);
                 triggered = true;
@@ -313,12 +313,12 @@ namespace SephKayle
                     {
                         if (afterdmg <= setvalueult)
                         {
-                            Game.PrintChat("Ult target: " + target.ChampionName + " Ult reason: Incoming spell damage will leave us below set value of " + setvaluehealth + " Current value is: " + target.HealthPercent + " and after spell health left is: " + afterdmg + " Triggered by: Incoming spell: + " + args.SData.Name);
+                            Game.PrintChat("Ult target: " + target.ChampionName + " Ult reason: Incoming spell damage will leave us below set value of " + setvalueult + " Current value is: " + target.HealthPercent + " and after spell health left is: " + afterdmg + " Triggered by: Incoming spell: + " + args.SData.Name);
                         }
 
                         else
                         {
-                         Game.PrintChat("Ult target: " + target.ChampionName + " Ult reason: Incoming spell damage and health below set value of " + setvaluehealth + " Current value is: " + target.HealthPercent + " Triggered by: Incoming spell: + " + args.SData.Name);
+                         Game.PrintChat("Ult target: " + target.ChampionName + " Ult reason: Incoming spell damage and health below set value of " + setvalueult + " Current value is: " + target.HealthPercent + " Triggered by: Incoming spell: + " + args.SData.Name);
                         }
                     }
                     HealUltManager(false, true, target);
