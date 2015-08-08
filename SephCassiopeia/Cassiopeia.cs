@@ -158,7 +158,7 @@ namespace SephCassiopeia
                 }
             }
 
-            /*
+            
 
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") &&
                 CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
@@ -206,9 +206,10 @@ namespace SephCassiopeia
                     return;
                 }
             }
-            */
+            
 
             /* © ® ™ Work on patented algorithms in the future! XD © ® ™ */
+            /*
             if (SpellSlot.R.IsReady() && CassioUtils.Active("Combo.UseR") && CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 var easycheck =
@@ -267,6 +268,7 @@ namespace SephCassiopeia
                 }
             
             }   
+            */
              
 
         }
