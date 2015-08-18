@@ -23,6 +23,7 @@ namespace SephLux
 
             Menu Combo = new Menu("Combo", "Combo", false);
             Combo.AddItem(new MenuItem("Combo.UseQ", "Use Q", false).SetValue(true));
+            Combo.AddItem(new MenuItem("Combo.UseW", "Use W", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseE", "Use E", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseE2", "Use E2", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseR", "Use R", false).SetValue(true));

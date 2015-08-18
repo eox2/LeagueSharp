@@ -34,15 +34,17 @@ namespace SephLux
 
         private static readonly Dictionary<SpellSlot, Spell> Spells = new Dictionary<SpellSlot, Spell>
         {
-            { SpellSlot.Q, new Spell(SpellSlot.Q, 1300f, TargetSelector.DamageType.Magical) },
-            { SpellSlot.E, new Spell(SpellSlot.E, 1100f, TargetSelector.DamageType.Magical) },
-            { SpellSlot.R, new Spell(SpellSlot.R, 3500f, TargetSelector.DamageType.Magical) },
-            { IgniteSlot, new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 550f) }
+            {SpellSlot.Q, new Spell(SpellSlot.Q, 1300f, TargetSelector.DamageType.Magical)},
+            {SpellSlot.W, new Spell(SpellSlot.W, 1150f)},
+            {SpellSlot.E, new Spell(SpellSlot.E, 1100f, TargetSelector.DamageType.Magical)},
+            {SpellSlot.R, new Spell(SpellSlot.R, 3500f, TargetSelector.DamageType.Magical)},
+            {IgniteSlot, new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 550f)}
         };
 
         private static void InitializeSpells()
         {
             Spells[SpellSlot.Q].SetSkillshot(0.250f, 70f, 1300f, false, SkillshotType.SkillshotLine);
+            Spells[SpellSlot.W].SetSkillshot(0.25f, 150f, 1200f, false, SkillshotType.SkillshotLine);
             Spells[SpellSlot.E].SetSkillshot(0.250f, 275f, 1300f, false, SkillshotType.SkillshotCircle);
             Spells[SpellSlot.R].SetSkillshot(1f, 150f, float.MaxValue, false, SkillshotType.SkillshotCircle);
         }
@@ -170,10 +172,61 @@ namespace SephLux
                 }
             }
 
+
+            if (SpellSlot.W.IsReady() && LuxUtils.Active("Combo.UseW"))
+            {
+                var list = HeroManager.Allies;
+
+                var lowhealthallies =
+                    list.Where(ally => ally.HealthPercent <= 40 && Player.Distance(ally) <= Spells[SpellSlot.W].Range);
+                Obj_AI_Hero besthero = null;
+                int amthit = 0;
+                foreach (var hero in lowhealthallies)
+                {
+                    var pred = Prediction.GetPrediction(WInput(hero));
+                    if (pred.Hitchance >= HitChance.Collision || pred.Hitchance >= HitChance.Low)
+                    {
+                        var coll = pred.CollisionObjects.Count;
+                        if (coll >= amthit)
+                        {
+                            amthit = coll;
+                            besthero = hero;
+                        }
+                    }
+                }
+                if (besthero != null)
+                {
+                    Spells[SpellSlot.W].Cast(besthero.ServerPosition);
+                }
+            }
+        }
+
+        public static CollisionableObjects[] CollObjects =
+        {
+            CollisionableObjects.Allies
+        };
+
+        private static PredictionInput WInput(Obj_AI_Hero target)
+        {
+            var input = new PredictionInput
+            {
+                Unit = target,
+                CollisionObjects = CollObjects,
+                From = Player.ServerPosition,
+                Collision = true,
+                Delay = Spells[SpellSlot.W].Delay,
+                Radius = Spells[SpellSlot.W].Width,
+                Range = Spells[SpellSlot.W].Range,
+                Speed = Spells[SpellSlot.W].Speed,
+                Type = SkillshotType.SkillshotLine
+            };
+
+            return input;
         }
 
 
-        #endregion
+
+    #endregion
 
         #region Waveclear
 
@@ -293,7 +346,7 @@ namespace SephLux
 
         static void Harass(Obj_AI_Hero target)
         {
-            if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Harass.UseQ"))
+            if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Harass.UseQ") && Player.ManaPercent > LuxUtils.GetSlider("Harass.Mana"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
                 if (pred.CollisionObjects.Count <= 1 && pred.Hitchance > LuxUtils.GetHitChance("Hitchance.Q"))
@@ -322,6 +375,10 @@ namespace SephLux
 
         static void Killsteal()
         {
+            if (!LuxUtils.Active("Killsteal"))
+            {
+                return;
+            }
             var targets = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsInvulnerable & !x.IsZombie);
 
             if (SpellSlot.Q.IsReady() && LuxUtils.Active("Killsteal.UseQ"))

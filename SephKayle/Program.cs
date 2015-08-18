@@ -347,11 +347,13 @@ namespace SephKayle
 
             if (GetBool("Healingon") && !GetBool("onlyhincdmg"))
             {
-            var herolistheal = ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(
-                                h =>
-                                    (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead && GetBool("heal" + h.ChampionName) &&
-                                    h.HealthPercent <= Getslider("hpct" + h.ChampionName) && Player.Distance(h) <= R.Range).OrderByDescending(i => i == Player).ThenBy(i => i);
+                var herolistheal = ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(
+                        h =>
+                            (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead && GetBool("heal" + h.ChampionName) &&
+                            h.HealthPercent <= Getslider("hpct" + h.ChampionName) && Player.Distance(h) <= R.Range)
+                    .OrderByDescending(i => i.IsMe)
+                    .ThenBy(i => i.HealthPercent);
                 
                 if (W.IsReady())
                 {
@@ -382,7 +384,7 @@ namespace SephKayle
                                 (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead &&
                                  GetBool("ult" + h.ChampionName) &&
                                 h.HealthPercent <= Getslider("upct" + h.ChampionName) &&
-                                Player.Distance(h) <= R.Range && Player.CountEnemiesInRange(500) > 0).OrderByDescending(i => i == Player).ThenBy(i => i);
+                                Player.Distance(h) <= R.Range && Player.CountEnemiesInRange(500) > 0).OrderByDescending(i => i.IsMe).ThenBy(i => i.HealthPercent);
 
                     if (R.IsReady())
                     {
@@ -503,7 +505,7 @@ namespace SephKayle
             }
 
             var Targ = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            if (Q.IsReady() && GetBool("UseQ") && Player.Distance(Targ) <= Q.Range)
+            if (Targ != null && Q.IsReady() && GetBool("UseQ") && Player.Distance(Targ) <= Q.Range)
             {
                 Q.Cast(Targ);
             }
