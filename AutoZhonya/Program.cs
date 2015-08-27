@@ -6,7 +6,7 @@ using LeagueSharp.Common;
 namespace AutoZhonya
 {
     
-     * To do
+     /* To do
      * Add Buffs for not detectable spells
      */
     class Program
