@@ -5,7 +5,7 @@ using LeagueSharp.Common;
 
 namespace AutoZhonya
 {
-    /*
+    
      * To do
      * Add Buffs for not detectable spells
      */
@@ -14,6 +14,7 @@ namespace AutoZhonya
 
         private static Obj_AI_Hero Player;
         private static readonly Items.Item Zhonya = new Items.Item(3157, 0);
+        private static readonly Items.Item Wooglets = new Items.Item(3090, 0);
         private static readonly Items.Item Seraph = new Items.Item(3040, 0);
         private static readonly string Version = "1.0";
         public static Menu Menu;
@@ -186,7 +187,7 @@ namespace AutoZhonya
 
         public static bool zhonyaready()
         {
-            return Zhonya.IsReady();
+            return Zhonya.IsReady() || Wooglets.IsReady();
         }
 
         public static bool seraphready()
