@@ -23,7 +23,7 @@ namespace SkinsSharp
 
             menu = new Menu("Skins#", "Skinswitcher", true);
 
-            menu.AddItem(new MenuItem("forall", "Enable for all (reload required)", false).SetValue(true));
+            menu.AddItem(new MenuItem("forall", "Enable for all (reload required)", false).SetValue(false));
 
             try
             {
