@@ -189,7 +189,7 @@ namespace AutoZhonya
         public static bool zhonyaready()
         {
          //   return (Zhonya.IsReady() || Wooglets.IsReady());
-               return\ Wooglets.IsReady())\;
+               return Wooglets.IsReady();
         }
 
         public static bool seraphready()
