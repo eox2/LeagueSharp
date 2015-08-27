@@ -50,7 +50,7 @@ namespace SkinsSharp
                                         new[]
                                         {
                                             "Skin 0", "Skin 1", "Skin 2", "Skin 3", "Skin 4", "Skin 5", "Skin 6", "Skin 7",
-                                            "Skin 8", "Skin 9", "Skin 10"
+                                            "Skin 8", "Skin 9", "Skin 10", "Skin 11", "Skin 12", "Skin 13", "Skin 14", "Skin 15"
                                         }, 0)));
 
                     ChampSkins.Add(hero.Name, skinselect.GetValue<StringList>().SelectedIndex);
