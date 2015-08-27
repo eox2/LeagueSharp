@@ -76,6 +76,7 @@ namespace AutoZhonya
                 BuffDetector();
                 if (Player.Health < Player.MaxHealth * 0.35 && Player.CountEnemiesInRange(300) >= 1 && (!SpellSlot.Q.IsReady() || !SpellSlot.W.IsReady() || !SpellSlot.E.IsReady() || !SpellSlot.R.IsReady()) && Player.Mana < Player.MaxMana * 80) {
                     Zhonya.Cast();
+                    Wooglets.Cast();
                 }
             }
         }
@@ -187,7 +188,7 @@ namespace AutoZhonya
 
         public static bool zhonyaready()
         {
-            return Zhonya.IsReady() || Wooglets.IsReady();
+            return (Zhonya.IsReady() || Wooglets.IsReady());
         }
 
         public static bool seraphready()
