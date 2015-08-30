@@ -49,21 +49,36 @@ namespace SephSoraka
         {
             {SpellSlot.Q, new Spell(SpellSlot.Q, 950f, TargetSelector.DamageType.Magical)},
             {SpellSlot.W, new Spell(SpellSlot.W, 550f)},
-            {SpellSlot.E, new Spell(SpellSlot.E, 925f, TargetSelector.DamageType.Magical)},
+            {SpellSlot.E, new Spell(SpellSlot.E, 920f, TargetSelector.DamageType.Magical)},
             {SpellSlot.R, new Spell(SpellSlot.R) },
             {IgniteSlot, new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 550f)}
         };
 
         private static void InitializeSpells()
         {
-            Spells[SpellSlot.Q].SetSkillshot(0.250f, 70f, 1300f, false, SkillshotType.SkillshotLine);
-            Spells[SpellSlot.E].SetSkillshot(0.250f, 275f, 1300f, false, SkillshotType.SkillshotCircle);
+            Spells[SpellSlot.Q].SetSkillshot(0.500f, 300f, 1750f, false, SkillshotType.SkillshotLine);
+            Spells[SpellSlot.E].SetSkillshot(0.500f, 250f, 1300f, false, SkillshotType.SkillshotCircle);
         }
+
+        private static bool done;
+        /*
+        private static void PrintSData()
+        {
+            if (done) return;
+            foreach (var spell in Player.Spellbook.Spells)
+            {
+                var sdata = spell.SData;
+                Game.PrintChat("spell " + spell.Slot + " speed " + sdata.MissileSpeed + " delay " + sdata.DelayCastOffsetPercent + " width " + sdata.LineWidth + " range " + sdata.CastRange);
+            }
+            done = true;
+        }
+        */
 
         private static void SorakaMain(EventArgs args)
         {
             Player = ObjectManager.Player;
 
+          //  PrintSData();
             if (Player.CharData.BaseSkinName != "Soraka")
             {
                 return;
