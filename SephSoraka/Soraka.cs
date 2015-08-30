@@ -80,7 +80,6 @@ namespace SephSoraka
 
             Obj_AI_Base.OnProcessSpellCast += DangerDetector;
 
-          //  Orbwalking.BeforeAttack += BeforeAttack;
 
             Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += OnDraw;
@@ -227,14 +226,6 @@ namespace SephSoraka
         }
         #region Combo
 
-        static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
-        {
-
-            if (Misc.Active("Farming.Disableauto") && args.Target.Type != GameObjectType.obj_AI_Hero)
-            {
-                args.Process = false;
-            }
-        }
 
         static void Healing()
         {
