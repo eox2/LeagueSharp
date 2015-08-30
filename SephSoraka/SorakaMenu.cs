@@ -61,9 +61,9 @@ namespace SephSoraka
                 foreach (var hero in HeroManager.Allies)
                 {
                     RManager.AddItem(
-                        new MenuItem("r" + hero.ChampionName, "Heal " + hero.ChampionName).SetTag(1).SetValue(true));
+                        new MenuItem("r" + hero.ChampionName, "Heal " + hero.ChampionName).SetValue(true));
                     RManager.AddItem(
-                        new MenuItem("rpct" + hero.ChampionName, "Health % " + hero.ChampionName).SetTag(1)
+                        new MenuItem("rpct" + hero.ChampionName, "Health % " + hero.ChampionName)
                             .SetValue(new Slider(45, 0, 100)));
                 }
 
