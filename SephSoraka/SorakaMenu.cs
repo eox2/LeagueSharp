@@ -28,6 +28,8 @@ namespace SephSoraka
                 Healing.AddItem(new MenuItem("Healing.UseR", "Use R").SetValue(true));
                 Healing.AddItem(new MenuItem("Healing.Priority", "Priority Type").SetValue(new StringList(new[] { "Lowest Health", "Priority List"})));
 
+                Config.AddSubMenu(Healing);
+
 
                 // WManager Options
                 Menu WManager = new Menu("W Settings", "WManager");

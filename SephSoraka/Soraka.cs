@@ -262,9 +262,10 @@ namespace SephSoraka
                 var alliesinneed =
                     HeroManager.Allies.Where(
                         hero => !hero.IsMe &&
-                            !hero.IsDead && !hero.IsZombie && hero.Distance(Player) <= Spells[SpellSlot.W].Range && Misc.Active("w" + hero.ChampionName) &&
-                            hero.HealthPercent <= Misc.GetSlider("wpct" + hero.ChampionName))
-                        .ToList().OrderByDescending(x => x.GetSetPriority());
+                                !hero.IsDead && !hero.IsZombie && hero.Distance(Player) <= Spells[SpellSlot.W].Range &&
+                                Misc.Active("w" + hero.ChampionName) &&
+                                hero.HealthPercent <= Misc.GetSlider("wpct" + hero.ChampionName))
+                        .ToList();
 
                 if (Misc.Active("wonlyadc") && alliesinneed.Contains(myADC) && Player.Distance(myADC) <= Spells[SpellSlot.W].Range)
                 {
