@@ -23,10 +23,11 @@ namespace SephSoraka
                 Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking", false));
                 Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
-                Menu Automatic = new Menu("Healing", "Auto", false);
-                Automatic.AddItem(new MenuItem("Healing.UseW", "Use W", false).SetValue(true));
-                Automatic.AddItem(new MenuItem("Healing.UseR", "Use R", false).SetValue(true));
-                Config.AddSubMenu(Automatic);
+                Menu Healing = new Menu("Healing", "Auto");
+                Healing.AddItem(new MenuItem("Healing.UseW", "Use W").SetValue(true));
+                Healing.AddItem(new MenuItem("Healing.UseR", "Use R").SetValue(true));
+                Healing.AddItem(new MenuItem("Healing.Priority", "Priority Type").SetValue(new StringList(new[] { "Lowest Health", "Priority List"})));
+
 
                 // WManager Options
                 Menu WManager = new Menu("W Settings", "WManager");
@@ -88,9 +89,7 @@ namespace SephSoraka
                 }
 
                     Priorities.AddItem((new MenuItem("adc", "ADC").SetValue(new StringList(allynames, iof))));
-                
-
-
+ 
 
                 foreach (var ally in HeroManager.Allies)
                 {
@@ -143,27 +142,6 @@ namespace SephSoraka
 
                 Config.AddSubMenu(Interrupter);
 
-                Menu Blist = new Menu("Heal BlackList", "BlackList");
-                foreach (var hero in HeroManager.Allies)
-                {
-                    var champ = hero;
-                    var addhero =
-                        Blist.AddItem(new MenuItem("Blacklist." + hero.ChampionName, hero.ChampionName).SetValue(false));
-                    addhero.ValueChanged += (sender, args) =>
-                    {
-                        if (args.GetNewValue<bool>())
-                        {
-                            BlackList.Add(champ);
-                        }
-                        else
-                        {
-                            BlackList.Remove(champ);
-                        }
-                    };
-                }
-
-                Config.AddSubMenu(Blist);
-
 
                 Menu Misc = new Menu("Hitchance Settings", "Misc", false);
                 Misc.AddItem(
@@ -205,6 +183,26 @@ namespace SephSoraka
             Default,
             Advanced
         }
+
+        internal enum HealPriority
+        {
+            PriorityList,
+            LowestHealth
+        }
+
+        internal static HealPriority PriorityType()
+        {
+            switch (Config.Item("Healing.Priority").GetValue<StringList>().SelectedIndex)
+            {
+                case 0:
+                    return HealPriority.LowestHealth;
+                case 1:
+                    return HealPriority.PriorityList;
+                default:
+                    return HealPriority.LowestHealth;
+            }
+        }
+
 
     }
 }

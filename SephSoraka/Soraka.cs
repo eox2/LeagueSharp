@@ -189,7 +189,7 @@ namespace SephSoraka
         static void DangerDetector(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             var ally = args.Target as Obj_AI_Hero;
-            if (sender.IsChampion() && sender.Team != Player.Team && ally != null && ally.IsAlly && !SorakaMenu.BlackList.Contains(ally))
+            if (sender.IsChampion() && sender.Team != Player.Team && ally != null && ally.IsAlly)
             {
                 if (Misc.Active("Healing.UseW"))
                 {
@@ -259,12 +259,12 @@ namespace SephSoraka
         {
             if (Spells[SpellSlot.W].IsReady())
             {
-                List<Obj_AI_Hero> alliesinneed =
+                var alliesinneed =
                     HeroManager.Allies.Where(
                         hero => !hero.IsMe &&
                             !hero.IsDead && !hero.IsZombie && hero.Distance(Player) <= Spells[SpellSlot.W].Range && Misc.Active("w" + hero.ChampionName) &&
                             hero.HealthPercent <= Misc.GetSlider("wpct" + hero.ChampionName))
-                        .ToList();
+                        .ToList().OrderByDescending(x => x.GetSetPriority());
 
                 if (Misc.Active("wonlyadc") && alliesinneed.Contains(myADC) && Player.Distance(myADC) <= Spells[SpellSlot.W].Range)
                 {
@@ -273,12 +273,14 @@ namespace SephSoraka
 
                 else if (!Misc.Active("wonlyadc"))
                 {
-                    Obj_AI_Hero allytoheal = alliesinneed.MinOrDefault(x => x.HealthPercent);
+                    Obj_AI_Hero allytoheal = null;
+
+                    allytoheal = SorakaMenu.PriorityType() == SorakaMenu.HealPriority.PriorityList ? alliesinneed.MaxOrDefault(h => h.GetSetPriority()) : alliesinneed.MinOrDefault(x => x.HealthPercent);
+
                     if (allytoheal != null)
                     {
                         Spells[SpellSlot.W].CastOnUnit(allytoheal);
                     }
-
                 }
             }
         }
@@ -583,6 +585,7 @@ namespace SephSoraka
                     return SorakaMenu.UltMode.Default;
             }
         }
+
 
         internal static int GetSetPriority(this Obj_AI_Hero hero)
         {
