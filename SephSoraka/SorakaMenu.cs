@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using System.Drawing;
 
 namespace SephSoraka
 {
@@ -54,8 +55,14 @@ namespace SephSoraka
                 RManager.AddItem(
                     new MenuItem("ultmode", "Ult Mode").SetValue(new StringList(new[] {"Default", "Advanced"})));
 
+                Menu AntiIgnite = new Menu("AntiIgnite", "Antiignite");
+                AntiIgnite.AddItem(new MenuItem("ultifadcignited", "Use ult if adc is ignited").SetValue(false));
+                AntiIgnite.AddItem(new MenuItem("adcignitedhealth", "ADC below HP").SetValue(new Slider(40, 0, 100)));
+
+                RManager.AddSubMenu(AntiIgnite);
+
                 RManager.AddItem(new MenuItem("onlyrincdmg", "Only if incoming damage").SetValue(false));
-                RManager.AddItem(new MenuItem("ultonlyadc", "Only if adc needs it").SetValue(false));
+                RManager.AddItem(new MenuItem("ultonlyadc", "Only if ADC needs it").SetValue(false));
                 RManager.AddItem(new MenuItem("rcheckdmgafter", "Take HP after damage into consideration").SetValue(true));
 
                 RManager.AddItem(
@@ -163,14 +170,15 @@ namespace SephSoraka
                                 HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(),
                                 HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString()
                             }, 1)));
+                Misc.AddItem(new MenuItem("Misc.AutoEStunned", "Auto E Immobile Champions").SetValue(false));
                 Misc.AddItem(new MenuItem("Misc.Debug", "Debug", false).SetValue(false));
                 Config.AddSubMenu(Misc);
 
                 Menu Drawings = new Menu("Drawings", "Drawing", false);
                 Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable all").SetValue(false));
-                Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q").SetValue(true));
-                Drawings.AddItem(new MenuItem("Drawing.DrawW", "Draw Q").SetValue(true));
-                Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E").SetValue(true));
+                Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q").SetValue(new Circle(true, Color.White)));
+                Drawings.AddItem(new MenuItem("Drawing.DrawW", "Draw W").SetValue(new Circle(true, Color.DarkCyan)));
+                Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E").SetValue(new Circle(true, Color.RoyalBlue)));
                 Drawings.AddItem(new MenuItem("Drawing.Drawfarm", "Farming indicator circle").SetValue(true));
                 Config.AddSubMenu(Drawings);
                 return Config;

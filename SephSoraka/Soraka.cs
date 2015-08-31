@@ -5,6 +5,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using Color = System.Drawing.Color;
 
 #endregion;
 
@@ -57,7 +58,7 @@ namespace SephSoraka
         private static void InitializeSpells()
         {
             Spells[SpellSlot.Q].SetSkillshot(0.500f, 300f, 1750f, false, SkillshotType.SkillshotLine);
-            Spells[SpellSlot.E].SetSkillshot(0.500f, 250f, 1300f, false, SkillshotType.SkillshotCircle);
+            Spells[SpellSlot.E].SetSkillshot(0.250f, 250f, 1300f, false, SkillshotType.SkillshotCircle);
         }
 
         private static bool done;
@@ -150,6 +151,16 @@ namespace SephSoraka
             if (Player.IsDead || Player.IsRecalling())
             {
                 return;
+            }
+
+            if (Misc.Active("Misc.AutoEStunned"))
+            {
+                AutoEStunned();
+            }
+
+            if (Misc.Active("ultifadcignited"))
+            {
+                AutoUltIgniteADC();
             }
 
             Healing();
@@ -511,6 +522,33 @@ namespace SephSoraka
         #endregion KillSteal
 
 
+        #region AutoUltIgniteADC
+
+        private static void AutoUltIgniteADC()
+        {
+            var sethealth = Misc.GetSlider("adcignitedhealth");
+            if (Spells[SpellSlot.R].IsReady() && myADC.HasBuff("summonerdot") && myADC.HealthPercent <= sethealth)
+            {
+                Spells[SpellSlot.R].Cast();
+            }
+        }
+        #endregion AutoUltIgniteADC
+
+        #region AutoEStunned
+
+        private static void AutoEStunned()
+        {
+                var enemy = HeroManager.Enemies.Find(x => x.IsMovementImpaired());
+                if (enemy != null)
+                {
+                    var pred = Spells[SpellSlot.E].GetPrediction(enemy);
+                    if (pred.Hitchance == HitChance.Immobile)
+                    {
+                        Spells[SpellSlot.E].Cast(pred.CastPosition);
+                    }
+            }
+    }
+        #endregion
 
         #region AntiGapcloser
 
@@ -572,21 +610,24 @@ namespace SephSoraka
                 return;
             }
 
-            if (Misc.Active("Drawing.DrawQ"))
+            var DrawQ = Config.Item("Drawing.DrawQ").GetValue<Circle>();
+            var DrawW = Config.Item("Drawing.DrawW").GetValue<Circle>();
+            var DrawE = Config.Item("Drawing.DrawE").GetValue<Circle>();
+            if (DrawQ.Active)
             {
-                Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.Q].Range, System.Drawing.Color.White);
+                Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.Q].Range, DrawQ.Color);
             }
-            if (Misc.Active("Drawing.DrawW"))
+            if (DrawW.Active)
             {
-                Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.E].Range, System.Drawing.Color.DarkCyan);
+                Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.W].Range, DrawW.Color);
             }
-            if (Misc.Active("Drawing.DrawE"))
+            if (DrawE.Active)
             {
-                Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.E].Range, System.Drawing.Color.RoyalBlue);
+                Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.E].Range, DrawE.Color);
             }
             if (Misc.Active("Drawing.Drawfarm"))
             {
-                Render.Circle.DrawCircle(Player.Position, FarmRange, System.Drawing.Color.Red);
+                Render.Circle.DrawCircle(Player.Position, FarmRange, Color.Red);
             }
         }
         #endregion
@@ -612,7 +653,7 @@ namespace SephSoraka
 
         internal static int GetSetPriority(this Obj_AI_Hero hero)
         {
-            return Config.Item("p" + hero.ChampionName).GetValue<int>();
+            return Config.Item("p" + hero.ChampionName).GetValue<Slider>().Value;
         }
 
         static string[] p4 = {
