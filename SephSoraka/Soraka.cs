@@ -392,22 +392,6 @@ namespace SephSoraka
                     Spells[SpellSlot.Q].Cast(QLocation.Position);
                 }
             }
-
-            if (SpellSlot.E.IsReady() && Misc.Active("Farm.UseE"))
-            {
-                var eminions =
-                         Minions.Where(
-                             m =>
-                                 Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.E].Range);
-                MinionManager.FarmLocation ELocation =
-                    MinionManager.GetBestCircularFarmLocation(
-                        eminions.Select(m => m.ServerPosition.To2D()).ToList(), Spells[SpellSlot.E].Width,
-                        Spells[SpellSlot.E].Range);
-                if (ELocation.MinionsHit >= 1)
-                {
-                    Spells[SpellSlot.E].Cast(ELocation.Position);
-                }
-            }
         }
         #endregion Waveclear
 

@@ -130,7 +130,6 @@ namespace SephSoraka
                 Menu Farming = new Menu("Farming", "Farming");
                // Farming.AddItem(new MenuItem("Farm.Disableauto", "Dont farm minions").SetValue(true));
                 Farming.AddItem(new MenuItem("Farm.UseQ", "Use Q").SetValue(true));
-                Farming.AddItem(new MenuItem("Farm.UseE", "Use E").SetValue(true));
 
                 Config.AddSubMenu(Farming);
 
