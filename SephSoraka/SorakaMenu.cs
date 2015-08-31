@@ -135,7 +135,7 @@ namespace SephSoraka
 
                 Menu Interrupter = new Menu("Interrupter", "Interrupter +");
                 Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Use Q").SetValue(true));
-                Interrupter.AddItem(new MenuItem("Interrupter.UseW", "Use W").SetValue(true));
+                Interrupter.AddItem(new MenuItem("Interrupter.UseE", "Use E").SetValue(true));
                 Interrupter.AddItem(new MenuItem("Seperator", "----AntiGapCloser-----"));
                 Interrupter.AddItem(new MenuItem("Interrupter.AntiGapClose", "AntiGapClosers").SetValue(true));
                 Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "AntiGapClose with Q").SetValue(true));

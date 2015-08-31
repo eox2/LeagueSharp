@@ -512,6 +512,13 @@ namespace SephSoraka
                     Spells[SpellSlot.Q].Cast(sender.ServerPosition);
                 }
             }
+            if (Misc.Active("Interrupter.AntiGapClose") && sender.IsValidTarget())
+            {
+                if (Misc.Active("Interrupter.AG.UseE") && Vector3.Distance(args.End, Player.ServerPosition) <= Spells[SpellSlot.E].Range)
+                {
+                    Spells[SpellSlot.E].Cast(sender.ServerPosition);
+                }
+            }
         }
         #endregion
 
