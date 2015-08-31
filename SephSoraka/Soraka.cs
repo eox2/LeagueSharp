@@ -95,6 +95,7 @@ namespace SephSoraka
 
             Obj_AI_Base.OnProcessSpellCast += DangerDetector;
 
+            Orbwalking.BeforeAttack += BeforeAttack;
 
             Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += OnDraw;
@@ -141,9 +142,7 @@ namespace SephSoraka
         #endregion DetectAdc
 
         #endregion
-
-
-
+       
         #region OnUpdate
 
         private static void OnUpdate(EventArgs args)
@@ -185,6 +184,15 @@ namespace SephSoraka
         }
 
         #endregion
+
+        static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+       {
+            if (Misc.Active("Farm.Disableauto") && args.Target.Type != GameObjectType.obj_AI_Hero)
+           {
+               args.Process = false;
+            }
+       }
+
 
         static void DangerDetector(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
