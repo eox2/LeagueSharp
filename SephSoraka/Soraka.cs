@@ -186,8 +186,9 @@ namespace SephSoraka
         #endregion
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
-       {
-            if (Misc.Active("Farm.Disableauto") && args.Target.Type != GameObjectType.obj_AI_Hero)
+        {
+            var alliesinrange = Player.CountAlliesInRange(1400);
+            if (Misc.Active("Farm.Disableauto") && args.Target.Type != GameObjectType.obj_AI_Hero && alliesinrange > 0)
            {
                args.Process = false;
             }
