@@ -187,12 +187,17 @@ namespace SephSoraka
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            var alliesinrange = Player.CountAlliesInRange(1400);
-            if (Misc.Active("Farm.Disableauto") && args.Target.Type != GameObjectType.obj_AI_Hero && alliesinrange > 0)
-           {
-               args.Process = false;
+            if (Misc.Active("Farm.Disableauto") && args.Target.Type != GameObjectType.obj_AI_Hero)
+            {
+
+                var alliesinrange = HeroManager.Allies.Count(x => !x.IsMe && x.Distance(Player) <= FarmRange);
+                if (alliesinrange > 0)
+                {
+                    args.Process = false;
+                }
             }
-       }
+ 
+        }
 
 
         static void DangerDetector(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
@@ -579,9 +584,17 @@ namespace SephSoraka
             {
                 Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.E].Range, System.Drawing.Color.RoyalBlue);
             }
+            if (Misc.Active("Drawing.Drawfarm"))
+            {
+                Render.Circle.DrawCircle(Player.Position, FarmRange, System.Drawing.Color.Red);
+            }
         }
         #endregion
 
+        private static int FarmRange
+        {
+           get { return Config.Item("Farm.Range").GetValue<Slider>().Value; }
+        }
 
         internal static SorakaMenu.UltMode GetUltMode()
         {

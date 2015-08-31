@@ -129,7 +129,8 @@ namespace SephSoraka
                 Config.AddSubMenu(Harass);
 
                 Menu Farming = new Menu("Farming", "Farming");
-                Farming.AddItem(new MenuItem("Farm.Disableauto", "Dont autoing minions").SetValue(true));
+                Farming.AddItem(new MenuItem("Farm.Disableauto", "Dont auto minions").SetValue(true));
+                Farming.AddItem(new MenuItem("Farm.Range", "Min ally distance to auto attack").SetValue(new Slider(1400, 700, 2000)));
                 Farming.AddItem(new MenuItem("Farm.UseQ", "Use Q").SetValue(true));
 
                 Config.AddSubMenu(Farming);
@@ -170,6 +171,7 @@ namespace SephSoraka
                 Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q").SetValue(true));
                 Drawings.AddItem(new MenuItem("Drawing.DrawW", "Draw Q").SetValue(true));
                 Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E").SetValue(true));
+                Drawings.AddItem(new MenuItem("Drawing.Drawfarm", "Farming indicator circle").SetValue(true));
                 Config.AddSubMenu(Drawings);
                 return Config;
             }
