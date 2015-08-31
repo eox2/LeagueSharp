@@ -58,7 +58,7 @@ namespace SephSoraka
         private static void InitializeSpells()
         {
             Spells[SpellSlot.Q].SetSkillshot(0.500f, 300f, 1750f, false, SkillshotType.SkillshotLine);
-            Spells[SpellSlot.E].SetSkillshot(0.250f, 250f, 1300f, false, SkillshotType.SkillshotCircle);
+            Spells[SpellSlot.E].SetSkillshot(0.500f, 250f, 1300f, false, SkillshotType.SkillshotCircle);
         }
 
         private static bool done;
