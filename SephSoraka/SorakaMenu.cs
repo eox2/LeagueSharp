@@ -55,7 +55,7 @@ namespace SephSoraka
                     new MenuItem("ultmode", "Ult Mode").SetValue(new StringList(new[] {"Default", "Advanced"})));
 
                 RManager.AddItem(new MenuItem("onlyrincdmg", "Only if incoming damage").SetValue(false));
-                RManager.AddItem(new MenuItem("ultonlyadc", "Only if adc needs it").SetValue(false));
+                RManager.AddItem(new MenuItem("ultonlyadc", "Only if ADC needs it").SetValue(false));
                 RManager.AddItem(new MenuItem("rcheckdmgafter", "Take HP after damage into consideration").SetValue(true));
 
                 RManager.AddItem(
@@ -138,7 +138,7 @@ namespace SephSoraka
                 Menu Interrupter = new Menu("Interrupter", "Interrupter +");
                 Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Use Q").SetValue(true));
                 Interrupter.AddItem(new MenuItem("Interrupter.UseE", "Use E").SetValue(true));
-                Interrupter.AddItem(new MenuItem("Seperator", "----AntiGapCloser-----"));
+                Interrupter.AddItem(new MenuItem("Seperator", "----- AntiGapClose Options -----"));
                 Interrupter.AddItem(new MenuItem("Interrupter.AntiGapClose", "AntiGapClosers").SetValue(true));
                 Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "AntiGapClose with Q").SetValue(true));
                 Interrupter.AddItem(new MenuItem("Interrupter.AG.UseE", "AntiGapClose with E").SetValue(true));
@@ -167,11 +167,11 @@ namespace SephSoraka
                 Config.AddSubMenu(Misc);
 
                 Menu Drawings = new Menu("Drawings", "Drawing", false);
-                Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable all").SetValue(false));
+                Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable All").SetValue(false));
                 Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q").SetValue(true));
-                Drawings.AddItem(new MenuItem("Drawing.DrawW", "Draw Q").SetValue(true));
+                Drawings.AddItem(new MenuItem("Drawing.DrawW", "Draw W").SetValue(true));
                 Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E").SetValue(true));
-                Drawings.AddItem(new MenuItem("Drawing.Drawfarm", "Farming indicator circle").SetValue(true));
+                Drawings.AddItem(new MenuItem("Drawing.Drawfarm", "Farming Indicator Circle").SetValue(true));
                 Config.AddSubMenu(Drawings);
                 return Config;
             }
