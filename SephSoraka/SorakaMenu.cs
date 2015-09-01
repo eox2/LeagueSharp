@@ -36,7 +36,7 @@ namespace SephSoraka
                 Menu WManager = new Menu("W Settings", "WManager");
                 WManager.AddItem(new MenuItem("onlywincdmg", "Only heal if incoming damage").SetValue(false));
                 WManager.AddItem(new MenuItem("wdamagedetection", "Disable damage detection").SetValue(false));
-                WManager.AddItem(new MenuItem("wcheckdmgafter", "Take HP after damage into consideration").SetValue(true));
+                WManager.AddItem(new MenuItem("wcheckdmgafter", "Take HP-after-Damage into consideration").SetValue(true));
                 WManager.AddItem(new MenuItem("wonlyadc", "Heal only ADC").SetValue(false));
 
                 foreach (var hero in HeroManager.Allies.Where(x => !x.IsMe))
@@ -53,17 +53,17 @@ namespace SephSoraka
                 Menu RManager = new Menu("R Settings", "RManager");
 
                 RManager.AddItem(
-                    new MenuItem("ultmode", "Ult Mode").SetValue(new StringList(new[] {"Default", "Advanced"})));
+                    new MenuItem("ultmode", "Ultimate Mode").SetValue(new StringList(new[] {"Default", "Advanced"})));
 
-                Menu AntiIgnite = new Menu("AntiIgnite", "Antiignite");
-                AntiIgnite.AddItem(new MenuItem("ultifadcignited", "Use ult if adc is ignited").SetValue(false));
+                Menu AntiIgnite = new Menu("Anti-Ignite", "Antiignite");
+                AntiIgnite.AddItem(new MenuItem("ultifadcignited", "Use R if ADC is Ignited").SetValue(false));
                 AntiIgnite.AddItem(new MenuItem("adcignitedhealth", "ADC below HP").SetValue(new Slider(40, 0, 100)));
 
                 RManager.AddSubMenu(AntiIgnite);
 
                 RManager.AddItem(new MenuItem("onlyrincdmg", "Only if incoming damage").SetValue(false));
-                RManager.AddItem(new MenuItem("ultonlyadc", "Only if ADC needs it").SetValue(false));
-                RManager.AddItem(new MenuItem("rcheckdmgafter", "Take HP after damage into consideration").SetValue(true));
+                RManager.AddItem(new MenuItem("ultonlyadc", "Only if ADC needs healing").SetValue(false));
+                RManager.AddItem(new MenuItem("rcheckdmgafter", "Take HP-after-damage into consideration").SetValue(true));
 
                 RManager.AddItem(
                     new MenuItem("minallies", "Minimum # of allies under set health").SetValue(new Slider(1, 0, 5)));
@@ -117,7 +117,7 @@ namespace SephSoraka
 
 
                 Menu KillSteal = new Menu("Killsteal", "Killsteal");
-                KillSteal.AddItem(new MenuItem("Killsteal", "KillSteal").SetValue(true));
+                KillSteal.AddItem(new MenuItem("Killsteal", "Killsteal").SetValue(true));
                 KillSteal.AddItem(new MenuItem("Killsteal.UseQ", "Use Q").SetValue(false));
                 KillSteal.AddItem(new MenuItem("Killsteal.UseE", "Use E").SetValue(false));
                 KillSteal.AddItem(new MenuItem("Killsteal.UseIgnite", "Use Ignite").SetValue(false));
@@ -137,7 +137,7 @@ namespace SephSoraka
 
                 Menu Farming = new Menu("Farming", "Farming");
                 Farming.AddItem(new MenuItem("Farm.Disableauto", "Dont auto minions").SetValue(true));
-                Farming.AddItem(new MenuItem("Farm.Range", "Min ally distance to auto attack").SetValue(new Slider(1400, 700, 2000)));
+                Farming.AddItem(new MenuItem("Farm.Range", "Min ally-distance to auto attack").SetValue(new Slider(1400, 700, 2000)));
                 Farming.AddItem(new MenuItem("Farm.UseQ", "Use Q").SetValue(true));
 
                 Config.AddSubMenu(Farming);
@@ -145,10 +145,10 @@ namespace SephSoraka
                 Menu Interrupter = new Menu("Interrupter", "Interrupter +");
                 Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Use Q").SetValue(true));
                 Interrupter.AddItem(new MenuItem("Interrupter.UseE", "Use E").SetValue(true));
-                Interrupter.AddItem(new MenuItem("Seperator", "----AntiGapCloser-----"));
-                Interrupter.AddItem(new MenuItem("Interrupter.AntiGapClose", "AntiGapClosers").SetValue(true));
-                Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "AntiGapClose with Q").SetValue(true));
-                Interrupter.AddItem(new MenuItem("Interrupter.AG.UseE", "AntiGapClose with E").SetValue(true));
+                Interrupter.AddItem(new MenuItem("Seperator", "----- Anti-Gapcloser -----"));
+                Interrupter.AddItem(new MenuItem("Interrupter.AntiGapClose", "Anti-Gapclosers").SetValue(true));
+                Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "Anti-Gapclose with Q").SetValue(true));
+                Interrupter.AddItem(new MenuItem("Interrupter.AG.UseE", "Anti-Gapclose with E").SetValue(true));
 
                 Config.AddSubMenu(Interrupter);
 
@@ -170,17 +170,16 @@ namespace SephSoraka
                                 HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(),
                                 HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString()
                             }, 1)));
-                Misc.AddItem(new MenuItem("Misc.AutoEStunned", "Auto E Immobile Champions").SetValue(false));
-                Misc.AddItem(new MenuItem("Misc.Nohealshop", "No heal if ally in base").SetValue(false));
+                Misc.AddItem(new MenuItem("Misc.AutoEStunned", "Auto E immobile champions").SetValue(false));
                 Misc.AddItem(new MenuItem("Misc.Debug", "Debug", false).SetValue(false));
                 Config.AddSubMenu(Misc);
 
                 Menu Drawings = new Menu("Drawings", "Drawing", false);
-                Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable all").SetValue(false));
+                Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable All").SetValue(false));
                 Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q").SetValue(new Circle(true, Color.White)));
                 Drawings.AddItem(new MenuItem("Drawing.DrawW", "Draw W").SetValue(new Circle(true, Color.DarkCyan)));
                 Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E").SetValue(new Circle(true, Color.RoyalBlue)));
-                Drawings.AddItem(new MenuItem("Drawing.Drawfarm", "Farming indicator circle").SetValue(true));
+                Drawings.AddItem(new MenuItem("Drawing.Drawfarm", "Farming-range indicator").SetValue(true));
                 Config.AddSubMenu(Drawings);
                 return Config;
             }
