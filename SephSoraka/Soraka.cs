@@ -57,11 +57,11 @@ namespace SephSoraka
 
         private static void InitializeSpells()
         {
-            Spells[SpellSlot.Q].SetSkillshot(0.500f, 300f, 1750f, false, SkillshotType.SkillshotLine);
+            Spells[SpellSlot.Q].SetSkillshot(0.500f, 300f, 1750f, false, SkillshotType.SkillshotCircle);
             Spells[SpellSlot.E].SetSkillshot(0.500f, 250f, 1300f, false, SkillshotType.SkillshotCircle);
         }
 
-        private static bool done;
+        //private static bool done;
         /*
         private static void PrintSData()
         {
@@ -214,7 +214,7 @@ namespace SephSoraka
         static void DangerDetector(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             var ally = args.Target as Obj_AI_Hero;
-            if (sender.IsChampion() && sender.Team != Player.Team && ally != null && ally.IsAlly)
+            if (sender.IsChampion() && sender.Team != Player.Team && ally != null && ally.IsAlly && (!Misc.Active("Misc.Nohealshop") || !ally.InShop()))
             {
                 if (Misc.Active("Healing.UseW"))
                 {
@@ -287,7 +287,7 @@ namespace SephSoraka
                 var alliesinneed =
                     HeroManager.Allies.Where(
                         hero => !hero.IsMe &&
-                                !hero.IsDead && !hero.IsZombie && hero.Distance(Player) <= Spells[SpellSlot.W].Range &&
+                                !hero.IsDead && (!Misc.Active("Misc.Nohealshop") || !hero.InShop()) && !hero.IsZombie && hero.Distance(Player) <= Spells[SpellSlot.W].Range &&
                                 Misc.Active("w" + hero.ChampionName) &&
                                 hero.HealthPercent <= Misc.GetSlider("wpct" + hero.ChampionName))
                         .ToList();
@@ -331,7 +331,7 @@ namespace SephSoraka
         {
             List<Obj_AI_Hero> alliesinneed = HeroManager.Allies.Where(
           hero =>
-              !hero.IsDead && !hero.IsZombie && hero.Distance(Player) <= Spells[SpellSlot.W].Range &&
+              !hero.IsDead && !hero.IsZombie && (!Misc.Active("Misc.Nohealshop") || !hero.InShop()) && hero.Distance(Player) <= Spells[SpellSlot.W].Range &&
               hero.HealthPercent <= Misc.GetSlider("rpct" + hero.ChampionName))
           .ToList();
 
@@ -353,7 +353,7 @@ namespace SephSoraka
         {
             List<Obj_AI_Hero> alliesinneed = HeroManager.Allies.Where(
       hero =>
-          !hero.IsDead && !hero.IsZombie && hero.Distance(Player) <= Spells[SpellSlot.W].Range && Misc.Active("r" + hero.ChampionName) &&
+          !hero.IsDead && !hero.IsZombie && (!Misc.Active("Misc.Nohealshop") || !hero.InShop()) && hero.Distance(Player) <= Spells[SpellSlot.W].Range && Misc.Active("r" + hero.ChampionName) &&
           hero.HealthPercent <= Misc.GetSlider("rpct" + hero.HealthPercent))
       .ToList();
 
