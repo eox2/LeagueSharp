@@ -53,7 +53,7 @@ namespace SephSoraka
                 Menu RManager = new Menu("R Settings", "RManager");
 
                 RManager.AddItem(
-                    new MenuItem("ultmode", "Ult Mode").SetValue(new StringList(new[] {"Default", "Advanced"})));
+                    new MenuItem("ultmode", "Ultimate Mode").SetValue(new StringList(new[] {"Default", "Advanced"})));
 
                 Menu AntiIgnite = new Menu("Anti-Ignite", "Antiignite");
                 AntiIgnite.AddItem(new MenuItem("ultifadcignited", "Use R if ADC is Ignited").SetValue(false));
