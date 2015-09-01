@@ -171,6 +171,7 @@ namespace SephSoraka
                                 HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString()
                             }, 1)));
                 Misc.AddItem(new MenuItem("Misc.AutoEStunned", "Auto E immobile champions").SetValue(false));
+                Misc.AddItem(new MenuItem("Misc.Nohealshop", "Dont heal if ally in base").SetValue(true));
                 Misc.AddItem(new MenuItem("Misc.Debug", "Debug", false).SetValue(false));
                 Config.AddSubMenu(Misc);
 
