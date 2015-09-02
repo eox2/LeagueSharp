@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephSoraka", "SephSoraka\Se
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YTSharp", "YTSharp\YTSharp.csproj", "{5AE9F483-E0DC-4DA0-B0ED-A367F7E13059}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PingSpammer", "PingSpammer\PingSpammer.csproj", "{0683857E-FEEA-4835-A3B8-F0195E636A99}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -117,6 +119,10 @@ Global
 		{5AE9F483-E0DC-4DA0-B0ED-A367F7E13059}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AE9F483-E0DC-4DA0-B0ED-A367F7E13059}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AE9F483-E0DC-4DA0-B0ED-A367F7E13059}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0683857E-FEEA-4835-A3B8-F0195E636A99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0683857E-FEEA-4835-A3B8-F0195E636A99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0683857E-FEEA-4835-A3B8-F0195E636A99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0683857E-FEEA-4835-A3B8-F0195E636A99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
