@@ -74,7 +74,7 @@ namespace SephSoraka
                         new MenuItem("r" + hero.ChampionName, "Heal " + hero.ChampionName).SetValue(true));
                     RManager.AddItem(
                         new MenuItem("rpct" + hero.ChampionName, "Health % " + hero.ChampionName)
-                            .SetValue(new Slider(45, 0, 100)));
+                            .SetValue(new Slider(30, 0, 100)));
                 }
 
                 Config.AddSubMenu(RManager);
@@ -146,7 +146,6 @@ namespace SephSoraka
                 Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Use Q").SetValue(true));
                 Interrupter.AddItem(new MenuItem("Interrupter.UseE", "Use E").SetValue(true));
                 Interrupter.AddItem(new MenuItem("Seperator", "----- Anti-Gapcloser -----"));
-                Interrupter.AddItem(new MenuItem("Interrupter.AntiGapClose", "Anti-Gapclosers").SetValue(true));
                 Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "Anti-Gapclose with Q").SetValue(true));
                 Interrupter.AddItem(new MenuItem("Interrupter.AG.UseE", "Anti-Gapclose with E").SetValue(true));
 

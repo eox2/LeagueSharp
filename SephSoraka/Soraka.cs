@@ -560,14 +560,14 @@ namespace SephSoraka
             }
             var sender = args.Sender;
 
-            if (Misc.Active("Interrupter.AntiGapClose") && sender.IsValidTarget())
+            if (sender.IsValidTarget())
             {
                 if (Misc.Active("Interrupter.AG.UseQ") && Vector3.Distance(args.End, Player.ServerPosition) <= Spells[SpellSlot.Q].Range)
                 {
                     Spells[SpellSlot.Q].Cast(sender.ServerPosition);
                 }
             }
-            if (Misc.Active("Interrupter.AntiGapClose") && sender.IsValidTarget())
+            if (sender.IsValidTarget())
             {
                 if (Misc.Active("Interrupter.AG.UseE") && Vector3.Distance(args.End, Player.ServerPosition) <= Spells[SpellSlot.E].Range)
                 {
