@@ -16,15 +16,18 @@ namespace PingSpammer
 
         static void OnLoad(EventArgs args)
         {
-            if (Game.Time - lasttick >= 1000)
-            {
-                lasttick = Game.Time;
+            Game.OnUpdate += OnUpdate;
+        }
+
+        static void OnUpdate(EventArgs args)
+        {
                 foreach (var hero in HeroManager.AllHeroes)
                 {
+                    if (!(Game.Time - lasttick >= 1000)) return;
+                    lasttick = Game.Time;
                     Vector3 kappa = hero.Position;
                     Game.SendPing(PingCategory.Normal, kappa);
                 }
-            }
         }
     }
 }
