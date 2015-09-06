@@ -98,7 +98,9 @@ namespace SephSoraka
                 }
 
                     Priorities.AddItem((new MenuItem("adc", "ADC").SetValue(new StringList(allynames, iof))));
- 
+
+                Priorities.AddItem(
+                    new MenuItem("Priorities.Mikaels", "Min priority for Mikaels").SetValue(new Slider(5, 1, 5)));
 
                 foreach (var ally in HeroManager.Allies)
                 {
@@ -169,6 +171,7 @@ namespace SephSoraka
                                 HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(),
                                 HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString()
                             }, 1)));
+                Misc.AddItem(new MenuItem("Misc.UseMikael", "Use Mikaels").SetValue(true));
                 Misc.AddItem(new MenuItem("Misc.AutoEStunned", "Auto E immobile champions").SetValue(false));
                 Misc.AddItem(new MenuItem("Misc.Nohealshop", "Dont heal if ally in base").SetValue(true));
                 Misc.AddItem(new MenuItem("Misc.Debug", "Debug", false).SetValue(false));

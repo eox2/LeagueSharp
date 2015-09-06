@@ -27,6 +27,8 @@ namespace SephSoraka
             "Jinx", "Kalista", "KogMaw", "Lucian", "Miss Fortune", "Quinn", "Sivir", "Tristana", "Twitch", "Urgot", "Varus", "Vayne"
         };
 
+        private static Items.Item mikaels = new Items.Item(3222);
+
         private static Obj_AI_Hero myADC
         {
             get
@@ -161,6 +163,11 @@ namespace SephSoraka
             if (Misc.Active("ultifadcignited"))
             {
                 AutoUltIgniteADC();
+            }
+
+            if (Misc.Active("Misc.UseMikael"))
+            {
+                UseMikaels();
             }
 
             Healing();
@@ -521,6 +528,31 @@ namespace SephSoraka
 
         #endregion KillSteal
 
+        #region Mikaels
+
+        static void UseMikaels()
+        {
+            if (mikaels.IsReady())
+            {
+                foreach (
+                    var ally in
+                        HeroManager.Allies.Where(
+                            x =>
+                                !x.IsMe && x.Distance(Player) <= 750 &&
+                                x.GetSetPriority() == Misc.GetSlider("Priorities.Mikaels")))
+                {
+                    if (ally.HasBuffOfType(BuffType.Fear) || ally.HasBuffOfType(BuffType.Stun) ||
+                        ally.HasBuffOfType(BuffType.Taunt) ||
+                        (ally.HasBuffOfType(BuffType.Blind) && ally.NetworkId == myADC.NetworkId) ||
+                        ally.HasBuffOfType(BuffType.Polymorph) || ally.HasBuffOfType(BuffType.Snare))
+                    {
+                        mikaels.Cast(ally);
+                    }
+                }
+            }
+        }
+        #endregion Mikaels
+
 
         #region AutoUltIgniteADC
 
@@ -533,6 +565,7 @@ namespace SephSoraka
             }
         }
         #endregion AutoUltIgniteADC
+
 
         #region AutoEStunned
 
