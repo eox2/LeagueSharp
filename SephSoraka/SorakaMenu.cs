@@ -97,7 +97,7 @@ namespace SephSoraka
                     iof = Array.IndexOf(allynames, allynames.FirstOrDefault(x => x == detected.ChampionName));
                 }
 
-                    Priorities.AddItem((new MenuItem("adc", "ADC").SetValue(new StringList(allynames, iof))));
+                    Priorities.AddItem((new MenuItem("adc", "ADC").SetValue(new StringList(allynames, iof)))).Permashow();
 
                 Priorities.AddItem(
                     new MenuItem("Priorities.Mikaels", "Min priority for Mikaels").SetValue(new Slider(5, 1, 5)));
@@ -144,17 +144,7 @@ namespace SephSoraka
 
                 Config.AddSubMenu(Farming);
 
-                Menu Interrupter = new Menu("Interrupter", "Interrupter +");
-                Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Use Q").SetValue(true));
-                Interrupter.AddItem(new MenuItem("Interrupter.UseE", "Use E").SetValue(true));
-                Interrupter.AddItem(new MenuItem("Seperator", "----- Anti-Gapcloser -----"));
-                Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "Anti-Gapclose with Q").SetValue(true));
-                Interrupter.AddItem(new MenuItem("Interrupter.AG.UseE", "Anti-Gapclose with E").SetValue(true));
-
-                Config.AddSubMenu(Interrupter);
-
-
-                Menu Misc = new Menu("Hitchance Settings", "Misc", false);
+                Menu Misc = new Menu("Misc Settings", "Misc", false);
                 Misc.AddItem(
                     new MenuItem("Hitchance.Q", "Q Hit Chance").SetValue(
                         new StringList(
@@ -174,8 +164,17 @@ namespace SephSoraka
                 Misc.AddItem(new MenuItem("Misc.UseMikael", "Use Mikaels").SetValue(true));
                 Misc.AddItem(new MenuItem("Misc.AutoEStunned", "Auto E immobile champions").SetValue(false));
                 Misc.AddItem(new MenuItem("Misc.Nohealshop", "Dont heal if ally in base").SetValue(true));
-                Misc.AddItem(new MenuItem("Misc.Debug", "Debug", false).SetValue(false));
                 Config.AddSubMenu(Misc);
+
+                Menu Interrupter = new Menu("Interrupter", "Interrupter +");
+                Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Use Q").SetValue(true));
+                Interrupter.AddItem(new MenuItem("Interrupter.UseE", "Use E").SetValue(true));
+                Interrupter.AddItem(new MenuItem("Seperator", "----- Anti-Gapcloser -----"));
+                Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "Anti-Gapclose with Q").SetValue(true));
+                Interrupter.AddItem(new MenuItem("Interrupter.AG.UseE", "Anti-Gapclose with E").SetValue(true));
+
+                Config.AddSubMenu(Interrupter);
+
 
                 Menu Drawings = new Menu("Drawings", "Drawing", false);
                 Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable All").SetValue(false));
