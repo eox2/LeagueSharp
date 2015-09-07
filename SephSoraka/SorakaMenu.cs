@@ -39,13 +39,16 @@ namespace SephSoraka
                 WManager.AddItem(new MenuItem("wcheckdmgafter", "Take HP-after-Damage into consideration").SetValue(true));
                 WManager.AddItem(new MenuItem("wonlyadc", "Heal only ADC").SetValue(false));
 
+                Menu Wsubmenu = new Menu("Heal %", "healpercent");
                 foreach (var hero in HeroManager.Allies.Where(x => !x.IsMe))
                 {
-                    WManager.AddItem(new MenuItem("w" + hero.ChampionName, "Heal " + hero.ChampionName).SetValue(true));
-                    WManager.AddItem(
+                    Wsubmenu.AddItem(new MenuItem("w" + hero.ChampionName, "Heal " + hero.ChampionName).SetValue(true));
+                    Wsubmenu.AddItem(
                         new MenuItem("wpct" + hero.ChampionName, "Health % " + hero.ChampionName).SetValue(new Slider(
                             45, 0, 100)));
                 }
+
+                WManager.AddSubMenu(Wsubmenu);
 
                 Config.AddSubMenu(WManager);
 
@@ -68,15 +71,17 @@ namespace SephSoraka
                 RManager.AddItem(
                     new MenuItem("minallies", "Minimum # of allies under set health").SetValue(new Slider(1, 0, 5)));
 
+                Menu Rsubmenu = new Menu("Heal %", "Healpercents");
                 foreach (var hero in HeroManager.Allies)
                 {
-                    RManager.AddItem(
+                    Rsubmenu.AddItem(
                         new MenuItem("r" + hero.ChampionName, "Heal " + hero.ChampionName).SetValue(true));
-                    RManager.AddItem(
+                    Rsubmenu.AddItem(
                         new MenuItem("rpct" + hero.ChampionName, "Health % " + hero.ChampionName)
                             .SetValue(new Slider(30, 0, 100)));
                 }
 
+                RManager.AddSubMenu(Rsubmenu);
                 Config.AddSubMenu(RManager);
 
                 Menu Priorities = new Menu("Priorities", "Priorities");
