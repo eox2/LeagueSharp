@@ -449,7 +449,7 @@ namespace SephSoraka
             if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Harass.UseQ") && Player.ManaPercent > Misc.GetSlider("Harass.Mana"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
-                if (pred.Hitchance > Misc.GetHitChance("Hitchance.Q"))
+                if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
                 {
                     Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
