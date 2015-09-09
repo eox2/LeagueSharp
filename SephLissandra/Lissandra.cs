@@ -22,7 +22,7 @@ namespace SephLissandra
         public static Menu Config;
         public static Obj_AI_Hero Player;
         public static bool jumping;
-        private static Vector3 MissilePosition;
+        private static Vector2 MissilePosition;
         private static MissileClient LissEMissile;
 
         private static Dictionary<String, Spell> Spells = new Dictionary<String, Spell>
@@ -123,10 +123,10 @@ namespace SephLissandra
              {
                  return;
              }
-             MissilePosition = LissEMissile.Position;
+             MissilePosition = LissEMissile.Position.To2D();
              if (jumping)
              {
-                 if ((Vector2.Distance(LissEMissile.Position.To2D(), LissEMissile.EndPosition.To2D()) < 40))
+                 if ((Vector2.Distance(MissilePosition, LissEMissile.EndPosition.To2D()) < 40))
                  {
                      Spells["E"].CastOnUnit(Player);
                      jumping = false;
@@ -294,7 +294,7 @@ namespace SephLissandra
         {
             if (LissUtils.AutoSecondE() && LissUtils.isHealthy() && LissEMissile != null && Spells["E"].IsReady())
             {
-                if (Vector3.Distance(MissilePosition, target.ServerPosition) < Vector3.Distance(Player.ServerPosition, target.ServerPosition) && !LissUtils.PointUnderEnemyTurret(MissilePosition) && Vector3.Distance(target.ServerPosition, LissEMissile.EndPosition) > Vector3.Distance(Player.ServerPosition, target.ServerPosition)) 
+                if (Vector2.Distance(MissilePosition, target.ServerPosition.To2D()) < Vector3.Distance(Player.ServerPosition, target.ServerPosition) && !LissUtils.PointUnderEnemyTurret(MissilePosition) && Vector3.Distance(target.ServerPosition, LissEMissile.EndPosition) > Vector3.Distance(Player.ServerPosition, target.ServerPosition)) 
                 {
                      Spells["E"].CastOnUnit(Player);
                      return;
@@ -304,7 +304,7 @@ namespace SephLissandra
 
                     if ((enemiesatpointR >= Config.Item("Combo.ecountR").GetValue<Slider>().Value && SpellSlot.R.IsReady()) || (Enemiesatpoint.Any(e => e.IsKillableFromPoint(LissEMissile.Position) && Vector3.Distance(LissEMissile.Position, e.ServerPosition) < Vector3.Distance(Player.ServerPosition, e.ServerPosition))))
                     {
-                            if (LissUtils.PointUnderEnemyTurret(LissEMissile.Position) && LissUtils.Active("Misc.DontETurret"))
+                            if (LissUtils.PointUnderEnemyTurret(MissilePosition) && LissUtils.Active("Misc.DontETurret"))
                             {
                                 return;
                             }
@@ -314,7 +314,7 @@ namespace SephLissandra
                     var enemiesatpointW = LissEMissile.Position.CountEnemiesInRange(Spells["W"].Range);
                     if (enemiesatpointW >= LissUtils.GetSlider("Combo.ecountW") && SpellSlot.W.IsReady())
                     {
-                            if (LissUtils.PointUnderEnemyTurret(LissEMissile.Position) && LissUtils.Active("Misc.DontETurret"))
+                            if (LissUtils.PointUnderEnemyTurret(MissilePosition) && LissUtils.Active("Misc.DontETurret"))
                             {
                                 return;
                             }
@@ -502,7 +502,7 @@ namespace SephLissandra
             {
                 if (Vector3.Distance(LissEMissile.Position, etarget.Position) < Spells["Q"].Range && SpellSlot.Q.IsReady() && etarget.Health < Player.GetSpellDamage(etarget, SpellSlot.Q))
                 {
-                    if (LissUtils.PointUnderEnemyTurret(LissEMissile.Position) && LissUtils.Active("Misc.DontETurret"))
+                    if (LissUtils.PointUnderEnemyTurret(MissilePosition) && LissUtils.Active("Misc.DontETurret"))
                     {
                         return;
                     }
@@ -556,6 +556,7 @@ namespace SephLissandra
             if (miss.SpellCaster is Obj_AI_Hero && miss.SpellCaster.IsValid && miss.SpellCaster.IsMe && miss.SData.Name == "LissandraEMissile")
             {
                 LissEMissile = null;
+                MissilePosition = new Vector2(0, 0);
             }
         }
 
@@ -675,9 +676,9 @@ namespace SephLissandra
                         
                     }
                 }
-                else if (LissEMissile != null && LissUtils.Active("Waveclear.UseE2") && Vector3.Distance(LissEMissile.Position, LissEMissile.EndPosition) <= 15 && SpellSlot.E.IsReady())
+                else if (LissEMissile != null && LissUtils.Active("Waveclear.UseE2") && Vector2.Distance(MissilePosition, LissEMissile.EndPosition.To2D()) <= 15 && SpellSlot.E.IsReady())
                 {
-                    if (LissUtils.PointUnderEnemyTurret(LissEMissile.Position) && LissUtils.Active("Misc.DontETurret"))
+                    if (LissUtils.PointUnderEnemyTurret(MissilePosition) && LissUtils.Active("Misc.DontETurret"))
                     {
                         return;
                     }
