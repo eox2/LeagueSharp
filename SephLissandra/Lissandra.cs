@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using LeagueSharp.Common;
 using LeagueSharp;
+using LeagueSharp.Common;
 using SharpDX;
+using Color = System.Drawing.Color;
+using Version = System.Version;
 
 namespace SephLissandra
 {
@@ -16,17 +18,17 @@ namespace SephLissandra
          * April 12 2015
          */
 
-        public static System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
+        public static Version version = Assembly.GetExecutingAssembly().GetName().Version;
         public static Menu Config;
         public static Obj_AI_Hero Player;
-        private static Orbwalking.Orbwalker Orbwalker = null;
-        public static bool jumping = false;
+        public static bool jumping;
         private static Vector3 MissilePosition;
-        private static Obj_SpellLineMissile LissEMissile = null;
+        private static MissileClient LissEMissile;
 
         private static Dictionary<String, Spell> Spells = new Dictionary<String, Spell>
         {
             { "Q", new Spell(SpellSlot.Q, 715f) },
+            { "Qtest", new Spell(SpellSlot.Q, 715f) },
             { "Q2", new Spell(SpellSlot.Q, 825f) },
             { "W", new Spell(SpellSlot.W, 450f) },
             { "E", new Spell(SpellSlot.E, 1050f) },
@@ -43,7 +45,7 @@ namespace SephLissandra
         static void OnLoad(EventArgs args)
         {
             Player = ObjectManager.Player;
-            if (Player.BaseSkinName != "Lissandra")
+            if (Player.CharData.BaseSkinName != "Lissandra")
             {
                 return;
             }
@@ -64,8 +66,9 @@ namespace SephLissandra
 
         static void DefineSpells()
         {
-            Spells["Q"].SetSkillshot(0.250f, 75f, 1200f, false, SkillshotType.SkillshotLine);
-            Spells["Q2"].SetSkillshot(0.250f, 90f, 1200f, false, SkillshotType.SkillshotLine);
+            Spells["Q"].SetSkillshot(0.250f, 75f, 2200f, false, SkillshotType.SkillshotLine);
+            Spells["Qtest"].SetSkillshot(0.250f, 75f, 2200f, true, SkillshotType.SkillshotLine);
+            Spells["Q2"].SetSkillshot(0.250f, 90f, 2200f, false, SkillshotType.SkillshotLine);
             Spells["E"].SetSkillshot(0.250f, 125f, 850f, false, SkillshotType.SkillshotLine);
         }
 
@@ -110,7 +113,6 @@ namespace SephLissandra
              {
                  Spells["E"].Cast(Position);
                  jumping = true;
-
              }
          }
 
@@ -124,23 +126,26 @@ namespace SephLissandra
              MissilePosition = LissEMissile.Position;
              if (jumping)
              {
-                 if ((Vector3.Distance(LissEMissile.Position, LissEMissile.EndPosition) < 25))
+                 if ((Vector2.Distance(LissEMissile.Position.To2D(), LissEMissile.EndPosition.To2D()) < 40))
                  {
                      Spells["E"].CastOnUnit(Player);
                      jumping = false;
-                     return;
                  }
+                 Utility.DelayAction.Add(2000, delegate { jumping = false; });
              }
+            
          }
 
 
          private static void ComboHandler()
-        {
-            var Target = TargetSelector.GetTarget(Spells["Q"].Range, TargetSelector.DamageType.Magical);
+         {
+            var Target = TargetSelector.GetTarget(Spells["E"].Range * 0.94f, TargetSelector.DamageType.Magical);
+
             if (Target == null || !Target.IsValidTarget())
             {
-                Target = HeroManager.Enemies.Where(h => h.IsValidTarget() && (Vector3.Distance(h.ServerPosition, Player.ServerPosition) < Spells["Q"].Range) && !h.IsZombie).FirstOrDefault();
+                Target = HeroManager.Enemies.FirstOrDefault(h => h.IsValidTarget() && (Vector3.Distance(h.ServerPosition, Player.ServerPosition) < Spells["E"].Range * 0.94) && !h.IsZombie);
             }
+
             if (Target != null && !Target.IsInvulnerable)
             {
                 if (LissUtils.Active("Combo.UseQ") && SpellSlot.Q.IsReady())
@@ -206,94 +211,45 @@ namespace SephLissandra
              }
          }
 
-
-         /*
-        private static void CastQ(Obj_AI_Hero target)
-        {
-            List<Vector3> Positions = new List<Vector3>();
-            List<Vector3> GoodPositions = new List<Vector3>();
-            foreach (
-                var hero in
-                    ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(
-                            h =>
-                                h.IsValidTarget() && !h.IsZombie &&
-                                Vector3.Distance(Player.ServerPosition, h.ServerPosition) < Spells["Q2"].Range))
-            {
-                var pred = Spells["Q2"].GetPrediction(hero, true);
-                if (pred.AoeTargetsHitCount > 1 &&
-                    pred.AoeTargetsHit.Any(
-                        h => Vector3.Distance(Player.ServerPosition, h.ServerPosition) <= Spells["Q"].Range) && pred.Hitchance > GetHitChance("Hitchance.Q"))
-                {
-                    Positions.Add(pred.CastPosition);
-                    if (pred.AoeTargetsHit.Any(h => h.Equals(target)))
-                    {
-                        GoodPositions.Add(pred.CastPosition);
-                    }
-
-                }
-            }
-
-            if (Vector3.Distance(target.ServerPosition, Player.ServerPosition) <= Spells["Q"].Range)
-            {
-                var pred = Spells["Q"].GetPrediction(target);
-                if (pred.Hitchance > GetHitChance("Hitchance.Q")) 
-                {
-                    Positions.Add(pred.CastPosition);
-                }
-            }
-            if (GoodPositions.Any())
-                {
-                    Spells["Q2"].Cast(GoodPositions.FirstOrDefault());
-                    if (LissUtils.Active("Misc.Debug"))
-                    {
-                        Game.PrintChat("Good position");
-                    }
-                    return;
-                }
-            if (Positions.Any())
-            {
-                Spells["Q"].Cast(Positions.FirstOrDefault());
-                if (LissUtils.Active("Misc.Debug"))
-                {
-                    Game.PrintChat("positions");
-                }
-            }
-        }
-          * */
-
-
          private static void CastQ(Obj_AI_Hero target)
          {
-             var pred = Spells["Q2"].GetPrediction(target);
-             var collisionobjects = pred.CollisionObjects;
+            Dictionary<Vector3, int> maxhit = (from hero in HeroManager.Enemies.Where(h => h.IsValidTarget() && !h.IsInvulnerable && Vector3.Distance(h.ServerPosition, Player.ServerPosition) < Spells["Q2"].Range) select Spells["Q2"].GetPrediction(hero) into prediction where prediction.CollisionObjects.Count > 0 && prediction.Hitchance >= LissUtils.GetHitChance("Hitchance.Q") let enemieshit = prediction.CollisionObjects.Where(x => x is Obj_AI_Hero) select prediction).ToDictionary(prediction => prediction.CastPosition, prediction => prediction.CollisionObjects.Count);
 
-             if (collisionobjects.Any())
+             var bestpair = maxhit.MaxOrDefault(x => x.Value);
+             if (bestpair.Value > 0)
              {
-                 Spells["Q2"].Cast(pred.CastPosition);
+                 Vector3 bestpos = bestpair.Key;
+                 Spells["Q2"].Cast(bestpos);
                  return;
              }
-                 var predQ = Spells["Q"].GetPrediction(target);
-                 if (predQ.Hitchance > LissUtils.GetHitChance("Hitchance.Q"))
-                 {
-                     Spells["Q"].Cast(pred.CastPosition);
-                     return;
-                 }
-             foreach (var hero in HeroManager.Enemies.Where(h => h.IsValidTarget() && !h.IsInvulnerable && Vector3.Distance(h.ServerPosition, Player.ServerPosition) < Spells["Q2"].Range && SpellSlot.Q.IsReady()))
+
+
+            var distbw = Vector3.Distance(Player.ServerPosition, target.ServerPosition);
+
+             if (distbw < Spells["Q"].Range)
              {
-                 var prediction = Spells["Q2"].GetPrediction(hero);
-                 if (prediction.CollisionObjects.Any() && prediction.Hitchance > LissUtils.GetHitChance("Hitchance.Q"))
+                 var prediction2 = Spells["Q"].GetPrediction(target);
+                 if (prediction2.Hitchance >= LissUtils.GetHitChance("Hitchance.Q"))
                  {
-                     Spells["Q2"].Cast(pred.CastPosition);
+                     Spells["Q"].Cast(prediction2.CastPosition);
                      return;
-                 }
-                 var prediction2 = Spells["Q"].GetPrediction(hero);
-                 if (prediction.Hitchance > LissUtils.GetHitChance("Hitchance.Q"))
-                 {
-                     Spells["Q"].Cast(pred.CastPosition);
                  }
              }
-         }
+
+             if (distbw > Spells["Qtest"].Range && distbw < Spells["Q2"].Range)
+             {
+                 var testQ = Spells["Qtest"].GetPrediction(target);
+                 var collobjs = testQ.CollisionObjects;
+                 if ((testQ.Hitchance == HitChance.Collision || collobjs.Count > 0) && collobjs.All(x => x.IsTargetable))
+                 {
+                     var pred = Spells["Q2"].GetPrediction(target);
+                     if (pred.Hitchance >= LissUtils.GetHitChance("Hitchance.Q"))
+                     {
+                        Spells["Q2"].Cast(pred.CastPosition);
+                    }
+                 }
+             }
+        }
 
         private static void CastW(Obj_AI_Hero target)
         {
@@ -302,7 +258,7 @@ namespace SephLissandra
                 Spells["W"].CastOnUnit(Player);
                 return;
             }
-            else if (HeroManager.Enemies.Where(h => h.IsValidTarget() && (Vector3.Distance(h.ServerPosition, Player.ServerPosition) < Spells["W"].Range) && !h.IsZombie).Any())
+             if (HeroManager.Enemies.Any(h => h.IsValidTarget() && (Vector3.Distance(h.ServerPosition, Player.ServerPosition) < Spells["W"].Range) && !h.IsZombie))
             {
                 Spells["W"].CastOnUnit(Player);
             }
@@ -313,21 +269,17 @@ namespace SephLissandra
         {
             if (LissEMissile == null && !LissUtils.CanSecondE())
             {
-                var PredManager = new List<Tuple<Vector3, int, HitChance, List<Obj_AI_Hero>>>();
-                foreach (
-                    var hero in
-                        HeroManager.Enemies
-                            .Where(
-                                h =>
-                                    h.IsValidTarget() && !h.IsZombie &&
-                                    Vector3.Distance(h.ServerPosition, Player.ServerPosition) <= Spells["E"].Range))
-                {
-                    var pred = Spells["E"].GetPrediction(hero);
-                    PredManager.Add(new Tuple<Vector3, int, HitChance, List<Obj_AI_Hero>>(pred.CastPosition,
-                        pred.AoeTargetsHitCount, pred.Hitchance, pred.AoeTargetsHit));
-                }
+                var PredManager =
+                    HeroManager.Enemies.Where(
+                        h =>
+                            h.IsValidTarget() && !h.IsZombie &&
+                            Vector3.Distance(h.ServerPosition, Player.ServerPosition) <= Spells["E"].Range)
+                        .Select(hero => Spells["E"].GetPrediction(hero))
+                        .Select(
+                            pred =>
+                                new Tuple<Vector3, int, HitChance, List<Obj_AI_Hero>>(pred.CastPosition,
+                                    pred.AoeTargetsHitCount, pred.Hitchance, pred.AoeTargetsHit));
 
-                // var OrganizedPredManager = PredManager.OrderByDescending(x => x.Item2);
                 var BestLocation = PredManager.MaxOrDefault(x => x.Item4.Count);
                 if (BestLocation.Item3 >= LissUtils.GetHitChance("Hitchance.E") && Spells["E"].IsReady())
                 {
@@ -342,12 +294,12 @@ namespace SephLissandra
         {
             if (LissUtils.AutoSecondE() && LissUtils.isHealthy() && LissEMissile != null && Spells["E"].IsReady())
             {
-                if (Vector3.Distance(MissilePosition, target.ServerPosition) < Vector3.Distance(Player.ServerPosition, target.ServerPosition) && !LissUtils.PointUnderEnemyTurret(MissilePosition)) 
+                if (Vector3.Distance(MissilePosition, target.ServerPosition) < Vector3.Distance(Player.ServerPosition, target.ServerPosition) && !LissUtils.PointUnderEnemyTurret(MissilePosition) && Vector3.Distance(target.ServerPosition, LissEMissile.EndPosition) > Vector3.Distance(Player.ServerPosition, target.ServerPosition)) 
                 {
                      Spells["E"].CastOnUnit(Player);
                      return;
                 }
-                    var Enemiesatpoint = Utility.GetEnemiesInRange(LissEMissile.Position, Spells["R"].Range);
+                    var Enemiesatpoint = LissEMissile.Position.GetEnemiesInRange(Spells["R"].Range);
                     var enemiesatpointR = Enemiesatpoint.Count;
 
                     if ((enemiesatpointR >= Config.Item("Combo.ecountR").GetValue<Slider>().Value && SpellSlot.R.IsReady()) || (Enemiesatpoint.Any(e => e.IsKillableFromPoint(LissEMissile.Position) && Vector3.Distance(LissEMissile.Position, e.ServerPosition) < Vector3.Distance(Player.ServerPosition, e.ServerPosition))))
@@ -359,15 +311,14 @@ namespace SephLissandra
                                 Spells["E"].CastOnUnit(Player);
                                 return;
                     }
-                    var enemiesatpointW = Utility.CountEnemiesInRange(LissEMissile.Position, Spells["W"].Range);
-                    if (enemiesatpointW >= Config.Item("Combo.ecountW").GetValue<Slider>().Value && SpellSlot.W.IsReady())
+                    var enemiesatpointW = LissEMissile.Position.CountEnemiesInRange(Spells["W"].Range);
+                    if (enemiesatpointW >= LissUtils.GetSlider("Combo.ecountW") && SpellSlot.W.IsReady())
                     {
                             if (LissUtils.PointUnderEnemyTurret(LissEMissile.Position) && LissUtils.Active("Misc.DontETurret"))
                             {
                                 return;
                             }
                                 Spells["E"].CastOnUnit(Player);
-                                return;
                     }
             }
         }
@@ -495,10 +446,11 @@ namespace SephLissandra
             var targets =
                 HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsInvulnerable & !x.IsZombie);
 
+            var objAiHeroes = targets as IList<Obj_AI_Hero> ?? targets.ToList();
             if (SpellSlot.Q.IsReady() && LissUtils.Active("Killsteal.UseQ"))
             {
                 Obj_AI_Hero qtarget =
-                    targets.Where(x => x.Distance(Player.Position) < Spells["Q"].Range)
+                    objAiHeroes.Where(x => x.Distance(Player.Position) < Spells["Q"].Range)
                     .MinOrDefault(x => x.Health);
                 if (qtarget != null)
                 {
@@ -516,7 +468,7 @@ namespace SephLissandra
             if (SpellSlot.W.IsReady() && LissUtils.Active("Killsteal.UseW"))
             {
                 Obj_AI_Hero wtarget =
-                    targets.Where(x => x.Distance(Player.Position) < Spells["W"].Range)
+                    objAiHeroes.Where(x => x.Distance(Player.Position) < Spells["W"].Range)
                         .MinOrDefault(x => x.Health);
                 if (wtarget != null)
                 {
@@ -529,7 +481,7 @@ namespace SephLissandra
             }
 
             Obj_AI_Hero etarget =
-            targets.Where(x => x.Distance(Player.Position) < Spells["E"].Range).MinOrDefault(x => x.Health);
+            objAiHeroes.Where(x => x.Distance(Player.Position) < Spells["E"].Range).MinOrDefault(x => x.Health);
             if (SpellSlot.E.IsReady() && LissEMissile == null && !LissUtils.CanSecondE() && LissUtils.Active("Killsteal.UseE"))
             {
                 if (etarget != null)
@@ -561,7 +513,7 @@ namespace SephLissandra
             if (Spells["Ignite"].IsReady() && LissUtils.Active("Killsteal.UseIgnite"))
             {
                 Obj_AI_Hero igntarget =
-                    targets.Where(x => x.Distance(Player.Position) < Spells["Ignite"].Range)
+                    objAiHeroes.Where(x => x.Distance(Player.Position) < Spells["Ignite"].Range)
                         .MinOrDefault(x => x.Health);
                 if (igntarget != null)
                 {
@@ -575,7 +527,7 @@ namespace SephLissandra
 
             if (SpellSlot.R.IsReady() && LissUtils.Active("Killsteal.UseR"))
             {
-                var Rtarget = targets.Where(h =>
+                var Rtarget = objAiHeroes.Where(h =>
                            (Vector3.Distance(Player.ServerPosition, h.ServerPosition) < Spells["R"].Range) && h.CountEnemiesInRange(Spells["R"].Range) > 1 && h.Health < Player.GetSpellDamage(h, SpellSlot.R) && !LissUtils.Active("Blacklist." + h.ChampionName)).MinOrDefault(h => h.Health);
                 if (Rtarget != null)
                 {
@@ -587,32 +539,28 @@ namespace SephLissandra
  
         static void OnCreate(GameObject sender, EventArgs args)
         {
-            if (sender is Obj_SpellLineMissile && sender.IsValid)
+            var miss = sender as MissileClient;
+            if (miss != null && miss.IsValid)
             {
-                Obj_SpellLineMissile miss = sender as Obj_SpellLineMissile;
-                if (miss.SpellCaster is Obj_AI_Hero && miss.SpellCaster.IsMe && miss.SpellCaster.IsValid && miss.SData.Name == "LissandraEMissile")
+                if (miss.SpellCaster.IsMe && miss.SpellCaster.IsValid && miss.SData.Name == "LissandraEMissile")
                 {
                     LissEMissile = miss;
                 }
             }
         }
 
-        static void OnDelete(GameObject sender, EventArgs args)
+         static void OnDelete(GameObject sender, EventArgs args)
         {
-            if (sender is Obj_SpellLineMissile && sender.IsValid)
+            var miss = sender as MissileClient;
+            if (miss == null || !miss.IsValid) return;
+            if (miss.SpellCaster is Obj_AI_Hero && miss.SpellCaster.IsValid && miss.SpellCaster.IsMe && miss.SData.Name == "LissandraEMissile")
             {
-                Obj_SpellLineMissile miss = sender as Obj_SpellLineMissile;
-                if (miss.SpellCaster is Obj_AI_Hero && miss.SpellCaster.IsValid && miss.SpellCaster.IsMe && miss.SData.Name == "LissandraEMissile")
-                {
-                    LissEMissile = null;
-                    
-                }
+                LissEMissile = null;
             }
         }
 
 
-
-        private static void HarassHandler()
+         private static void HarassHandler()
         {
             if (Player.ManaPercent < LissUtils.GetSlider("Harass.Mana"))
             {
@@ -620,7 +568,7 @@ namespace SephLissandra
             }
             if (LissUtils.Active("Harass.UseQ"))
             {
-                var target = TargetSelector.GetTarget(Spells["Q"].Range, TargetSelector.DamageType.Magical);
+                var target = TargetSelector.GetTarget(Spells["Q2"].Range, TargetSelector.DamageType.Magical);
                 if (target != null)
                 {
                     CastQ(target);
@@ -727,7 +675,7 @@ namespace SephLissandra
                         
                     }
                 }
-                else if (LissEMissile != null && LissUtils.Active("Waveclear.UseE2") && LissEMissile.Position == LissEMissile.EndPosition - 15 && SpellSlot.E.IsReady())
+                else if (LissEMissile != null && LissUtils.Active("Waveclear.UseE2") && Vector3.Distance(LissEMissile.Position, LissEMissile.EndPosition) <= 15 && SpellSlot.E.IsReady())
                 {
                     if (LissUtils.PointUnderEnemyTurret(LissEMissile.Position) && LissUtils.Active("Misc.DontETurret"))
                     {
@@ -757,30 +705,35 @@ namespace SephLissandra
             }
             if (LissUtils.Active("Misc.Debug"))
             {
-                var poswts = Drawing.WorldToScreen(Player.Position);
                 if (LissEMissile != null)
                 {
                     var misposwts = Drawing.WorldToScreen(LissEMissile.Position);
-                    Drawing.DrawText(misposwts.X, misposwts.Y, System.Drawing.Color.Red, LissEMissile.Position.ToString());
+                    Drawing.DrawText(misposwts.X, misposwts.Y, Color.Red, LissEMissile.Position.ToString());
+                    Render.Circle.DrawCircle(LissEMissile.Position, 200, Color.Red);
 
                 }
             }
 
-            if (LissUtils.Active("Drawing.DrawQ"))
+            var DrawQ = Config.Item("Drawing.DrawQ").GetValue<Circle>();
+            var DrawW = Config.Item("Drawing.DrawW").GetValue<Circle>();
+            var DrawE = Config.Item("Drawing.DrawE").GetValue<Circle>();
+            var DrawR = Config.Item("Drawing.DrawR").GetValue<Circle>();
+
+            if (DrawQ.Active)
             {
-                Render.Circle.DrawCircle(Player.Position, Spells["Q"].Range, System.Drawing.Color.White);
+                Render.Circle.DrawCircle(Player.Position, Spells["Q"].Range, DrawQ.Color);
             }
-            if (LissUtils.Active("Drawing.DrawW"))
+            if (DrawW.Active)
             {
-                Render.Circle.DrawCircle(Player.Position, Spells["W"].Range, System.Drawing.Color.Green);
+                Render.Circle.DrawCircle(Player.Position, Spells["W"].Range, DrawW.Color);
             }
-            if (LissUtils.Active("Drawing.DrawE"))
+            if (DrawE.Active)
             {
-                Render.Circle.DrawCircle(Player.Position, Spells["E"].Range, System.Drawing.Color.RoyalBlue);
+                Render.Circle.DrawCircle(Player.Position, Spells["E"].Range, DrawE.Color);
             }
-            if (LissUtils.Active("Drawing.DrawR"))
+            if (DrawR.Active)
             {
-                Render.Circle.DrawCircle(Player.Position, Spells["R"].Range, System.Drawing.Color.Red);
+                Render.Circle.DrawCircle(Player.Position, Spells["R"].Range, DrawE.Color);
             }
         }
 

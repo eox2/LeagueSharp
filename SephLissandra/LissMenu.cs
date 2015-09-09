@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace SephLissandra
             KillSteal.AddItem(new MenuItem("Killsteal.UseQ", "Use Q", false).SetValue(true));
             KillSteal.AddItem(new MenuItem("Killsteal.UseW", "Use W", false).SetValue(true));
             KillSteal.AddItem(new MenuItem("Killsteal.UseE", "Use E", false).SetValue(true));
-            KillSteal.AddItem(new MenuItem("Killsteal.UseE2", "Use E", false).SetValue(true));
+            KillSteal.AddItem(new MenuItem("Killsteal.UseE2", "Use E2", false).SetValue(true));
             KillSteal.AddItem(new MenuItem("Killsteal.UseR", "Use R", false).SetValue(true));
             KillSteal.AddItem(new MenuItem("Killsteal.UseIgnite", "Use Ignite", false).SetValue(true));
             Config.AddSubMenu(KillSteal);
@@ -101,12 +102,12 @@ namespace SephLissandra
             Config.AddSubMenu(Misc);
 
             Menu Drawings = new Menu("Drawings", "Drawing", false);
-            Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q", false).SetValue(true));
-            Drawings.AddItem(new MenuItem("Drawing.DrawW", "Draw W", false).SetValue(true));
-            Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E", false).SetValue(true));
-            Drawings.AddItem(new MenuItem("Drawing.DrawR", "Draw R", false).SetValue(true));
+            Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q").SetValue(new Circle(true, Color.White)));
+            Drawings.AddItem(new MenuItem("Drawing.DrawW", "Draw W").SetValue(new Circle(true, Color.Green)));
+            Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E").SetValue(new Circle(true, Color.RoyalBlue)));
+            Drawings.AddItem(new MenuItem("Drawing.DrawR", "Draw R").SetValue(new Circle(true, Color.Red)));
             Config.AddSubMenu(Drawings);
-            //Config.AddToMainMenu();
+
             return Config;
         }
     }
