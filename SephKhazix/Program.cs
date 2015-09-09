@@ -4,7 +4,6 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
 
 namespace SephKhazix
@@ -12,20 +11,18 @@ namespace SephKhazix
 
     internal class Program
     {
-        private const string ChampionName = "Khazix";
         private static Orbwalking.Orbwalker Orbwalker;
         public static Spell Q, W, E, R, WE;
-        private const float Wangle = 22 * (float)Math.PI / 180;
+        private const float Wangle = 22 * (float) Math.PI / 180;
         private static Menu Config;
-        private static Items.Item HDR, TIA, BKR, BWC, YOU;
+        private static Items.Item Hydra, Tiamat, Blade, Bilgewater, Youmu;
         private static SpellSlot IgniteSlot;
         private static List<Obj_AI_Hero> HeroList;
         private static bool EvolvedQ, EvolvedW, EvolvedE, EvolvedR;
         private static List<Vector3> EnemyTurretPositions = new List<Vector3>();
         private static Vector3 NexusPosition;
-        private static Vector3 Jumppoint1 = new Vector3();
-        private static Vector3 Jumppoint2 = new Vector3();
-        private static bool Jumping = false;
+        private static Vector3 Jumppoint1, Jumppoint2;
+        private static bool Jumping;
 
         private static Obj_AI_Hero Player;
         private static bool Wnorm =  true, Wevolved, Eevolved;
@@ -42,7 +39,7 @@ namespace SephKhazix
             Player = ObjectManager.Player;
 
             
-            if (Player.BaseSkinName != ChampionName)
+            if (Player.CharData.BaseSkinName != "Khazix")
             {
                 return;
             }
@@ -60,26 +57,22 @@ namespace SephKhazix
             E.SetSkillshot(0.25f, 100f, 1000f, false, SkillshotType.SkillshotCircle);
 
 
-            HDR = new Items.Item(3074, 225f);
-            TIA = new Items.Item(3077, 225f);
-            BKR = new Items.Item(3153, 450f);
-            BWC = new Items.Item(3144, 450f);
-            YOU = new Items.Item(3142, 185f);
+            Hydra = new Items.Item(3074, 225f);
+            Tiamat = new Items.Item(3077, 225f);
+            Blade = new Items.Item(3153, 450f);
+            Bilgewater = new Items.Item(3144, 450f);
+            Youmu = new Items.Item(3142, 185f);
 
 
             IgniteSlot = Player.GetSpellSlot("summonerdot");
 
 
+            Config = new Menu("SephKhazix", "SephKhazix", true);
 
-            Config = new Menu("SephKhazix", "Khazix", true);
+            var tsmenu = new Menu("Target Selector", "Target Selector");
+            TargetSelector.AddToMenu(tsmenu);
+            Config.AddSubMenu(tsmenu);
 
-
-            //TargetSelector
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            Config.AddSubMenu(targetSelectorMenu);
-
-            //Orbwalker
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
@@ -141,7 +134,7 @@ namespace SephKhazix
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEKs", "Use E")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEQKs", "Use EQ in KS")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseEWKs", "Use EW in KS")).SetValue(false);
-            Config.SubMenu("Ks").AddItem(new MenuItem("UseTiaKs", "Use items")).SetValue(true);
+            Config.SubMenu("Ks").AddItem(new MenuItem("UseTiamatKs", "Use items")).SetValue(true);
             Config.SubMenu("Ks").AddItem(new MenuItem("Edelay", "E Delay (ms)").SetValue(new Slider(0, 0, 300)));
             Config.SubMenu("Ks").AddItem(new MenuItem("autoescape", "Use E to get out when low")).SetValue(false);
             Config.SubMenu("Ks").AddItem(new MenuItem("UseIgnite", "Use Ignite")).SetValue(true);
@@ -149,7 +142,7 @@ namespace SephKhazix
             Config.AddSubMenu(new Menu("Double Jumping", "DoubleJump"));
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("djumpenabled", "Enabled")).SetValue(true);
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("JEDelay", "Delay between jumps").SetValue(new Slider(250, 250, 500)));
-            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("jumpmode", "Jump Mode").SetValue(new StringList(new[] { "Default (jumps towards your nexus)", "Custom - Settings below" }, 0)));
+            Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("jumpmode", "Jump Mode").SetValue(new StringList(new[] { "Default (jumps towards Youmur nexus)", "Custom - Settings below" }, 0)));
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("save", "Save Double Jump Abilities")).SetValue(true);
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("noauto", "Wait for Q instead of autos")).SetValue(false);
             Config.SubMenu(("DoubleJump")).AddItem(new MenuItem("jcursor", "Jump to Cursor (true) or false for script logic")).SetValue(true);
@@ -177,7 +170,11 @@ namespace SephKhazix
                 EnemyTurretPositions.Add(t.ServerPosition);
             }
 
-            NexusPosition = ObjectManager.Get<Obj_Shop>().Where(o => o.IsAlly).FirstOrDefault().Position;
+            var shop = ObjectManager.Get<Obj_Shop>().FirstOrDefault(o => o.IsAlly);
+            if (shop != null)
+            {
+                NexusPosition = shop.Position;
+            }
 
             Game.OnUpdate += OnGameUpdate;
             Game.OnUpdate += CheckSpells;
@@ -362,14 +359,14 @@ namespace SephKhazix
         {
             var pos = new List<Vector2>();
             List<Obj_AI_Base> mobs = MinionManager.GetMinions(
-                Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.Health);
+                Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral);
             foreach (Obj_AI_Base minion in mobs)
             {
                 if (minion != null)
                 {
                     pos.Add(minion.Position.To2D());
                 }
-                // Orbwalker.SetAttacks(!(Q.IsReady() || W.IsReady() || E.IsReady()) || TIA.IsReady() || HDR.IsReady());
+
                 // Normal Farms
                 if (Q.IsReady() && minion.IsValidTarget() && Vector3.Distance(Player.ServerPosition, minion.ServerPosition) <= Q.Range &&
                     Config.Item("UseQFarm").GetValue<bool>())
@@ -402,14 +399,13 @@ namespace SephKhazix
                 }
                 if (Config.Item("UseItems").GetValue<bool>())
                 {
-                    if (HDR.IsReady() && Vector3.Distance(Player.ServerPosition, minion.ServerPosition) <= HDR.Range)
+                    if (Hydra.IsReady() && Vector3.Distance(Player.ServerPosition, minion.ServerPosition) <= Hydra.Range)
                     {
-                        HDR.Cast();
-                        // Items.UseItem(3077, ObjectManager.Player);
+                        Hydra.Cast();
                     }
-                    if (TIA.IsReady() && Vector3.Distance(Player.ServerPosition, minion.ServerPosition) <= TIA.Range)
+                    if (Tiamat.IsReady() && Vector3.Distance(Player.ServerPosition, minion.ServerPosition) <= Tiamat.Range)
                     {
-                        TIA.Cast();
+                        Tiamat.Cast();
                     }
                 }
             }
@@ -433,7 +429,7 @@ namespace SephKhazix
                         Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) && Vector3.Distance(Player.ServerPosition, minion.ServerPosition) <= Q.Range)
                     {
                         Orbwalker.SetAttack(false);
-                        Q.CastOnUnit(minion, false);
+                        Q.CastOnUnit(minion);
                         Orbwalker.SetAttack(true);
                         return;
                     }
@@ -480,46 +476,36 @@ namespace SephKhazix
             {
                 MinionManager.FarmLocation farmLocation =
                     MinionManager.GetBestCircularFarmLocation(
-                        MinionManager.GetMinions(Player.Position, HDR.Range)
+                        MinionManager.GetMinions(Player.Position, Hydra.Range)
                             .Select(minion => minion.ServerPosition.To2D())
-                            .ToList(), HDR.Range, HDR.Range);
+                            .ToList(), Hydra.Range, Hydra.Range);
 
-                if (HDR.IsReady() && Vector2.Distance(Player.ServerPosition.To2D(), farmLocation.Position) <= HDR.Range && farmLocation.MinionsHit >= 2)
+                if (Hydra.IsReady() && Vector2.Distance(Player.ServerPosition.To2D(), farmLocation.Position) <= Hydra.Range && farmLocation.MinionsHit >= 2)
                 {
                     Items.UseItem(3074, ObjectManager.Player);
                 }
-                if (TIA.IsReady() && Vector2.Distance(Player.ServerPosition.To2D(), farmLocation.Position) <= TIA.Range && farmLocation.MinionsHit >= 2)
+                if (Tiamat.IsReady() && Vector2.Distance(Player.ServerPosition.To2D(), farmLocation.Position) <= Tiamat.Range && farmLocation.MinionsHit >= 2)
                 {
                     Items.UseItem(3077, ObjectManager.Player);
                 }
             }
         }
 
-        //Detuks
-        public static bool targetisisolated(Obj_AI_Base target)
+        public static bool IsoCheck(Obj_AI_Base target)
         {
-            var enes = ObjectManager.Get<Obj_AI_Base>()
-                .Where(her => her.IsEnemy && her.NetworkId != target.NetworkId && Vector3.Distance(target.ServerPosition, her.ServerPosition) < 500 && !her.IsMe)
-                .ToArray();
-            return !enes.Any();
+            return !ObjectManager
+                .Get<Obj_AI_Base>().Any(x => x.NetworkId != target.NetworkId && x.Team == target.Team && x.Distance(target) <= 500);
         }
-        //Detuks
 
-        /*
-        private static bool targetisisolated(Obj_AI_Hero Target)
-        {
-            return !ObjectManager.Get<Obj_AI_Base>().Any(x => x.Distance(Target) < 500 && !x.IsAlly && !x.IsMe);
-        }
-        */
         private static double GetQDamage(Obj_AI_Hero target)
         {
-                if (Q.Range == 325)
+                if (Q.Range < 326)
                 {
-                    return 0.984 * Player.GetSpellDamage(target, SpellSlot.Q, targetisisolated(target) ? 1 : 0);
+                    return 0.984 * Player.GetSpellDamage(target, SpellSlot.Q, IsoCheck(target) ? 1 : 0);
                 }
                 if (Q.Range > 325)
                 {
-                    var isolated = targetisisolated(target);
+                    var isolated = IsoCheck(target);
                     if (isolated)
                     {
                         return 0.984 * Player.GetSpellDamage(target, SpellSlot.Q, 3);
@@ -531,7 +517,7 @@ namespace SephKhazix
 
         public static bool ishealthy()
         {
-            return Player.HealthPercent > 20;
+            return Player.HealthPercent > 30;
         }
 
 
@@ -553,7 +539,7 @@ namespace SephKhazix
 
             if (Q.IsReady())
             {
-                var CheckQKillable = Targets.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Q.Range - 50 && GetQDamage(x) > x.Health).FirstOrDefault();
+                var CheckQKillable = Targets.FirstOrDefault(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Q.Range - 50 && GetQDamage(x) > x.Health);
 
                 if (CheckQKillable != null)
                 {
@@ -571,7 +557,6 @@ namespace SephKhazix
                         }
                         Jumping = false;
                     });
-                    return;
                 }
             }
         }
@@ -601,18 +586,12 @@ namespace SephKhazix
             Vector3 Position = new Vector3();
             var jumptarget = ishealthy()
                   ? HeroList
-                      .Where(
-                          x =>
-                              x.IsValidTarget() && !x.IsZombie && x != Qtarget &&
+                      .FirstOrDefault(x => x.IsValidTarget() && !x.IsZombie && x != Qtarget &&
                               Vector3.Distance(Player.ServerPosition, x.ServerPosition) < E.Range)
-                      .FirstOrDefault()
                   :
               HeroList
-                  .Where(
-                      x =>
-                          x.IsAlly && !x.IsZombie && !x.IsDead && !x.IsMe &&
-                          Vector3.Distance(Player.ServerPosition, x.ServerPosition) < E.Range)
-                  .FirstOrDefault();
+                  .FirstOrDefault(x => x.IsAlly && !x.IsZombie && !x.IsDead && !x.IsMe &&
+                          Vector3.Distance(Player.ServerPosition, x.ServerPosition) < E.Range);
 
             if (jumptarget != null)
             {
@@ -620,7 +599,6 @@ namespace SephKhazix
             }
             if (jumptarget == null)
             {
-                //Position = Player.ServerPosition.Extend(TurretPositions.MinOrDefault(h => Player.Distance(h)), E.Range);
                 return Player.ServerPosition.Extend(NexusPosition, E.Range);
             }
             return Position;
@@ -689,7 +667,7 @@ namespace SephKhazix
                 if (Config.Item("autoescape").GetValue<bool>() && !ishealthy())
                 {
                     var ally =
-                        HeroList.Where(h => h.HealthPercent > 50 && h.CountEnemiesInRange(400) == 0 && !PointUnderEnemyTurret(h.ServerPosition)).FirstOrDefault();
+                        HeroList.FirstOrDefault(h => h.HealthPercent > 50 && h.CountEnemiesInRange(400) == 0 && !PointUnderEnemyTurret(h.ServerPosition));
                     if (ally != null && ally.IsValid)
                     {
                         E.Cast(ally.ServerPosition);
@@ -728,7 +706,6 @@ namespace SephKhazix
                                 if (target.IsValid && !target.IsDead)
                                 {
                                     E.Cast(pred.CastPosition, usePacket);
-                                    return;
                                 }
                             });
                     }
@@ -765,8 +742,8 @@ namespace SephKhazix
                         {
                             List<Obj_AI_Base> PCollision = pred.CollisionObjects;
                             var x =
-                                PCollision.Where(PredCollisionChar => Vector3.Distance(PredCollisionChar.ServerPosition, target.ServerPosition) <= 30)
-                                    .FirstOrDefault();
+                                PCollision
+                                    .FirstOrDefault(PredCollisionChar => Vector3.Distance(PredCollisionChar.ServerPosition, target.ServerPosition) <= 30);
                             if (x != null)
                             {
                                 W.Cast(x.Position, Config.Item("usePackets").GetValue<bool>());
@@ -791,11 +768,9 @@ namespace SephKhazix
                                 if (target.IsValidTarget() && !target.IsZombie)
                                 {
                                     E.Cast(pred.CastPosition);
-                                    return;
                                 }
                             });
-
-                        }
+                         }
                     }
 
                     // MIXED EW KS
@@ -813,33 +788,31 @@ namespace SephKhazix
                                 if (target.IsValid && !target.IsDead)
                                 {
                                     E.Cast(pred.CastPosition);
-                                    return;
                                 }
                             });
                         }
                     }
 
 
-                    if (TIA.IsReady() &&
-                        Vector2.Distance(Player.ServerPosition.To2D(), target.ServerPosition.To2D()) <= TIA.Range &&
-                        Config.Item("UseTiaKs").GetValue<bool>())
+                    if (Tiamat.IsReady() &&
+                        Vector2.Distance(Player.ServerPosition.To2D(), target.ServerPosition.To2D()) <= Tiamat.Range &&
+                        Config.Item("UseTiamatKs").GetValue<bool>())
                     {
-                        double tiamatdmg = Player.GetItemDamage(target, Damage.DamageItems.Tiamat);
-                        if (target.Health <= tiamatdmg)
+                        double Tiamatdmg = Player.GetItemDamage(target, Damage.DamageItems.Tiamat);
+                        if (target.Health <= Tiamatdmg)
                         {
-                            TIA.Cast();
+                            Tiamat.Cast();
                             return;
                         }
                     }
-                    if (HDR.IsReady() &&
-                        Vector2.Distance(Player.ServerPosition.To2D(), target.ServerPosition.To2D()) <= HDR.Range &&
-                        Config.Item("UseTiaKs").GetValue<bool>())
+                    if (Hydra.IsReady() &&
+                        Vector2.Distance(Player.ServerPosition.To2D(), target.ServerPosition.To2D()) <= Hydra.Range &&
+                        Config.Item("UseTiamatKs").GetValue<bool>())
                     {
                         double hydradmg = Player.GetItemDamage(target, Damage.DamageItems.Hydra);
                         if (target.Health <= hydradmg)
                         {
-                            HDR.Cast();
-                            return;
+                            Hydra.Cast();
                         }
                     }
                 }
@@ -1065,25 +1038,25 @@ namespace SephKhazix
             var PlayerServerPosition = Player.ServerPosition.To2D();
             var targetServerPosition = target.ServerPosition.To2D();
 
-            if (HDR.IsReady() && Vector2.Distance(PlayerServerPosition, targetServerPosition) <= HDR.Range)
+            if (Hydra.IsReady() && Vector2.Distance(PlayerServerPosition, targetServerPosition) <= Hydra.Range)
             {
-                HDR.Cast();
+                Hydra.Cast();
             }
-            if (TIA.IsReady() && Vector2.Distance(PlayerServerPosition, targetServerPosition) <= TIA.Range)
+            if (Tiamat.IsReady() && Vector2.Distance(PlayerServerPosition, targetServerPosition) <= Tiamat.Range)
             {
-                TIA.Cast();
+                Tiamat.Cast();
             }
-            if (BKR.IsReady() && Vector2.Distance(PlayerServerPosition, targetServerPosition) <= BKR.Range)
+            if (Blade.IsReady() && Vector2.Distance(PlayerServerPosition, targetServerPosition) <= Blade.Range)
             {
-                BKR.Cast(target);
+                Blade.Cast(target);
             }
-            if (YOU.IsReady() && Vector2.Distance(PlayerServerPosition, targetServerPosition) <= YOU.Range)
+            if (Youmu.IsReady() && Vector2.Distance(PlayerServerPosition, targetServerPosition) <= Youmu.Range)
             {
-                YOU.Cast(target);
+                Youmu.Cast(target);
             }
-            if (BWC.IsReady() && Vector2.Distance(PlayerServerPosition, targetServerPosition) <= BWC.Range)
+            if (Bilgewater.IsReady() && Vector2.Distance(PlayerServerPosition, targetServerPosition) <= Bilgewater.Range)
             {
-                BWC.Cast(target);
+                Bilgewater.Cast(target);
             }
         }
 

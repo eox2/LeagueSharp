@@ -7,8 +7,8 @@
     <ProjectGuid>{BD5B2DAD-85F1-40A7-92B8-6F4462A1A33E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProBuildsMine</RootNamespace>
-    <AssemblyName>ProBuildsMine</AssemblyName>
+    <RootNamespace>LolBuilder</RootNamespace>
+    <AssemblyName>LolBuilder</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PreBuildEvent />

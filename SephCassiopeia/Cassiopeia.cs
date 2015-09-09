@@ -59,7 +59,7 @@ namespace SephCassiopeia
         {
             Player = ObjectManager.Player;
 
-            if (Player.BaseSkinName != "Cassiopeia")
+            if (Player.CharData.BaseSkinName != "Cassiopeia")
             {
                 return;
             }

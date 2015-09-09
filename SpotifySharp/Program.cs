@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading;
@@ -101,7 +99,7 @@ namespace SpotifySharp
 
             if (SpotifyOpen())
             {
-                Console.WriteLine("::: Spotify has been detected :::");
+                Game.PrintChat("::: Spotify has been detected :::");
             }
 
 
@@ -117,7 +115,7 @@ namespace SpotifySharp
             Console.WriteLine("Loaded Spotify Controller by Seph");
             if (!SpotifyOpen())
             {
-                Console.WriteLine("Spotify isn't running");
+                Game.PrintChat("Spotify isn't running");
             }
 
             Game.OnWndProc += Game_OnWndProc;
@@ -159,11 +157,11 @@ namespace SpotifySharp
                 _voldown1.Hide();
             }
 
-
             if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && Mouseonnext())
             {
                 NextTrack();
             }
+
             if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && Mouseonprev())
             {
                 PreviousTrack();
@@ -171,7 +169,6 @@ namespace SpotifySharp
 
             if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && Mouseonplay())
             {
-                Songname = GetSongName() + " - " + GetArtistName() + " - Paused... ";
                 PausePlay();
             }
             if ((args.Msg == (uint) WindowsMessages.WM_LBUTTONDOWN) && Mouseonspotify())
@@ -313,12 +310,13 @@ namespace SpotifySharp
             return FindWindow("SpotifyMainWindow", null);
         }
 
-        private static String GetTitle()
+        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
+        private static string GetTitle()
         {
             IntPtr spotifyWindow = FindWindow("SpotifyMainWindow", null);
             if (spotifyWindow == new IntPtr(0))
             {
-                return "";
+                return "Cannot detect Spotify!";
             }
             int length = GetWindowTextLength(spotifyWindow);
             var sb = new StringBuilder(length + 1);
@@ -333,25 +331,15 @@ namespace SpotifySharp
             return Spotify != null;
         }
 
-        public static String GetSongName()
+        public static string GetSongName()
         {
-            String[] title = GetTitle().Split('–');
-            if (title.Count() > 1)
+            if (GetTitle() == "Spotify")
             {
-                return title[1].Trim();
+                return "Paused...";
             }
-            return "";
+            return GetTitle();
         }
 
-        public static String GetArtistName()
-        {
-            String[] title = GetTitle().Split('–');
-            if (title.Count() > 1)
-            {
-                return title[0].Split('-')[1].Trim();
-            }
-            return "";
-        }
 
         public static void PausePlay()
         {
@@ -531,7 +519,6 @@ namespace SpotifySharp
         {
             _posvolu = GetScaledVector(_posvolu);
 
-
             var loadvolup = new Render.Sprite(Resources.volup, _posvold)
             {
                 Scale = Scale,
@@ -588,8 +575,8 @@ namespace SpotifySharp
                 if (GetSongName() != "")
                 {
                     Drawing.DrawText(
-                        Drawing.Width / 2f - TextWidth(GetSongName() + " - " + GetArtistName(), font) / 2f, 50,
-                        Color.White, GetSongName() + " - " + GetArtistName());
+                        Drawing.Width / 2f - TextWidth(GetSongName(), font) / 2f, 50,
+                        Color.White, GetSongName());
                 }
             }
         }

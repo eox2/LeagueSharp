@@ -20,7 +20,7 @@ namespace SephLux
 
         public static Obj_AI_Hero Player;
         public static Menu Config;
-        private static Obj_SpellCircleMissile LuxE;
+        private static MissileClient LuxE;
         private static SpellSlot IgniteSlot = SpellSlot.Summoner1;
 
         #endregion
@@ -53,7 +53,7 @@ namespace SephLux
         {
             Player = ObjectManager.Player;
 
-            if (Player.BaseSkinName != "Lux")
+            if (Player.CharData.BaseSkinName != "Lux")
             {
                 return;
             }
@@ -559,8 +559,8 @@ namespace SephLux
                 {
                     if (sender.Name.Contains("LuxLightstrike_tar"))
                     {
-                        var miss = sender as Obj_SpellCircleMissile;
-                        if (sender is Obj_SpellCircleMissile && sender.IsValid && miss.SpellCaster.IsMe)
+                        var miss = sender as MissileClient;
+                        if (sender is MissileClient && sender.IsValid && miss.SpellCaster.IsMe)
                         {
                             LuxE = miss;
                         }
@@ -571,8 +571,8 @@ namespace SephLux
                 {
                     if (sender.Name.Contains("LuxLightstrike_tar"))
                     {
-                        var miss = sender as Obj_SpellCircleMissile;
-                        if (sender is Obj_SpellCircleMissile && sender.IsValid && miss.SpellCaster.IsMe)
+                        var miss = sender as MissileClient;
+                        if (sender is MissileClient && sender.IsValid && miss.SpellCaster.IsMe)
                         {
                             LuxE = null;
                         }
