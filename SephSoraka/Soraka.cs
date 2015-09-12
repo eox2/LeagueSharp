@@ -396,6 +396,8 @@ namespace SephSoraka
 			if (Debug)
 			{
 				Game.PrintChat("Combo Called");
+				Game.PrintChat("Q" + Spells[SpellSlot.Q].IsReady() + " " + Misc.Active("Combo.UseQ") + " " + Spells[SpellSlot.Q].Instance.State);
+				Game.PrintChat("E " + Spells[SpellSlot.E].IsReady() + " " + Misc.Active("Combo.UseE") + " " + Spells[SpellSlot.E].Instance.State);
 			}
 			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ"))
 			{
