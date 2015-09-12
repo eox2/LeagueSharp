@@ -81,7 +81,6 @@ namespace SephSoraka
         {
             Player = ObjectManager.Player;
 
-          //  PrintSData();
             if (Player.CharData.BaseSkinName != "Soraka")
             {
                 return;
@@ -150,11 +149,15 @@ namespace SephSoraka
 
         private static void OnUpdate(EventArgs args)
         {
-            if (Player.IsDead || Player.IsRecalling())
+            if (Player.IsDead)
             {
+	            if (Debug)
+	            {
+		            Game.PrintChat("Dead or recalling so won't cast");
+	            }
                 return;
             }
-
+			
             if (Misc.Active("Misc.AutoEStunned"))
             {
                 AutoEStunned();
@@ -181,13 +184,23 @@ namespace SephSoraka
             {
                 Harass(target);
             }
+
+	        if (Debug && target == null && Misc.ActiveKeyBind("Keys.HarassT"))
+	        {
+		        Game.PrintChat("target is null");
+	        }
+
             switch (SorakaMenu.Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
-                    if (target != null)
-                    {
-                        Combo(target);
-                    }
+		            if (target != null)
+		            {
+			            Combo(target);
+		            }
+		            else if (Debug)
+		            {
+			            Game.PrintChat("Target is null");
+		            }
                     break;
                 case Orbwalking.OrbwalkingMode.LaneClear:
                     WaveClear();
@@ -207,7 +220,6 @@ namespace SephSoraka
         {
             if (Misc.Active("Farm.Disableauto") && args.Target.Type != GameObjectType.obj_AI_Hero)
             {
-
                 var alliesinrange = HeroManager.Allies.Count(x => !x.IsMe && x.Distance(Player) <= FarmRange);
                 if (alliesinrange > 0)
                 {
@@ -381,14 +393,38 @@ namespace SephSoraka
 
         private static void Combo(Obj_AI_Hero target)
         {
+	        if (Debug)
+	        {
+		        Game.PrintChat("Combo Called");
+	        }
             if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ"))
             {
-                var pred = Spells[SpellSlot.Q].GetPrediction(target);
-                if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
-                {
-                    Spells[SpellSlot.Q].Cast(pred.CastPosition);
-                }
+				if (Debug) { Game.PrintChat("Q is ready"); }
+				var pred = Spells[SpellSlot.Q].GetPrediction(target);
+				if (Debug) { Game.PrintChat("Q pred result is " + pred.Hitchance + " " + pred.CastPosition); }
+	            if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
+	            {
+		            if (Debug)
+		            {
+			            Game.PrintChat("Hitchance exceeds set value, casting");
+		            }
+		            Spells[SpellSlot.Q].Cast(pred.CastPosition);
+	            }
+	            else
+	            {
+		            if (Debug)
+		            {
+			            Game.PrintChat("Failed min hitchance");
+		            }
+	            }
             }
+
+	        if (Debug)
+	        {
+		        Game.PrintChat("Q is not ready or set to not use Q");
+	        }
+
+
 
             if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE"))
             {
@@ -683,8 +719,12 @@ namespace SephSoraka
             }
         }
 
+	    internal static bool Debug
+	    {
+		    get { return Config.Item("Debug").GetValue<bool>(); }
+	    }
 
-        internal static int GetSetPriority(this Obj_AI_Hero hero)
+	    internal static int GetSetPriority(this Obj_AI_Hero hero)
         {
             return Config.Item("p" + hero.ChampionName).GetValue<Slider>().Value;
         }
