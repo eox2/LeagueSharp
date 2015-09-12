@@ -149,7 +149,7 @@ namespace SephSoraka
 
 		private static void OnUpdate(EventArgs args)
 		{
-			if (Player.IsDead)
+			if (Player.IsDead || Player.IsRecalling())
 			{
 				if (Debug)
 				{
@@ -674,6 +674,16 @@ namespace SephSoraka
 
 		static void OnDraw(EventArgs args)
 		{
+			if (Debug)
+			{
+				for (int i = 0; i < Player.Buffs.Count(); i++)
+				{
+					var buff = Player.Buffs[i];
+					var wts = Drawing.WorldToScreen(Player.Position);
+					var adjustedy = wts.Y + (i*15);
+					Drawing.DrawText(wts.X, adjustedy, Color.Aqua, buff.Name + " " + buff.Type);
+				}
+			}
 			if (Player.IsDead || Player.IsRecalling() || Misc.Active("Drawing.Disable"))
 			{
 				return;
