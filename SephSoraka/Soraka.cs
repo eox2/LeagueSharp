@@ -419,7 +419,7 @@ namespace SephSoraka
 				}
 			}
 
-			if (Debug)
+			else if (Debug)
 			{
 				Game.PrintChat("Q is not ready or set to not use Q");
 			}
