@@ -459,7 +459,7 @@ namespace SephSoraka
 
 		static void MixedModeLogic(Obj_AI_Hero target, bool isMixed)
 		{
-			if (Misc.Active("Harass.InMixed"))
+			if (Misc.Active("Harass.InMixed") && target != null)
 			{
 				Harass(target);
 			}
