@@ -9,7 +9,8 @@ namespace SkinsSharp
     {
         private static Menu menu;
         private static Dictionary<String, int> ChampSkins = new Dictionary<String, int>();
-        private static Dictionary<Obj_AI_Hero, bool> WasDead = new Dictionary<Obj_AI_Hero, bool>();
+		private static Dictionary<int, bool> Enabled = new Dictionary<int, bool>();
+		private static Dictionary<Obj_AI_Hero, bool> WasDead = new Dictionary<Obj_AI_Hero, bool>();
 
         static void Main(string[] args)
         {
@@ -18,14 +19,20 @@ namespace SkinsSharp
 
         private static List<Obj_AI_Hero> HeroList = new List<Obj_AI_Hero>();
 
-        static void GameLoad(EventArgs argss)
+	    private static bool OnlyDefault
+	    {
+		    get { return menu.Item("onlydefault").GetValue<bool>(); }
+	    }
+
+	    static void GameLoad(EventArgs argss)
         {
 
             menu = new Menu("Skins#", "Skinswitcher", true);
 
-            menu.AddItem(new MenuItem("forall", "Enable for all (reload required)", false).SetValue(false));
+            menu.AddItem(new MenuItem("forall", "Enable for all (reload required)").SetValue(false));
+			menu.AddItem(new MenuItem("onlydefault", "Keep loaded skins").SetValue(true));
 
-            try
+			try
             {
                 foreach (var hero in HeroManager.AllHeroes)
                 {
@@ -38,12 +45,13 @@ namespace SkinsSharp
 
                     WasDead.Add(hero, false);
 
+					Enabled.Add(hero.NetworkId, false);
+
                     var currenthero = hero;
 
                     var herosubmenu = new Menu(hero.ChampionName + " (" + hero.Name + ") ", hero.ChampionName);
 
-
-                    var skinselect = herosubmenu.AddItem(
+	                var skinselect = herosubmenu.AddItem(
                             new MenuItem("skin." + hero.ChampionName, "Change Skin")
                                 .SetValue(
                                     new StringList(
@@ -55,13 +63,24 @@ namespace SkinsSharp
 
                     ChampSkins.Add(hero.Name, skinselect.GetValue<StringList>().SelectedIndex);
 
-                    hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
 
-                    menu.AddSubMenu(herosubmenu);
+	                if (OnlyDefault && hero.CharData.BaseSkinName == hero.SkinName)
+	                {
+		                Enabled[hero.NetworkId] = true;
+		                hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
+	                }
+					else if (!OnlyDefault)
+					{
+						Enabled[hero.NetworkId] = true;
+						hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
+					}
+
+	                menu.AddSubMenu(herosubmenu);
 
                     skinselect.ValueChanged += delegate (Object sender, OnValueChangeEventArgs args)
                     {
-                        ChampSkins[currenthero.Name] = args.GetNewValue<StringList>().SelectedIndex;
+						Enabled[hero.NetworkId] = true;
+						ChampSkins[currenthero.Name] = args.GetNewValue<StringList>().SelectedIndex;
                         currenthero.SetSkin(currenthero.ChampionName, ChampSkins[currenthero.Name]);
                     };
                 }
@@ -89,7 +108,7 @@ namespace SkinsSharp
                     WasDead[hero] = true;
                     continue;
                 }
-                 if (!hero.IsDead && WasDead[hero])
+                 if (!hero.IsDead && WasDead[hero] && Enabled[hero.NetworkId])
                 {
                     hero.SetSkin(hero.ChampionName, ChampSkins[hero.Name]);
                     WasDead[hero] = false;
