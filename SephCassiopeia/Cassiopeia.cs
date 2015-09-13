@@ -1,13 +1,11 @@
 ﻿#region imports
 using System;
-using System.Windows;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using Color = System.Drawing.Color;
+using SPrediction;
 
 #endregion;
 
@@ -357,20 +355,26 @@ namespace SephCassiopeia
         {
             if (Spells[SpellSlot.Q].IsReady() && CassioUtils.Active("Combo.UseQ"))
             {
+	            Spells[SpellSlot.Q].SPredictionCast(target, CassioUtils.GetHitChance("Hitchance.Q"));
+	            /*
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
-                if (pred.Hitchance > CassioUtils.GetHitChance("Hitchance.Q"))
+                if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.Q"))
                 {
                     Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
+				*/
             }
             if (Spells[SpellSlot.W].IsReady() && CassioUtils.Active("Combo.UseW"))
             {
+				Spells[SpellSlot.W].SPredictionCast(target, CassioUtils.GetHitChance("Hitchance.W"));
+				/*
                 var pred = Spells[SpellSlot.W].GetPrediction(target, true);
                 if (pred.Hitchance > CassioUtils.GetHitChance("Hitchance.W"))
                 {
                     Spells[SpellSlot.W].Cast(pred.CastPosition);
                 }
-            }
+				*/
+			}
             if (Spells[SpellSlot.E].IsReady() && CassioUtils.Active("Combo.UseE"))
             {
                 if (CassioUtils.Active("Combo.useepoison") && target.isPoisoned())
@@ -415,7 +419,7 @@ namespace SephCassiopeia
         {
             var x = target.GetWaypoints().Last();
             var mypos2d = Player.ServerPosition.To2D();
-            if (Vector2.Distance(mypos2d, x) <= Vector2.Distance(mypos2d, target.ServerPosition.To2D()) && target.GetWaypoints().Count >= 3 || !target.IsMoving)
+            if (Vector2.Distance(mypos2d, x) <= Vector2.Distance(mypos2d, target.ServerPosition.To2D()) && target.GetWaypoints().Count >= 2 || !target.IsMoving)
             {
                 return true;
             }
@@ -580,20 +584,27 @@ namespace SephCassiopeia
         {
             if (Spells[SpellSlot.Q].IsReady() && CassioUtils.Active("Harass.UseQ"))
             {
+				Spells[SpellSlot.Q].SPredictionCast(target, CassioUtils.GetHitChance("Hitchance.Q"));
+				/*
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
                 if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.Q"))
                 {
                     Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
-            }
+				*/
+			}
             if (Spells[SpellSlot.W].IsReady() && CassioUtils.Active("Harass.UseW"))
             {
+				Spells[SpellSlot.W].SPredictionCast(target, CassioUtils.GetHitChance("Hitchance.W"));
+				/*
                 var pred = Spells[SpellSlot.W].GetPrediction(target, true);
                 if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.W"))
                 {
                     Spells[SpellSlot.W].Cast(pred.CastPosition);
                 }
-            }
+				*/
+
+			}
             if (Spells[SpellSlot.E].IsReady() && CassioUtils.Active("Harass.UseE"))
             {
                 if (target.isPoisoned())
@@ -629,12 +640,16 @@ namespace SephCassiopeia
                     var qdmg = Player.GetSpellDamage(qtarget, SpellSlot.Q);
                     if (qtarget.Health < qdmg)
                     {
+						Spells[SpellSlot.Q].SPredictionCast(target,       CassioUtils.GetHitChance("Hitchance.Q"));
+	                    return;
+	                    /*
                         var pred = Spells[SpellSlot.Q].GetPrediction(qtarget, false);
                         if (pred != null && pred.Hitchance >= HitChance.Medium)
                         {
-                            Spells[SpellSlot.Q].Cast(pred.CastPosition);
+                            Spells[SpellSlot.W].Cast(pred.CastPosition);
                             return;
                         }
+						*/
                     }
                 }
             }
@@ -649,13 +664,16 @@ namespace SephCassiopeia
                     var wdmg = Player.GetSpellDamage(wtarget, SpellSlot.W);
                     if (wtarget.Health < wdmg)
                     {
-                        var pred = Spells[SpellSlot.Q].GetPrediction(wtarget, false);
+						Spells[SpellSlot.W].SPredictionCast(target, CassioUtils.GetHitChance("Hitchance.W"));
+						/*
+                        var pred = Spells[SpellSlot.W].GetPrediction(wtarget, false);
                         if (pred != null && pred.Hitchance >= HitChance.Medium)
                         {
                             Spells[SpellSlot.W].Cast(pred.CastPosition);
                             return;
                         }
-                    }
+						*/
+					}
                 }
             }
             if (SpellSlot.E.IsReady() && CassioUtils.Active("Killsteal.UseE"))
@@ -687,12 +705,15 @@ namespace SephCassiopeia
 
                 if (targ != null)
                 {
+					Spells[SpellSlot.R].SPredictionCast(target, CassioUtils.GetHitChance("Hitchance.R"));
+					/*
                     var pred = Spells[SpellSlot.R].GetPrediction(targ, true);
                     if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.R"))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
                     }
-                }
+					*/
+				}
             }
 
             if (Spells[IgniteSlot].IsReady() && CassioUtils.Active("Killsteal.UseIgnite"))
@@ -776,11 +797,14 @@ namespace SephCassiopeia
             {
                 if (CassioUtils.Active("Interrupter.AG.UseR") && Vector3.Distance(args.End, Player.ServerPosition) <= Spells[SpellSlot.R].Range && sender.IsFacing(Player))
                 {
+	                Spells[SpellSlot.R].SPredictionCast(sender, CassioUtils.GetHitChance("Hitchance.R"));
+	                /*
                     var pred = Spells[SpellSlot.R].GetPrediction(sender);
                     if (pred.Hitchance >= HitChance.VeryHigh && sender.IsFacing(Player))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
                     }
+					*/
                 }
             }
         }
@@ -798,12 +822,15 @@ namespace SephCassiopeia
             {
                 if (CassioUtils.Active("Interrupter.UseR") && Vector3.Distance(sender.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.R].Range && sender.IsFacing(Player))
                 {
+					Spells[SpellSlot.R].SPredictionCast(sender, CassioUtils.GetHitChance("Hitchance.R"));
+					/*
                     var pred = Spells[SpellSlot.R].GetPrediction(sender);
                     if (pred.Hitchance >= HitChance.VeryHigh && sender.IsFacing(Player))
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
                     }
-                }
+					*/
+				}
             }
         }
         #endregion

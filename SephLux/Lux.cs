@@ -5,6 +5,8 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using SPrediction;
+using Prediction = LeagueSharp.Common.Prediction;
 
 #endregion;
 
@@ -129,19 +131,23 @@ namespace SephLux
             if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Combo.UseQ"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
-                if (pred.CollisionObjects.Count <= 1 && pred.Hitchance > LuxUtils.GetHitChance("Hitchance.Q"))
+                if (pred.CollisionObjects.Count <= 1 && pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.Q"))
                 {
                     Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
+				
             }
             if (Spells[SpellSlot.E].IsReady() && LuxE == null && LuxUtils.Active("Combo.UseE"))
             {
+				Spells[SpellSlot.E].SPredictionCast(target, LuxUtils.GetHitChance("Hitchance.E"));
+				/*
                 var pred = Spells[SpellSlot.E].GetPrediction(target, true);
                 if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.E"))
                 {
                     Spells[SpellSlot.E].Cast(pred.CastPosition);
                 }
-            }
+				*/
+			}
             else if (LuxUtils.Active("Combo.UseE2") && LuxE != null &&
                      Vector3.Distance(LuxE.Position, target.ServerPosition) <=
                      LuxE.BoundingRadius + target.BoundingRadius)
@@ -164,7 +170,7 @@ namespace SephLux
                 {
                     var pred = Spells[SpellSlot.R].GetPrediction(target, true);
                     if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.R") ||
-                        pred.CollisionObjects.Count(x => x.Type == GameObjectType.obj_AI_Hero && x.IsEnemy) > 2 &&
+                        pred.CollisionObjects.Count(x => x.Type == GameObjectType.obj_AI_Hero && x.IsEnemy) >= 2 &&
                         pred.Hitchance >= HitChance.High)
                     {
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
@@ -356,12 +362,15 @@ namespace SephLux
             }
             if (Spells[SpellSlot.E].IsReady() && LuxE == null && LuxUtils.Active("Harass.UseE"))
             {
+				Spells[SpellSlot.E].SPredictionCast(target, LuxUtils.GetHitChance("Hitchance.E"));
+				/*
                 var pred = Spells[SpellSlot.E].GetPrediction(target, true);
                 if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.E"))
                 {
                     Spells[SpellSlot.E].Cast(pred.CastPosition);
                 }
-            }
+				*/
+			}
             else if (LuxUtils.Active("Harass.UseE") && LuxE != null &&
                      Vector3.Distance(LuxE.Position, target.ServerPosition) <=
                      LuxE.BoundingRadius + target.BoundingRadius)

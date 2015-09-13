@@ -5,6 +5,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using SPrediction;
 using Color = System.Drawing.Color;
 
 #endregion;
@@ -395,28 +396,38 @@ namespace SephSoraka
 		{
 			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ"))
 			{
+				Spells[SpellSlot.Q].SPredictionCast(target, Misc.GetHitChance("Hitchance.Q"));
+				/*
 				var pred = Spells[SpellSlot.Q].GetPrediction(target);
 				if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
 				{
 					Spells[SpellSlot.Q].Cast(pred.CastPosition);
-				}
+                }
+				*/
 			}
+			
 
-
-			if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE"))
-			{
-				var pred = Spells[SpellSlot.E].GetPrediction(target);
-				if (pred.Hitchance >= Misc.GetHitChance("Hitchance.E"))
+				if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE"))
 				{
-					Spells[SpellSlot.E].Cast(pred.CastPosition);
+					Spells[SpellSlot.E].SPredictionCast(target, Misc.GetHitChance("Hitchance.E"));
+					/*
+					 var pred = Spells[SpellSlot.E].GetPrediction(target);
+					 if (pred.Hitchance >= Misc.GetHitChance("Hitchance.E"))
+					 {
+						 Spells[SpellSlot.E].Cast(pred.CastPosition);
+					 }
+					 */
 				}
 			}
-		}
+		
+
+
 		#endregion
 
-		#region Waveclear
+				#region Waveclear
 
-		private static void WaveClear()
+			private static
+			void WaveClear()
 		{
 			var Minions =
 				ObjectManager.Get<Obj_AI_Minion>()
@@ -461,19 +472,25 @@ namespace SephSoraka
 		{
 			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Harass.UseQ") && Player.ManaPercent > Misc.GetSlider("Harass.Mana"))
 			{
+				Spells[SpellSlot.Q].SPredictionCast(target, Misc.GetHitChance("Hitchance.Q"));
+				/*
 				var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
 				if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
 				{
 					Spells[SpellSlot.Q].Cast(pred.CastPosition);
 				}
+				*/
 			}
 			if (Spells[SpellSlot.E].IsReady() && Misc.Active("Harass.UseE"))
 			{
+				Spells[SpellSlot.E].SPredictionCast(target, Misc.GetHitChance("Hitchance.E"));
+				/*
 				var pred = Spells[SpellSlot.E].GetPrediction(target, true);
 				if (pred.Hitchance >= Misc.GetHitChance("Hitchance.E"))
 				{
 					Spells[SpellSlot.E].Cast(pred.CastPosition);
 				}
+				*/
 			}
 		}
 		#endregion
@@ -499,12 +516,16 @@ namespace SephSoraka
 					var qdmg = Player.GetSpellDamage(qtarget, SpellSlot.Q);
 					if (qtarget.Health < qdmg)
 					{
+						Spells[SpellSlot.Q].SPredictionCast(qtarget, Misc.GetHitChance("Hitchance.Q"));
+						return;
+						/*
 						var pred = Spells[SpellSlot.Q].GetPrediction(qtarget);
 						if (pred != null && pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
 						{
 							Spells[SpellSlot.Q].Cast(pred.CastPosition);
 							return;
 						}
+						*/
 					}
 				}
 
@@ -518,8 +539,21 @@ namespace SephSoraka
 						var edmg = Player.GetSpellDamage(etarget, SpellSlot.E);
 						if (etarget.Health < edmg)
 						{
-							Spells[SpellSlot.E].Cast(etarget);
+							Spells[SpellSlot.E].SPredictionCast(qtarget, Misc.GetHitChance("Hitchance.E"));
 						}
+					}
+				}
+
+				if (Spells[SpellSlot.E].IsReady() && Misc.Active("Killsteal.UseE") && Spells[SpellSlot.Q].IsReady() &&
+				    Misc.Active("Killsteal.UseQ"))
+				{
+					Obj_AI_Hero eqtarget =
+						targets.Where(x => x.Distance(Player.Position) < Spells[SpellSlot.E].Range && x.Distance(Player.Position) < Spells[SpellSlot.Q].Range && x.Health < Player.GetSpellDamage(x, SpellSlot.E) + Player.GetSpellDamage(x, SpellSlot.Q))
+							.MinOrDefault(x => x.Health);
+					if (eqtarget != null)
+					{
+						Spells[SpellSlot.Q].SPredictionCast(qtarget, Misc.GetHitChance("Hitchance.Q"));
+						Spells[SpellSlot.E].SPredictionCast(qtarget, Misc.GetHitChance("Hitchance.E"));
 					}
 				}
 

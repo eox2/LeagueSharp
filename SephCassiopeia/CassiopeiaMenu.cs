@@ -12,7 +12,8 @@ namespace SephCassiopeia
         public static Menu CreateMenu()
         {
             Config = new Menu("SephCassio", "Lux", true);
-            LeagueSharp.Common.TargetSelector TargetSelector = new LeagueSharp.Common.TargetSelector();
+			SPrediction.Prediction.Initialize(Config);
+			LeagueSharp.Common.TargetSelector TargetSelector = new LeagueSharp.Common.TargetSelector();
             Menu TSMenu = new Menu("Target Selector", "TS", false);
             TargetSelector.AddToMenu(TSMenu);
             Config.AddSubMenu(TSMenu);

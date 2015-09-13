@@ -17,6 +17,8 @@ namespace SephSoraka
 			try
 			{
 				Config = new Menu("SephSoraka", "Soraka", true);
+
+				SPrediction.Prediction.Initialize(Config);
 				Menu TSMenu = new Menu("Target Selector", "TS", false);
 				TargetSelector.AddToMenu(TSMenu);
 				Config.AddSubMenu(TSMenu);

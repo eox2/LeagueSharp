@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="clipper_library">
+      <HintPath>..\..\..\..\Desktop\L#\System\clipper_library.dll</HintPath>
+    </Reference>
     <Reference Include="LeagueSharp">
       <HintPath>C:\Users\Laptop\Desktop\L#\System\LeagueSharp.dll</HintPath>
     </Reference>
@@ -62,6 +65,10 @@
     <Compile Include="LuxUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SPrediction\ClipperWrapper.cs" />
+    <Compile Include="SPrediction\Collision.cs" />
+    <Compile Include="SPrediction\Geometry.cs" />
+    <Compile Include="SPrediction\Prediction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
