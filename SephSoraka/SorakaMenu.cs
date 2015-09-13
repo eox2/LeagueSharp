@@ -166,9 +166,6 @@ namespace SephSoraka
 								HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(),
 								HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString()
 							}, 1)));
-				Menu Debug = new Menu("Debug", "Debugmenu");
-				Debug.AddItem(new MenuItem("Debug", "Debug")).SetValue(false);
-				Misc.AddSubMenu(Debug);
 				Misc.AddItem(new MenuItem("Misc.UseMikael", "Use Mikaels").SetValue(true));
 				Misc.AddItem(new MenuItem("Misc.AutoEStunned", "Auto E immobile champions").SetValue(false));
 				Misc.AddItem(new MenuItem("Misc.Nohealshop", "Dont heal if ally in base").SetValue(true));

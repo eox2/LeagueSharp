@@ -151,10 +151,6 @@ namespace SephSoraka
 		{
 			if (Player.IsDead || Player.IsRecalling())
 			{
-				if (Debug)
-				{
-					Game.PrintChat("Dead or recalling so won't cast");
-				}
 				return;
 			}
 
@@ -185,10 +181,6 @@ namespace SephSoraka
 				Harass(target);
 			}
 
-			if (Debug && target == null && Misc.ActiveKeyBind("Keys.HarassT"))
-			{
-				Game.PrintChat("target is null");
-			}
 
 			switch (SorakaMenu.Orbwalker.ActiveMode)
 			{
@@ -196,10 +188,6 @@ namespace SephSoraka
 					if (target != null)
 					{
 						Combo(target);
-					}
-					else if (Debug)
-					{
-						Game.PrintChat("Target is null");
 					}
 					break;
 				case Orbwalking.OrbwalkingMode.LaneClear:
@@ -232,55 +220,67 @@ namespace SephSoraka
 
 		static void DangerDetector(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
 		{
-			var ally = args.Target as Obj_AI_Hero;
-			if (sender.IsChampion() && sender.Team != Player.Team && ally != null && ally.IsAlly && (!Misc.Active("Misc.Nohealshop") || !ally.InShop()))
+			try
 			{
-				if (Misc.Active("Healing.UseW"))
+				var ally = args.Target as Obj_AI_Hero;
+				if (sender.IsChampion() && sender.Team != Player.Team && ally != null && ally.IsAlly &&
+				    (!Misc.Active("Misc.Nohealshop") || !ally.InShop()))
 				{
-					if (Misc.Active("w" + ally.ChampionName) && !ally.IsMe && !ally.IsZombie &&
-						ally.Distance(Player) <= Spells[SpellSlot.W].Range)
+					if (Misc.Active("Healing.UseW"))
+					{
+						if (Misc.Active("w" + ally.ChampionName) && !ally.IsMe && !ally.IsZombie &&
+						    ally.Distance(Player) <= Spells[SpellSlot.W].Range)
+						{
+							var damage = sender.GetSpellDamage(ally, args.SData.Name);
+							var afterdmg = ((ally.Health - damage)/(ally.MaxHealth))*100f;
+							if (ally.HealthPercent < Misc.GetSlider("wpct" + ally.ChampionName) ||
+							    Misc.Active("wcheckdmgafter") && afterdmg < Misc.GetSlider("wpct" + ally.ChampionName))
+							{
+								if (Misc.Active("wonlyadc") &&
+								    (ally == myADC || myADC.HealthPercent <= Misc.GetSlider("wpct" + myADC.ChampionName)))
+								{
+									Spells[SpellSlot.W].CastOnUnit(myADC);
+								}
+								else if (!Misc.Active("wonlyadc"))
+								{
+									Spells[SpellSlot.W].CastOnUnit(ally);
+								}
+							}
+						}
+					}
+					if (Misc.Active("Healing.UseR") && Misc.Active("r" + ally.ChampionName) && !ally.IsZombie)
 					{
 						var damage = sender.GetSpellDamage(ally, args.SData.Name);
-						var afterdmg = ((ally.Health - damage) / (ally.MaxHealth)) * 100f;
-						if (ally.HealthPercent < Misc.GetSlider("wpct" + ally.ChampionName) ||
-							Misc.Active("wcheckdmgafter") && afterdmg < Misc.GetSlider("wpct" + ally.ChampionName))
+						var afterdmg = ((ally.Health - damage)/(ally.MaxHealth))*100f;
+						if (ally.HealthPercent < Misc.GetSlider("rpct" + ally.ChampionName) ||
+						    (Misc.Active("rcheckdmgafter") && afterdmg < Misc.GetSlider("rpct" + ally.ChampionName)))
 						{
-							if (Misc.Active("wonlyadc") &&
-								(ally == myADC || myADC.HealthPercent <= Misc.GetSlider("wpct" + myADC.ChampionName)))
+							var otherallies =
+								HeroManager.Allies.Where(
+									x =>
+										x != ally && Misc.Active("r" + x.ChampionName) && Misc.GetSlider("rpct" + x.ChampionName) > x.HealthPercent);
+
+							var count = otherallies.Count() + 1;
+
+							if (count >= Misc.GetSlider("minallies"))
 							{
-								Spells[SpellSlot.W].CastOnUnit(myADC);
-							}
-							else if (!Misc.Active("wonlyadc"))
-							{
-								Spells[SpellSlot.W].CastOnUnit(ally);
+								if (Misc.Active("ultonlyadc") &&
+								    (ally == myADC || myADC.HealthPercent <= Misc.GetSlider("rpct" + myADC.ChampionName)))
+								{
+									Spells[SpellSlot.R].Cast();
+								}
+
+								else if (!Misc.Active("ultonlyadc"))
+								{
+									Spells[SpellSlot.R].Cast();
+								}
 							}
 						}
 					}
 				}
-				if (Misc.Active("Healing.UseR") && Misc.Active("r" + ally.ChampionName) && !ally.IsZombie)
-				{
-					var damage = sender.GetSpellDamage(ally, args.SData.Name);
-					var afterdmg = ((ally.Health - damage) / (ally.MaxHealth)) * 100f;
-					if (ally.HealthPercent < Misc.GetSlider("rpct" + ally.ChampionName) || (Misc.Active("rcheckdmgafter") && afterdmg < Misc.GetSlider("rpct" + ally.ChampionName)))
-					{
-						var otherallies = HeroManager.Allies.Where(x => x != ally && Misc.Active("r" + x.ChampionName) && Misc.GetSlider("rpct" + x.ChampionName) > x.HealthPercent);
-
-						var count = otherallies.Count() + 1;
-
-						if (count >= Misc.GetSlider("minallies"))
-						{
-							if (Misc.Active("ultonlyadc") && (ally == myADC || myADC.HealthPercent <= Misc.GetSlider("rpct" + myADC.ChampionName)))
-							{
-								Spells[SpellSlot.R].Cast();
-							}
-
-							else if (!Misc.Active("ultonlyadc"))
-							{
-								Spells[SpellSlot.R].Cast();
-							}
-						}
-					}
-				}
+			}
+			catch (Exception e)
+			{
 			}
 		}
 		#region Combo
@@ -373,7 +373,7 @@ namespace SephSoraka
 			List<Obj_AI_Hero> alliesinneed = HeroManager.Allies.Where(
 	  hero =>
 		  !hero.IsDead && !hero.IsZombie && (!Misc.Active("Misc.Nohealshop") || !hero.InShop()) && hero.Distance(Player) <= Spells[SpellSlot.W].Range && Misc.Active("r" + hero.ChampionName) &&
-		  hero.HealthPercent <= Misc.GetSlider("rpct" + hero.HealthPercent))
+		  hero.HealthPercent <= Misc.GetSlider("rpct" + hero.ChampionName))
 	  .ToList();
 
 			var indanger = alliesinneed.Count(x => x.CountEnemiesInRange(600) > 0);
@@ -393,39 +393,14 @@ namespace SephSoraka
 
 		private static void Combo(Obj_AI_Hero target)
 		{
-			if (Debug)
-			{
-				Game.PrintChat("Combo Called");
-				Game.PrintChat("Q" + Spells[SpellSlot.Q].IsReady() + " " + Misc.Active("Combo.UseQ") + " " + Spells[SpellSlot.Q].Instance.State);
-				Game.PrintChat("E " + Spells[SpellSlot.E].IsReady() + " " + Misc.Active("Combo.UseE") + " " + Spells[SpellSlot.E].Instance.State);
-			}
 			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ"))
 			{
-				if (Debug) { Game.PrintChat("Q is ready"); }
 				var pred = Spells[SpellSlot.Q].GetPrediction(target);
-				if (Debug) { Game.PrintChat("Q pred result is " + pred.Hitchance + " " + pred.CastPosition); }
 				if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
 				{
-					if (Debug)
-					{
-						Game.PrintChat("Hitchance exceeds set value, casting");
-					}
 					Spells[SpellSlot.Q].Cast(pred.CastPosition);
 				}
-				else
-				{
-					if (Debug)
-					{
-						Game.PrintChat("Failed min hitchance");
-					}
-				}
 			}
-
-			else if (Debug)
-			{
-				Game.PrintChat("Q is not ready or set to not use Q");
-			}
-
 
 
 			if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE"))
@@ -676,16 +651,6 @@ namespace SephSoraka
 
 		static void OnDraw(EventArgs args)
 		{
-			if (Debug)
-			{
-				for (int i = 0; i < Player.Buffs.Count(); i++)
-				{
-					var buff = Player.Buffs[i];
-					var wts = Drawing.WorldToScreen(Player.Position);
-					var adjustedy = wts.Y + (i*15);
-					Drawing.DrawText(wts.X, adjustedy, Color.Aqua, buff.Name + " " + buff.Type);
-				}
-			}
 			if (Player.IsDead || Player.IsRecalling() || Misc.Active("Drawing.Disable"))
 			{
 				return;
@@ -731,10 +696,6 @@ namespace SephSoraka
 			}
 		}
 
-		internal static bool Debug
-		{
-			get { return Config.Item("Debug").GetValue<bool>(); }
-		}
 
 		internal static int GetSetPriority(this Obj_AI_Hero hero)
 		{
