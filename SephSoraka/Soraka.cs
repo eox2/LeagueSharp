@@ -207,7 +207,7 @@ namespace SephSoraka
 
 		static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
 		{
-			if (Misc.Active("Farm.Disableauto") && args.Target.Type != GameObjectType.obj_AI_Hero)
+			if (Misc.Active("Farm.Disableauto") && args.Target.Type == GameObjectType.obj_AI_Minion)
 			{
 				var alliesinrange = HeroManager.Allies.Count(x => !x.IsMe && x.Distance(Player) <= FarmRange);
 				if (alliesinrange > 0)

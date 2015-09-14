@@ -41,7 +41,7 @@ namespace SupportMode
 					return;
 				}
 
-				if (args.Target.Type != GameObjectType.obj_AI_Hero)
+				if (args.Target.Type == GameObjectType.obj_AI_Minion)
 				{
 					var alliesinrange = HeroManager.Allies.Count(x => !x.IsMe && x.Distance(Player) <= range);
 					if (alliesinrange > 0)
@@ -54,7 +54,7 @@ namespace SupportMode
 
 		void OnDraw(EventArgs args)
 		{
-			if (drawenabled.Active)
+			if (drawenabled.Active && enabled)
 			{
 				Render.Circle.DrawCircle(Player.Position, range, drawenabled.Color);
 			}
