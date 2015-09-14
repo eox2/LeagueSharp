@@ -23,7 +23,7 @@ namespace SupportMode
 			menu.AddItem(new MenuItem("drawenabled", "Enable Drawing").SetValue(new Circle(true, System.Drawing.Color.Red)));
 			menu.AddToMainMenu();
 
-			Game.PrintChat("Support Mode Loaded " + "Status: " + enabled);
+			Game.PrintChat("Support Mode Loaded " + "Enabled: " + enabled);
 
 			Orbwalking.BeforeAttack += BeforeAttack;
 			Drawing.OnDraw += OnDraw;
@@ -34,6 +34,13 @@ namespace SupportMode
 		{
 			if (enabled)
 			{
+				var lhmode = Orbwalking.Orbwalker.Instances.Find(x => x.ActiveMode == Orbwalking.OrbwalkingMode.LastHit);
+
+				if (lhmode != null)
+				{
+					return;
+				}
+
 				if (args.Target.Type != GameObjectType.obj_AI_Hero)
 				{
 					var alliesinrange = HeroManager.Allies.Count(x => !x.IsMe && x.Distance(Player) <= range);
