@@ -47,7 +47,7 @@ namespace SephKhazix
 
             Q = new Spell(SpellSlot.Q, 325f);
             W = new Spell(SpellSlot.W, 1000f);
-            WE = new Spell(SpellSlot.W, 10000f);
+            WE = new Spell(SpellSlot.W, 1000f);
             E = new Spell(SpellSlot.E, 600f);
             R = new Spell(SpellSlot.R, 0);
 
@@ -83,10 +83,6 @@ namespace SephKhazix
             Config.SubMenu("autopoke").AddItem(new MenuItem("AutoWD", "Auto W")).SetValue(true);
             Config.SubMenu("autopoke").AddItem(new MenuItem("AutoWHitchance", "W Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString() }, 1)));
 
-
-            //Packets
-            Config.AddSubMenu(new Menu("Packet Setting", "Packets"));
-            Config.SubMenu("Packets").AddItem(new MenuItem("usePackets", "Enable Packets").SetValue(false));
 
             //Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
@@ -177,7 +173,6 @@ namespace SephKhazix
             }
 
             Game.OnUpdate += OnGameUpdate;
-            Game.OnUpdate += CheckSpells;
             Game.OnUpdate += DoubleJump;
             Spellbook.OnCastSpell += SpellCast;
             Orbwalking.BeforeAttack += BeforeAttack;
@@ -300,6 +295,11 @@ namespace SephKhazix
                 return;
             }
 
+	        if (!EvolvedQ || !EvolvedW || !EvolvedE)
+	        {
+				CheckSpells();
+			}
+
             if (Config.Item("Combo").GetValue<KeyBind>().Active)
             {
                 Combo();
@@ -333,23 +333,22 @@ namespace SephKhazix
             Obj_AI_Hero target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             if (target != null)
             {
-                var usePacket = Config.Item("usePackets").GetValue<bool>();
                 if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= Q.Range && Config.Item("UseQHarass").GetValue<bool>() && Q.IsReady() && !Jumping)
                 {
                     Orbwalker.SetAttack(false);
-                    Q.Cast(target, usePacket);
+                    Q.Cast(target);
                     Orbwalker.SetAttack(true);
                 }
 
                 if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= W.Range && Config.Item("UseWHarass").GetValue<bool>() && W.IsReady() &&
                     Wnorm)
                 {
-                    W.Cast(target, usePacket);
+                    W.Cast(target);
                 }
                 if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= W.Range && Config.Item("UseWHarass").GetValue<bool>() && W.IsReady() &&
                     Wevolved)
                 {
-                    W.Cast(target, usePacket);
+                    W.Cast(target);
                 }
             }
         }
@@ -649,7 +648,6 @@ namespace SephKhazix
                 .Where(x => x.IsValidTarget() && x.Distance(Player.Position) < 1000f && !x.IsZombie)
                 .MinOrDefault(x => x.Health);
             
-            var usePacket = Config.Item("usePackets").GetValue<bool>();
 
             if (target != null)
             {
@@ -677,7 +675,7 @@ namespace SephKhazix
                     if (objAiturret.Any() || Player.CountEnemiesInRange(500) >= 1)
                     {
                         var bestposition = Player.ServerPosition.Extend(NexusPosition, E.Range);
-                        E.Cast(bestposition, usePacket);
+                        E.Cast(bestposition);
                         return;
                     }
                 }
@@ -688,7 +686,7 @@ namespace SephKhazix
                     double QDmg = GetQDamage(target);
                     if (!Jumping && target.Health <= QDmg)
                     {
-                        Q.Cast(target, usePacket);
+                        Q.Cast(target);
                         return;
                     }
                 }
@@ -705,7 +703,7 @@ namespace SephKhazix
                                 PredictionOutput pred = E.GetPrediction(target);
                                 if (target.IsValid && !target.IsDead)
                                 {
-                                    E.Cast(pred.CastPosition, usePacket);
+                                    E.Cast(pred.CastPosition);
                                 }
                             });
                     }
@@ -746,7 +744,7 @@ namespace SephKhazix
                                     .FirstOrDefault(PredCollisionChar => Vector3.Distance(PredCollisionChar.ServerPosition, target.ServerPosition) <= 30);
                             if (x != null)
                             {
-                                W.Cast(x.Position, Config.Item("usePackets").GetValue<bool>());
+                                W.Cast(x.Position);
                                 return;
                             }
                         }
@@ -820,23 +818,22 @@ namespace SephKhazix
         
 
 
-        private static void CheckSpells(EventArgs args)
+        private static void CheckSpells()
         {
-            var minion = new Obj_AI_Minion();
             //check for evolutions
-            if (Player.HasBuff("khazixqevo") && !EvolvedQ)
+            if (!EvolvedQ && Player.HasBuff("khazixqevo"))
             {
                 Q.Range = 375;
                 EvolvedQ = true;
             }
-            if (Player.HasBuff("khazixwevo") && !Wevolved)
+            if (!Wevolved && Player.HasBuff("khazixwevo"))
             {
                 Wevolved = true;
                 Wnorm = false;
                 W.SetSkillshot(0.225f, 100f, 828.5f, true, SkillshotType.SkillshotLine);
             }
             
-            if (Player.HasBuff("khazixeevo") && !Eevolved)
+            if (!Eevolved && Player.HasBuff("khazixeevo"))
             {
                 E.Range = 1000;
                 Eevolved = true;
@@ -866,7 +863,6 @@ namespace SephKhazix
                 return;
             }
 
-            var usePacket = Config.Item("usePackets").GetValue<bool>();
             Obj_AI_Hero target = TargetSelector.GetTarget(950, TargetSelector.DamageType.Physical);
             var autoWI = Config.Item("AutoWI").GetValue<bool>();
             var autoWD = Config.Item("AutoWD").GetValue<bool>();
@@ -879,7 +875,7 @@ namespace SephKhazix
                     PredictionOutput predw = W.GetPrediction(target);
                     if (predw.Hitchance == HarassHitChance())
                     {
-                        W.Cast(predw.CastPosition, usePacket);
+                        W.Cast(predw.CastPosition);
 
                     }
                 }
@@ -923,7 +919,6 @@ namespace SephKhazix
             {
                 return;
             }
-            var usePacket = Config.Item("usePackets").GetValue<bool>();
             var isolatedlist = GetIsolatedTargets();
             HitChance hitchance = HarassHitChance();
             Obj_AI_Hero target = new Obj_AI_Hero();
@@ -952,14 +947,14 @@ namespace SephKhazix
                     Q.IsReady() && !Jumping)
                 {
                     Orbwalker.SetAttack(false);
-                    Q.Cast(target, usePacket);
+                    Q.Cast(target);
                     Orbwalker.SetAttack(true);
                 }
                 if (Wnorm && Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= W.Range && Config.Item("UseWCombo").GetValue<bool>() &&
                     W.IsReady() && W.GetPrediction(target).Hitchance >= hitchance)
                 {
                     PredictionOutput pred = W.GetPrediction(target);
-                    W.Cast(pred.CastPosition, usePacket);
+                    W.Cast(pred.CastPosition);
                 }
 
                 if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= E.Range && Config.Item("UseECombo").GetValue<bool>() &&
@@ -968,7 +963,7 @@ namespace SephKhazix
                     PredictionOutput pred = E.GetPrediction(target);
                     if (target.IsValid && !target.IsDead)
                     {
-                        E.Cast(pred.CastPosition, usePacket);
+                        E.Cast(pred.CastPosition);
                     }
                 }
 
@@ -980,7 +975,7 @@ namespace SephKhazix
                     PredictionOutput pred = E.GetPrediction(target);
                     if (target.IsValid && !target.IsDead)
                     {
-                        E.Cast(pred.CastPosition, usePacket);
+                        E.Cast(pred.CastPosition);
                     }
                     if (Config.Item("UseRGapcloseW").GetValue<bool>() && R.IsReady())
                     {
@@ -1011,7 +1006,7 @@ namespace SephKhazix
                         var x = PCollision.Where(PredCollisionChar => PredCollisionChar.Distance(target) <= 30).FirstOrDefault();
                         if (x != null)
                         {
-                            W.Cast(x.Position, usePacket);
+                            W.Cast(x.Position);
                         }
                     }
                 }
@@ -1022,7 +1017,7 @@ namespace SephKhazix
                     PredictionOutput pred = E.GetPrediction(target);
                     if (target.IsValid && !target.IsDead)
                     {
-                        E.Cast(pred.CastPosition, usePacket);
+                        E.Cast(pred.CastPosition);
                     }
                 }
 
