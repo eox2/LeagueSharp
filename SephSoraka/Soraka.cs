@@ -227,7 +227,11 @@ namespace SephSoraka
 				if (sender.IsChampion() && sender.Team != Player.Team && ally != null && ally.IsAlly &&
 				    (!Misc.Active("Misc.Nohealshop") || !ally.InShop()))
 				{
-					if (Misc.Active("Healing.UseW"))
+					if (!(ally.HealthPercent >= Misc.GetSlider("Healing.MinHP")))
+					{
+						return;
+					}
+						if (Misc.Active("Healing.UseW"))
 					{
 						if (Misc.Active("w" + ally.ChampionName) && !ally.IsMe && !ally.IsZombie &&
 						    ally.Distance(Player) <= Spells[SpellSlot.W].Range)
@@ -309,7 +313,7 @@ namespace SephSoraka
 						hero => !hero.IsMe &&
 								!hero.IsDead && (!Misc.Active("Misc.Nohealshop") || !hero.InShop()) && !hero.IsZombie && hero.Distance(Player) <= Spells[SpellSlot.W].Range &&
 								Misc.Active("w" + hero.ChampionName) &&
-								hero.HealthPercent <= Misc.GetSlider("wpct" + hero.ChampionName))
+								hero.HealthPercent <= Misc.GetSlider("wpct" + hero.ChampionName) && hero.HealthPercent >= Misc.GetSlider("Healing.MinHP"))
 						.ToList();
 
 				if (Misc.Active("wonlyadc") && alliesinneed.Contains(myADC) && Player.Distance(myADC) <= Spells[SpellSlot.W].Range)
@@ -352,7 +356,7 @@ namespace SephSoraka
 			List<Obj_AI_Hero> alliesinneed = HeroManager.Allies.Where(
 		  hero =>
 			  !hero.IsDead && !hero.IsZombie && (!Misc.Active("Misc.Nohealshop") || !hero.InShop()) && hero.Distance(Player) <= Spells[SpellSlot.W].Range &&
-			  hero.HealthPercent <= Misc.GetSlider("rpct" + hero.ChampionName))
+			  hero.HealthPercent <= Misc.GetSlider("rpct" + hero.ChampionName) && hero.HealthPercent >= Misc.GetSlider("Healing.MinHP"))
 		  .ToList();
 
 			if (alliesinneed.Count >= Misc.GetSlider("minallies"))
@@ -374,7 +378,7 @@ namespace SephSoraka
 			List<Obj_AI_Hero> alliesinneed = HeroManager.Allies.Where(
 	  hero =>
 		  !hero.IsDead && !hero.IsZombie && (!Misc.Active("Misc.Nohealshop") || !hero.InShop()) && hero.Distance(Player) <= Spells[SpellSlot.W].Range && Misc.Active("r" + hero.ChampionName) &&
-		  hero.HealthPercent <= Misc.GetSlider("rpct" + hero.ChampionName))
+		  hero.HealthPercent <= Misc.GetSlider("rpct" + hero.ChampionName) && hero.HealthPercent >= Misc.GetSlider("Healing.MinHP"))
 	  .ToList();
 
 			var indanger = alliesinneed.Count(x => x.CountEnemiesInRange(600) > 0);
@@ -639,6 +643,14 @@ namespace SephSoraka
 				return;
 			}
 			var sender = args.Sender;
+
+			if (Misc.Active("Interrupter.AG.ADConly"))
+			{
+				if (!(args.End.Distance(myADC.ServerPosition) <= 250))
+				{
+					return;
+				}
+			}
 
 			if (sender.IsValidTarget())
 			{

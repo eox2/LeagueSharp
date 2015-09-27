@@ -64,8 +64,7 @@ namespace SephLux
             Config.AddSubMenu(Waveclear);
 
             Menu Interrupter = new Menu("Interrupter", "Interrupter +", false);
-            Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Use Q").SetValue(true));
-            Interrupter.AddItem(new MenuItem("Interrupter.AntiGapClose", "AntiGapClosers").SetValue(true));
+            Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Q Important spels").SetValue(true));
             Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "AntiGapClose with Q").SetValue(true));
             Config.AddSubMenu(Interrupter);
 

@@ -29,6 +29,7 @@ namespace SephSoraka
 				Menu Healing = new Menu("Healing", "Auto");
 				Healing.AddItem(new MenuItem("Healing.UseW", "Use W").SetValue(true));
 				Healing.AddItem(new MenuItem("Healing.UseR", "Use R").SetValue(true));
+				Healing.AddItem(new MenuItem("Healing.MinHP", "Minimum HP to Heal (%)").SetValue(new Slider(0, 0 , 100)));
 				Healing.AddItem(new MenuItem("Healing.Priority", "Priority Type").SetValue(new StringList(new[] { "Lowest Health", "Priority List" })));
 
 				Config.AddSubMenu(Healing);
@@ -177,6 +178,7 @@ namespace SephSoraka
 				Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Use Q").SetValue(true));
 				Interrupter.AddItem(new MenuItem("Interrupter.UseE", "Use E").SetValue(true));
 				Interrupter.AddItem(new MenuItem("Seperator", "----- Anti-Gapcloser -----"));
+				Interrupter.AddItem(new MenuItem("Interrupter.AG.ADConly", "Only Anti-AG for ADC").SetValue(false));
 				Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "Anti-Gapclose with Q").SetValue(true));
 				Interrupter.AddItem(new MenuItem("Interrupter.AG.UseE", "Anti-Gapclose with E").SetValue(true));
 

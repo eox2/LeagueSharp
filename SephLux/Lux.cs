@@ -355,7 +355,7 @@ namespace SephLux
             if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Harass.UseQ") && Player.ManaPercent > LuxUtils.GetSlider("Harass.Mana"))
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
-                if (pred.CollisionObjects.Count <= 1 && pred.Hitchance > LuxUtils.GetHitChance("Hitchance.Q"))
+                if (pred.CollisionObjects.Count <= 1 && pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.Q"))
                 {
                     Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
@@ -402,7 +402,7 @@ namespace SephLux
                     if (qtarget.Health < qdmg)
                     {
                         var pred = Spells[SpellSlot.Q].GetPrediction(qtarget, true);
-                        if (pred != null && pred.Hitchance > HitChance.Medium && pred.CollisionObjects.Count <= 1)
+                        if (pred != null && pred.Hitchance >= HitChance.Medium && pred.CollisionObjects.Count <= 1)
                         {
                             Spells[SpellSlot.Q].Cast(pred.CastPosition);
                             return;
@@ -429,7 +429,7 @@ namespace SephLux
                             if (etarget.Health < edmg)
                             {
                                 var pred = Spells[SpellSlot.Q].GetPrediction(etarget, false);
-                                if (pred != null && pred.Hitchance > HitChance.Medium)
+                                if (pred != null && pred.Hitchance >= HitChance.Medium)
                                 {
                                     Spells[SpellSlot.E].Cast(pred.CastPosition);
                                 }
@@ -614,8 +614,10 @@ namespace SephLux
             }
             if (LuxUtils.Active("Drawing.DrawR"))
             {
-                Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.R].Range, System.Drawing.Color.Red);
-            }
+                Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.R].Range, System.Drawing.Color.Aqua);
+
+				Utility.DrawCircle(Player.Position, Spells[SpellSlot.R].Range, System.Drawing.Color.Aqua, 1, 23, true);
+			}
 
         }
         #endregion
