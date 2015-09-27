@@ -29,7 +29,7 @@ namespace SephSoraka
 				Menu Healing = new Menu("Healing", "Auto");
 				Healing.AddItem(new MenuItem("Healing.UseW", "Use W").SetValue(true));
 				Healing.AddItem(new MenuItem("Healing.UseR", "Use R").SetValue(true));
-				Healing.AddItem(new MenuItem("Healing.MinHP", "Minimum HP to Heal (%)").SetValue(new Slider(0, 0 , 100)));
+				Healing.AddItem(new MenuItem("Healing.MinHP", "Ally min HP to Heal (%)").SetValue(new Slider(0, 0 , 100)));
 				Healing.AddItem(new MenuItem("Healing.Priority", "Priority Type").SetValue(new StringList(new[] { "Lowest Health", "Priority List" })));
 
 				Config.AddSubMenu(Healing);
@@ -41,6 +41,7 @@ namespace SephSoraka
 				WManager.AddItem(new MenuItem("wdamagedetection", "Disable damage detection").SetValue(false));
 				WManager.AddItem(new MenuItem("wcheckdmgafter", "Take HP-after-Damage into consideration").SetValue(true));
 				WManager.AddItem(new MenuItem("wonlyadc", "Heal only ADC").SetValue(false));
+				Healing.AddItem(new MenuItem("Healing.MinHPME", "Soraka min HP to Heal (%)").SetValue(new Slider(10, 0, 100)));
 
 				Menu Wsubmenu = new Menu("Heal %", "healpercent");
 				foreach (var hero in HeroManager.Allies.Where(x => !x.IsMe))

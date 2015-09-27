@@ -233,8 +233,8 @@ namespace SephSoraka
 					}
 						if (Misc.Active("Healing.UseW"))
 					{
-						if (Misc.Active("w" + ally.ChampionName) && !ally.IsMe && !ally.IsZombie &&
-						    ally.Distance(Player) <= Spells[SpellSlot.W].Range)
+						if (Spells[SpellSlot.W].IsReady() && Player.HealthPercent <= Misc.GetSlider("Healing.MinHPME") &&  Misc.Active("w" + ally.ChampionName) && !ally.IsMe && !ally.IsZombie &&
+						    ally.Distance(Player) <= Spells[SpellSlot.W].Range) 
 						{
 							var damage = sender.GetSpellDamage(ally, args.SData.Name);
 							var afterdmg = ((ally.Health - damage)/(ally.MaxHealth))*100f;
@@ -306,6 +306,11 @@ namespace SephSoraka
 
 		private static void UseW()
 		{
+			if (Player.HealthPercent <= Misc.GetSlider("Healing.MinHPME"))
+			{
+				return;
+			}
+
 			if (Spells[SpellSlot.W].IsReady())
 			{
 				var alliesinneed =
