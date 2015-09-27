@@ -32,7 +32,7 @@ namespace SephLux
 
 
             Menu KillSteal = new Menu("Killsteal", "Killsteal", false);
-            KillSteal.AddItem(new MenuItem("Killsteal", "KillSteal", false).SetValue(true));
+            KillSteal.AddItem(new MenuItem("Killsteal", "Killsteal", false).SetValue(true));
             KillSteal.AddItem(new MenuItem("Killsteal.UseQ", "Use Q", false).SetValue(true));
             KillSteal.AddItem(new MenuItem("Killsteal.UseE", "Use E", false).SetValue(true));
             KillSteal.AddItem(new MenuItem("Killsteal.UseE2", "Use E", false).SetValue(true));
@@ -45,12 +45,12 @@ namespace SephLux
             Harass.AddItem(new MenuItem("Keys.HarassT", "Harass Toggle", false).SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
             Harass.AddItem(new MenuItem("Harass.UseQ", "Use Q", false).SetValue(true));
             Harass.AddItem(new MenuItem("Harass.UseE", "Use E", false).SetValue(true));
-            Harass.AddItem(new MenuItem("Harass.Mana", "Min mana for harass (%)", false).SetValue(new Slider(50, 0, 100)));
+            Harass.AddItem(new MenuItem("Harass.Mana", "Min. % Mana for Harass", false).SetValue(new Slider(50, 0, 100)));
             Config.AddSubMenu(Harass);
 
-            Menu Farm = new Menu("Farm (LH)", "Farm", false);
-            Farm.AddItem(new MenuItem("Farm.Enable", "Enable abilities for farming").SetValue(true));
-            Farm.AddItem(new MenuItem("Farm.Mana", "Minimum Mana %").SetValue(new Slider(50, 0, 100)));
+            Menu Farm = new Menu("Farm (Last Hit)", "Farm", false);
+            Farm.AddItem(new MenuItem("Farm.Enable", "Enable Abilities for Farming").SetValue(true));
+            Farm.AddItem(new MenuItem("Farm.Mana", "Min. % Mana for Farming").SetValue(new Slider(50, 0, 100)));
             Farm.AddItem(new MenuItem("Farm.UseQ", "Use Q").SetValue(true));
             Farm.AddItem(new MenuItem("Farm.UseE", "Use E").SetValue(true));
             Config.AddSubMenu(Farm);
@@ -58,17 +58,17 @@ namespace SephLux
             Menu Waveclear = new Menu("Waveclear", "Waveclear", false);
             Waveclear.AddItem(new MenuItem("Waveclear.UseQ", "Use Q").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseR", "Use R").SetValue(true));
-            Waveclear.AddItem(new MenuItem("Waveclear.Rcount", "Minions for R").SetValue(new Slider(10, 0, 20)));
+            Waveclear.AddItem(new MenuItem("Waveclear.Rcount", "Minions to Use R").SetValue(new Slider(10, 0, 20)));
             Waveclear.AddItem(new MenuItem("Waveclear.UseE", "Use E").SetValue(true));
             Waveclear.AddItem(new MenuItem("Waveclear.UseE2", "Use E2").SetValue(true));
             Config.AddSubMenu(Waveclear);
 
             Menu Interrupter = new Menu("Interrupter", "Interrupter +", false);
-            Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Q Important spels").SetValue(true));
-            Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "AntiGapClose with Q").SetValue(true));
+            Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Use Q on Dangerous Spells").SetValue(true));
+            Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "Anti-Gapclose with Q").SetValue(true));
             Config.AddSubMenu(Interrupter);
 
-            Menu Blist = new Menu("BlackList", "BlackList", false);
+            Menu Blist = new Menu("Blacklist", "BlackList", false);
             foreach (var hero in HeroManager.Enemies)
             {
                 var champ = hero;
@@ -89,7 +89,7 @@ namespace SephLux
             Config.AddSubMenu(Blist);
 
 
-            Menu Misc = new Menu("Hitchance Settings", "Misc", false);
+            Menu Misc = new Menu("Hit Chance Settings", "Misc", false);
             Misc.AddItem(new MenuItem("Hitchance.Q", "Q Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 1)));
             Misc.AddItem(new MenuItem("Hitchance.E", "E Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 1)));
             Misc.AddItem(new MenuItem("Hitchance.R", "R Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 4)));
@@ -97,7 +97,7 @@ namespace SephLux
             Config.AddSubMenu(Misc);
 
             Menu Drawings = new Menu("Drawings", "Drawing", false);
-            Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable all").SetValue(false));
+            Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable All").SetValue(false));
             Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q").SetValue(true));
             Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E").SetValue(true));
             Drawings.AddItem(new MenuItem("Drawing.DrawR", "Draw R").SetValue(true));
