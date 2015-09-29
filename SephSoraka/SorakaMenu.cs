@@ -124,6 +124,7 @@ namespace SephSoraka
 				Menu Combo = new Menu("Combo", "Combo");
 				Combo.AddItem(new MenuItem("Combo.UseQ", "Use Q").SetValue(true));
 				Combo.AddItem(new MenuItem("Combo.UseE", "Use E").SetValue(true));
+				Combo.AddItem(new MenuItem("Combo.Disableauto", "Disable auto attacks in Combo").SetValue(true));
 				Config.AddSubMenu(Combo);
 
 
@@ -142,6 +143,7 @@ namespace SephSoraka
 				Harass.AddItem(new MenuItem("Harass.InMixed", "Harass in Mixed Mode").SetValue(true));
 				Harass.AddItem(new MenuItem("Harass.UseQ", "Use Q").SetValue(true));
 				Harass.AddItem(new MenuItem("Harass.UseE", "Use E").SetValue(true));
+				Harass.AddItem(new MenuItem("Harass.Eminhit", "Min targs for E").SetValue(new Slider(1, 1, 5)));
 				Harass.AddItem(
 					new MenuItem("Harass.Mana", "Min mana for harass (%)", false).SetValue(new Slider(50, 0, 100)));
 				Config.AddSubMenu(Harass);

@@ -207,7 +207,7 @@ namespace SephSoraka
 
 		static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
 		{
-			if (Misc.Active("Farm.Disableauto") && args.Target.Type == GameObjectType.obj_AI_Minion)
+			if (Misc.Active("Farm.Disableauto") && args.Target.Type == GameObjectType.obj_AI_Minion && SorakaMenu.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LastHit)
 			{
 				var alliesinrange = HeroManager.Allies.Count(x => !x.IsMe && x.Distance(Player) <= FarmRange);
 				if (alliesinrange > 0)
@@ -216,6 +216,10 @@ namespace SephSoraka
 				}
 			}
 
+			if (Misc.Active("Combo.Disableauto") && SorakaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+			{
+				args.Process = false;
+			}
 		}
 
 
@@ -492,7 +496,7 @@ namespace SephSoraka
 			}
 			if (Spells[SpellSlot.E].IsReady() && Misc.Active("Harass.UseE"))
 			{
-				Spells[SpellSlot.E].SPredictionCast(target, Misc.GetHitChance("Hitchance.E"));
+				Spells[SpellSlot.E].SPredictionCast(target, Misc.GetHitChance("Hitchance.E"), (byte)Misc.GetSlider("Harass.Eminhit"));
 				/*
 				var pred = Spells[SpellSlot.E].GetPrediction(target, true);
 				if (pred.Hitchance >= Misc.GetHitChance("Hitchance.E"))
@@ -651,7 +655,7 @@ namespace SephSoraka
 
 			if (Misc.Active("Interrupter.AG.ADConly"))
 			{
-				if (!(args.End.Distance(myADC.ServerPosition) <= 250))
+				if (!(args.End.Distance(myADC.ServerPosition) <= 250) && !(args.End.Distance(Player.ServerPosition) <= 250))
 				{
 					return;
 				}
