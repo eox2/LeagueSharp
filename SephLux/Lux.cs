@@ -5,8 +5,9 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using SPrediction;
+using SephLux.SPrediction;
 using Prediction = LeagueSharp.Common.Prediction;
+using Utility = LeagueSharp.Common.Utility;
 
 #endregion;
 
@@ -67,14 +68,15 @@ namespace SephLux
 
             InitializeSpells();
 
-            ObjectHandling();
+            ObjectHandling(); 
 
             AntiGapcloser.OnEnemyGapcloser += OnGapClose;
 
             Interrupter2.OnInterruptableTarget += OnInterruptableTarget;
 
             Game.OnUpdate += OnUpdate;
-            Game.OnUpdate += CheckKillable;
+            Game.OnUpdate += AutoSpells;
+            
             Drawing.OnDraw += OnDraw;
         }
 
@@ -89,6 +91,18 @@ namespace SephLux
             if (Player.IsDead || Player.IsRecalling())
             {
                 return;
+            }
+
+            CheckKillable();
+
+            if (LuxUtils.ActiveKeyBind("Misc.LKey"))
+            {
+                Game.SendEmote(Emote.Laugh);
+            }
+
+            if (LuxUtils.ActiveKeyBind("Misc.RKey"))
+            {
+                CastR();
             }
 
             Killsteal();
@@ -124,11 +138,124 @@ namespace SephLux
         #endregion
 
 
+        #region KeyPressR
+
+        static void CastR()
+        {
+            var targ = TargetSelector.GetTarget(Spells[SpellSlot.R].Range, TargetSelector.DamageType.Magical);
+            if (targ != null)
+            {
+                var pred = Spells[SpellSlot.R].GetPrediction(targ);
+                if (pred.Hitchance >= HitChance.Medium)
+                {
+                    Spells[SpellSlot.R].Cast(pred.CastPosition);
+                }
+            }
+        }
+
+        #endregion KeyPressR
+
+
+        #region AutoSpells
+
+        private static void AutoSpells(EventArgs args)
+        {
+            foreach (var target in HeroManager.Enemies)
+            {
+                if (LuxUtils.Active("Combo.UseE2") && LuxE != null &&
+                    Vector3.Distance(LuxE.Position, target.ServerPosition) <=
+                    LuxE.BoundingRadius + target.BoundingRadius)
+                {
+                    Spells[SpellSlot.E].Cast();
+                }
+            }
+
+            if (SpellSlot.R.IsReady() && LuxUtils.Active("Auto.R"))
+            {
+                List<Obj_AI_Hero> targets = new List<Obj_AI_Hero>();
+                targets = HeroManager.Enemies.Where(x => x.Distance(Player) <= Spells[SpellSlot.R].Range).ToList();
+                List<CastPosition1> Positions = new List<CastPosition1>();
+
+
+                foreach (var h in targets)
+                {
+                    var pred = Spells[SpellSlot.R].GetPrediction(h, true);
+
+                    //List<Obj_AI_Base> collobjs =
+                       // pred.CollisionObjects.FindAll(x => x.Type == GameObjectType.obj_AI_Hero && x.IsEnemy);
+
+                    if (pred != null)
+                    {
+                        CastPosition1 cp = new CastPosition1
+                        {
+                            pos = pred.CastPosition,
+                            hc = pred.Hitchance,
+                            numberhit = pred.AoeTargetsHitCount + 1,
+                            hasbuff = h.HasBuff("LuxLightBindingMis")
+                        };
+
+                        Positions.Add(cp);
+                    }
+                }
+
+                var bestpossibleposition =
+                    Positions.OrderByDescending(x => x.numberhit)
+                        .ThenByDescending(x => x.hc)
+                        .ThenByDescending(h => h.hasbuff)
+                        .FirstOrDefault();
+
+                if (bestpossibleposition != null && bestpossibleposition.hc >= LuxUtils.GetHitChance("Hitchance.R") &&
+                    bestpossibleposition.numberhit >= LuxUtils.GetSlider("Auto.Rcount"))
+                {
+                    Spells[SpellSlot.R].Cast(bestpossibleposition.pos);
+                }
+            }
+
+            if (SpellSlot.W.IsReady() && LuxUtils.Active("Auto.W"))
+            {
+                var list = HeroManager.Allies;
+
+                var lowhealthallies =
+                    list.Where(ally => ally.HealthPercent <= LuxUtils.GetSlider("Auto.Whp") && Player.Distance(ally) <= Spells[SpellSlot.W].Range);
+                Obj_AI_Hero besthero = null;
+                int amthit = 0;
+                foreach (var hero in lowhealthallies)
+                {
+                    var pred = Prediction.GetPrediction(WInput(hero));
+                    if (pred.Hitchance >= HitChance.Collision || pred.Hitchance >= HitChance.Low)
+                    {
+                        var coll = pred.CollisionObjects.Count;
+                        if (coll >= amthit)
+                        {
+                            amthit = coll;
+                            besthero = hero;
+                        }
+                    }
+                }
+                if (besthero != null && amthit >= LuxUtils.GetSlider("Auto.Wcount"))
+                {
+                    Spells[SpellSlot.W].Cast(besthero.ServerPosition);
+                }
+            }
+        }
+
+        #endregion AutoSpells   
+
         #region Combo
+
+        class CastPosition1
+        {
+            public int numberhit;
+            public Vector3 pos;
+            public HitChance hc;
+            public bool hasbuff;
+
+
+        }
 
         private static void Combo(Obj_AI_Hero target)
         {
-            if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Combo.UseQ"))
+            if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Combo.UseQ") && Player.Distance(target) <= Spells[SpellSlot.Q].Range)
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
                 if (pred.CollisionObjects.Count <= 1 && pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.Q"))
@@ -137,7 +264,7 @@ namespace SephLux
                 }
 				
             }
-            if (Spells[SpellSlot.E].IsReady() && LuxE == null && LuxUtils.Active("Combo.UseE"))
+            if (Spells[SpellSlot.E].IsReady() && LuxE == null && LuxUtils.Active("Combo.UseE") && Player.Distance(target) <= Spells[SpellSlot.E].Range)
             {
 				Spells[SpellSlot.E].SPredictionCast(target, LuxUtils.GetHitChance("Hitchance.E"));
 				/*
@@ -157,25 +284,49 @@ namespace SephLux
 
             if (SpellSlot.R.IsReady() && LuxUtils.Active("Combo.UseR"))
             {
-                var ulttarget = HeroManager.Enemies.FirstOrDefault(h => h.HasBuff("LuxLightBindingMis"));
-                if (ulttarget != null)
+                List<Obj_AI_Hero> targets = new List<Obj_AI_Hero>();
+                if (LuxUtils.Active("Combo.RKillable"))
                 {
-                    var pred = Spells[SpellSlot.R].GetPrediction(ulttarget, true);
-                    if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.R"))
-                    {
-                        Spells[SpellSlot.R].Cast(pred.CastPosition);
-                    }
+                    targets =
+                        HeroManager.Enemies.Where(
+                            x =>
+                                x.Health <= Player.GetSpellDamage(x, SpellSlot.R) &&
+                                x.Distance(Player) <= Spells[SpellSlot.R].Range).ToList();
                 }
                 else
                 {
-                    var pred = Spells[SpellSlot.R].GetPrediction(target, true);
-                    if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.R") ||
-                        pred.CollisionObjects.Count(x => x.Type == GameObjectType.obj_AI_Hero && x.IsEnemy) >= 2 &&
-                        pred.Hitchance >= HitChance.High)
-                    {
-                        Spells[SpellSlot.R].Cast(pred.CastPosition);
-                    }
+                    targets = HeroManager.Enemies.Where(x => x.Distance(Player) <= Spells[SpellSlot.R].Range).ToList();
                 }
+
+                List<CastPosition1> Positions = new List<CastPosition1>();
+
+                    foreach (var h in targets)
+                    {
+                        var pred = Spells[SpellSlot.R].GetPrediction(h, true);
+                        int hit = pred.AoeTargetsHitCount + 1;
+                       // List<Obj_AI_Base> collobjs =
+                          //  pred.CollisionObjects.FindAll(x => x.Type == GameObjectType.obj_AI_Hero && x.IsEnemy);
+
+                        CastPosition1 cp = new CastPosition1
+                        {
+                            pos = pred.CastPosition,
+                            hc = pred.Hitchance,
+                            numberhit = hit,
+                            hasbuff = h.HasBuff("LuxLightBindingMis")
+                        };
+                        Positions.Add(cp);
+                    }
+
+                    var bestpossibleposition =
+                        Positions.OrderByDescending(x => x.numberhit)
+                            .ThenByDescending(x => x.hc)
+                            .ThenByDescending(h => h.hasbuff)
+                            .FirstOrDefault();
+                if (bestpossibleposition != null && bestpossibleposition.hc >= LuxUtils.GetHitChance("Hitchance.R") &&
+                    bestpossibleposition.numberhit >= LuxUtils.GetSlider("Combo.Rcount"))
+                    {
+                        Spells[SpellSlot.R].Cast(bestpossibleposition.pos);
+                    }
             }
 
 
@@ -200,7 +351,7 @@ namespace SephLux
                         }
                     }
                 }
-                if (besthero != null)
+                if (besthero != null && Player.HealthPercent <= 30 && Player.CountEnemiesInRange(800) > 0)
                 {
                     Spells[SpellSlot.W].Cast(besthero.ServerPosition);
                 }
@@ -225,6 +376,7 @@ namespace SephLux
                 Range = Spells[SpellSlot.W].Range,
                 Speed = Spells[SpellSlot.W].Speed,
                 Type = SkillshotType.SkillshotLine
+                
             };
 
             return input;
@@ -307,6 +459,11 @@ namespace SephLux
 
         static void MixedModeLogic(Obj_AI_Hero target, bool isMixed)
         {
+	        if (isMixed && target != null)
+	        {
+		        Harass(target);
+	        }
+
             if (!LuxUtils.Active("Farm.Enable") || target == null || Player.ManaPercent < LuxUtils.GetSlider("Farm.Mana"))
             {
                 return;
@@ -317,7 +474,7 @@ namespace SephLux
                     .Where(
                         m =>
                             m.IsValidTarget() &&
-                            (Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.E].Range));
+                            (Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.E].Range)).ToList();
 
             if (!Minions.Any())
             {
@@ -352,7 +509,18 @@ namespace SephLux
 
         static void Harass(Obj_AI_Hero target)
         {
-            if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Harass.UseQ") && Player.ManaPercent > LuxUtils.GetSlider("Harass.Mana"))
+            if (Player.ManaPercent < LuxUtils.GetSlider("Harass.Mana"))
+            {
+                if (LuxUtils.Active("Harass.UseE") && LuxE != null &&
+                     Vector3.Distance(LuxE.Position, target.ServerPosition) <=
+                     LuxE.BoundingRadius + target.BoundingRadius)
+                {
+                    Spells[SpellSlot.E].Cast();
+                }
+                return;
+            }
+            
+            if (Spells[SpellSlot.Q].IsReady() && LuxUtils.Active("Harass.UseQ") && Player.Distance(target) <= Spells[SpellSlot.Q].Range)
             {
                 var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
                 if (pred.CollisionObjects.Count <= 1 && pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.Q"))
@@ -360,7 +528,7 @@ namespace SephLux
                     Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
             }
-            if (Spells[SpellSlot.E].IsReady() && LuxE == null && LuxUtils.Active("Harass.UseE"))
+            if (Spells[SpellSlot.E].IsReady() && LuxE == null && LuxUtils.Active("Harass.UseE") && Player.Distance(target) <= Spells[SpellSlot.E].Range)
             {
 				Spells[SpellSlot.E].SPredictionCast(target, LuxUtils.GetHitChance("Hitchance.E"));
 				/*
@@ -428,7 +596,7 @@ namespace SephLux
                             var edmg = Player.GetSpellDamage(etarget, SpellSlot.E);
                             if (etarget.Health < edmg)
                             {
-                                var pred = Spells[SpellSlot.Q].GetPrediction(etarget, false);
+                                var pred = Spells[SpellSlot.E].GetPrediction(etarget, true);
                                 if (pred != null && pred.Hitchance >= HitChance.Medium)
                                 {
                                     Spells[SpellSlot.E].Cast(pred.CastPosition);
@@ -442,6 +610,29 @@ namespace SephLux
 
             if (SpellSlot.R.IsReady() && LuxUtils.Active("Killsteal.UseR"))
             {
+
+                    List<Obj_AI_Hero> targetss = new List<Obj_AI_Hero>();
+
+                    targetss = HeroManager.Enemies.Where(x => x.Health <= Player.GetSpellDamage(x, SpellSlot.R) && x.Distance(Player) <= Spells[SpellSlot.R].Range).ToList();
+ 
+                    List<CastPosition1> Positions = new List<CastPosition1>();
+
+                    foreach (var h in targetss)
+                    {
+                        var pred = Spells[SpellSlot.R].GetPrediction(h, true);
+                       // List<Obj_AI_Base> collobjs =
+                         // pred.CollisionObjects.FindAll(x => x.Type == GameObjectType.obj_AI_Hero && x.IsEnemy);
+                        CastPosition1 cp = new CastPosition1 { pos = pred.CastPosition, hc = pred.Hitchance, numberhit = pred.AoeTargetsHitCount + 1, hasbuff = h.HasBuff("LuxLightBindingMis") };
+                        Positions.Add(cp);
+                    }
+
+                    var bestpossibleposition = Positions.OrderByDescending(x => x.numberhit).ThenByDescending(x => x.hc).ThenByDescending(h => h.hasbuff).FirstOrDefault();
+                    if (bestpossibleposition != null && bestpossibleposition.hc >= LuxUtils.GetHitChance("Hitchance.R"))
+                    {
+                        Spells[SpellSlot.R].Cast(bestpossibleposition.pos);
+                    }
+                
+                /*
                 var targ = HeroManager.Enemies.FirstOrDefault(h => h.HasBuff("LuxLightBindingMis") && h.IsValidTarget(Spells[SpellSlot.R].Range) && h.Health < Player.GetSpellDamage(h, SpellSlot.R));
 
                 if (targ == null)
@@ -461,6 +652,7 @@ namespace SephLux
                         Spells[SpellSlot.R].Cast(pred.CastPosition);
                     }
                 }
+                */
             }
 
             if (Spells[IgniteSlot].IsReady() && LuxUtils.Active("Killsteal.UseIgnite"))
@@ -481,7 +673,7 @@ namespace SephLux
         #region Killable
 
         public static List<Obj_AI_Hero> Killable = new List<Obj_AI_Hero>();
-        private static void CheckKillable(EventArgs args)
+        private static void CheckKillable()
         {
             if (Player.IsDead || Player.IsRecalling())
             {
@@ -533,9 +725,9 @@ namespace SephLux
             }
             var sender = args.Sender;
 
-            if (LuxUtils.Active("Interrupter.AntiGapClose") && sender.IsValidTarget())
+            if (sender != null && LuxUtils.Active("Interrupter.AntiGapClose") && sender.IsValidTarget())
             {
-                if (LuxUtils.Active("Interrupter.AG.UseQ") && Vector3.Distance(args.End, Player.ServerPosition) <= Spells[SpellSlot.Q].Range)
+                if (LuxUtils.Active("Interrupter.AG.UseQ") && Vector3.Distance(sender.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.Q].Range)
                 {
                     Spells[SpellSlot.Q].Cast(sender.ServerPosition);
                 }
@@ -592,7 +784,7 @@ namespace SephLux
 
         #region Drawing
 
-        static void OnDraw(EventArgs args)
+        private static void OnDraw(EventArgs args)
         {
             if (Player.IsDead || Player.IsRecalling() || LuxUtils.Active("Drawing.Disable"))
             {
@@ -615,15 +807,18 @@ namespace SephLux
             if (LuxUtils.Active("Drawing.DrawR"))
             {
                 Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.R].Range, System.Drawing.Color.Aqua);
+            }
 
-				Utility.DrawCircle(Player.Position, Spells[SpellSlot.R].Range, System.Drawing.Color.Aqua, 1, 23, true);
-			}
-
+            if (LuxUtils.Active("Drawing.DrawRMM"))
+            {
+                Utility.DrawCircle(Player.Position, Spells[SpellSlot.R].Range, System.Drawing.Color.Aqua, 1, 23, true);
+            }
         }
+
         #endregion
+        }
 
     }
-   }
 
 
 

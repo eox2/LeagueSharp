@@ -28,22 +28,31 @@ namespace SephLux
             Combo.AddItem(new MenuItem("Combo.UseE", "Use E", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseE2", "Use E2", false).SetValue(true));
             Combo.AddItem(new MenuItem("Combo.UseR", "Use R", false).SetValue(true));
-            Config.AddSubMenu(Combo);
+            Combo.AddItem(new MenuItem("Combo.Rcount", "R Count Combo").SetValue(new Slider(1, 1, 5))).Permashow();
+            Combo.AddItem(new MenuItem("Combo.RKillable", "R only killable", false).SetValue(false)).Permashow();
+			Config.AddSubMenu(Combo);
 
+            Menu Auto = new Menu("Auto", "Auto", false);
+            Auto.AddItem(new MenuItem("Auto.R", "R Automatically").SetValue(true)).Permashow();
+            Auto.AddItem(new MenuItem("Auto.Rcount", "Min Enemies R").SetValue(new Slider(1, 1, 5))).Permashow();
+            Auto.AddItem(new MenuItem("Auto.W", "W Automatically").SetValue(true)).Permashow();
+            Auto.AddItem(new MenuItem("Auto.Whp", "Health % for W").SetValue(new Slider(40, 0, 100)));
+            Auto.AddItem(new MenuItem("Auto.Wcount", "Min Allies W (Including You)").SetValue(new Slider(1, 1, 5)));
+            Config.AddSubMenu(Auto);
 
             Menu KillSteal = new Menu("Killsteal", "Killsteal", false);
             KillSteal.AddItem(new MenuItem("Killsteal", "Killsteal", false).SetValue(true));
             KillSteal.AddItem(new MenuItem("Killsteal.UseQ", "Use Q", false).SetValue(true));
             KillSteal.AddItem(new MenuItem("Killsteal.UseE", "Use E", false).SetValue(true));
-            KillSteal.AddItem(new MenuItem("Killsteal.UseE2", "Use E", false).SetValue(true));
             KillSteal.AddItem(new MenuItem("Killsteal.UseR", "Use R", false).SetValue(true));
             KillSteal.AddItem(new MenuItem("Killsteal.UseIgnite", "Use Ignite", false).SetValue(true));
             Config.AddSubMenu(KillSteal);
 
 
             Menu Harass = new Menu("Harass", "Harass", false);
-            Harass.AddItem(new MenuItem("Keys.HarassT", "Harass Toggle", false).SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
-            Harass.AddItem(new MenuItem("Harass.UseQ", "Use Q", false).SetValue(true));
+            Harass.AddItem(new MenuItem("Keys.HarassT", "Harass Toggle", false).SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle))).Permashow();
+			Harass.AddItem(new MenuItem("Harass.InMixed", "Harass in Mixed Mode").SetValue(true));
+			Harass.AddItem(new MenuItem("Harass.UseQ", "Use Q", false).SetValue(true));
             Harass.AddItem(new MenuItem("Harass.UseE", "Use E", false).SetValue(true));
             Harass.AddItem(new MenuItem("Harass.Mana", "Min. % Mana for Harass", false).SetValue(new Slider(50, 0, 100)));
             Config.AddSubMenu(Harass);
@@ -88,19 +97,26 @@ namespace SephLux
 
             Config.AddSubMenu(Blist);
 
-
-            Menu Misc = new Menu("Hit Chance Settings", "Misc", false);
-            Misc.AddItem(new MenuItem("Hitchance.Q", "Q Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 1)));
-            Misc.AddItem(new MenuItem("Hitchance.E", "E Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 1)));
-            Misc.AddItem(new MenuItem("Hitchance.R", "R Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 4)));
-            Misc.AddItem(new MenuItem("Misc.Debug", "Debug", false).SetValue(false));
+            Menu Misc = new Menu("Misc", "Misc");
+            Misc.AddItem(new MenuItem("Misc.Debug", "Debug").SetValue(false));
+            Misc.AddItem(new MenuItem("Misc.RKey", "Ult Key").SetValue(new KeyBind(114, KeyBindType.Press)));
+            Misc.AddItem(new MenuItem("Misc.Lkey", "Laugh key").SetValue(new KeyBind(115, KeyBindType.Press)));
             Config.AddSubMenu(Misc);
+
+            Menu HC = new Menu("Hit Chance Settings", "HC", false);
+            HC.AddItem(new MenuItem("Hitchance.Q", "Q Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 1)));
+            HC.AddItem(new MenuItem("Hitchance.E", "E Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 1)));
+            HC.AddItem(new MenuItem("Hitchance.R", "R Hit Chance").SetValue(new StringList(new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString(), HitChance.VeryHigh.ToString(), HitChance.Immobile.ToString() }, 1)));
+            Config.AddSubMenu(HC);
+
+
 
             Menu Drawings = new Menu("Drawings", "Drawing", false);
             Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable All").SetValue(false));
             Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q").SetValue(true));
             Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E").SetValue(true));
             Drawings.AddItem(new MenuItem("Drawing.DrawR", "Draw R").SetValue(true));
+            Drawings.AddItem(new MenuItem("Drawing.DrawRMM", "Draw R Minimap").SetValue(true));
             Config.AddSubMenu(Drawings);
             return Config;
         }

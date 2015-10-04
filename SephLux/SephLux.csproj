@@ -14,6 +14,7 @@
     <PreBuildEvent />
     <PostBuildEvent />
     <OutputPath>bin\Release</OutputPath>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -36,7 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="clipper_library">
-      <HintPath>..\..\..\..\Desktop\L#\System\clipper_library.dll</HintPath>
+      <HintPath>C:\Users\Laptop\Desktop\L#\System\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp">
       <HintPath>C:\Users\Laptop\Desktop\L#\System\LeagueSharp.dll</HintPath>
@@ -65,10 +66,19 @@
     <Compile Include="LuxUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SPrediction\ArcPrediction.cs" />
+    <Compile Include="SPrediction\CirclePrediction.cs" />
     <Compile Include="SPrediction\ClipperWrapper.cs" />
     <Compile Include="SPrediction\Collision.cs" />
+    <Compile Include="SPrediction\ConePrediction.cs" />
     <Compile Include="SPrediction\Geometry.cs" />
+    <Compile Include="SPrediction\LinePrediction.cs" />
+    <Compile Include="SPrediction\Obj_AI_HeroExtensions.cs" />
+    <Compile Include="SPrediction\PathTracker.cs" />
     <Compile Include="SPrediction\Prediction.cs" />
+    <Compile Include="SPrediction\SpellExtensions.cs" />
+    <Compile Include="SPrediction\Utility.cs" />
+    <Compile Include="SPrediction\VectorPrediction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

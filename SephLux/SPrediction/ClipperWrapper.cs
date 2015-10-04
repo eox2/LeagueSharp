@@ -29,8 +29,11 @@ using ClipperLib;
 using Path = System.Collections.Generic.List<ClipperLib.IntPoint>;
 using Paths = System.Collections.Generic.List<System.Collections.Generic.List<ClipperLib.IntPoint>>;
 
-namespace SPrediction
+namespace SephLux.SPrediction
 {
+    /// <summary>
+    /// SPrediciton Clipper wrapper class
+    /// </summary>
     internal static class ClipperWrapper
     {
         /// <summary>

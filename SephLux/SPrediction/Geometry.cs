@@ -25,8 +25,11 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-namespace SPrediction
+namespace SephLux.SPrediction
 {
+    /// <summary>
+    /// SPrediction Geometry class
+    /// </summary>
     public static class Geometry
     {
         //from Esk0r's evade's geometry class, orginal code: https://github.com/Esk0r/LeagueSharp/blob/master/Evade/Geometry.cs
@@ -34,17 +37,29 @@ namespace SPrediction
         {
             public List<Vector2> Points = new List<Vector2>();
 
+            /// <summary>
+            /// ctor
+            /// </summary>
+            /// <param name="poly">Polygons to combine</param>
             public Polygon(params Polygon[] poly)
             {
                 for (int i = 0; i < poly.Length; i++)
                     Points.AddRange(poly[i].Points);
             }
 
+            /// <summary>
+            /// Adds point to polygon
+            /// </summary>
+            /// <param name="point">Point</param>
             public void Add(Vector2 point)
             {
                 Points.Add(point);
             }
 
+            /// <summary>
+            /// Draws polygon
+            /// </summary>
+            /// <param name="width">Line width</param>
             public void Draw(int width = 1)
             {
                 for (var i = 0; i < Points.Count; i++)
@@ -59,24 +74,41 @@ namespace SPrediction
             }
         }
 
+        /// <summary>
+        /// Circle class
+        /// </summary>
         internal class Circle
         {
             private const int CircleLineSegmentN = 22;
             public Vector2 Center;
             public float Radius;
-
+            
+            /// <summary>
+            /// ctor
+            /// </summary>
+            /// <param name="x">center x</param>
+            /// <param name="y">center y</param>
+            /// <param name="r">radius</param>
             public Circle(float x, float y, float r)
             {
                 Center = new Vector2(x, y);
                 Radius = r;
             }
 
+            /// <summary>
+            /// ctor
+            /// </summary>
+            /// <param name="c">Center</param>
+            /// <param name="r">radius</param>
             public Circle(Vector2 c, float r)
             {
                 Center = c;
                 Radius = r;
             }
 
+            /// <summary>
+            /// Gets Circle as Polygon
+            /// </summary>
             public Polygon Polygons
             {
                 get
@@ -97,6 +129,9 @@ namespace SPrediction
             }
         }
 
+        /// <summary>
+        /// Rectangle class
+        /// </summary>
         internal class Rectangle
         {
             public Vector2 Direction;
@@ -105,6 +140,12 @@ namespace SPrediction
             public Vector2 RStart;
             public float Width;
 
+            /// <summary>
+            /// ctor
+            /// </summary>
+            /// <param name="start">Start pos</param>
+            /// <param name="end">End pos</param>
+            /// <param name="width">Scale</param>
             public Rectangle(Vector2 start, Vector2 end, float width)
             {
                 RStart = start;
@@ -114,6 +155,9 @@ namespace SPrediction
                 Perpendicular = Direction.Perpendicular();
             }
 
+            /// <summary>
+            /// Gets Rectangle as polygon
+            /// </summary>
             public Polygon Polygons
             {
                 get
@@ -130,6 +174,9 @@ namespace SPrediction
             }
         }
 
+        /// <summary>
+        /// Sector class
+        /// </summary>
         internal class Sector
         {
             private const int CircleLineSegmentN = 22;
@@ -138,6 +185,13 @@ namespace SPrediction
             public Vector2 Direction;
             public float Radius;
 
+            /// <summary>
+            /// ctor
+            /// </summary>
+            /// <param name="center">Center</param>
+            /// <param name="direction">Direction</param>
+            /// <param name="angle">Angle</param>
+            /// <param name="radius">Radius</param>
             public Sector(Vector2 center, Vector2 direction, float angle, float radius)
             {
                 Center = center;
@@ -146,6 +200,9 @@ namespace SPrediction
                 Radius = radius;
             }
 
+            /// <summary>
+            /// Gets sector as polygon
+            /// </summary>
             public Polygon Polygons
             {
                 get
@@ -178,6 +235,15 @@ namespace SPrediction
             public float Height;
             public float Angle;
 
+            /// <summary>
+            /// ctor
+            /// </summary>
+            /// <param name="x">Center x</param>
+            /// <param name="y">Center y</param>
+            /// <param name="direction">Direction</param>
+            /// <param name="angle">Angle</param>
+            /// <param name="w">Width</param>
+            /// <param name="h">Height</param>
             public Arc(float x, float y, Vector2 direction, float angle, float w, float h)
             {
                 Center = new Vector2(x, y);
@@ -187,6 +253,14 @@ namespace SPrediction
                 Height = h;
             }
 
+            /// <summary>
+            /// ctor
+            /// </summary>
+            /// <param name="c">Center</param>
+            /// <param name="direction">Direction</param>
+            /// <param name="angle">Angle</param>
+            /// <param name="w">Width</param>
+            /// <param name="h">Height</param>
             public Arc(Vector2 c, Vector2 direction, float angle, float w, float h)
             {
                 Center = c;
@@ -196,6 +270,9 @@ namespace SPrediction
                 Height = h;
             }
 
+            /// <summary>
+            /// Gets arc as polygon
+            /// </summary>
             public Polygon Polygons
             {
                 get
@@ -232,6 +309,49 @@ namespace SPrediction
                     return result;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets position with time
+        /// </summary>
+        /// <param name="t">Time</param>
+        /// <param name="speed">Move speed</param>
+        /// <param name="delay">Delay to start</param>
+        /// <returns></returns>
+        internal static Vector2 PositionAfter(List<Vector2> self, float t, float speed, float delay = 0)
+        {
+            var distance = Math.Max(0, t - delay) * speed / 1000;
+            for (var i = 0; i <= self.Count - 2; i++)
+            {
+                var from = self[i];
+                var to = self[i + 1];
+                var d = (int)to.Distance(from);
+                if (d > distance)
+                {
+                    return from + distance * (to - from).Normalized();
+                }
+                distance -= d;
+            }
+            return self[self.Count - 1];
+        }
+
+        /// <summary>
+        /// Gets closest on circle point
+        /// </summary>
+        /// <param name="center">Circle center</param>
+        /// <param name="radius">Circle radius</param>
+        /// <param name="pointStart">Point start</param>
+        /// <param name="pointEnd">Point end</param>
+        /// <returns></returns>
+        internal static Vector2 ClosestCirclePoint(Vector2 center, float radius, Vector2 pointStart, Vector2 pointEnd)
+        {
+            Vector2 point;
+            if (pointStart.Distance(center) < pointEnd.Distance(center))
+                point = pointStart;
+            else
+                point = pointEnd;
+            Vector2 v = (point - center);
+            return center + v / v.Length() * radius;
         }
     }
 }
