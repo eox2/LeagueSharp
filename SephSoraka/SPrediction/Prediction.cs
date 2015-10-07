@@ -28,24 +28,90 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-namespace SPrediction
+namespace SephSorka.SPrediction
 {
     /// <summary>
     /// Spacebar Prediction class
     /// </summary>
     public static class Prediction
     {
-        public static Dictionary<int, EnemyData> EnemyInfo = new Dictionary<int, EnemyData>();
+        /// <summary>
+        /// Neccesary input structure for prediction calculations
+        /// </summary>
+        public struct Input
+        {
+            public Obj_AI_Base Target;
+            public float SpellDelay;
+            public float SpellMissileSpeed;
+            public float SpellWidth;
+            public float SpellRange;
+            public bool SpellCollisionable;
+            public SkillshotType SpellSkillShotType;
+            public List<Vector2> Path;
+            public float AvgReactionTime;
+            public float LastMovChangeTime;
+            public float AvgPathLenght;
+            public Vector3 From;
+            public Vector3 RangeCheckFrom;
+
+            public Input(Obj_AI_Base _target, Spell s, Vector3 _from, Vector3 _rangeCheckFrom)
+            {
+                Target = _target;
+                SpellDelay = s.Delay;
+                SpellMissileSpeed = s.Speed;
+                SpellWidth = s.Width;
+                SpellRange = s.Range;
+                SpellCollisionable = s.Collision;
+                SpellSkillShotType = s.Type;
+                Path = Target.GetWaypoints();
+                if (Target is Obj_AI_Hero)
+                {
+                    Obj_AI_Hero t = Target as Obj_AI_Hero;
+                    AvgReactionTime = t.AvgMovChangeTime();
+                    LastMovChangeTime = t.LastMovChangeTime();
+                    AvgPathLenght = t.AvgPathLenght();
+                }
+                else
+                {
+                    AvgReactionTime = 0;
+                    LastMovChangeTime = 0;
+                    AvgPathLenght = 0;
+                }
+                From = _from;
+                RangeCheckFrom = _rangeCheckFrom;
+            }
+        }
+
+        /// <summary>
+        /// structure for prediction results
+        /// </summary>
+        public struct Result
+        {
+            public Vector2 CastPosition;
+            public Vector2 UnitPosition;
+            public HitChance HitChance;
+            public Collision.Result CollisionResult;
+        }
+
+        /// <summary>
+        /// structure for aoe prediction result
+        /// </summary>
+        public struct AoeResult
+        {
+            public Vector2 CastPosition;
+            public Collision.Result CollisionResult;
+            public int HitCount;
+        }
+
         private static bool blInitialized;
-        private static Menu predMenu;
-        private static SPrediction.Collision Collision;
+        internal static Menu predMenu;
 
         #region stuff for prediction drawings
-        private static string lastDrawHitchance;
-        private static Vector2 lastDrawPos;
-        private static Vector2 lastDrawDirection;
-        private static int lastDrawTick;
-        private static int lastDrawWidth;
+        internal static string lastDrawHitchance;
+        internal static Vector2 lastDrawPos;
+        internal static Vector2 lastDrawDirection;
+        internal static int lastDrawTick;
+        internal static int lastDrawWidth;
         #endregion
 
         #region stuff for hitchance drawings
@@ -70,17 +136,18 @@ namespace SPrediction
         /// <summary>
         /// Initializes Prediction Services
         /// </summary>
-        public static void Initialize(Menu mainMenu = null)
+        public static void Initialize(Menu mainMenu)
         {
-            foreach (Obj_AI_Hero enemy in HeroManager.Enemies)
-                EnemyInfo.Add(enemy.NetworkId, new EnemyData(new List<Vector2>()));
-
-            Obj_AI_Hero.OnNewPath += Obj_AI_Hero_OnNewPath;
+            SPrediction.PathTracker.Initialize();
+            SPrediction.Collision.Initialize();
 
             if (mainMenu != null)
             {
                 predMenu = new Menu("SPrediction", "SPRED");
                 predMenu.AddItem(new MenuItem("PREDICTONLIST", "Prediction Method").SetValue(new StringList(new[] { "SPrediction", "Common Predicion" }, 0)));
+                predMenu.AddItem(new MenuItem("SPREDWINDUP", "Check for target AA Windup").SetValue(true));
+                predMenu.AddItem(new MenuItem("SPREDWPANALYSIS", "Waypoint analysis splitting method").SetValue(new StringList(new[] { "By target bounding radius", "By spell width" }, 1)));
+                predMenu.AddItem(new MenuItem("SPREDMAXRANGEIGNORE", "Max Range Dodge Ignore (%)").SetValue(new Slider(50, 0, 100)));
                 predMenu.AddItem(new MenuItem("SPREDREACTIONDELAY", "Ignore Rection Delay").SetValue<Slider>(new Slider(0, 0, 200)));
                 predMenu.AddItem(new MenuItem("SPREDDELAY", "Spell Delay").SetValue<Slider>(new Slider(0, 0, 200)));
                 predMenu.AddItem(new MenuItem("SPREDHC", "Count HitChance").SetValue<KeyBind>(new KeyBind(32, KeyBindType.Press)));
@@ -88,42 +155,164 @@ namespace SPrediction
                 mainMenu.AddSubMenu(predMenu);
             }
 
-            Collision = new SPrediction.Collision();
             Drawing.OnDraw += Drawing_OnDraw;
-            Obj_AI_Hero.OnDamage += Obj_AI_Hero_OnDamage;
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
+            Obj_AI_Hero.OnDamage += Obj_AI_Hero_OnDamage;
             blInitialized = true;
         }
 
-        static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        /// <summary>
+        /// Gets Prediction result
+        /// </summary>
+        /// <param name="input">Neccesary inputs for prediction calculations</param>
+        /// <returns>Prediction result as <see cref="Prediction.Result"/></returns>
+        internal static Result GetPrediction(Input input)
         {
-            lock (LastSpells)
-            {
-                LastSpells.RemoveAll(p => Environment.TickCount - p.tick > 2000);
-                if (sender.IsMe && !args.SData.IsAutoAttack() && predMenu.Item("SPREDHC").GetValue<KeyBind>().Active)
-                {
-                    if (sender.Spellbook.Spells.Find(p => p.Name == args.SData.Name).Slot == SpellSlot.Q && !LastSpells.Exists(p => p.name == args.SData.Name))
-                    {
-                        LastSpells.Add(new _lastSpells(args.SData.Name, Environment.TickCount));
-                        castCount++;
-                    }
-                }
-            }
+            return GetPrediction(input.Target, input.SpellWidth, input.SpellDelay, input.SpellMissileSpeed, input.SpellRange, input.SpellCollisionable, input.SpellSkillShotType, input.Path, input.AvgReactionTime, input.LastMovChangeTime, input.AvgPathLenght, input.From.To2D(), input.RangeCheckFrom.To2D());
         }
 
-        static void Obj_AI_Hero_OnDamage(AttackableUnit sender, AttackableUnitDamageEventArgs args)
+        /// <summary>
+        /// Gets Prediction result
+        /// </summary>
+        /// <param name="target">Target for spell</param>
+        /// <param name="width">Spell width</param>
+        /// <param name="delay">Spell delay</param>
+        /// <param name="missileSpeed">Spell missile speed</param>
+        /// <param name="range">Spell range</param>
+        /// <param name="collisionable">Spell collisionable</param>
+        /// <param name="type">Spell skillshot type</param>
+        /// <param name="from">Spell casted position</param>
+        /// <returns>Prediction result as <see cref="Prediction.Result"/></returns>
+        internal static Result GetPrediction(Obj_AI_Hero target, float width, float delay, float missileSpeed, float range, bool collisionable, SkillshotType type)
         {
-            lock (LastSpells)
+            return GetPrediction(target, width, delay, missileSpeed, range, collisionable, type, target.GetWaypoints(), target.AvgMovChangeTime(), target.LastMovChangeTime(), target.AvgPathLenght(), ObjectManager.Player.ServerPosition.To2D(), ObjectManager.Player.ServerPosition.To2D());
+        }
+
+        /// <summary>
+        /// Gets Prediction result
+        /// </summary>
+        /// <param name="target">Target for spell</param>
+        /// <param name="width">Spell width</param>
+        /// <param name="delay">Spell delay</param>
+        /// <param name="missileSpeed">Spell missile speed</param>
+        /// <param name="range">Spell range</param>
+        /// <param name="collisionable">Spell collisionable</param>
+        /// <param name="type">Spell skillshot type</param>
+        /// <param name="path">Waypoints of target</param>
+        /// <param name="avgt">Average reaction time (in ms)</param>
+        /// <param name="movt">Passed time from last movement change (in ms)</param>
+        /// <param name="avgp">Average Path Lenght</param>
+        /// <param name="from">Spell casted position</param>
+        /// <param name="rangeCheckFrom"></param>
+        /// <returns>Prediction result as <see cref="Prediction.Result"/></returns>
+        internal static Result GetPrediction(Obj_AI_Base target, float width, float delay, float missileSpeed, float range, bool collisionable, SkillshotType type, List<Vector2> path, float avgt, float movt, float avgp, Vector2 from, Vector2 rangeCheckFrom)
+        {
+            Prediction.AssertInitializationMode();
+
+            Result result = new Result();
+
+            try
             {
-                LastSpells.RemoveAll(p => Environment.TickCount - p.tick > 2000);
-                if (args.SourceNetworkId == ObjectManager.Player.NetworkId && HeroManager.Enemies.Exists(p => p.NetworkId == args.TargetNetworkId))
+                if (type == SkillshotType.SkillshotCircle)
+                    range += width;
+
+                //to do: hook logic ? by storing average movement direction etc
+                if (path.Count <= 1 && movt > 100 && (Environment.TickCount - PathTracker.EnemyInfo[target.NetworkId].LastAATick > 300 || !predMenu.Item("SPREDWINDUP").GetValue<bool>())) //if target is not moving, easy to hit (and not aaing)
                 {
-                    if (LastSpells.Count != 0)
+                    result.HitChance = HitChance.VeryHigh;
+                    result.CastPosition = target.ServerPosition.To2D();
+                    result.UnitPosition = result.CastPosition;
+                    result.CollisionResult = Collision.GetCollisions(from, result.CastPosition, width, delay, missileSpeed);
+
+                    if (collisionable && (result.CollisionResult.Objects.HasFlag(Collision.Flags.Minions) || result.CollisionResult.Objects.HasFlag(Collision.Flags.YasuoWall)))
+                        result.HitChance = HitChance.Collision;
+
+                    if (from.Distance(result.CastPosition) > range - GetArrivalTime(from.Distance(result.CastPosition), delay, missileSpeed) * target.MoveSpeed)
+                        result.HitChance = HitChance.OutOfRange;
+
+                    return result;
+                }
+
+                if (target is Obj_AI_Hero)
+                {
+                    if (((Obj_AI_Hero)target).IsChannelingImportantSpell())
                     {
-                        LastSpells.RemoveRange(0, 1);
-                        hitCount++;
+                        result.HitChance = HitChance.VeryHigh;
+                        result.CastPosition = target.ServerPosition.To2D();
+                        result.UnitPosition = result.CastPosition;
+                        result.CollisionResult = Collision.GetCollisions(from, result.CastPosition, width, delay, missileSpeed);
+
+                        //check collisions
+                        if (collisionable && (result.CollisionResult.Objects.HasFlag(Collision.Flags.Minions) || result.CollisionResult.Objects.HasFlag(Collision.Flags.YasuoWall)))
+                            result.HitChance = HitChance.Collision;
+
+                        //check if target can dodge with moving backward
+                        if (from.Distance(result.CastPosition) > range - GetArrivalTime(from.Distance(result.CastPosition), delay, missileSpeed) * target.MoveSpeed)
+                            result.HitChance = HitChance.OutOfRange;
+
+                        return result;
+                    }
+
+                    if (Environment.TickCount - PathTracker.EnemyInfo[target.NetworkId].LastAATick < 300 && predMenu.Item("SPREDWINDUP").GetValue<bool>())
+                    {
+                        if (target.AttackCastDelay * 1000 + PathTracker.EnemyInfo[target.NetworkId].AvgOrbwalkTime + avgt - width / 2f / target.MoveSpeed >= GetArrivalTime(target.ServerPosition.To2D().Distance(from), delay, missileSpeed))
+                        {
+                            result.HitChance = HitChance.High;
+                            result.CastPosition = target.ServerPosition.To2D();
+                            result.UnitPosition = result.CastPosition;
+                            result.CollisionResult = Collision.GetCollisions(from, result.CastPosition, width, delay, missileSpeed);
+
+                            //check collisions
+                            if (collisionable && (result.CollisionResult.Objects.HasFlag(Collision.Flags.Minions) || result.CollisionResult.Objects.HasFlag(Collision.Flags.YasuoWall)))
+                                result.HitChance = HitChance.Collision;
+
+                            return result;
+                        }
+                    }
+
+                    //to do: find a fuking logic
+                    if (avgp < 400 && movt < 100 && path.PathLength() <= avgp)
+                    {
+                        result.HitChance = HitChance.High;
+                        result.CastPosition = path.Last();
+                        result.UnitPosition = result.CastPosition;
+                        result.CollisionResult = Collision.GetCollisions(from, result.CastPosition, width, delay, missileSpeed);
+
+                        //check collisions
+                        if (collisionable && (result.CollisionResult.Objects.HasFlag(Collision.Flags.Minions) || result.CollisionResult.Objects.HasFlag(Collision.Flags.YasuoWall)))
+                            result.HitChance = HitChance.Collision;
+
+                        //check if target can dodge with moving backward
+                        if (from.Distance(result.CastPosition) > range - GetArrivalTime(from.Distance(result.CastPosition), delay, missileSpeed) * target.MoveSpeed)
+                            result.HitChance = HitChance.OutOfRange;
+
+                        return result;
                     }
                 }
+
+                if (target.IsDashing()) //if unit is dashing
+                    return GetDashingPrediction(target, width, delay, missileSpeed, range, collisionable, type, from);
+
+                if (Utility.IsImmobileTarget(target)) //if unit is immobile
+                    return GetImmobilePrediction(target, width, delay, missileSpeed, range, collisionable, type, from);
+
+                result = WaypointAnlysis(target, width, delay, missileSpeed, range, collisionable, type, path, avgt, movt, avgp, from);
+
+                //check collisions
+                if (collisionable && (result.CollisionResult.Objects.HasFlag(Collision.Flags.Minions) || result.CollisionResult.Objects.HasFlag(Collision.Flags.YasuoWall)))
+                    result.HitChance = HitChance.Collision;
+
+                //check if target can dodge with moving backward
+                if (from.Distance(result.CastPosition) > range - GetArrivalTime(from.Distance(result.CastPosition), delay, missileSpeed) * target.MoveSpeed)
+                    result.HitChance = HitChance.OutOfRange;
+
+                return result;
+            }
+            finally
+            {
+                //check if movement changed while prediction calculations
+                if (!target.GetWaypoints().SequenceEqual(path))
+                    result.HitChance = HitChance.Medium;
             }
         }
 
@@ -139,10 +328,10 @@ namespace SPrediction
         /// <param name="hc">Predicted HitChance</param>
         /// <param name="rangeCheckFrom">Position where spell will be casted from</param>
         /// <returns>Predicted position and HitChance out value</returns>
+        [Obsolete("This method will be deleted soon, use other overloads of GetPrediction instead")]
         public static Vector2 GetPrediction(Obj_AI_Base target, Spell s, List<Vector2> path, float avgt, float movt, float avgp, out HitChance hc, Vector3 rangeCheckFrom)
         {
-            if (!blInitialized)
-                throw new InvalidOperationException("Prediction is not initalized");
+            Prediction.AssertInitializationMode();
 
             if (path.Count <= 1) //if target is not moving, easy to hit
             {
@@ -156,11 +345,19 @@ namespace SPrediction
                 return target.ServerPosition.To2D();
             }
 
-            if (IsImmobileTarget(target))
-                return GetImmobilePrediction(target, s, out hc, rangeCheckFrom);
+            if (Utility.IsImmobileTarget(target))
+            {
+                var pred = GetImmobilePrediction(target, s.Width, s.Delay, s.Speed, s.Range, s.Collision, s.Type, s.From.To2D());
+                hc = pred.HitChance;
+                return pred.CastPosition;
+            }
 
             if (target.IsDashing())
-                return GetDashingPrediction(target, s, out hc, rangeCheckFrom);
+            {
+                var pred = GetDashingPrediction(target, s.Width, s.Delay, s.Speed, s.Range, s.Collision, s.Type, s.From.To2D());
+                hc = pred.HitChance;
+                return pred.CastPosition;
+            }
 
             //if (avgp < 400 && target.GetSpellCastable())
             //{
@@ -205,6 +402,123 @@ namespace SPrediction
         }
 
         /// <summary>
+        /// Gets fast-predicted unit position
+        /// </summary>
+        /// <param name="target">Target</param>
+        /// <param name="delay">Spell delay</param>
+        /// <param name="missileSpeed">Spell missile speed</param>
+        /// <param name="from">Spell casted position</param>
+        /// <returns></returns>
+        public static Vector2 GetFastUnitPosition(Obj_AI_Base target, float delay, float missileSpeed = 0, Vector2? from = null, float distanceSet = 0)
+        {
+            List<Vector2> path = target.GetWaypoints();
+            if (from == null)
+                from = target.ServerPosition.To2D();
+
+            if (path.Count <= 1 || (target is Obj_AI_Hero && ((Obj_AI_Hero)target).IsChannelingImportantSpell()) || Utility.IsImmobileTarget(target))
+                return target.ServerPosition.To2D();
+
+            if (target.IsDashing())
+                return target.GetDashInfo().Path.Last();
+
+            float distance = distanceSet;
+
+            if (distance == 0)
+            {
+                float targetDistance = from.Value.Distance(target.ServerPosition);
+                float flyTime = targetDistance / missileSpeed;
+
+                /*if (missileSpeed != 0) //skillshot with a missile
+                {
+                    Vector2 Vt = (path[path.Count - 1] - path[0]).Normalized() * target.MoveSpeed;
+                    Vector2 Vs = (target.ServerPosition.To2D() - from.Value).Normalized() * missileSpeed;
+                    Vector2 Vr = Vs - Vt;
+
+                    flyTime = targetDistance / Vr.Length();
+
+                    if (path.Count > 5) //complicated movement
+                        flyTime = targetDistance / missileSpeed;
+                }*/
+
+                float t = flyTime + delay + Game.Ping / 2000f;
+                distance = t * target.MoveSpeed;
+            }
+
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                float d = path[i + 1].Distance(path[i]);
+                if (distance == d)
+                    return path[i + 1];
+                else if (distance < d)
+                    return path[i] + distance * (path[i + 1] - path[i]).Normalized();
+                else distance -= d;
+            }
+
+            return path.Last();
+        }
+
+        /// <summary>
+        /// Gets fast-predicted unit position
+        /// </summary>
+        /// <param name="target">Target</param>
+        /// <param name="path">Path</param>
+        /// <param name="delay">Spell delay</param>
+        /// <param name="missileSpeed">Spell missile speed</param>
+        /// <param name="from">Spell casted position</param>
+        /// <param name="moveSpeed">Move speed</param>
+        /// <param name="distanceSet"></param>
+        /// <returns></returns>
+        public static Vector2 GetFastUnitPosition(Obj_AI_Base target, List<Vector2> path, float delay, float missileSpeed = 0, Vector2? from = null, float moveSpeed = 0, float distanceSet = 0)
+        {
+            if (from == null)
+                from = target.ServerPosition.To2D();
+
+            if (moveSpeed == 0)
+                moveSpeed = target.MoveSpeed;
+
+            if (path.Count <= 1 || (target is Obj_AI_Hero && ((Obj_AI_Hero)target).IsChannelingImportantSpell()) || Utility.IsImmobileTarget(target))
+                return target.ServerPosition.To2D();
+
+            if (target.IsDashing())
+                return target.GetDashInfo().Path.Last();
+
+            float distance = distanceSet;
+
+            if (distance == 0)
+            {
+                float targetDistance = from.Value.Distance(target.ServerPosition);
+                float flyTime = 0f;
+
+                if (missileSpeed != 0) //skillshot with a missile
+                {
+                    Vector2 Vt = (path[path.Count - 1] - path[0]).Normalized() * moveSpeed;
+                    Vector2 Vs = (target.ServerPosition.To2D() - from.Value).Normalized() * missileSpeed;
+                    Vector2 Vr = Vs - Vt;
+
+                    flyTime = targetDistance / Vr.Length();
+
+                    if (path.Count > 5) //complicated movement
+                        flyTime = targetDistance / missileSpeed;
+                }
+
+                float t = flyTime + delay + Game.Ping / 2000f + SpellDelay / 1000f;
+                distance = t * moveSpeed;
+            }
+
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                float d = path[i + 1].Distance(path[i]);
+                if (distance == d)
+                    return path[i + 1];
+                else if (distance < d)
+                    return path[i] + distance * (path[i + 1] - path[i]).Normalized();
+                else distance -= d;
+            }
+
+            return path.Last();
+        }
+
+        /// <summary>
         /// beta
         /// </summary>
         /// <param name="target"></param>
@@ -216,12 +530,12 @@ namespace SPrediction
         /// <param name="hc"></param>
         /// <param name="rangeCheckFrom"></param>
         /// <returns></returns>
+        [Obsolete("This method will be deleted soon, use GetPrediction instead")]
         public static Vector2 GetPredictionMethod2(Obj_AI_Base target, Spell s, List<Vector2> path, float avgt, float movt, float avgp, out HitChance hc, Vector3 rangeCheckFrom)
         {
             try
             {
-                if (!blInitialized)
-                    throw new InvalidOperationException("Prediction is not initalized");
+                Prediction.AssertInitializationMode();
 
                 //to do: hook logic ? by storing average movement direction etc
                 if (path.Count <= 1) //if target is not moving, easy to hit
@@ -246,11 +560,19 @@ namespace SPrediction
                     }
                 }
 
-                if (IsImmobileTarget(target))
-                    return GetImmobilePrediction(target, s, out hc, rangeCheckFrom);
+                if (Utility.IsImmobileTarget(target))
+                {
+                    var pred = GetImmobilePrediction(target, s.Width, s.Delay, s.Speed, s.Range, s.Collision, s.Type, s.From.To2D());
+                    hc = pred.HitChance;
+                    return pred.CastPosition;
+                }
 
                 if (target.IsDashing())
-                    return GetDashingPrediction(target, s, out hc, rangeCheckFrom);
+                {
+                    var pred = GetDashingPrediction(target, s.Width, s.Delay, s.Speed, s.Range, s.Collision, s.Type, s.From.To2D());
+                    hc = pred.HitChance;
+                    return pred.CastPosition;
+                }
 
                 float targetDistance = rangeCheckFrom.Distance(target.ServerPosition);
                 float flyTimeMin = 0f;
@@ -351,10 +673,10 @@ namespace SPrediction
         /// <param name="hc">Predicted HitChance</param>
         /// <param name="rangeCheckFrom">Position where spell will be casted from</param>
         /// <returns>Predicted position and HitChance out value</returns>
+        [Obsolete("This method will be deleted soon, use Prediction.Arc.GetPrediction instead")]
         public static Vector2 GetArcPrediction(Obj_AI_Base target, Spell s, List<Vector2> path, float avgt, float movt, float avgp, out HitChance hc, Vector3 rangeCheckFrom)
         {
-            if (!blInitialized)
-                throw new InvalidOperationException("Prediction is not initalized");
+            Prediction.AssertInitializationMode();
 
             if (path.Count <= 1) //if target is not moving, easy to hit
             {
@@ -368,11 +690,19 @@ namespace SPrediction
                 return target.ServerPosition.To2D();
             }
 
-            if (IsImmobileTarget(target))
-                return GetImmobilePrediction(target, s, out hc, rangeCheckFrom);
+            if (Utility.IsImmobileTarget(target))
+            {
+                var pred = GetImmobilePrediction(target, s.Width, s.Delay, s.Speed, s.Range, s.Collision, s.Type, s.From.To2D());
+                hc = pred.HitChance;
+                return pred.CastPosition;
+            }
 
             if (target.IsDashing())
-                return GetDashingPrediction(target, s, out hc, rangeCheckFrom);
+            {
+                var pred = GetDashingPrediction(target, s.Width, s.Delay, s.Speed, s.Range, s.Collision, s.Type, s.From.To2D());
+                hc = pred.HitChance;
+                return pred.CastPosition;
+            }
 
 
             float targetDistance = rangeCheckFrom.Distance(target.ServerPosition);
@@ -432,597 +762,118 @@ namespace SPrediction
         }
 
         /// <summary>
-        /// Gets Predicted position while target is dashing
+        /// Gets Prediction result while unit is dashing
         /// </summary>
-        private static Vector2 GetDashingPrediction(Obj_AI_Base target, Spell s, out HitChance hc, Vector3 rangeCheckFrom)
+        /// <param name="target">Target for spell</param>
+        /// <param name="width">Spell width</param>
+        /// <param name="delay">Spell delay</param>
+        /// <param name="missileSpeed">Spell missile speed</param>
+        /// <param name="range">Spell range</param>
+        /// <param name="collisionable">Spell collisionable</param>
+        /// <param name="type">Spell skillshot type</param>
+        /// <param name="from">Spell casted position</param>
+        /// <returns></returns>
+        internal static Result GetDashingPrediction(Obj_AI_Base target, float width, float delay, float missileSpeed, float range, bool collisionable, SkillshotType type, Vector2 from)
         {
+            Result result = new Result();
+
             if (target.IsDashing())
             {
                 var dashInfo = target.GetDashInfo();
-
-                float dashPassedDistance = (Utils.TickCount - dashInfo.StartTick) / 1000f * dashInfo.Speed;
-                Vector2 currentDashPos = dashInfo.StartPos + (dashInfo.EndPos - dashInfo.StartPos).Normalized() * dashPassedDistance;
-
-                float targetDistance = rangeCheckFrom.To2D().Distance(currentDashPos);
-                float flyTime = 0f;
-
-                if (s.Speed != 0) //skillshot with a missile
+                if (dashInfo.IsBlink)
                 {
-                    Vector2 Vt = (dashInfo.Path[dashInfo.Path.Count - 1] - dashInfo.Path[0]).Normalized() * dashInfo.Speed;
-                    Vector2 Vs = (target.ServerPosition.To2D() - rangeCheckFrom.To2D()).Normalized() * s.Speed;
-                    Vector2 Vr = Vs - Vt;
-
-                    flyTime = targetDistance / Vr.Length();
+                    result.HitChance = HitChance.Impossible;
+                    return result;
                 }
-                int dashLeftTime = dashInfo.EndTick - Utils.TickCount;
-                float t = flyTime + s.Delay + Game.Ping / 1000f;
 
-                if (dashLeftTime >= t * 1000f)
+                //define hitboxes
+                var dashHitBox = ClipperWrapper.MakePaths(ClipperWrapper.DefineRectangle(dashInfo.StartPos, dashInfo.EndPos + (dashInfo.EndPos - dashInfo.StartPos).Normalized() * 500, target.BoundingRadius * 2));
+                var myHitBox = ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(from, from == ObjectManager.Player.ServerPosition.To2D() ? ObjectManager.Player.BoundingRadius : width));
+
+                if (ClipperWrapper.IsIntersects(myHitBox, dashHitBox))
                 {
-                    float distance = t * dashInfo.Speed;
-                    hc = HitChance.Dashing;
+                    result.HitChance = HitChance.Dashing;
+                    result.CastPosition = target.ServerPosition.To2D();
+                    result.UnitPosition = result.CastPosition;
+                    result.CollisionResult = Collision.GetCollisions(from, result.CastPosition, width, delay, missileSpeed);
 
-                    for (int i = 0; i < dashInfo.Path.Count - 1; i++)
-                    {
-                        float d = dashInfo.Path[i + 1].Distance(dashInfo.Path[i]);
-                        if (distance == d)
-                            return dashInfo.Path[i + 1];
-                        else if (distance < d)
-                            return dashInfo.Path[i] + distance * (dashInfo.Path[i + 1] - dashInfo.Path[i]).Normalized();
-                        else distance -= d;
-                    }
+                    //check collisions
+                    if (collisionable && result.CollisionResult.Objects.HasFlag(Collision.Flags.Minions))
+                        result.HitChance = HitChance.Collision;
+
+                    return result;
                 }
+
+                result.CastPosition = GetFastUnitPosition(target, dashInfo.Path, delay, missileSpeed, from, dashInfo.Speed);
+                result.HitChance = HitChance.Dashing;
+
+                //check range
+                if (result.CastPosition.Distance(from) > range)
+                    result.HitChance = HitChance.OutOfRange;
+
+                //check collisions
+                if (collisionable && (result.CollisionResult.Objects.HasFlag(Collision.Flags.Minions) || result.CollisionResult.Objects.HasFlag(Collision.Flags.YasuoWall)))
+                    result.HitChance = HitChance.Collision;
             }
-
-            hc = HitChance.Impossible;
-            return rangeCheckFrom.To2D();
+            else
+                result.HitChance = HitChance.Impossible;
+            return result;
         }
 
-        private static Vector2 GetImmobilePrediction(Obj_AI_Base target, Spell s, out HitChance hc, Vector3 rangeCheckFrom)
+        /// <summary>
+        /// Gets Prediction result while unit is immobile
+        /// </summary>
+        /// <param name="target">Target for spell</param>
+        /// <param name="width">Spell width</param>
+        /// <param name="delay">Spell delay</param>
+        /// <param name="missileSpeed">Spell missile speed</param>
+        /// <param name="range">Spell range</param>
+        /// <param name="collisionable">Spell collisionable</param>
+        /// <param name="type">Spell skillshot type</param>
+        /// <param name="from">Spell casted position</param>
+        /// <returns></returns>
+        internal static Result GetImmobilePrediction(Obj_AI_Base target, float width, float delay, float missileSpeed, float range, bool collisionable, SkillshotType type, Vector2 from)
         {
-            float t = s.Delay + Game.Ping / 2000f;
-            if (s.Speed != 0)
-                t += rangeCheckFrom.To2D().Distance(target.ServerPosition) / s.Speed;
+            Result result = new Result();
+            result.CastPosition = target.ServerPosition.To2D();
+            result.UnitPosition = result.CastPosition;
 
-            if (s.Type == SkillshotType.SkillshotCircle)
-                t += s.Width / target.MoveSpeed / 2f;
+            //calculate spell arrival time
+            float t = delay + Game.Ping / 2000f;
+            if (missileSpeed != 0)
+                t += from.Distance(target.ServerPosition) / missileSpeed;
 
-            if (t >= LeftImmobileTime(target))
+            if (type == SkillshotType.SkillshotCircle)
+                t += width / target.MoveSpeed / 2f;
+
+            if (t >= Utility.LeftImmobileTime(target))
             {
-                hc = HitChance.Immobile;
-                return target.ServerPosition.To2D();
+                result.HitChance = HitChance.Immobile;
+                result.CollisionResult = Collision.GetCollisions(from, result.CastPosition, width, delay, missileSpeed);
+
+                if (collisionable && result.CollisionResult.Objects.HasFlag(Collision.Flags.Minions))
+                    result.HitChance = HitChance.Collision;
+
+                if (from.Distance(result.CastPosition) > range - GetArrivalTime(from.Distance(result.CastPosition), delay, missileSpeed) * target.MoveSpeed * (100 - predMenu.Item("SPREDMAXRANGEIGNORE").GetValue<Slider>().Value) / 100f)
+                    result.HitChance = HitChance.OutOfRange;
+
+                return result;
             }
 
             if (target is Obj_AI_Hero)
-                hc = GetHitChance(t - LeftImmobileTime(target), ((Obj_AI_Hero)target).AvgMovChangeTime(), 0, 0);
-
-            hc = HitChance.High;
-            return target.ServerPosition.To2D();
-        }
-
-        /// <summary>
-        /// Casts spell
-        /// </summary>
-        /// <param name="s">Spell to cast</param>
-        /// <param name="t">Target for spell</param>
-        /// <param name="hc">Minimum HitChance to cast</param>
-        /// <param name="reactionIgnoreDelay">Delay to ignore target's reaction time</param>
-        /// <param name="minHit">Minimum Hit Count to cast</param>
-        /// <param name="rangeCheckFrom">Position where spell will be casted from</param>
-        /// <param name="filterHPPercent">Minimum HP Percent to cast (for target)</param>
-        /// <returns>true if spell has casted</returns>
-        public static bool SPredictionCast(this Spell s, Obj_AI_Hero t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 1, Vector3? rangeCheckFrom = null, float filterHPPercent = 100)
-        {
-            if (rangeCheckFrom == null)
-                rangeCheckFrom = ObjectManager.Player.ServerPosition;
-
-            if (t == null)
-                return s.Cast();
-
-            if (!s.IsSkillshot)
-                return s.Cast(t) == Spell.CastStates.SuccessfullyCasted;
-
-            #region if common prediction selected
-            if (predMenu != null && predMenu.Item("PREDICTONLIST").GetValue<StringList>().SelectedIndex == 1)
-            {
-                var pout = s.GetPrediction(t, minHit > 1);
-
-                if (minHit > 1)
-                    if (pout.AoeTargetsHitCount >= minHit)
-                        return s.Cast(pout.CastPosition);
-                    else return false;
-
-                if (pout.Hitchance >= hc)
-                    return s.Cast(pout.CastPosition);
-                else
-                    return false;
-            }
-            #endregion
-
-            if (minHit > 1)
-                return Aoe.SPredictionCast(s, t, hc, reactionIgnoreDelay, minHit, rangeCheckFrom, filterHPPercent);
-
-            if (s.Collision && minHit > 1)
-                throw new InvalidOperationException("You can't use collisionable spells with aoe");
-
-            if (t.HealthPercent > filterHPPercent)
-                return false;
-
-            if (Monitor.TryEnter(EnemyInfo[t.NetworkId].m_lock))
-            {
-                try
-                {
-                    HitChance predictedhc;
-                    float avgt = t.AvgMovChangeTime() + reactionIgnoreDelay;
-                    float movt = t.LastMovChangeTime();
-                    float avgp = t.AvgPathLenght();
-                    var waypoints = t.GetWaypoints();
-                    //PATCH WARNING
-                    Vector2 pos = GetPredictionMethod2(t, s, waypoints, avgt, movt, avgp, out predictedhc, rangeCheckFrom.Value);
-
-                    //if (waypoints.PathLength() / t.MoveSpeed < 1f)
-                    //    pos = GetPredictionMethod2(t, s, waypoints, avgt, movt, avgp, out predictedhc, rangeCheckFrom.Value);
-                    //else
-                    //    pos = GetPrediction(t, s, waypoints, avgt, movt, avgp, out predictedhc, rangeCheckFrom.Value);
-
-                    if (rangeCheckFrom.Value.To2D().Distance(pos) > s.Range + (s.Type == SkillshotType.SkillshotCircle ? s.Width / 2 : 0) - t.BoundingRadius) //out of range
-                    {
-                        Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
-                        return false;
-                    }
-
-                    lastDrawTick = Utils.TickCount;
-                    lastDrawPos = pos;
-                    lastDrawHitchance = predictedhc.ToString();
-                    lastDrawDirection = (pos - rangeCheckFrom.Value.To2D()).Normalized().Perpendicular();
-                    lastDrawWidth = (int)s.Width;
-
-                    if (s.Collision && Collision.CheckCollision(rangeCheckFrom.Value.To2D(), pos, s, true, false, true))
-                    {
-                        lastDrawHitchance = HitChance.Collision.ToString();
-                        Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
-                        return false;
-                    }
-
-                    if (predictedhc >= hc)
-                    {
-                        s.Cast(pos);
-                        return true;
-                    }
-
-                    Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
-                    return false;
-                }
-                finally
-                {
-                    Monitor.Exit(EnemyInfo[t.NetworkId].m_lock);
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Casts spell
-        /// </summary>
-        /// <param name="s">Spell to cast</param>
-        /// <param name="t">Target for spell</param>
-        /// <param name="hc">Minimum HitChance to cast</param>
-        /// <param name="reactionIgnoreDelay">Delay to ignore target's reaction time</param>
-        /// <param name="minHit">Minimum Hit Count to cast</param>
-        /// <param name="rangeCheckFrom">Position where spell will be casted from</param>
-        /// <param name="filterHPPercent">Minimum HP Percent to cast (for target)</param>
-        /// <returns>true if spell has casted</returns>
-        public static bool SPredictionCastArc(this Spell s, Obj_AI_Hero t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 1, Vector3? rangeCheckFrom = null, float filterHPPercent = 100)
-        {
-            if (minHit > 1)
-                throw new NotSupportedException("Arc aoe prediction has not supported yet");
-
-            if (predMenu != null && predMenu.Item("PREDICTONLIST").GetValue<StringList>().SelectedIndex == 1)
-                throw new NotSupportedException("Arc Prediction not supported in Common prediction");
-
-
-            if (t.HealthPercent > filterHPPercent)
-                return false;
-
-            if (rangeCheckFrom == null)
-                rangeCheckFrom = ObjectManager.Player.ServerPosition;
-
-            if (Monitor.TryEnter(EnemyInfo[t.NetworkId].m_lock))
-            {
-                try
-                {
-                    HitChance predictedhc;
-                    float avgt = t.AvgMovChangeTime() + reactionIgnoreDelay;
-                    float movt = t.LastMovChangeTime();
-                    float avgp = t.AvgPathLenght();
-                    Vector2 pos = GetArcPrediction(t, s, t.GetWaypoints(), avgt, movt, avgp, out predictedhc, rangeCheckFrom.Value);
-
-                    if (rangeCheckFrom.Value.To2D().Distance(pos) > s.Range + s.Width / 2 - t.BoundingRadius) //out of range
-                    {
-                        Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
-                        return false;
-                    }
-
-                    float multp = (pos.Distance(rangeCheckFrom.Value.To2D()) / 875.0f);
-
-                    var dianaArc = new SPrediction.Geometry.Polygon(
-                                    ClipperWrapper.DefineArc(rangeCheckFrom.Value.To2D() - new Vector2(875 / 2f, 20), pos, (float)Math.PI * multp, 410, 200 * multp),
-                                    ClipperWrapper.DefineArc(rangeCheckFrom.Value.To2D() - new Vector2(875 / 2f, 20), pos, (float)Math.PI * multp, 410, 320 * multp));
-
-                    if (Collision.CheckYasuoWallCollision(dianaArc))
-                    {
-                        Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
-                        return false;
-                    }
-
-                    if (predictedhc >= hc)
-                    {
-                        s.Cast(pos);
-                        return true;
-                    }
-
-                    Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
-                    return false;
-                }
-                finally
-                {
-                    Monitor.Exit(EnemyInfo[t.NetworkId].m_lock);
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Class for aoe spell castings
-        /// </summary>
-        public static class Aoe
-        {
-            /// <summary>
-            /// Casts aoe spell
-            /// </summary>
-            /// <param name="s">Spell to cast</param>
-            /// <param name="t">Target for spell</param>
-            /// <param name="hc">Minimum HitChance to cast</param>
-            /// <param name="minHit">Minimum Hit Count to cast</param>
-            /// <param name="rangeCheckFrom">Position where spell will be casted from</param>
-            /// <param name="filterHPPercent">Minimum HP Percent to cast (for target)</param>
-            /// <returns>true if spell has casted</returns>
-            internal static bool SPredictionCast(Spell s, Obj_AI_Hero t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 2, Vector3? rangeCheckFrom = null, float filterHPPercent = 0)
-            {
-                if (!blInitialized)
-                    throw new Exception("Prediction is not initalized");
-
-                if (rangeCheckFrom == null)
-                    rangeCheckFrom = ObjectManager.Player.ServerPosition;
-
-                if (Monitor.TryEnter(EnemyInfo[t.NetworkId].m_lock))
-                {
-                    try
-                    {
-                        HitChance predictedhc = HitChance.Impossible;
-                        float avgt = t.AvgMovChangeTime() + reactionIgnoreDelay;
-                        float movt = t.LastMovChangeTime();
-                        float avgp = t.AvgPathLenght();
-
-                        Vector2 pos = ObjectManager.Player.ServerPosition.To2D();
-                        switch (s.Type)
-                        {
-                            case SkillshotType.SkillshotLine: pos = Line.GetPrediction(t, s, t.GetWaypoints(), avgt, movt, avgp, filterHPPercent, minHit, out predictedhc, rangeCheckFrom.Value);
-                                break;
-                            case SkillshotType.SkillshotCircle: pos = Circle.GetPrediction(t, s, t.GetWaypoints(), avgt, movt, avgp, filterHPPercent, minHit, out predictedhc, rangeCheckFrom.Value);
-                                break;
-                            case SkillshotType.SkillshotCone: pos = Cone.GetPrediction(t, s, t.GetWaypoints(), avgt, movt, avgp, filterHPPercent, minHit, out predictedhc, rangeCheckFrom.Value);
-                                break;
-                        }
-
-                        if (predictedhc >= hc)
-                        {
-                            s.Cast(pos);
-
-                            return true;
-                        }
-
-                        Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
-                        return false;
-                    }
-                    finally
-                    {
-                        Monitor.Exit(EnemyInfo[t.NetworkId].m_lock);
-                    }
-                }
-                return false;
-            }
-
-            //modified common aoe classes, i think logic is nice
-
-            /// <summary>
-            /// aoe line prediction class
-            /// </summary>
-            public static class Line
-            {
-                private static IEnumerable<Vector2> GetHits(Vector2 start, Vector2 end, double radius, List<Vector2> points)
-                {
-                    return points.Where(p => p.Distance(start, end, true, true) <= radius * radius);
-                }
-
-                private static bool GetCandidates(Vector2 from, Vector2 to, float radius, float range, out Vector2[] vec)
-                {
-                    var middlePoint = (from + to) / 2;
-                    var intersections = LeagueSharp.Common.Geometry.CircleCircleIntersection(
-                        from, middlePoint, radius, from.Distance(middlePoint));
-
-                    if (intersections.Length > 1)
-                    {
-                        var c1 = intersections[0];
-                        var c2 = intersections[1];
-
-                        c1 = from + range * (to - c1).Normalized();
-                        c2 = from + range * (to - c2).Normalized();
-
-                        vec = new[] { c1, c2 };
-                        return true;
-                    }
-
-                    vec = new Vector2[] { };
-                    return false;
-                }
-
-                public static Vector2 GetPrediction(Obj_AI_Hero t, Spell s, List<Vector2> path, float avgt, float movt, float avgp, float filterHPPercent, byte minHit, out HitChance hc, Vector3 rangeCheckFrom)
-                {
-                    Vector2 castPos = Prediction.GetPrediction(t, s, path, avgt, movt, avgp, out hc, rangeCheckFrom);
-
-                    var posibleTargets = new List<PossibleTarget>
-                    {
-                        new PossibleTarget { Position = t.ServerPosition.To2D(), Unit = t }
-                    };
-
-                    if (hc >= HitChance.Low)
-                    {
-                        //Add the posible targets  in range:
-                        posibleTargets.AddRange(GetPossibleTargets(t, s, rangeCheckFrom, filterHPPercent));
-                        if (posibleTargets.Count < minHit)
-                        {
-                            hc = HitChance.Impossible;
-                            return castPos;
-                        }
-                    }
-
-                    if (posibleTargets.Count > 1)
-                    {
-                        var candidates = new List<Vector2>();
-                        foreach (var target in posibleTargets)
-                        {
-                            Vector2[] v;
-                            if (GetCandidates(rangeCheckFrom.To2D(), target.Position, s.Width, s.Range, out v))
-                                candidates.AddRange(v);
-                        }
-
-                        var bestCandidateHits = -1;
-                        var bestCandidate = new Vector2();
-                        var bestCandidateHitPoints = new List<Vector2>();
-                        var positionsList = posibleTargets.Select(p => p.Position).ToList();
-
-                        foreach (var candidate in candidates)
-                        {
-                            if (GetHits(rangeCheckFrom.To2D(), candidate, s.Width, new List<Vector2> { posibleTargets[0].Position }).Count() == 1)
-                            {
-                                var hits = GetHits(rangeCheckFrom.To2D(), candidate, s.Width, positionsList).ToList();
-                                var hitsCount = hits.Count;
-                                if (hitsCount >= bestCandidateHits)
-                                {
-                                    bestCandidateHits = hitsCount;
-                                    bestCandidate = candidate;
-                                    bestCandidateHitPoints = hits.ToList();
-                                }
-                            }
-                        }
-
-                        if (bestCandidateHits > 1)
-                        {
-                            float maxDistance = -1;
-                            Vector2 p1 = new Vector2(), p2 = new Vector2();
-
-                            //Center the position
-                            for (var i = 0; i < bestCandidateHitPoints.Count; i++)
-                            {
-                                for (var j = 0; j < bestCandidateHitPoints.Count; j++)
-                                {
-                                    var startP = rangeCheckFrom.To2D();
-                                    var endP = bestCandidate;
-                                    var proj1 = positionsList[i].ProjectOn(startP, endP);
-                                    var proj2 = positionsList[j].ProjectOn(startP, endP);
-                                    var dist = Vector2.DistanceSquared(bestCandidateHitPoints[i], proj1.LinePoint) +
-                                               Vector2.DistanceSquared(bestCandidateHitPoints[j], proj2.LinePoint);
-                                    if (dist >= maxDistance &&
-                                        (proj1.LinePoint - positionsList[i]).AngleBetween(
-                                            proj2.LinePoint - positionsList[j]) > 90)
-                                    {
-                                        maxDistance = dist;
-                                        p1 = positionsList[i];
-                                        p2 = positionsList[j];
-                                    }
-                                }
-                            }
-
-                            if (bestCandidateHits < minHit)
-                                hc = HitChance.Impossible;
-
-                            return (p1 + p2) * 0.5f;
-                        }
-                    }
-
-                    hc = HitChance.Impossible;
-                    return castPos;
-                }
-            }
-
-            /// <summary>
-            /// aoe circle prediction class
-            /// </summary>
-            public static class Circle
-            {
-                public static Vector2 GetPrediction(Obj_AI_Hero t, Spell s, List<Vector2> path, float avgt, float movt, float avgp, float filterHPPercent, byte minHit, out HitChance hc, Vector3 rangeCheckFrom)
-                {
-                    Vector2 castPos = Prediction.GetPrediction(t, s, path, avgt, movt, avgp, out hc, rangeCheckFrom);
-                    var posibleTargets = new List<PossibleTarget>
-                    {
-                        new PossibleTarget { Position = t.ServerPosition.To2D(), Unit = t }
-                    };
-
-                    if (hc >= HitChance.Low)
-                    {
-                        //Add the posible targets  in range:
-                        posibleTargets.AddRange(GetPossibleTargets(t, s, rangeCheckFrom, filterHPPercent));
-                        if (posibleTargets.Count < minHit)
-                        {
-                            hc = HitChance.Impossible;
-                            return castPos;
-                        }
-                    }
-
-
-                    while (posibleTargets.Count > 1)
-                    {
-                        var mecCircle = MEC.GetMec(posibleTargets.Select(h => h.Position).ToList());
-
-                        if (mecCircle.Radius <= s.Width - 10 && Vector2.DistanceSquared(mecCircle.Center, rangeCheckFrom.To2D()) < s.Range * s.Range)
-                        {
-                            if (posibleTargets.Count < minHit)
-                                hc = HitChance.Impossible;
-
-                            return mecCircle.Center;
-                        }
-
-                        float maxdist = -1;
-                        var maxdistindex = 1;
-                        for (var i = 1; i < posibleTargets.Count; i++)
-                        {
-                            var distance = Vector2.DistanceSquared(posibleTargets[i].Position, posibleTargets[0].Position);
-                            if (distance > maxdist || maxdist.CompareTo(-1) == 0)
-                            {
-                                maxdistindex = i;
-                                maxdist = distance;
-                            }
-                        }
-                        posibleTargets.RemoveAt(maxdistindex);
-                    }
-
-                    hc = HitChance.Impossible;
-                    return castPos;
-                }
-            }
-
-            /// <summary>
-            /// aoe cone prediction class
-            /// </summary>
-            public static class Cone
-            {
-                private static int GetHits(Vector2 end, double range, float angle, List<Vector2> points)
-                {
-                    return (from point in points
-                            let edge1 = end.Rotated(-angle / 2)
-                            let edge2 = edge1.Rotated(angle)
-                            where
-                                point.Distance(new Vector2(), true) < range * range && edge1.CrossProduct(point) > 0 &&
-                                point.CrossProduct(edge2) > 0
-                            select point).Count();
-                }
-
-                public static Vector2 GetPrediction(Obj_AI_Hero t, Spell s, List<Vector2> path, float avgt, float movt, float avgp, float filterHPPercent, byte minHit, out HitChance hc, Vector3 rangeCheckFrom)
-                {
-                    Vector2 castPos = Prediction.GetPrediction(t, s, path, avgt, movt, avgp, out hc, rangeCheckFrom);
-                    var posibleTargets = new List<PossibleTarget>
-                    {
-                        new PossibleTarget { Position = t.ServerPosition.To2D(), Unit = t }
-                    };
-
-                    if (hc >= HitChance.Low)
-                    {
-                        //Add the posible targets  in range:
-                        posibleTargets.AddRange(GetPossibleTargets(t, s, rangeCheckFrom, filterHPPercent));
-                        if (posibleTargets.Count < minHit)
-                        {
-                            hc = HitChance.Impossible;
-                            return castPos;
-                        }
-                    }
-
-                    if (posibleTargets.Count > 1)
-                    {
-                        var candidates = new List<Vector2>();
-
-                        foreach (var target in posibleTargets)
-                        {
-                            target.Position = target.Position - rangeCheckFrom.To2D();
-                        }
-
-                        for (var i = 0; i < posibleTargets.Count; i++)
-                        {
-                            for (var j = 0; j < posibleTargets.Count; j++)
-                            {
-                                if (i != j)
-                                {
-                                    var p = (posibleTargets[i].Position + posibleTargets[j].Position) * 0.5f;
-                                    if (!candidates.Contains(p))
-                                    {
-                                        candidates.Add(p);
-                                    }
-                                }
-                            }
-                        }
-
-                        var bestCandidateHits = -1;
-                        var bestCandidate = new Vector2();
-                        var positionsList = posibleTargets.Select(p => p.Position).ToList();
-
-                        foreach (var candidate in candidates)
-                        {
-                            var hits = GetHits(candidate, s.Range, s.Width, positionsList);
-                            if (hits > bestCandidateHits)
-                            {
-                                bestCandidate = candidate;
-                                bestCandidateHits = hits;
-                            }
-                        }
-
-                        if (bestCandidateHits < minHit)
-                            hc = HitChance.Impossible;
-
-                        if (bestCandidateHits > 1 && rangeCheckFrom.To2D().Distance(bestCandidate, true) > 50 * 50)
-                        {
-                            return bestCandidate;
-                        }
-                    }
-
-                    hc = HitChance.Impossible;
-                    return castPos;
-                }
-            }
-
-            private class PossibleTarget
-            {
-                public Vector2 Position;
-                public Obj_AI_Base Unit;
-            }
-
-            private static List<PossibleTarget> GetPossibleTargets(Obj_AI_Hero target, Spell s, Vector3 rangeCheckFrom, float filterHPPercent)
-            {
-                var result = new List<PossibleTarget>();
-                var originalUnit = target;
-                var enemies = HeroManager.Enemies.FindAll(h => h.NetworkId != originalUnit.NetworkId && h.IsValidTarget(s.Range, true, rangeCheckFrom) && h.Health / h.MaxHealth * 100 <= filterHPPercent);
-                foreach (var enemy in enemies)
-                {
-                    HitChance hc;
-                    var prediction = Prediction.GetPrediction(enemy, s, enemy.GetWaypoints(), enemy.AvgMovChangeTime(), enemy.LastMovChangeTime(), enemy.AvgPathLenght(), out hc, rangeCheckFrom);
-                    if (hc >= HitChance.High)
-                    {
-                        result.Add(new PossibleTarget { Position = prediction, Unit = enemy });
-                    }
-                }
-                return result;
-            }
+                result.HitChance = GetHitChance(t - Utility.LeftImmobileTime(target), ((Obj_AI_Hero)target).AvgMovChangeTime(), 0, 0);
+            else
+                result.HitChance = HitChance.High;
+
+            //check collisions
+            if (collisionable && result.CollisionResult.Objects.HasFlag(Collision.Flags.Minions))
+                result.HitChance = HitChance.Collision;
+
+            //check range
+            if (from.Distance(result.CastPosition) > range - GetArrivalTime(from.Distance(result.CastPosition), delay, missileSpeed) * target.MoveSpeed)
+                result.HitChance = HitChance.OutOfRange;
+
+            return result;
         }
 
         /// <summary>
@@ -1033,7 +884,7 @@ namespace SPrediction
         /// <param name="movt">Passed time from last movement change (in ms)</param>
         /// <param name="avgp">Average Path Lenght</param>
         /// <returns>HitChance</returns>
-        private static HitChance GetHitChance(float t, float avgt, float movt, float avgp)
+        internal static HitChance GetHitChance(float t, float avgt, float movt, float avgp)
         {
             if (avgp > 400)
             {
@@ -1053,7 +904,134 @@ namespace SPrediction
                 return HitChance.High;
         }
 
-        private static int IgnoreReactionDelay
+        /// <summary>
+        /// Gets spell arrival time to cast position
+        /// </summary>
+        /// <param name="distance">Distance from to to</param>
+        /// <param name="delay">Spell delay</param>
+        /// <param name="missileSpeed">Spell missile speed</param>
+        /// <returns></returns>
+        internal static float GetArrivalTime(float distance, float delay, float missileSpeed = 0)
+        {
+            if (missileSpeed != 0)
+                return distance / missileSpeed + delay;
+
+            return delay;
+        }
+
+        /// <summary>
+        /// Calculates cast position with target's path
+        /// </summary>
+        /// <param name="target">Target for spell</param>
+        /// <param name="width">Spell width</param>
+        /// <param name="delay">Spell delay</param>
+        /// <param name="missileSpeed">Spell missile speed</param>
+        /// <param name="range">Spell range</param>
+        /// <param name="collisionable">Spell collisionable</param>
+        /// <param name="type">Spell skillshot type</param>
+        /// <param name="path">Waypoints of target</param>
+        /// <param name="avgt">Average reaction time (in ms)</param>
+        /// <param name="movt">Passed time from last movement change (in ms)</param>
+        /// <param name="avgp">Average Path Lenght</param>
+        /// <param name="from">Spell casted position</param>
+        /// <returns></returns>
+        internal static Result WaypointAnlysis(Obj_AI_Base target, float width, float delay, float missileSpeed, float range, bool collisionable, SkillshotType type, List<Vector2> path, float avgt, float movt, float avgp, Vector2 from, float moveSpeed = 0, bool isDash = false)
+        {
+            if (moveSpeed == 0)
+                moveSpeed = target.MoveSpeed;
+
+            Result result = new Result();
+
+            float flyTimeMax = 0f;
+
+            if (missileSpeed != 0) //skillshot with a missile
+                flyTimeMax = range / missileSpeed;
+
+            float tMin = delay + Game.Ping / 2000f + SpellDelay / 1000f;
+            float tMax = flyTimeMax + delay + Game.Ping / 1000f + SpellDelay / 1000f;
+            float pathTime = 0f;
+            int[] pathBounds = new int[] { -1, -1 };
+
+            //find bounds
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                float t = path[i + 1].Distance(path[i]) / moveSpeed;
+
+                if (pathTime <= tMin && pathTime + t >= tMin)
+                    pathBounds[0] = i;
+                if (pathTime <= tMax && pathTime + t >= tMax)
+                    pathBounds[1] = i;
+
+                if (pathBounds[0] != -1 && pathBounds[1] != -1)
+                    break;
+
+                pathTime += t;
+            }
+
+            //calculate cast & unit position
+            if (pathBounds[0] != -1 && pathBounds[1] != -1)
+            {
+                for (int k = pathBounds[0]; k <= pathBounds[1]; k++)
+                {
+                    Vector2 direction = (path[k + 1] - path[k]).Normalized();
+                    float distance = width;
+                    if (predMenu.Item("SPREDWPANALYSIS").GetValue<StringList>().SelectedIndex == 0)
+                        distance = target.BoundingRadius;
+
+                    int steps = (int)Math.Floor(path[k].Distance(path[k + 1]) / distance);
+                    //split & anlyse current path
+                    for (int i = 0; i < steps; i++)
+                    {
+                        Vector2 pA = path[k] + (direction * distance * i);
+                        Vector2 pB = path[k] + (direction * distance * (i + 1));
+                        Vector2 center = (pA + pB) / 2f;
+
+                        float flytime = missileSpeed != 0 ? from.Distance(center) / missileSpeed : 0f;
+                        float t = flytime + delay + Game.Ping / 1000f + SpellDelay / 1000f;
+
+                        Vector2 currentPosition = isDash ? target.Position.To2D() : target.ServerPosition.To2D();
+
+                        float arriveTimeA = currentPosition.Distance(pA) / moveSpeed;
+                        float arriveTimeB = currentPosition.Distance(pB) / moveSpeed;
+
+                        if (Math.Min(arriveTimeA, arriveTimeB) <= t && Math.Max(arriveTimeA, arriveTimeB) >= t)
+                        {
+                            result.HitChance = GetHitChance(t, avgt, movt, avgp);
+                            result.CastPosition = center + (direction * Game.Ping / 1000f * moveSpeed) - (type == SkillshotType.SkillshotLine ? (center - from).Normalized().Perpendicular() * width / 2f : Vector2.Zero);
+                            result.UnitPosition = center + (direction * (t - Math.Min(arriveTimeA, arriveTimeB)) * moveSpeed);
+                            result.CollisionResult = Collision.GetCollisions(from, result.CastPosition, width, delay, missileSpeed);
+                            return result;
+                        }
+                    }
+
+                    if (steps == 0)
+                    {
+                        float flytime = missileSpeed != 0 ? from.Distance(path[pathBounds[1]]) / missileSpeed : 0f;
+                        float t = flytime + delay + Game.Ping / 2000f + SpellDelay / 1000f;
+                        result.HitChance = GetHitChance(t, avgt, movt, avgp);
+                        result.CastPosition = path[pathBounds[1]];
+                        result.UnitPosition = path[pathBounds[1]];
+                        result.CollisionResult = Collision.GetCollisions(from, result.CastPosition, width, delay, missileSpeed);
+                        return result;
+                    }
+                }
+            }
+
+            result.HitChance = HitChance.Impossible;
+
+            if (type == SkillshotType.SkillshotCircle && (pathBounds[0] != -1 || pathBounds[1] != -1))
+                if (movt < 100)
+                    result.HitChance = HitChance.High;
+                else
+                    result.HitChance = HitChance.Medium;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets Ignored reaction time (sets with menu)
+        /// </summary>
+        public static int IgnoreReactionDelay
         {
             get
             {
@@ -1063,7 +1041,10 @@ namespace SPrediction
             }
         }
 
-        private static int SpellDelay
+        /// <summary>
+        /// Gets extra spell delay (sets with menu)
+        /// </summary>
+        public static int SpellDelay
         {
             get
             {
@@ -1073,47 +1054,18 @@ namespace SPrediction
             }
         }
 
-        private static void Obj_AI_Hero_OnNewPath(Obj_AI_Base sender, GameObjectNewPathEventArgs args)
+        /// <summary>
+        /// Initialization assert
+        /// </summary>
+        internal static void AssertInitializationMode()
         {
-            if (!sender.IsEnemy || !sender.IsChampion() || args.IsDash)
-                return;
-
-            EnemyData enemy = EnemyInfo[sender.NetworkId];
-
-            lock (enemy.m_lock)
-            {
-                if (args.Path.Length < 2)
-                {
-                    if (!enemy.IsStopped)
-                    {
-                        enemy.StopTick = Environment.TickCount;
-                        enemy.LastWaypointTick = Environment.TickCount;
-                        enemy.IsStopped = true;
-                        enemy.Count = 0;
-                        enemy.AvgTick = 0;
-                        enemy.AvgPathLenght = 0;
-                    }
-                }
-                else
-                {
-                    List<Vector2> wp = args.Path.Select(p => p.To2D()).ToList();
-                    if (!enemy.LastWaypoints.SequenceEqual(wp))
-                    {
-                        if (!enemy.IsStopped)
-                        {
-                            enemy.AvgTick = (enemy.Count * enemy.AvgTick + (Environment.TickCount - enemy.LastWaypointTick)) / ++enemy.Count;
-                            enemy.AvgPathLenght = ((enemy.Count - 1) * enemy.AvgPathLenght + wp.PathLength()) / enemy.Count;
-                        }
-                        enemy.LastWaypointTick = Environment.TickCount;
-                        enemy.IsStopped = false;
-                        enemy.LastWaypoints = wp;
-                    }
-                }
-
-                EnemyInfo[sender.NetworkId] = enemy;
-            }
+            if (!blInitialized)
+                throw new InvalidOperationException("Prediction is not initalized");
         }
 
+        /// <summary>
+        /// OnDraw event for prediction drawings
+        /// </summary>
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (predMenu != null && predMenu.Item("SPREDDRAWINGS").GetValue<bool>())
@@ -1150,96 +1102,38 @@ namespace SPrediction
             }
         }
 
-        #region Obj_AI_Hero extensions
-        /// <summary>
-        /// Gets passed time without moving
-        /// </summary>
-        /// <param name="t">target</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int MovImmobileTime(this Obj_AI_Hero t)
+        #region events for hitcount drawings
+        private static void Obj_AI_Hero_OnDamage(AttackableUnit sender, AttackableUnitDamageEventArgs args)
         {
-            if (!blInitialized)
-                throw new InvalidOperationException("Prediction is not initalized");
-
-            return EnemyInfo[t.NetworkId].IsStopped ? Environment.TickCount - EnemyInfo[t.NetworkId].StopTick : 0;
-        }
-        /// <summary>
-        /// Gets passed time from last movement change
-        /// </summary>
-        /// <param name="t">target</param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int LastMovChangeTime(this Obj_AI_Hero t)
-        {
-            if (!blInitialized)
-                throw new InvalidOperationException("Prediction is not initalized");
-
-            return Environment.TickCount - EnemyInfo[t.NetworkId].LastWaypointTick;
-        }
-
-        /// <summary>
-        /// Gets average movement reaction time
-        /// </summary>
-        /// <param name="t"><target/param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float AvgMovChangeTime(this Obj_AI_Hero t)
-        {
-            if (!blInitialized)
-                throw new InvalidOperationException("Prediction is not initalized");
-
-            return EnemyInfo[t.NetworkId].AvgTick + IgnoreReactionDelay;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float AvgPathLenght(this Obj_AI_Hero t)
-        {
-            if (!blInitialized)
-                throw new InvalidOperationException("Prediction is not initalized");
-
-            return EnemyInfo[t.NetworkId].AvgPathLenght;
-        }
-        #endregion
-
-        #region util funcs
-        internal static bool IsImmobilizeBuff(BuffType type)
-        {
-            return type == BuffType.Snare || type == BuffType.Stun || type == BuffType.Charm || type == BuffType.Knockup || type == BuffType.Suppression;
-        }
-
-        internal static bool IsImmobileTarget(Obj_AI_Base target)
-        {
-            return target.Buffs.Count(p => IsImmobilizeBuff(p.Type)) > 0;
-        }
-
-        internal static float LeftImmobileTime(Obj_AI_Base target)
-        {
-            return target.Buffs.Where(p => p.IsActive && IsImmobilizeBuff(p.Type) && p.EndTime >= Game.Time).Max(q => q.EndTime - Game.Time);
-        }
-        #endregion
-
-        public struct EnemyData
-        {
-            public bool IsStopped;
-            public List<Vector2> LastWaypoints;
-            public int LastWaypointTick;
-            public int StopTick;
-            public float AvgTick;
-            public float AvgPathLenght;
-            public int Count;
-            public object m_lock;
-
-            public EnemyData(List<Vector2> wp)
+            lock (LastSpells)
             {
-                IsStopped = false;
-                LastWaypoints = wp;
-                LastWaypointTick = 0;
-                StopTick = 0;
-                AvgTick = 0;
-                AvgPathLenght = 0;
-                Count = 0;
-                m_lock = new object();
+                LastSpells.RemoveAll(p => Environment.TickCount - p.tick > 2000);
+                if (args.SourceNetworkId == ObjectManager.Player.NetworkId && HeroManager.Enemies.Exists(p => p.NetworkId == args.TargetNetworkId))
+                {
+                    if (LastSpells.Count != 0)
+                    {
+                        LastSpells.RemoveAt(0);
+                        hitCount++;
+                    }
+                }
             }
         }
+
+        private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            lock (LastSpells)
+            {
+                LastSpells.RemoveAll(p => Environment.TickCount - p.tick > 2000);
+                if (sender.IsMe && !args.SData.IsAutoAttack() && predMenu.Item("SPREDHC").GetValue<KeyBind>().Active)
+                {
+                    if (args.Slot == SpellSlot.Q && !LastSpells.Exists(p => p.name == args.SData.Name))
+                    {
+                        LastSpells.Add(new _lastSpells(args.SData.Name, Environment.TickCount));
+                        castCount++;
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }
