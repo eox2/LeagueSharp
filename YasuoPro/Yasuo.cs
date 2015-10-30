@@ -23,6 +23,13 @@ namespace YasuPro
 
         private void OnLoad(EventArgs args)
         {
+            if (Yasuo.CharData.BaseSkinName != "Yasuo")
+            {
+                return;
+            }
+            
+            Game.PrintChat("YasuoPro Loaded!");
+
             InitSpells();
             YasuoMenu.Init(this);
             Program.Init();
