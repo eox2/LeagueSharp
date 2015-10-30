@@ -14,7 +14,7 @@ namespace LolBuilder
 
         public static void GameLoad(EventArgs args)
         {
-            Console.WriteLine("LolBuilder Loaded - By Seph");
+            Game.PrintChat("LolBuilder Loaded - By Seph");
             String championname = ObjectManager.Player.ChampionName.Replace(" ", "").Replace("'", "");
             var main = new System.Threading.Thread(() =>
             {
@@ -164,50 +164,19 @@ namespace LolBuilder
                 var Final = BuildMenu.AddSubMenu(new Menu("Final Items", "Final"));
                 var Summary = BuildMenu.AddSubMenu(new Menu("Build Summary", "Summary"));
 
-                if (BuildData.BuildsList.IndexOf(build) == 0 && NotifOn())
-                {
-                    INotification start = new Notification("Starting Items", 60000);
-                    Notifications.AddNotification(start);
-                }
                 foreach (var si in build.startingitems)
                 {
                     starting.AddItem(new MenuItem(si + Random.Next(), si));
-                    if (BuildData.BuildsList.IndexOf(build) == 0 && NotifOn())
-                    {
-                        INotification buildnotif = new Notification(si, 100000);
-                        Notifications.AddNotification(buildnotif);
-                    }
-                }
-                if (BuildData.BuildsList.IndexOf(build) == 0 && NotifOn())
-                {
-                    INotification start = new Notification("Build Order", 100000);
-                    Notifications.AddNotification(start);
                 }
 
                 foreach (var bo in build.buildorder)
                 {
                     Buildorder.AddItem(new MenuItem(bo + Random.Next(), bo));
-                    if (BuildData.BuildsList.IndexOf(build) == 0 && NotifOn())
-                    {
-                        INotification buildnotif = new Notification(bo, 100000);
-                        Notifications.AddNotification(buildnotif);
-                    }
 
-                }
-                if (BuildData.BuildsList.IndexOf(build) == 0 && NotifOn())
-                {
-                    INotification start = new Notification("Final Items", 100000);
-                    Notifications.AddNotification(start);
                 }
                 foreach (var finalitem in build.finalitems)
                 {
                     Final.AddItem(new MenuItem(finalitem + Random.Next(), finalitem));
-                    if (BuildData.BuildsList.IndexOf(build) == 0 && NotifOn())
-                    {
-                        INotification buildnotif = new Notification(finalitem, 100000);
-                        Notifications.AddNotification(buildnotif);
-                    }
-
                 }
 
                 foreach (var summitem in build.buildsummary)

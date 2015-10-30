@@ -43,6 +43,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PingSpammer", "PingSpammer\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportMode", "SupportMode\SupportMode.csproj", "{C40D5BC1-819A-4BC4-BF90-1646922DE7C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SephZiggs", "SephZiggs\SephZiggs.csproj", "{6F755788-CF62-497A-B473-34B6551D9BC2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasuoPro", "YasuoPro\YasuoPro.csproj", "{F8E64169-8FDF-4207-89D7-A4F9A426ABA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +133,14 @@ Global
 		{C40D5BC1-819A-4BC4-BF90-1646922DE7C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C40D5BC1-819A-4BC4-BF90-1646922DE7C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C40D5BC1-819A-4BC4-BF90-1646922DE7C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F755788-CF62-497A-B473-34B6551D9BC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F755788-CF62-497A-B473-34B6551D9BC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F755788-CF62-497A-B473-34B6551D9BC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F755788-CF62-497A-B473-34B6551D9BC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8E64169-8FDF-4207-89D7-A4F9A426ABA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8E64169-8FDF-4207-89D7-A4F9A426ABA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8E64169-8FDF-4207-89D7-A4F9A426ABA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8E64169-8FDF-4207-89D7-A4F9A426ABA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

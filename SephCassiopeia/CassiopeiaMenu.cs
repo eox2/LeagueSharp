@@ -11,8 +11,7 @@ namespace SephCassiopeia
         public static List<Obj_AI_Hero> BlackList = new List<Obj_AI_Hero>(); 
         public static Menu CreateMenu()
         {
-            Config = new Menu("SephCassio", "Lux", true);
-			SPrediction.Prediction.Initialize(Config);
+            Config = new Menu("SephCassio", "Cassiopeia", true);
 			LeagueSharp.Common.TargetSelector TargetSelector = new LeagueSharp.Common.TargetSelector();
             Menu TSMenu = new Menu("Target Selector", "TS", false);
             TargetSelector.AddToMenu(TSMenu);
