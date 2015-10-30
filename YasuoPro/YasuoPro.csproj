@@ -61,9 +61,6 @@
     <Reference Include="LeagueSharp.Common">
       <HintPath>C:\Users\Laptop\Desktop\L#\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
-    <Reference Include="LeagueSharp.Sandbox">
-      <HintPath>C:\Users\Laptop\Desktop\L#\System\LeagueSharp.Sandbox.dll</HintPath>
-    </Reference>
     <Reference Include="SharpDX">
       <HintPath>C:\Users\Laptop\Desktop\L#\System\SharpDX.dll</HintPath>
     </Reference>

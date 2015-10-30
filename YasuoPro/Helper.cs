@@ -142,19 +142,9 @@ namespace YasuPro
 
         internal static Vector2 GetDashPos(Obj_AI_Base @base)
         {
-            var mydir = Yasuo.Direction.To2D().Perpendicular();
-            //var predictedposition = @base.ServerPosition.To2D() + (475 - Yasuo.Distance(@base)) * mydir;
             var predictedposition = Yasuo.ServerPosition.Extend(@base.Position, Yasuo.Distance(@base) + 475 - Yasuo.Distance(@base)).To2D();
             DashPosition = predictedposition;
             return predictedposition;
-        }
-
-        internal static Vector2 GetDashPos3(Obj_AI_Base target)
-        {
-            return
-                Yasuo.ServerPosition.Extend(
-                    target.ServerPosition,
-                    Yasuo.Distance(target) < 410 ? Spells[E].Range : Yasuo.Distance(target) + 65).To2D();
         }
 
         internal static double GetProperEDamage(Obj_AI_Base target)

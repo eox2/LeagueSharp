@@ -38,7 +38,7 @@ namespace YasuPro
             GameObject.OnCreate += OnCreate;
             AntiGapcloser.OnEnemyGapcloser += OnGapClose;
             Interrupter2.OnInterruptableTarget += OnInterruptable;
-            Spellbook.OnCastSpell += CastSpell;
+          //  Spellbook.OnCastSpell += CastSpell;
         }
 
         void CastSpell(Spellbook x, SpellbookCastSpellEventArgs args)
@@ -102,10 +102,12 @@ namespace YasuPro
 
         void OnDraw(EventArgs args)
         {
+            /*
             if (Debug)
             {
                 Drawing.DrawCircle(DashPosition.To3D(), Yasuo.BoundingRadius, Color.Chartreuse);
             }
+            */
 
             if (Yasuo.IsDead || !GetBool("Drawing.Active"))
             {
