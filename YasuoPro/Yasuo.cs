@@ -73,12 +73,6 @@ namespace YasuPro
                 Orbwalker.SetAttack(true);
             }
 
-
-            if (GetBool("Evade.WSS"))
-            {
-                Evade();
-            }
-
             if (GetBool("Misc.AutoR") && !Fleeing)
             {
                 CastR(GetSlider("Misc.RMinHit"));
@@ -183,11 +177,11 @@ namespace YasuPro
                 {
                     Hydra.Cast(null);
                 }
-                if (GetBool("Items.UseBRK"))
+                if (GetBool("Items.UseBRK") && CurrentTarget != null)
                 {
                     Blade.Cast(CurrentTarget);
                 }
-                if (GetBool("Items.UseBLG"))
+                if (GetBool("Items.UseBLG") && CurrentTarget != null)
                 {
                     Bilgewater.Cast(CurrentTarget);
                 }
@@ -399,101 +393,6 @@ namespace YasuPro
             }
         }
 
-        void Evade()
-        {
-            if (!GetBool("Evade.Enabled"))
-            {
-                return;
-            }
-
-            foreach (var skillshot in Program.DetectedSkillshots)
-            {
-                
-                if (skillshot.Dodged)
-                { 
-                    if (Debug)
-                    Game.PrintChat(skillshot.SpellData.SpellName + " Dodged already");
-                }
-                
-                if (skillshot.IsAboutToHit(250, Yasuo) &&
-                    ((Program.NoSolutionFound ||
-                      !Program.IsSafePath(Yasuo.GetWaypoints(), 250).IsSafe &&
-                      !Program.IsSafe(Yasuo.Position.To2D()).IsSafe) || skillshot.SpellData.IsDangerous ||
-                     skillshot.SpellData.DangerValue >= 3))
-                {
-                    if (!skillshot.Dodged && skillshot.SpellData.Type != SkillShotType.SkillshotCircle)
-                    {
-                        if (!Yasuo.IsDashing() && SpellSlot.W.IsReady() && GetBool("Evade.UseW") &&
-                            skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall))
-                        {
-                            var castpos = Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(), 50);
-                            var dist = Yasuo.Distance(skillshot.MissilePosition);
-                            // var extpos = Yasuo.ServerPosition.To2D().Extend(skillshot.MissilePosition, dist * 0.25f);
-                            //var castpos = Yasuo.ServerPosition.To2D() + Math.Abs(Spells[W].Range - (0.25f * dist))*(-skillshot.Direction);
-                            bool WCasted = Spells[W].Cast(castpos);
-                            Program.DetectedSkillshots.Remove(skillshot);
-                            skillshot.Dodged = WCasted;
-                            if (Debug && WCasted)
-                            {
-                                Game.PrintChat("Blocked " + skillshot.SpellData.SpellName + " with Windwall ");
-                            }
-                            return;
-                        }
-                        if (!Yasuo.IsDashing() && !skillshot.Dodged && SpellSlot.E.IsReady() && GetBool("Evade.UseE"))
-                        {
-                            var evadetarget =
-                                ObjectManager.Get<Obj_AI_Base>()
-                                    .Where(
-                                        x =>
-                                            x.Team != Yasuo.Team && (x is Obj_AI_Minion || x is Obj_AI_Hero) &&
-                                            Program.IsSafe(GetDashPos(x)).IsSafe)
-                                    .OrderBy(x => x.IsMinion)
-                                    .ThenByDescending(x => x.CountEnemiesInRange(400))
-                                    .FirstOrDefault();
-                            if (evadetarget != null)
-                            {
-                                Spells[E].CastOnUnit(evadetarget);
-                                Program.DetectedSkillshots.Remove(skillshot);
-                                skillshot.Dodged = true;
-                                if (Debug)
-                                {
-                                    Game.PrintChat("Evading " + skillshot.SpellData.SpellName + " " + "using E to " + evadetarget.BaseSkinName + " " +
-                                                    "with E dash");
-                                }
-                                return;
-                            }
-                        }
-                    }
-
-                    if (!skillshot.Dodged && skillshot.SpellData.Type == SkillShotType.SkillshotCircle)
-                    {
-                        if (SpellSlot.E.IsReady() && GetBool("Evade.UseE"))
-                        {
-                            var evadetarget =
-                                ObjectManager.Get<Obj_AI_Base>()
-                                    .Where(
-                                        x =>
-                                            x.IsValidTarget(Spells[E].Range) &&
-                                            Program.IsSafe(GetDashPos(x)).IsSafe)
-                                    .OrderBy(x => x.CountEnemiesInRange(400))
-                                    .FirstOrDefault();
-                            if (evadetarget != null)
-                            {
-                                Spells[E].CastOnUnit(evadetarget);
-                                skillshot.Dodged = true;
-                                Program.DetectedSkillshots.Remove(skillshot);
-                                if (Debug)
-                                {
-                                    Game.PrintChat("Evading " + skillshot.SpellData.SpellName + " " + "using E to " + evadetarget.BaseSkinName + " " +
-                                                   "with E dash");
-                                }
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
 
         void CastIgnite()

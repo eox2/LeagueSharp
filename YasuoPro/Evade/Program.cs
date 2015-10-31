@@ -24,6 +24,7 @@ using Evade.Pathfinding;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using YasuoPro;
 using Color = System.Drawing.Color;
 using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
 using YasuPro;
@@ -126,18 +127,20 @@ namespace Evade
             SkillshotDetector.OnDeleteMissile += SkillshotDetectorOnOnDeleteMissile;
 
             //For skillshot drawing.
-            if (Initalization.Yasuo.Debug)
+            if (Helper.Debug)
             {
                 Drawing.OnDraw += Drawing_OnDraw;
             }
 
             //Ondash event.
-            CustomEvents.Unit.OnDash += UnitOnOnDash;
+            //CustomEvents.Unit.OnDash += UnitOnOnDash;
 
             DetectedSkillshots.OnAdd += DetectedSkillshots_OnAdd;
 
             //Create the menu to allow the user to change the config.
             Config.CreateMenu();
+
+            Config.AttachToMenu();
 
             //Initialze the collision
             Collision.Init();
@@ -450,6 +453,11 @@ namespace Evade
                 skillshot.Game_OnGameUpdate();
             }
 
+            if (Helper.GetBool("Evade.WSS"))
+            {
+                YasuoEvade.Evade();
+            }
+
             return;
 
             //Avoid sending move/cast packets while dead.
@@ -616,6 +624,7 @@ namespace Evade
                     }
 
                     var isDangerous = false;
+
                     foreach (var skillshot in DetectedSkillshots)
                     {
                         if (skillshot.Evade() && skillshot.IsDanger(PlayerPosition))
@@ -781,7 +790,8 @@ namespace Evade
 
             foreach (var skillshot in DetectedSkillshots)
             {
-                if (skillshot.Evade() && skillshot.IsDanger(point))
+                //skillshot.Evade() && 
+                if (skillshot.IsDanger(point))
                 {
                     result.SkillshotList.Add(skillshot);
                 }
@@ -807,16 +817,16 @@ namespace Evade
 
             foreach (var skillshot in DetectedSkillshots)
             {
-                if (skillshot.Evade())
-                {
+               // if (skillshot.Evade(SpellSlot.E) || skillshot.)
+               // {
                     var sResult = skillshot.IsSafePath(path, timeOffset, speed, delay, unit);
-                    IsSafe = (IsSafe) ? sResult.IsSafe : false;
+                    IsSafe = (IsSafe) && sResult.IsSafe;
 
                     if (sResult.Intersection.Valid)
                     {
                         intersections.Add(sResult.Intersection);
                     }
-                }
+                //}
             }
 
             //Return the first intersection
@@ -1318,46 +1328,20 @@ namespace Evade
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (!Config.Menu.Item("EnableDrawings").GetValue<bool>())
+            if (!Helper.Debug)
             {
+                Drawing.OnDraw -= Drawing_OnDraw;
                 return;
             }
 
-            if (Config.Menu.Item("ShowEvadeStatus").GetValue<bool>())
-            {
-                var heropos = Drawing.WorldToScreen(ObjectManager.Player.Position);
-                if (Config.Menu.Item("Enabled").GetValue<KeyBind>().Active)
-                {
-                    Drawing.DrawText(heropos.X, heropos.Y, Color.Red, "Evade: ON");
-                }
-            }
-
-            var Border = Config.Menu.Item("Border").GetValue<Slider>().Value;
-            var missileColor = Config.Menu.Item("MissileColor").GetValue<Color>();
-            
             //Draw the polygon for each skillshot.
             foreach (var skillshot in DetectedSkillshots)
             {
                 skillshot.Draw(
-                    (skillshot.Evade() && Config.Menu.Item("Enabled").GetValue<KeyBind>().Active)
-                        ? Config.Menu.Item("EnabledColor").GetValue<Color>()
-                        : Config.Menu.Item("DisabledColor").GetValue<Color>(), missileColor, Border);
+                    (Helper.GetBool("Evade.Enabled"))
+                        ? Color.DodgerBlue
+                        : Color.Red, Color.Coral, 5);
             }
-
-            if (Config.TestOnAllies)
-            {
-                var myPath = ObjectManager.Player.GetWaypoints();
-
-                for (var i = 0; i < myPath.Count - 1; i++)
-                {
-                    var A = myPath[i];
-                    var B = myPath[i + 1];
-                    var SA = Drawing.WorldToScreen(A.To3D());
-                    var SB = Drawing.WorldToScreen(B.To3D());
-                     Drawing.DrawLine(SA.X, SA.Y, SB.X, SB.Y, 1, Color.White);
-                }
-
-                Drawing.DrawCircle(EvadePoint.To3D(), 300, Color.White);
             }
         }
 
@@ -1367,4 +1351,4 @@ namespace Evade
             public List<Skillshot> SkillshotList;
         }
     }
-}
+

@@ -22,6 +22,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using YasuPro;
 using Color = System.Drawing.Color;
 using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
 
@@ -190,7 +191,7 @@ namespace Evade
         /// </summary>
         public T GetValue<T>(string name)
         {
-            return Config.Menu.Item(name + SpellData.MenuItemName).GetValue<T>();
+            return YasuoMenu.Config.Item(name + SpellData.MenuItemName).GetValue<T>();
         }
 
         /// <summary>
@@ -220,7 +221,7 @@ namespace Evade
                 return _cachedValue;
             }
 
-            if (!GetValue<bool>("IsDangerous") && Config.Menu.Item("OnlyDangerous").GetValue<KeyBind>().Active)
+            if (!GetValue<bool>("IsDangerous") && YasuoMenu.Config.Item("Evade.OnlyDangerous").GetValue<KeyBind>().Active)
             {
                 _cachedValue = false;
                 _cachedValueTick = Utils.TickCount;
@@ -233,6 +234,35 @@ namespace Evade
 
             return _cachedValue;
         }
+
+
+        public bool Evade(SpellSlot slot)
+        {
+            if (ForceDisabled || !slot.IsReady())
+            {
+                return false;
+            }
+
+            if (Utils.TickCount - _cachedValueTick < 100)
+            {
+                return _cachedValue;
+            }
+
+            if (!GetValue<bool>("IsDangerous") && YasuoMenu.Config.Item("Evade.OnlyDangerous").GetValue<bool>())
+            {
+                _cachedValue = false;
+                _cachedValueTick = Utils.TickCount;
+                return _cachedValue;
+            }
+
+            _cachedValue = slot == SpellSlot.W ? GetValue<bool>("EvadeW") : GetValue<bool>("EvadeE");
+            _cachedValueTick = Utils.TickCount;
+
+            return _cachedValue;
+        }
+
+       
+
 
         public void Game_OnGameUpdate()
         {
@@ -654,10 +684,12 @@ namespace Evade
 
         public void Draw(Color color, Color missileColor, int width = 1)
         {
+            /*
             if (!GetValue<bool>("Draw"))
             {
                 return;
             }
+            */
             DrawingPolygon.Draw(color, width);
 
             if (SpellData.Type == SkillShotType.SkillshotMissileLine)

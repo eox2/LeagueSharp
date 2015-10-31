@@ -21,6 +21,7 @@ using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using YasuPro;
 
 #endregion
 
@@ -51,6 +52,7 @@ namespace Evade
         public static int LastEvadePointChangeT = 0;
 
         public static Menu Menu;
+        public static Menu skillShots;
 
         public static void CreateMenu()
         {
@@ -159,6 +161,44 @@ namespace Evade
                 new MenuItem("OnlyDangerous", "Dodge only dangerous").SetValue(new KeyBind(32, KeyBindType.Press)));
 
             // SephYasuo.YasuoMenu.Config.AddSubMenu(Menu);
+        }
+
+        internal static void AttachToMenu()
+        {
+            skillShots = new Menu("Skillshots", "Skillshots");
+
+            foreach (var hero in HeroManager.Enemies)
+            {
+                    foreach (var spell in SpellDatabase.Spells)
+                    {
+                        if (String.Equals(spell.ChampionName, hero.ChampionName, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            var subMenu = new Menu(spell.MenuItemName, spell.MenuItemName);
+
+                            subMenu.AddItem(
+                                new MenuItem("DangerLevel" + spell.MenuItemName, "Danger level").SetValue(
+                                    new Slider(spell.DangerValue, 5, 1)));
+
+                            if (spell.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall))
+                            {
+                                subMenu.AddBool("EvadeW" + spell.MenuItemName, "Evade with W");
+                            }
+
+                            subMenu.AddBool("EvadeE" + spell.MenuItemName, "Evade with E");
+
+
+                            subMenu.AddItem(
+                                new MenuItem("IsDangerous" + spell.MenuItemName, "Is Dangerous").SetValue(
+                                    spell.IsDangerous));
+
+                           // subMenu.AddItem(new MenuItem("Enabled" + spell.MenuItemName, "Enabled").SetValue(!spell.DisabledByDefault));
+
+                            skillShots.AddSubMenu(subMenu);
+                        }
+                    }
+            }
+
+            YasuoMenu.GetEvadeMenu().AddSubMenu(skillShots);
         }
     }
 }

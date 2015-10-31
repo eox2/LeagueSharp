@@ -17,7 +17,11 @@ namespace YasuPro
 
         internal static bool IsInRange(this Obj_AI_Base unit, float range)
         {
-            return Vector3.Distance(unit.ServerPosition, Helper.Yasuo.ServerPosition) <= range;
+            if (unit != null)
+            {
+                return Vector3.Distance(unit.ServerPosition, Helper.Yasuo.ServerPosition) <= range;
+            }
+            return false;
         }
 
         internal static bool PointUnderEnemyTurret(this Vector2 Point)
@@ -62,29 +66,29 @@ namespace YasuPro
             return menu.AddSubMenu(new Menu(disp, Assembly.GetExecutingAssembly().GetName() + "." + disp));
         }
 
-        internal static void AddBool(this Menu menu, string name, string displayname, bool @defaultvalue = true)
+        internal static MenuItem AddBool(this Menu menu, string name, string displayname, bool @defaultvalue = true)
         {
-            menu.AddItem(new MenuItem(name, displayname).SetValue(@defaultvalue));
+            return menu.AddItem(new MenuItem(name, displayname).SetValue(@defaultvalue));
         }
 
-        internal static void AddKeyBind(this Menu menu, string name, string displayname, uint key, KeyBindType type)
+        internal static MenuItem AddKeyBind(this Menu menu, string name, string displayname, uint key, KeyBindType type)
         {
-            menu.AddItem(new MenuItem(name, displayname).SetValue(new KeyBind(key, type)));
+            return menu.AddItem(new MenuItem(name, displayname).SetValue(new KeyBind(key, type)));
         }
 
-        internal static void AddCircle(this Menu menu, string name, string dname, float range, System.Drawing.Color col)
+        internal static MenuItem AddCircle(this Menu menu, string name, string dname, float range, System.Drawing.Color col)
         {
-            menu.AddItem(new MenuItem(name, name).SetValue(new Circle(true, col, range)));
+            return menu.AddItem(new MenuItem(name, name).SetValue(new Circle(true, col, range)));
         }
 
-        internal static void AddSlider(this Menu menu, string name, string displayname, int initial = 0, int min = 0, int max = 100)
+        internal static MenuItem AddSlider(this Menu menu, string name, string displayname, int initial = 0, int min = 0, int max = 100)
         {
-            menu.AddItem(new MenuItem(name, displayname).SetValue(new Slider(initial, min, max)));
+            return menu.AddItem(new MenuItem(name, displayname).SetValue(new Slider(initial, min, max)));
         }
 
-        internal static void AddSList(this Menu menu, string name, string displayname, string[] stringlist, int @default = 0)
+        internal static MenuItem AddSList(this Menu menu, string name, string displayname, string[] stringlist, int @default = 0)
         {
-            menu.AddItem(new MenuItem(name, displayname).SetValue(new StringList(stringlist, @default)));
+           return menu.AddItem(new MenuItem(name, displayname).SetValue(new StringList(stringlist, @default)));
         }
     }
 }

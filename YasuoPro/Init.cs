@@ -8,7 +8,5 @@
         {
             Yasuo = new Yasuo();
         }         
-
-
     }
 }

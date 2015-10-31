@@ -111,27 +111,27 @@ namespace YasuPro
             }
         }
 
-        internal bool isHealthy
+        internal static bool isHealthy
         {
             get { return Yasuo.HealthPercent > GetSlider("Misc.Healthy"); }
         }
 
-        internal bool GetBool(string name)
+        internal static bool GetBool(string name)
         {
             return YasuoMenu.Config.Item(name).GetValue<bool>();
         }
 
-        internal bool GetKeyBind(string name)
+        internal static bool GetKeyBind(string name)
         {
             return YasuoMenu.Config.Item(name).GetValue<KeyBind>().Active;
         }
 
-        internal int GetSlider(string name)
+        internal static int GetSlider(string name)
         {
             return YasuoMenu.Config.Item(name).GetValue<Slider>().Value;
         }
 
-        internal int GetSL(string name)
+        internal static int GetSL(string name)
         {
             return YasuoMenu.Config.Item(name).GetValue<StringList>().SelectedIndex;
         }
@@ -170,7 +170,7 @@ namespace YasuPro
             return dmg;
         }
 
-        internal bool Debug
+        internal static bool Debug
         {
             get { return GetBool("Misc.Debug"); }
         }

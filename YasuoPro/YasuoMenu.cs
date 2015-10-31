@@ -1,4 +1,5 @@
-﻿using LeagueSharp.Common;
+﻿using System.Reflection;
+using LeagueSharp.Common;
 
 namespace YasuPro
 {
@@ -47,6 +48,10 @@ namespace YasuPro
             Config.AddToMainMenu();
         }
 
+        internal static Menu GetEvadeMenu()
+        {
+            return Config.SubMenu(Assembly.GetExecutingAssembly().GetName() + ".Evade");
+        }
 
         struct Combo
         {
@@ -64,8 +69,8 @@ namespace YasuPro
                 menu.AddBool("Combo.UseW", "Use W");
                 menu.AddBool("Combo.UseE", "Use E");
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
-                var ultmenu = menu.AddSubMenu("Ult Settings");
 
+                var ultmenu = menu.AddSubMenu("Ult Settings");
                 ultmenu.AddBool("Combo.UseR", "Use R");
                 ultmenu.AddBool("Combo.UltTower", "Ult under Tower", false);
                 ultmenu.AddSlider("Combo.RMinHit", "Min Enemies for Ult", 1, 1, 5);
@@ -80,7 +85,7 @@ namespace YasuPro
         {
             internal static void Attach(Menu menu)
             {
-                menu.AddKeyBind("Harass.KB", "Harass Key", KeyCode("H"), KeyBindType.Toggle);
+                menu.AddKeyBind("Harass.KB", "Harass Key", KeyCode("H"), KeyBindType.Toggle).Permashow();
                 menu.AddBool("Harass.InMixed", "Harass in Mixed Mode");
                 menu.AddBool("Harass.UseQ", "Use Q");
                 menu.AddBool("Harass.UseE", "Use E");
@@ -147,7 +152,10 @@ namespace YasuPro
         {
             internal static void Attach(Menu menu)
             {
-                menu.AddBool("Evade.Enabled", "Evade Enabled");
+                menu.AddBool("Evade.Enabled", "Evade Enabled").Permashow(true, "Yasuo| Evade");
+                menu.AddBool("Evade.OnlyDangerous", "Evade only Dangerous").Permashow(true, "Yasuo| Only Dangerous");
+                // menu.AddKeyBind("Evade.OnlyDangerous", "Dodge only dangerous", 32, KeyBindType.Press).Permashow(true, "Yasuo| Only Dangerous");
+                menu.AddSlider("Evade.MinDangerLevel", "Min Danger Level", 3);
                 menu.AddBool("Evade.WTS", "Windwall Targetted");
                 menu.AddBool("Evade.WSS", "Windwall Skillshots");
                 menu.AddBool("Evade.UseW", "Evade with Windwall");
@@ -161,14 +169,14 @@ namespace YasuPro
         {
             internal static void Attach(Menu menu)
             {
-                menu.AddBool("Misc.AutoR", "Auto Ultimate");
+                menu.AddBool("Misc.AutoR", "Auto Ultimate").Permashow();
                 menu.AddSlider("Misc.RMinHit", "Min Enemies for Autoult", 1, 1, 5);
 
                 menu.AddSList("Hitchance.Q", "Q Hitchance", new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString() }, 1);
                 menu.AddSlider("Misc.Healthy", "Healthy Amount HP", 20, 0, 100);
                 menu.AddBool("Misc.AG", "Use Q (Tornado) on Gapcloser");
                 menu.AddBool("Misc.Interrupter", "Use Q (Tornado) to Interrupt");
-                menu.AddBool("Misc.Debug", "Debug");
+                menu.AddBool("Misc.Debug", "Debug", false);
             }
         }
 
