@@ -439,15 +439,16 @@ namespace YasuPro
                             }
                             return;
                         }
-                        if (!skillshot.Dodged && SpellSlot.E.IsReady() && GetBool("Evade.UseE"))
+                        if (!Yasuo.IsDashing() && !skillshot.Dodged && SpellSlot.E.IsReady() && GetBool("Evade.UseE"))
                         {
                             var evadetarget =
                                 ObjectManager.Get<Obj_AI_Base>()
                                     .Where(
                                         x =>
-                                            x.IsValidTarget(Spells[E].Range) &&
+                                            x.Team != Yasuo.Team && (x is Obj_AI_Minion || x is Obj_AI_Hero) &&
                                             Program.IsSafe(GetDashPos(x)).IsSafe)
-                                    .OrderBy(x => x.CountEnemiesInRange(400))
+                                    .OrderBy(x => x.IsMinion)
+                                    .ThenByDescending(x => x.CountEnemiesInRange(400))
                                     .FirstOrDefault();
                             if (evadetarget != null)
                             {
@@ -525,7 +526,7 @@ namespace YasuPro
                 {
                     var minion =
                         ObjectManager.Get<Obj_AI_Minion>()
-                            .Where(x => x.IsValidTarget(Spells[Q].Range)  && (Yasuo.GetSpellDamage(x, SpellSlot.Q) - x.Health >= 0.10 * x.MaxHealth || x.CanKill(SpellSlot.Q))).MaxOrDefault(x => x.MaxHealth);
+                            .Where(x => x.IsValidTarget(Spells[Q].Range)  && (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q)  >= 0.10 * x.MaxHealth || x.CanKill(SpellSlot.Q))).MaxOrDefault(x => x.MaxHealth);
                     if (minion != null)
                     {
                         Orbwalker.ForceTarget(minion);
@@ -535,7 +536,7 @@ namespace YasuPro
 
                 else if (TornadoReady && GetBool("Waveclear.UseQ2"))
                 {
-                    var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Spells[Q2].Range) && (Yasuo.GetSpellDamage(x, SpellSlot.Q) - x.Health >= 0.10 * x.MaxHealth || x.CanKill(SpellSlot.Q)));
+                    var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Spells[Q2].Range) && (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q) >= 0.10 * x.MaxHealth || x.CanKill(SpellSlot.Q)));
                     var pred =
                         MinionManager.GetBestLineFarmLocation(minions.Select(m => m.ServerPosition.To2D()).ToList(),
                             Spells[Q2].Width, Spells[Q2].Range);
@@ -703,7 +704,7 @@ namespace YasuPro
                 {
                     var minion =
                          ObjectManager.Get<Obj_AI_Minion>()
-                             .FirstOrDefault(x => x.IsValidTarget(Spells[Q].Range) && (Yasuo.GetSpellDamage(x, SpellSlot.Q) - x.Health >= 0.10 * x.MaxHealth || x.CanKill(SpellSlot.Q)));
+                             .FirstOrDefault(x => x.IsValidTarget(Spells[Q].Range) && (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q) >= 0.10 * x.MaxHealth || x.CanKill(SpellSlot.Q)));
                     if (minion != null)
                     {
                         Spells[Q].Cast(minion.ServerPosition);
@@ -712,7 +713,7 @@ namespace YasuPro
 
                 else if (TornadoReady && GetBool("Farm.UseQ2"))
                 {
-                    var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Spells[Q2].Range) && (Yasuo.GetSpellDamage(x, SpellSlot.Q) - x.Health >= 0.10 * x.MaxHealth || x.CanKill(SpellSlot.Q)));
+                    var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Spells[Q2].Range) && (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q) >= 0.10 * x.MaxHealth || x.CanKill(SpellSlot.Q)));
                     var pred =
                         MinionManager.GetBestLineFarmLocation(minions.Select(m => m.ServerPosition.To2D()).ToList(),
                             Spells[Q2].Width, Spells[Q2].Range);
