@@ -2247,7 +2247,7 @@ namespace Evade
                     MissileSpellName = "LuxLightBindingMis",
                     EarlyEvade = new[] {EarlyObjects.Allies, EarlyObjects.Minions, EarlyObjects.AllyObjects},
                     //CanBeRemoved = true,
-                    //CollisionObjects = new[] { CollisionObjectTypes.Champions, CollisionObjectTypes.Minion, CollisionObjectTypes.YasuoWall, },
+                    CollisionObjects = new[] { CollisionObjectTypes.Champions, CollisionObjectTypes.Minion, CollisionObjectTypes.YasuoWall, },
                 });
 
             Spells.Add(

@@ -4,7 +4,7 @@ using Evade;
 using LeagueSharp.Common;
 using LeagueSharp;
 using SharpDX;
-using Color = System.Drawing.Color;
+
 
 namespace YasuPro
 {
@@ -20,15 +20,15 @@ namespace YasuPro
         {
             CustomEvents.Game.OnGameLoad += OnLoad;
         }
-
-        private void OnLoad(EventArgs args)
+        
+        void OnLoad(EventArgs args)
         {
             if (Yasuo.CharData.BaseSkinName != "Yasuo")
             {
                 return;
             }
-            
-            Game.PrintChat("YasuoPro Loaded!");
+
+            Game.PrintChat("<font color='#1d87f2'>YasuoPro by Seph Loaded. Good Luck!</font>");
 
             InitSpells();
             YasuoMenu.Init(this);
@@ -53,11 +53,23 @@ namespace YasuPro
             }
         }
 
-        private void OnUpdate(EventArgs args)
+        void OnUpdate(EventArgs args)
         {
             if (Yasuo.IsDead)
             {
                 return;
+            }
+
+            var Fleeing = GetKeyBind("Flee.KB");
+            if (Fleeing)
+            {
+                Flee();
+            }
+
+            else
+            {
+                Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
+                Orbwalker.SetAttack(true);
             }
 
 
@@ -66,17 +78,17 @@ namespace YasuPro
                 Evade();
             }
 
-            if (GetBool("Misc.AutoR"))
+            if (GetBool("Misc.AutoR") && !Fleeing)
             {
                 CastR(GetSlider("Misc.RMinHit"));
             }
 
-            if (GetBool("Killsteal.Enabled"))
+            if (GetBool("Killsteal.Enabled") && !Fleeing)
             {
                 Killsteal();
             }
 
-            if (GetKeyBind("Harass.KB"))
+            if (GetKeyBind("Harass.KB") && !Fleeing)
             {
                 Harass();
             }
@@ -84,30 +96,35 @@ namespace YasuPro
             switch (Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
+                    if (!Fleeing)
                     Combo();
                     break;
                 case Orbwalking.OrbwalkingMode.Mixed:
+                    if (!Fleeing)
                     Mixed();
                     break;
                 case Orbwalking.OrbwalkingMode.LastHit:
+                    if (!Fleeing)
                     LHSkills();
                     break;
                 case Orbwalking.OrbwalkingMode.LaneClear:
+                    if (!Fleeing)
                     Waveclear();
                     break;
                 case Orbwalking.OrbwalkingMode.None:
                     break;
             }
         }
-
+        
         void OnDraw(EventArgs args)
-        {
-            /*
+        { 
+            
             if (Debug)
             {
-                Drawing.DrawCircle(DashPosition.To3D(), Yasuo.BoundingRadius, Color.Chartreuse);
+                Drawing.DrawCircle(DashPosition.To3D(), Yasuo.BoundingRadius, System.Drawing
+                    .Color.Chartreuse);
             }
-            */
+            
 
             if (Yasuo.IsDead || !GetBool("Drawing.Active"))
             {
@@ -120,19 +137,21 @@ namespace YasuPro
 
             if (drawq.Active)
             {
-                Render.Circle.DrawCircle(Yasuo.ServerPosition, Qrange, drawq.Color, 2);
+                Render.Circle.DrawCircle(Yasuo.Position, Qrange, drawq.Color);
             }
             if (drawe.Active)
             {
-                Render.Circle.DrawCircle(Yasuo.ServerPosition, Spells[E].Range, drawe.Color, 2);
+                Render.Circle.DrawCircle(Yasuo.Position, Spells[E].Range, drawe.Color);
             }
             if (drawr.Active)
             {
-                Render.Circle.DrawCircle(Yasuo.ServerPosition, Spells[R].Range, drawr.Color, 2);
+                Render.Circle.DrawCircle(Yasuo.Position, Spells[R].Range, drawr.Color);
             }
         }
+    
 
-        private void Combo()
+
+        void Combo()
         {
             CurrentTarget = TargetSelector.GetTarget(Spells[R].Range, TargetSelector.DamageType.Physical);
 
@@ -154,7 +173,7 @@ namespace YasuPro
             }
         }
 
-        private void CastQ(Obj_AI_Hero target)
+        void CastQ(Obj_AI_Hero target)
         {
             if (Spells[Q].IsReady() && target != null && target.IsInRange(Qrange))
             {
@@ -162,14 +181,14 @@ namespace YasuPro
             }
         }
 
-        private void CastE(Obj_AI_Hero target)
+        void CastE(Obj_AI_Hero target)
         {
             if (target != null)
             {
                 if (SpellSlot.E.IsReady())
                 {
                     if (DashCount >= 1 && target.IsDashable() && target.IsValidTarget(Spells[E].Range) &&
-                        !GetDashPos(target).PointUnderEnemyTurret())
+                        (GetBool("Combo.ETower") || !GetDashPos(target).PointUnderEnemyTurret()))
                     {
                         Spells[E].CastOnUnit(target);
                         return;
@@ -185,7 +204,7 @@ namespace YasuPro
                                     x =>
                                         x.IsValidTarget(Spells[E].Range) && x.IsDashable() 
                                          && target.Distance(GetDashPos(x)) < dist &&
-                                        !GetDashPos(x).PointUnderEnemyTurret())
+                                        (GetBool("Combo.ETower") || !GetDashPos(x).PointUnderEnemyTurret()))
                                 .OrderBy(x => Vector2.Distance(GetDashPos(x), target.ServerPosition.To2D()))
                                 .FirstOrDefault();
                         if (bestminion != null)
@@ -211,7 +230,7 @@ namespace YasuPro
                     {
                         var minion =
                             ObjectManager.Get<Obj_AI_Base>()
-                                .Where(x => x.IsValidTarget(Spells[E].Range) && x.IsDashable() && !GetDashPos(x).PointUnderEnemyTurret())
+                                .Where(x => x.IsValidTarget(Spells[E].Range) && x.IsDashable() && (GetBool("Combo.ETower") || !GetDashPos(x).PointUnderEnemyTurret()))
                                 .OrderBy(x => GetDashPos(x).Distance(target)).FirstOrDefault();
 
                         if (minion != null && GetDashPos(minion).IsCloser(target))
@@ -219,12 +238,11 @@ namespace YasuPro
                             Spells[E].CastOnUnit(minion);
                         }
                     }
-
                 }
             }
         }
 
-        private void CastR(int minhit = 1)
+        void CastR(int minhit = 1)
         {
             if (Spells[R].IsReady())
             {
@@ -252,7 +270,109 @@ namespace YasuPro
             }
         }
 
-        private void Evade()
+        void Flee()
+        {
+            Orbwalker.SetAttack(false);
+            if (SpellSlot.Q.IsReady())
+            {
+                if (!TornadoReady)
+                {
+                    var minq =
+                        ObjectManager.Get<Obj_AI_Base>()
+                            .Where(x => x.IsValidTarget(Spells[Q].Range))
+                            .MinOrDefault(x => x.Distance(Yasuo));
+                    if (minq != null)
+                    {
+                        Spells[Q].Cast(minq.ServerPosition);
+                    }
+                }
+
+                else
+                {
+                    var qtarg = TargetSelector.GetTarget(Spells[Q2].Range, TargetSelector.DamageType.Physical);
+                    if (qtarg != null)
+                    {
+                        Spells[Q2].Cast(qtarg.ServerPosition);
+                    }
+                }
+
+            }
+            if (FleeMode == FleeType.ToCursor)
+            {
+                Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
+
+                if (Spells[E].IsReady())
+                {
+                    var dashtarg =
+                        ObjectManager.Get<Obj_AI_Base>()
+                            .Where(x => x.IsValidTarget(Spells[E].Range))
+                            .MinOrDefault(x => GetDashPos(x).Distance(Game.CursorPos));
+
+                    if (dashtarg != null && GetDashPos(dashtarg).Distance(Game.CursorPos) < Yasuo.Distance(Game.CursorPos))
+                    {
+                        Spells[E].Cast(dashtarg);
+                    }
+                }
+            }
+
+            if (FleeMode == FleeType.ToNexus)
+            {
+                var nexus = ObjectManager.Get<Obj_Shop>().FirstOrDefault(x => x.IsAlly);
+                if (nexus != null)
+                {
+                    Orbwalker.SetOrbwalkingPoint(nexus.Position);
+                    var bestminion = ObjectManager.Get<Obj_AI_Base>().Where(x => x.IsValidTarget(Spells[E].Range)).MinOrDefault(x => GetDashPos(x).Distance(nexus.Position));
+                    if (bestminion != null && GetDashPos(bestminion).Distance(nexus.Position) < Yasuo.Distance(nexus.Position))
+                    {
+                        Spells[E].Cast(bestminion);
+                    }
+                }
+            }
+
+            if (FleeMode == FleeType.ToAllies)
+            {
+                Obj_AI_Base bestally = HeroManager.Allies.Where(x => !x.IsMe && x.CountEnemiesInRange(300) == 0).MinOrDefault(x => x.Distance(Yasuo));
+                if (bestally == null)
+                {
+                    bestally =
+                        ObjectManager.Get<Obj_AI_Minion>()
+                            .Where(x => x.IsValidTarget(3000))
+                            .MinOrDefault(x => x.Distance(Yasuo));
+                }
+
+                if (bestally != null)
+                {
+                    Orbwalker.SetOrbwalkingPoint(bestally.ServerPosition);
+                    if (Spells[E].IsReady())
+                    {
+                        var besttarget =
+                            ObjectManager.Get<Obj_AI_Base>()
+                                .Where(x => x.IsValidTarget(Spells[E].Range))
+                                .MinOrDefault(x => x.Distance(bestally));
+                        if (besttarget != null)
+                        {
+                            Spells[E].Cast(besttarget);
+                        }
+                    }
+                }
+
+                else
+                {
+                    var nexus = ObjectManager.Get<Obj_Shop>().FirstOrDefault(x => x.IsAlly);
+                    if (nexus != null)
+                    {
+                        Orbwalker.SetOrbwalkingPoint(nexus.Position);
+                        var bestminion = ObjectManager.Get<Obj_AI_Base>().Where(x => x.IsValidTarget(Spells[E].Range)).MinOrDefault(x => GetDashPos(x).Distance(nexus.Position));
+                        if (bestminion != null && GetDashPos(bestminion).Distance(nexus.Position) < Yasuo.Distance(nexus.Position))
+                        {
+                            Spells[E].Cast(bestminion);
+                        }
+                    }
+                }
+            }
+        }
+
+        void Evade()
         {
             if (!GetBool("Evade.Enabled"))
             {
@@ -263,8 +383,9 @@ namespace YasuPro
             {
                 
                 if (skillshot.Dodged)
-                {
-                    Game.PrintChat(skillshot.SpellData.SpellName + " " + "ddoged ");
+                { 
+                    if (Debug)
+                    Game.PrintChat(skillshot.SpellData.SpellName + " Dodged already");
                 }
                 
                 if (skillshot.IsAboutToHit(250, Yasuo) &&
@@ -275,7 +396,7 @@ namespace YasuPro
                 {
                     if (!skillshot.Dodged && skillshot.SpellData.Type != SkillShotType.SkillshotCircle)
                     {
-                        if (SpellSlot.W.IsReady() && GetBool("Evade.UseW") &&
+                        if (!Yasuo.IsDashing() && SpellSlot.W.IsReady() && GetBool("Evade.UseW") &&
                             skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall))
                         {
                             var castpos = Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(), 50);
@@ -365,7 +486,7 @@ namespace YasuPro
         {
             if (SpellSlot.E.IsReady() && GetBool("Waveclear.UseE"))
             {
-                var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsValidTarget(Spells[E].Range) && x.IsDashable() && !GetDashPos(x).PointUnderEnemyTurret() && (GetBool("Waveclear.UseENK") || x.Health < GetProperEDamage(x)));
+                var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsValidTarget(Spells[E].Range) && x.IsDashable() && (GetBool("Waveclear.ETower") || !GetDashPos(x).PointUnderEnemyTurret()) && (GetBool("Waveclear.UseENK") || x.Health < GetProperEDamage(x)));
                 if (minion != null)
                 {
                     Orbwalker.ForceTarget(minion);
@@ -379,7 +500,7 @@ namespace YasuPro
                 {
                     var minion =
                         ObjectManager.Get<Obj_AI_Minion>()
-                            .FirstOrDefault(x => x.IsValidTarget(Spells[Q].Range));
+                            .Where(x => x.IsValidTarget(Spells[Q].Range)  && (Yasuo.GetSpellDamage(x, SpellSlot.Q) - x.Health >= 0.10 * x.MaxHealth || x.CanKill(SpellSlot.Q))).MaxOrDefault(x => x.MaxHealth);
                     if (minion != null)
                     {
                         Orbwalker.ForceTarget(minion);
@@ -399,6 +520,45 @@ namespace YasuPro
                         Spells[Q2].Cast(pred.Position);
                     }
                 }
+            }
+        }
+
+
+        void Killsteal()
+        {
+            if (SpellSlot.Q.IsReady() && GetBool("Killsteal.UseQ"))
+            {
+                var targ = HeroManager.Enemies.Find(x => x.CanKill(SpellSlot.Q) && x.IsInRange(Qrange));
+                if (targ != null)
+                {
+                    UseQ(targ, GetHitChance("Hitchance.Q"));
+                    return;
+                }
+            }
+
+            if (SpellSlot.E.IsReady() && GetBool("Killsteal.UseE"))
+            {
+                var targ = HeroManager.Enemies.Find(x => x.CanKill(SpellSlot.E) && x.IsInRange(Spells[E].Range));
+                if (targ != null)
+                {
+                    Spells[E].Cast(targ);
+                    return;
+                }
+            }
+
+            if (SpellSlot.R.IsReady() && GetBool("Killsteal.UseR"))
+            {
+                var targ = KnockedUp.Find(x => x.CanKill(SpellSlot.R) && x.IsValidTarget(Spells[R].Range));
+                if (targ != null)
+                {
+                    Spells[R].Cast(targ);
+                    return;
+                }
+            }
+
+            if (GetBool("Killsteal.UseIgnite"))
+            {
+                CastIgnite();
             }
         }
 
@@ -478,6 +638,8 @@ namespace YasuPro
             }
         }
 
+
+
         void OnGapClose(ActiveGapcloser args)
         {
             if (GetBool("Misc.AG") && TornadoReady && Yasuo.Distance(args.End) <= 500)
@@ -501,44 +663,6 @@ namespace YasuPro
             }
         }
 
-
-        void Killsteal()
-        {
-            if (SpellSlot.Q.IsReady() && GetBool("Killsteal.UseQ"))
-            {
-                var targ = HeroManager.Enemies.Find(x => x.CanKill(SpellSlot.Q) && x.IsInRange(Qrange));
-                if (targ != null)
-                {
-                    UseQ(targ, GetHitChance("Hitchance.Q"));
-                    return;
-                }
-            }
-
-            if (SpellSlot.E.IsReady() && GetBool("Killsteal.UseE"))
-            {
-                var targ = HeroManager.Enemies.Find(x => x.CanKill(SpellSlot.E) && x.IsInRange(Spells[E].Range));
-                if (targ != null)
-                {
-                    Spells[E].Cast(targ);
-                    return;
-                }
-            }
-
-            if (SpellSlot.R.IsReady() && GetBool("Killsteal.UseR"))
-            {
-                var targ = KnockedUp.Find(x => x.CanKill(SpellSlot.R) && x.IsValidTarget(Spells[R].Range));
-                if (targ != null)
-                {
-                    Spells[R].Cast(targ);
-                    return;
-                }
-            }
-
-            if (GetBool("Killsteal.UseIgnite"))
-            {
-                CastIgnite();
-            }
-        }
 
         void OnCreate(GameObject sender, EventArgs args)
         {

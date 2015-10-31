@@ -110,7 +110,7 @@ namespace YasuPro
 
         internal bool isHealthy
         {
-            get { return Yasuo.HealthPercent > 20; }
+            get { return Yasuo.HealthPercent > GetSlider("Misc.Healthy"); }
         }
 
         internal bool GetBool(string name)
@@ -185,6 +185,32 @@ namespace YasuPro
                     return HitChance.High;
             }
             return HitChance.Medium;
+        }
+
+
+        internal FleeType FleeMode
+        {
+            get
+            {
+                var GetFM = GetSL("Flee.Mode");
+                if (GetFM == 0)
+                {
+                    return FleeType.ToNexus;
+                }
+                if (GetFM == 1)
+                {
+                    return FleeType.ToAllies;
+                }
+                return FleeType.ToCursor;
+            }
+        } 
+
+        internal enum FleeType
+        {
+            ToNexus,
+            ToAllies,
+            ToCursor,
+
         }
     }
 }

@@ -12,7 +12,7 @@ namespace YasuPro
         {
             Yas = yas;
 
-            Config = new Menu("SephYasuo", "SephYasuo", true);
+            Config = new Menu("YasuoPro", "YasuoPro", true);
 
             Menu OWMenu = Config.AddSubMenu("Orbwalking");
             Orbwalker = new Orbwalking.Orbwalker(OWMenu);
@@ -26,6 +26,8 @@ namespace YasuPro
 
             Menu Evade = Config.AddSubMenu("Evade");
             YasuoMenu.Evade.Attach(Evade);
+            YasuoMenu.Flee.Attach(Evade);
+
 
             Menu Killsteal = Config.AddSubMenu("Killsteal");
             YasuoMenu.Killsteal.Attach(Killsteal);
@@ -54,7 +56,8 @@ namespace YasuPro
                 menu.AddBool("Combo.UseW", "Use W");
                 menu.AddBool("Combo.UseE", "Use E");
                 menu.AddBool("Combo.UseR", "Use R");
-                menu.AddBool("Combo.UltTower", "Ult under Tower");
+                menu.AddBool("Combo.UltTower", "Ult under Tower", false);
+                menu.AddBool("Combo.ETower", "Use E under Tower", false);
                 menu.AddBool("Combo.UseIgnite", "Use Ignite");
             }
         }
@@ -81,6 +84,15 @@ namespace YasuPro
             }
         }
 
+        struct Flee
+        {
+            internal static void Attach(Menu menu)
+            {
+                menu.AddKeyBind("Flee.KB", "Flee", KeyCode("Z"), KeyBindType.Press);
+                menu.AddSList("Flee.Mode", "Flee Mode", new []{"To Nexus", "To Allies", "To Cursor"}, 0);
+            }
+        }
+
         struct Waveclear
         {
             internal static void Attach(Menu menu)
@@ -88,6 +100,7 @@ namespace YasuPro
                 menu.AddBool("Waveclear.UseQ", "Use Q");
                 menu.AddBool("Waveclear.UseQ2", "Use Q - Tornado");
                 menu.AddBool("Waveclear.UseE", "Use E");
+                menu.AddBool("Waveclear.ETower", "Use E under Tower", false);
                 menu.AddBool("Waveclear.UseENK", "Use E even if not killable");
             }
         }

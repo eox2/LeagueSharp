@@ -430,12 +430,14 @@ namespace Evade
         {
             PlayerPosition = ObjectManager.Player.ServerPosition.To2D();
 
+            /*
             //Set evading to false after blinking
             if (PreviousTickPosition.IsValid() &&
                 PlayerPosition.Distance(PreviousTickPosition) > 200)
             {
                 Evading = false;
             }
+            */
 
             PreviousTickPosition = PlayerPosition;
 
@@ -448,8 +450,10 @@ namespace Evade
                 skillshot.Game_OnGameUpdate();
             }
 
+            return;
+
             //Avoid sending move/cast packets while dead.
-            if (ObjectManager.Player.IsDead || !SpellSlot.W.IsReady())
+            if (ObjectManager.Player.IsDead)
             {
                 Evading = false;
                 EvadeToPoint = Vector2.Zero;
@@ -457,14 +461,7 @@ namespace Evade
                 return;
             }
 
-            //Avoid sending move/cast packets while channeling interruptable spells that cause hero not being able to move.
-            if (ObjectManager.Player.IsCastingInterruptableSpell(true))
-            {
-                Evading = false;
-                EvadeToPoint = Vector2.Zero;
-                PathFollower.Stop();
-                return;
-            }
+ 
 
 
             /*Avoid evading while stunned or immobile.*/
