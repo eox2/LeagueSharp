@@ -4,6 +4,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using YasuoPro;
 
 namespace YasuPro
 {
@@ -19,6 +20,8 @@ namespace YasuPro
             "syndrar", "veigarprimordialburst", "dazzle", "leblancchaosorb",
             "judicatorreckoning", "iceblast", "disintegrate"
         };
+
+        internal static ItemManager.Item Hydra, Tiamat, Blade, Bilgewater, Youmu;
 
         internal Orbwalking.Orbwalker Orbwalker
         {
@@ -210,7 +213,15 @@ namespace YasuPro
             ToNexus,
             ToAllies,
             ToCursor,
+        }
 
+        internal void InitItems()
+        {
+            Hydra = new ItemManager.Item(3074, 225f, ItemManager.ItemCastType.RangeCast, 1, 2);
+            Tiamat = new ItemManager.Item(3077, 225f, ItemManager.ItemCastType.RangeCast, 1, 2);
+            Blade = new ItemManager.Item(3153, 450f, ItemManager.ItemCastType.TargettedCast, 1);
+            Bilgewater = new ItemManager.Item(3144, 450f, ItemManager.ItemCastType.TargettedCast, 1);
+            Youmu = new ItemManager.Item(3142, 185f, ItemManager.ItemCastType.SelfCast, 1, 3);
         }
     }
 }

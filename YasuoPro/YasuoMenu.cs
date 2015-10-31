@@ -52,12 +52,26 @@ namespace YasuPro
         {
             internal static void Attach(Menu menu)
             {
+                var items = menu.AddSubMenu("Items");
+                items.AddBool("Items.Enabled", "Use Items");
+                items.AddBool("Items.UseTIA", "Use Tiamat");
+                items.AddBool("Items.UseHDR", "Use Hydra");
+                items.AddBool("Items.UseBRK", "Use BORK");
+                items.AddBool("Items.UseBLG", "Use Bilgewater");
+                items.AddBool("Items.UseYMU", "Use Youmu");
+
                 menu.AddBool("Combo.UseQ", "Use Q");
                 menu.AddBool("Combo.UseW", "Use W");
                 menu.AddBool("Combo.UseE", "Use E");
-                menu.AddBool("Combo.UseR", "Use R");
-                menu.AddBool("Combo.UltTower", "Ult under Tower", false);
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
+                var ultmenu = menu.AddSubMenu("Ult Settings");
+
+                ultmenu.AddBool("Combo.UseR", "Use R");
+                ultmenu.AddBool("Combo.UltTower", "Ult under Tower", false);
+                ultmenu.AddSlider("Combo.RMinHit", "Min Enemies for Ult", 1, 1, 5);
+                ultmenu.AddBool("Combo.UltLogic", "Some Ult Logic");
+
+
                 menu.AddBool("Combo.UseIgnite", "Use Ignite");
             }
         }
@@ -80,6 +94,7 @@ namespace YasuPro
             {
                 menu.AddBool("Farm.UseQ", "Use Q");
                 menu.AddBool("Farm.UseQ2", "Use Q - Tornado");
+                menu.AddSlider("Farm.Qcount", "Minions for Q (Tornado)", 1, 1, 10);
                 menu.AddBool("Farm.UseE", "Use E");
             }
         }
@@ -97,8 +112,17 @@ namespace YasuPro
         {
             internal static void Attach(Menu menu)
             {
+                var items = menu.AddSubMenu("Items");
+                items.AddBool("Waveclear.UseItems", "Use Items");
+                items.AddSlider("Waveclear.MinCountHDR", "Minion count for Cleave", 2, 1, 10);
+                items.AddSlider("Waveclear.MinCountYOU", "Minion count for Youmu", 2, 1, 10);
+                items.AddBool("Waveclear.UseTIA", "Use Tiamat");
+                items.AddBool("Waveclear.UseHDR", "Use Hydra");
+                items.AddBool("Waveclear.UseYMU", "Use Youmu", false);
+
                 menu.AddBool("Waveclear.UseQ", "Use Q");
                 menu.AddBool("Waveclear.UseQ2", "Use Q - Tornado");
+                menu.AddSlider("Waveclear.Qcount", "Minions for Q (Tornado)", 1, 1, 10);
                 menu.AddBool("Waveclear.UseE", "Use E");
                 menu.AddBool("Waveclear.ETower", "Use E under Tower", false);
                 menu.AddBool("Waveclear.UseENK", "Use E even if not killable");
@@ -114,6 +138,7 @@ namespace YasuPro
                 menu.AddBool("Killsteal.UseE", "Use E");
                 menu.AddBool("Killsteal.UseR", "Use R");
                 menu.AddBool("Killsteal.UseIgnite", "Use Ignite");
+                menu.AddBool("Killsteal.UseItems", "Use Items");
             }
         }
 
