@@ -2,7 +2,6 @@
 using Evade;
 using LeagueSharp;
 using LeagueSharp.Common;
-using YasuPro;
 
 namespace YasuoPro
 {
@@ -16,57 +15,66 @@ namespace YasuoPro
                 return;
             }
 
-            foreach (var skillshot in Program.DetectedSkillshots)
-            {
 
+            foreach (var skillshot in Program.DetectedSkillshots.ToList())
+            {
                 if (skillshot.Dodged)
                 {
                     if (Helper.Debug)
                         Game.PrintChat(skillshot.SpellData.SpellName + " Dodged already");
-                    return;
+                    continue;
                 }
 
-                if (Helper.GetBool("Evade.OnlyDangerous") && !skillshot.SpellData.IsDangerous || !(skillshot.SpellData.DangerValue >= Helper.GetSlider("Evade.MinDangerLevel")))
+                //Avoid trying to evade while dashing
+                if (Helper.Yasuo.IsDashing())
                 {
                     return;
                 }
 
-                if (skillshot.SpellData.Type == SkillShotType.SkillshotCircle && !SpellSlot.E.IsReady())
+                if (Helper.GetBool("Evade.OnlyDangerous") && !skillshot.SpellData.IsDangerous)
                 {
-                    return;
+                    continue;
                 }
 
-                if (skillshot.IsAboutToHit(250, Helper.Yasuo) &&
-                    ((Program.NoSolutionFound ||
+                if ((skillshot.SpellData.Type == SkillShotType.SkillshotCircle || (skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall)) && !SpellSlot.E.IsReady()))
+                {
+                    continue;
+                }
+
+
+                if (((Program.NoSolutionFound ||
                       !Program.IsSafePath(Helper.Yasuo.GetWaypoints(), 250).IsSafe &&
                       !Program.IsSafe(Helper.Yasuo.Position.To2D()).IsSafe)))
                 {
-                    if (skillshot.SpellData.Type != SkillShotType.SkillshotCircle)
+                    if (skillshot.IsAboutToHit(700, Helper.Yasuo) && skillshot.SpellData.Type != SkillShotType.SkillshotCircle && Helper.GetBool("Evade.UseW"))
                     {
-                        if (skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall) && skillshot.Evade(SpellSlot.W) && !Helper.Yasuo.IsDashing() &&
-                            Helper.GetBool("Evade.UseW"))
+                        if (skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall) && skillshot.Evade(SpellSlot.W)
+                             && skillshot.SpellData.DangerValue >= Helper.GetSlider("Evade.MinDangerLevelWW"))
                         {
                             var castpos = Helper.Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(), 50);
                             bool WCasted = Helper.Spells[Helper.W].Cast(castpos);
                             Program.DetectedSkillshots.Remove(skillshot);
                             skillshot.Dodged = WCasted;
-                            if (Helper.Debug && WCasted)
+                            if (WCasted)
                             {
-                                Game.PrintChat("Blocked " + skillshot.SpellData.SpellName + " with Windwall ");
+                                if (Helper.Debug)
+                                {
+                                    Game.PrintChat("Blocked " + skillshot.SpellData.SpellName + " with Windwall ");
+                                }
+                                continue;
                             }
                         }
-                        return;
                     }
-                    if (skillshot.Evade(SpellSlot.E) && !Helper.Yasuo.IsDashing() && !skillshot.Dodged && Helper.GetBool("Evade.UseE"))
+                    if (skillshot.IsAboutToHit(500, Helper.Yasuo) && skillshot.Evade(SpellSlot.E) && !skillshot.Dodged && Helper.GetBool("Evade.UseE") && skillshot.SpellData.DangerValue >= Helper.GetSlider("Evade.MinDangerLevelE"))
                     {
                         var evadetarget =
                             ObjectManager.Get<Obj_AI_Base>()
                                 .Where(
                                     x =>
-                                        x.Team != Helper.Yasuo.Team && (x is Obj_AI_Minion || x is Obj_AI_Hero) && x.IsValidTarget(Helper.Spells[Helper.E].Range) &&
+                                        x.IsDashable() &&
                                         Program.IsSafe(Helper.GetDashPos(x)).IsSafe)
                                 .OrderBy(x => x.IsMinion)
-                                .ThenByDescending(x => x.CountEnemiesInRange(400))
+                                .ThenByDescending(x => x.CountEnemiesInRange(400)).ThenBy(x => x.HealthPercent)
                                 .FirstOrDefault();
                         if (evadetarget != null)
                         {
@@ -77,7 +85,6 @@ namespace YasuoPro
                             {
                                 Game.PrintChat("Evading " + skillshot.SpellData.SpellName + " " + "using E to " + evadetarget.BaseSkinName);
                             }
-                            return;
                         }
                     }
                 }

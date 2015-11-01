@@ -2945,7 +2945,7 @@ namespace Evade
                     ExtraRange = 200,
                     CollisionObjects =
                         new[]
-                        {CollisionObjectTypes.Minion, CollisionObjectTypes.Champions, CollisionObjectTypes.YasuoWall},
+                        {CollisionObjectTypes.Minion, CollisionObjectTypes.Champions },
                 });
 
             #endregion Shen

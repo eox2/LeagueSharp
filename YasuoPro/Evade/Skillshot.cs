@@ -22,7 +22,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using YasuPro;
+using YasuoPro;
 using Color = System.Drawing.Color;
 using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
 
@@ -257,7 +257,6 @@ namespace Evade
 
             _cachedValue = slot == SpellSlot.W ? GetValue<bool>("EvadeW") : GetValue<bool>("EvadeE");
             _cachedValueTick = Utils.TickCount;
-
             return _cachedValue;
         }
 

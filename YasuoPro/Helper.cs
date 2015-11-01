@@ -4,9 +4,8 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using YasuoPro;
 
-namespace YasuPro
+namespace YasuoPro
 {
     class Helper
     {
@@ -20,6 +19,8 @@ namespace YasuPro
             "syndrar", "veigarprimordialburst", "dazzle", "leblancchaosorb",
             "judicatorreckoning", "iceblast", "disintegrate"
         };
+
+        internal const float LaneClearWaitTimeMod = 2f;
 
         internal static ItemManager.Item Hydra, Tiamat, Blade, Bilgewater, Youmu;
 

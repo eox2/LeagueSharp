@@ -6,7 +6,7 @@ using LeagueSharp;
 using SharpDX;
 
 
-namespace YasuPro
+namespace YasuoPro
 {
 
     //Credits to Kortatu/Esk0r for his work on Evade which this assembly relies on heavily!
@@ -206,7 +206,7 @@ namespace YasuPro
             {
                 if (SpellSlot.E.IsReady())
                 {
-                    if (DashCount >= 1 && target.IsDashable() && target.IsValidTarget(Spells[E].Range) &&
+                    if (DashCount >= 1 && target.IsDashable() &&
                         (GetBool("Combo.ETower") || !GetDashPos(target).PointUnderEnemyTurret()))
                     {
                         Spells[E].CastOnUnit(target);
@@ -221,7 +221,7 @@ namespace YasuPro
                             ObjectManager.Get<Obj_AI_Base>()
                                 .Where(
                                     x =>
-                                        x.IsValidTarget(Spells[E].Range) && x.IsDashable() 
+                                         x.IsDashable() 
                                          && target.Distance(GetDashPos(x)) < dist &&
                                         (GetBool("Combo.ETower") || !GetDashPos(x).PointUnderEnemyTurret()))
                                 .OrderBy(x => Vector2.Distance(GetDashPos(x), target.ServerPosition.To2D()))
@@ -235,7 +235,7 @@ namespace YasuPro
                         {
                             var minion =
                               ObjectManager.Get<Obj_AI_Base>()
-                                  .Where(x => x.IsValidTarget(Spells[E].Range) && x.IsDashable() && !GetDashPos(x).PointUnderEnemyTurret())
+                                  .Where(x => x.IsDashable() && !GetDashPos(x).PointUnderEnemyTurret())
                                   .OrderBy(x => GetDashPos(x).Distance(target)).FirstOrDefault();
 
                             if (minion != null && GetDashPos(minion).IsCloser(target))
@@ -249,7 +249,7 @@ namespace YasuPro
                     {
                         var minion =
                             ObjectManager.Get<Obj_AI_Base>()
-                                .Where(x => x.IsValidTarget(Spells[E].Range) && x.IsDashable() && (GetBool("Combo.ETower") || !GetDashPos(x).PointUnderEnemyTurret()))
+                                .Where(x =>  x.IsDashable() && (GetBool("Combo.ETower") || !GetDashPos(x).PointUnderEnemyTurret()))
                                 .OrderBy(x => GetDashPos(x).Distance(target)).FirstOrDefault();
 
                         if (minion != null && GetDashPos(minion).IsCloser(target))
@@ -313,7 +313,7 @@ namespace YasuPro
                 {
                     var dashtarg =
                         ObjectManager.Get<Obj_AI_Base>()
-                            .Where(x => x.IsValidTarget(Spells[E].Range))
+                            .Where(x => x.IsDashable())
                             .MinOrDefault(x => GetDashPos(x).Distance(Game.CursorPos));
 
                     if (dashtarg != null && GetDashPos(dashtarg).Distance(Game.CursorPos) < Yasuo.Distance(Game.CursorPos))
@@ -334,7 +334,7 @@ namespace YasuPro
                 if (nexus != null)
                 {
                     Orbwalker.SetOrbwalkingPoint(nexus.Position);
-                    var bestminion = ObjectManager.Get<Obj_AI_Base>().Where(x => x.IsValidTarget(Spells[E].Range)).MinOrDefault(x => GetDashPos(x).Distance(nexus.Position));
+                    var bestminion = ObjectManager.Get<Obj_AI_Base>().Where(x => x.IsDashable()).MinOrDefault(x => GetDashPos(x).Distance(nexus.Position));
                     if (bestminion != null && GetDashPos(bestminion).Distance(nexus.Position) < Yasuo.Distance(nexus.Position))
                     {
                         Spells[E].Cast(bestminion);
@@ -353,7 +353,7 @@ namespace YasuPro
                 {
                     bestally =
                         ObjectManager.Get<Obj_AI_Minion>()
-                            .Where(x => x.IsValidTarget(3000))
+                            .Where(x => x.IsValidAlly(3000))
                             .MinOrDefault(x => x.Distance(Yasuo));
                 }
 
@@ -364,7 +364,7 @@ namespace YasuPro
                     {
                         var besttarget =
                             ObjectManager.Get<Obj_AI_Base>()
-                                .Where(x => x.IsValidTarget(Spells[E].Range))
+                                .Where(x => x.IsDashable())
                                 .MinOrDefault(x => x.Distance(bestally));
                         if (besttarget != null)
                         {
@@ -383,7 +383,7 @@ namespace YasuPro
                     if (nexus != null)
                     {
                         Orbwalker.SetOrbwalkingPoint(nexus.Position);
-                        var bestminion = ObjectManager.Get<Obj_AI_Base>().Where(x => x.IsValidTarget(Spells[E].Range)).MinOrDefault(x => GetDashPos(x).Distance(nexus.Position));
+                        var bestminion = ObjectManager.Get<Obj_AI_Base>().Where(x => x.IsDashable()).MinOrDefault(x => GetDashPos(x).Distance(nexus.Position));
                         if (bestminion != null && GetDashPos(bestminion).Distance(nexus.Position) < Yasuo.Distance(nexus.Position))
                         {
                             Spells[E].Cast(bestminion);
@@ -411,7 +411,7 @@ namespace YasuPro
         {
             if (SpellSlot.E.IsReady() && GetBool("Waveclear.UseE"))
             {
-                var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsValidTarget(Spells[E].Range) && x.IsDashable() && (GetBool("Waveclear.ETower") || !GetDashPos(x).PointUnderEnemyTurret()) && (GetBool("Waveclear.UseENK") || x.Health < GetProperEDamage(x)));
+                var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsDashable() && (GetBool("Waveclear.ETower") || !GetDashPos(x).PointUnderEnemyTurret()) && (GetBool("Waveclear.UseENK") || x.Health < GetProperEDamage(x)));
                 if (minion != null)
                 {
                     Orbwalker.ForceTarget(minion);
@@ -565,7 +565,7 @@ namespace YasuPro
                 UseQ(target, GetHitChance("Hitchance.Q"));
             }
 
-            if (target != null && GetBool("Harass.UseE") && Spells[E].IsReady() && target.IsInRange(Spells[E].Range*3))
+            if (target != null && isHealthy && GetBool("Harass.UseE") && Spells[E].IsReady() && target.IsInRange(Spells[E].Range*3))
             {
                 if (target.IsInRange(Spells[E].Range))
                 {
@@ -603,7 +603,7 @@ namespace YasuPro
                 {
                     var minion =
                          ObjectManager.Get<Obj_AI_Minion>()
-                             .FirstOrDefault(x => x.IsValidTarget(Spells[Q].Range) && (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q) >= 0.10 * x.MaxHealth || x.CanKill(SpellSlot.Q)));
+                             .FirstOrDefault(x => x.IsValidTarget(Spells[Q].Range) && x.QCanKill());
                     if (minion != null)
                     {
                         Spells[Q].Cast(minion.ServerPosition);
@@ -625,7 +625,7 @@ namespace YasuPro
 
             if (Spells[E].IsReady())
             {
-                var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsValidTarget(Spells[E].Range) && x.CanKill(SpellSlot.E) && (GetBool("Waveclear.ETower") || !GetDashPos(x).PointUnderEnemyTurret()));
+                var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsDashable() && x.CanKill(SpellSlot.E) && (GetBool("Waveclear.ETower") || !GetDashPos(x).PointUnderEnemyTurret()));
                 if (minion != null)
                 {
                     Orbwalker.ForceTarget(minion);
@@ -674,7 +674,10 @@ namespace YasuPro
                 {
                     var postocast = Yasuo.ServerPosition.Extend(-(missile.Orientation), 100);
                     Spells[W].Cast(postocast);
-                    Game.PrintChat("Using SpellBlocker to Detect " + missile.Name + " or " + missile.SData.Name);
+                    if (Debug)
+                    {
+                        Game.PrintChat("Using SpellBlocker to Detect " + missile.Name + " or " + missile.SData.Name);
+                    }
                 }
             }
         }

@@ -4,15 +4,37 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-namespace YasuPro
+namespace YasuoPro
 {
     static class Extensions
     {
         internal static Obj_AI_Hero Player = Helper.Yasuo;
 
-        internal static bool IsDashable(this Obj_AI_Base unit)
+        internal static bool IsDashable(this Obj_AI_Base unit, float range = 475)
         {
-            return !unit.HasBuff("YasuoDashWrapper");
+            if (unit == null || unit.Team == Player.Team || unit.Distance(Player) > range || !unit.IsValid || unit.IsDead || !unit.IsVisible || !unit.IsTargetable)
+            {
+                return false;
+            }
+            return !unit.HasBuff("YasuoDashWrapper") && (unit is Obj_AI_Hero || unit is Obj_AI_Minion);
+        }
+
+        internal static bool IsValidAlly(this Obj_AI_Base unit, float range = 50000)
+        {
+            if (unit == null || unit.Distance(Player) > range || unit.Team != Player.Team || !unit.IsValid || unit.IsDead || !unit.IsVisible || unit.IsTargetable)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        internal static bool IsValidEnemy(this Obj_AI_Base unit, float range = 50000)
+        {
+            if (unit == null || unit.Distance(Player) > range || unit.Team == Player.Team || !unit.IsValid || unit.IsDead || !unit.IsVisible || unit.IsTargetable)
+            {
+                return false;
+            }
+            return true;
         }
 
         internal static bool IsInRange(this Obj_AI_Base unit, float range)
@@ -89,6 +111,46 @@ namespace YasuPro
         internal static MenuItem AddSList(this Menu menu, string name, string displayname, string[] stringlist, int @default = 0)
         {
            return menu.AddItem(new MenuItem(name, displayname).SetValue(new StringList(stringlist, @default)));
+        }
+
+        internal static bool IsTargetValid(this AttackableUnit unit,
+        float range = float.MaxValue,
+        bool checkTeam = true,
+        Vector3 from = new Vector3())
+        {
+            if (unit == null || !unit.IsValid || unit.IsDead || !unit.IsVisible || !unit.IsTargetable ||
+                unit.IsInvulnerable)
+            {
+                return false;
+            }
+
+            var @base = unit as Obj_AI_Base;
+            if (@base != null)
+            {
+                if (@base.HasBuff("kindredrnodeathbuff") && @base.HealthPercent <= 10)
+                {
+                    return false;
+                }
+            }
+
+            if (checkTeam && unit.Team == ObjectManager.Player.Team)
+            {
+                return false;
+            }
+
+            var unitPosition = @base != null ? @base.ServerPosition : unit.Position;
+
+            return !(range < float.MaxValue) ||
+                   !(Vector2.DistanceSquared(
+                       (@from.To2D().IsValid() ? @from : ObjectManager.Player.ServerPosition).To2D(),
+                       unitPosition.To2D()) > range * range);
+        }
+
+        internal static bool QCanKill(this Obj_AI_Base minion)
+        {
+            return HealthPrediction.GetHealthPrediction(
+                minion, (int) (Player.Distance(minion)*0.75)) <
+                   0.85*Player.GetSpellDamage(minion, SpellSlot.Q);
         }
     }
 }

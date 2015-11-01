@@ -1,4 +1,4 @@
-﻿namespace YasuPro
+﻿namespace YasuoPro
 {
     public class Initalization
     {

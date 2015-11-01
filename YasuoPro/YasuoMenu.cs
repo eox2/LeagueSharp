@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using LeagueSharp.Common;
 
-namespace YasuPro
+namespace YasuoPro
 {
     internal static class YasuoMenu
     {
@@ -85,7 +85,7 @@ namespace YasuPro
         {
             internal static void Attach(Menu menu)
             {
-                menu.AddKeyBind("Harass.KB", "Harass Key", KeyCode("H"), KeyBindType.Toggle).Permashow();
+                menu.AddKeyBind("Harass.KB", "Harass Key", KeyCode("H"), KeyBindType.Toggle).Permashow(true, "Harass");
                 menu.AddBool("Harass.InMixed", "Harass in Mixed Mode");
                 menu.AddBool("Harass.UseQ", "Use Q");
                 menu.AddBool("Harass.UseE", "Use E");
@@ -153,9 +153,10 @@ namespace YasuPro
             internal static void Attach(Menu menu)
             {
                 menu.AddBool("Evade.Enabled", "Evade Enabled").Permashow(true, "Yasuo| Evade");
-                menu.AddBool("Evade.OnlyDangerous", "Evade only Dangerous").Permashow(true, "Yasuo| Only Dangerous");
+                menu.AddBool("Evade.OnlyDangerous", "Evade only Dangerous", false).Permashow(true, "Yasuo| Only Dangerous");
                 // menu.AddKeyBind("Evade.OnlyDangerous", "Dodge only dangerous", 32, KeyBindType.Press).Permashow(true, "Yasuo| Only Dangerous");
-                menu.AddSlider("Evade.MinDangerLevel", "Min Danger Level", 3);
+                menu.AddSlider("Evade.MinDangerLevelWW", "Min Danger Level WindWall", 3, 1 , 5);
+                menu.AddSlider("Evade.MinDangerLevelE", "Min Danger Level Dash", 1, 1, 5);
                 menu.AddBool("Evade.WTS", "Windwall Targetted");
                 menu.AddBool("Evade.WSS", "Windwall Skillshots");
                 menu.AddBool("Evade.UseW", "Evade with Windwall");
@@ -188,6 +189,7 @@ namespace YasuPro
                 menu.AddCircle("Drawing.DrawQ", "Draw Q", Yas.Qrange, System.Drawing.Color.Red);
                 menu.AddCircle("Drawing.DrawE", "Draw E", Yas.Erange, System.Drawing.Color.CornflowerBlue);
                 menu.AddCircle("Drawing.DrawR", "Draw R", Yas.Rrange, System.Drawing.Color.DarkOrange);
+                menu.AddBool("Drawing.SS", "Draw Skillshot Drawings", false);
             }
         }
 

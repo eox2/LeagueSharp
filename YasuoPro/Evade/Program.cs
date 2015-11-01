@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Evade.Pathfinding;
 using LeagueSharp;
@@ -27,7 +26,6 @@ using SharpDX;
 using YasuoPro;
 using Color = System.Drawing.Color;
 using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
-using YasuPro;
 
 #endregion
 
@@ -127,7 +125,7 @@ namespace Evade
             SkillshotDetector.OnDeleteMissile += SkillshotDetectorOnOnDeleteMissile;
 
             //For skillshot drawing.
-            if (Helper.Debug)
+            if (Helper.Debug && Helper.GetBool("Drawing.SS"))
             {
                 Drawing.OnDraw += Drawing_OnDraw;
             }
@@ -1328,7 +1326,7 @@ namespace Evade
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (!Helper.Debug)
+            if (!Helper.Debug || !Helper.GetBool("Drawing.SS"))
             {
                 Drawing.OnDraw -= Drawing_OnDraw;
                 return;
