@@ -33,6 +33,7 @@ namespace YasuoPro
             InitItems();
             InitSpells();
             YasuoMenu.Init(this);
+            Orbwalker.RegisterCustomMode("Flee", YasuoMenu.KeyCode("Z"));
             Program.Init();
             Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += OnDraw;
@@ -61,17 +62,7 @@ namespace YasuoPro
                 return;
             }
 
-            var Fleeing = GetKeyBind("Flee.KB");
-            if (Fleeing)
-            {
-                Flee();
-            }
-
-            else
-            {
-                Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
-                Orbwalker.SetAttack(true);
-            }
+            var Fleeing = Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.CustomMode;
 
             if (GetBool("Misc.AutoR") && !Fleeing)
             {
@@ -91,20 +82,27 @@ namespace YasuoPro
             switch (Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
-                    if (!Fleeing)
+                    Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
+                    Orbwalker.SetAttack(true);
                     Combo();
                     break;
                 case Orbwalking.OrbwalkingMode.Mixed:
-                    if (!Fleeing)
+                    Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
+                    Orbwalker.SetAttack(true);
                     Mixed();
                     break;
                 case Orbwalking.OrbwalkingMode.LastHit:
-                    if (!Fleeing)
+                    Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
+                    Orbwalker.SetAttack(true);
                     LHSkills();
                     break;
                 case Orbwalking.OrbwalkingMode.LaneClear:
-                    if (!Fleeing)
+                    Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
+                    Orbwalker.SetAttack(true);
                     Waveclear();
+                    break;
+                case Orbwalking.OrbwalkingMode.CustomMode:
+                    Flee();
                     break;
                 case Orbwalking.OrbwalkingMode.None:
                     break;

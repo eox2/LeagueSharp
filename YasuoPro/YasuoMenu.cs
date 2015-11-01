@@ -27,7 +27,6 @@ namespace YasuoPro
 
             Menu Evade = Config.AddSubMenu("Evade");
             YasuoMenu.Evade.Attach(Evade);
-            YasuoMenu.Flee.Attach(Evade);
 
 
             Menu Killsteal = Config.AddSubMenu("Killsteal");
@@ -104,14 +103,6 @@ namespace YasuoPro
             }
         }
 
-        struct Flee
-        {
-            internal static void Attach(Menu menu)
-            {
-                menu.AddKeyBind("Flee.KB", "Flee", KeyCode("Z"), KeyBindType.Press);
-                menu.AddSList("Flee.Mode", "Flee Mode", new []{"To Nexus", "To Allies", "To Cursor"}, 0);
-            }
-        }
 
         struct Waveclear
         {
@@ -161,6 +152,7 @@ namespace YasuoPro
                 menu.AddBool("Evade.WSS", "Windwall Skillshots");
                 menu.AddBool("Evade.UseW", "Evade with Windwall");
                 menu.AddBool("Evade.UseE", "Evade with E");
+                menu.AddSList("Flee.Mode", "Flee Mode", new[] { "To Nexus", "To Allies", "To Cursor" }, 0);
 
             }
         }
