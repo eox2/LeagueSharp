@@ -36,10 +36,10 @@ namespace YasuoPro
             Program.Init();
             Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += OnDraw;
-            GameObject.OnCreate += OnCreate;
             AntiGapcloser.OnEnemyGapcloser += OnGapClose;
             Interrupter2.OnInterruptableTarget += OnInterruptable;
-          //  Spellbook.OnCastSpell += CastSpell;
+            Obj_AI_Base.OnProcessSpellCast += TargettedDanger.SpellCast;
+            //  Spellbook.OnCastSpell += CastSpell;
         }
 
         void CastSpell(Spellbook x, SpellbookCastSpellEventArgs args)
@@ -655,29 +655,6 @@ namespace YasuoPro
                 if (args.EndTime >= Spells[Q2].Delay)
                 {
                     Spells[Q2].Cast(sender.ServerPosition);
-                }
-            }
-        }
-
-
-        void OnCreate(GameObject sender, EventArgs args)
-        {
-            if (!GetBool("Evade.WTS"))
-            {
-                return;
-            }
-
-            var missile = sender as MissileClient;
-            if (missile != null && missile.Target.IsMe && missile.IsValid)
-            {
-                if (DangerousSpell.Contains(missile.Name) || DangerousSpell.Contains(missile.SData.Name))
-                {
-                    var postocast = Yasuo.ServerPosition.Extend(-(missile.Orientation), 100);
-                    Spells[W].Cast(postocast);
-                    if (Debug)
-                    {
-                        Game.PrintChat("Using SpellBlocker to Detect " + missile.Name + " or " + missile.SData.Name);
-                    }
                 }
             }
         }
