@@ -70,20 +70,7 @@ namespace YasuoPro
             get
             {
                 var bc = Yasuo.GetBuffCount("yasuodashscalar");
-                if (bc == -1)
-                {
-                    return 0;
-                }
-                if (bc == 0)
-                {
-                    return 1;
-                }
-
-                if (bc == 2)
-                {
-                    return 2;
-                }
-                return 0;
+                return bc;
             }
         }
 
