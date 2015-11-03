@@ -65,9 +65,9 @@ namespace YasuoPro
         internal static bool IsCloser(this Vector2 point, Obj_AI_Base target)
         {
             var lastwp = target.GetWaypoints().LastOrDefault();
-            var midwpnum = target.GetWaypoints().Count / 2;
+            var midwpnum = target.GetWaypoints().Count() / 2;
             var midwp = target.GetWaypoints()[midwpnum];
-            return point.Distance(lastwp) < Player.Distance(lastwp) || point.Distance(lastwp) < Player.Distance(midwp);
+            return point.Distance(lastwp) < Player.Distance(lastwp) || point.Distance(midwp) < Player.Distance(midwp);
         }
 
         internal static bool IsCloser(this Obj_AI_Base @base, Obj_AI_Base target)
@@ -146,11 +146,11 @@ namespace YasuoPro
                        unitPosition.To2D()) > range * range);
         }
 
-        internal static bool QCanKill(this Obj_AI_Base minion)
+        internal static bool QCanKill(this Obj_AI_Base minion, bool isQ2 = false)
         {
-            return HealthPrediction.GetHealthPrediction(
-                minion, (int) (Player.Distance(minion)*0.75)) <
-                   0.85*Player.GetSpellDamage(minion, SpellSlot.Q);
+            var hpred =
+                HealthPrediction.GetHealthPrediction(minion, 0, 500 + Game.Ping / 2);
+           return hpred < 0.95 * Player.GetSpellDamage(minion, SpellSlot.Q) && hpred > 0;
         }
     }
 }

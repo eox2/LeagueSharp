@@ -2177,6 +2177,7 @@ namespace Evade
                     IsDangerous = false,
                     MissileSpellName = "lucianrmissileoffhand",
                     ExtraMissileNames = new[] {"lucianrmissile"},
+                    CollisionObjects = new[] { CollisionObjectTypes.YasuoWall },
                     EarlyEvade = new[] {EarlyObjects.Allies, EarlyObjects.Minions, EarlyObjects.AllyObjects},
                     DontCheckForDuplicates = true,
                     DisabledByDefault = true,

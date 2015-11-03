@@ -41,7 +41,7 @@ namespace YasuoPro
 
         internal void InitSpells()
         {
-            Spells[Q].SetSkillshot(0.250f, 20f, int.MaxValue, false, SkillshotType.SkillshotLine);
+            Spells[Q].SetSkillshot(0.250f, 55f, int.MaxValue, false, SkillshotType.SkillshotLine);
             Spells[Q2].SetSkillshot(0.250f, 90, 1500f, false, SkillshotType.SkillshotLine);
         }
 

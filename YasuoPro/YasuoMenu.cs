@@ -65,6 +65,7 @@ namespace YasuoPro
                 items.AddBool("Items.UseYMU", "Use Youmu");
 
                 menu.AddBool("Combo.UseQ", "Use Q");
+                menu.AddBool("Combo.StackQ", "Stack Q while moving to target", false);
                 menu.AddBool("Combo.UseW", "Use W");
                 menu.AddBool("Combo.UseE", "Use E");
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
@@ -85,7 +86,7 @@ namespace YasuoPro
             internal static void Attach(Menu menu)
             {
                 menu.AddKeyBind("Harass.KB", "Harass Key", KeyCode("H"), KeyBindType.Toggle).Permashow(true, "Harass");
-                menu.AddBool("Harass.InMixed", "Harass in Mixed Mode");
+                menu.AddBool("Harass.InMixed", "Harass in Mixed Mode", false);
                 menu.AddBool("Harass.UseQ", "Use Q");
                 menu.AddBool("Harass.UseE", "Use E");
                 menu.AddBool("Harass.UseEMinion", "Use E Minions");
@@ -122,6 +123,7 @@ namespace YasuoPro
                 menu.AddBool("Waveclear.UseE", "Use E");
                 menu.AddBool("Waveclear.ETower", "Use E under Tower", false);
                 menu.AddBool("Waveclear.UseENK", "Use E even if not killable");
+                menu.AddBool("Waveclear.Smart", "Smart Waveclear");
             }
         }
 
@@ -146,7 +148,7 @@ namespace YasuoPro
                 menu.AddBool("Evade.Enabled", "Evade Enabled").Permashow(true, "Yasuo| Evade");
                 menu.AddBool("Evade.OnlyDangerous", "Evade only Dangerous", false).Permashow(true, "Yasuo| Only Dangerous");
                 // menu.AddKeyBind("Evade.OnlyDangerous", "Dodge only dangerous", 32, KeyBindType.Press).Permashow(true, "Yasuo| Only Dangerous");
-                menu.AddSlider("Evade.MinDangerLevelWW", "Min Danger Level WindWall", 3, 1 , 5);
+                menu.AddSlider("Evade.MinDangerLevelWW", "Min Danger Level WindWall", 1, 1 , 5);
                 menu.AddSlider("Evade.MinDangerLevelE", "Min Danger Level Dash", 1, 1, 5);
                 menu.AddBool("Evade.WTS", "Windwall Targetted");
                 menu.AddBool("Evade.WSS", "Windwall Skillshots");
