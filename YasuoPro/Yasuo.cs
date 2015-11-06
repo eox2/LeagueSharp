@@ -266,33 +266,55 @@ namespace YasuoPro
         {
             if (Spells[R].IsReady())
             {
-                Obj_AI_Hero BestHero = null;
-                int amthit = 0;
-                foreach (var knockedup in KnockedUp)
-                {
-                    if (!GetBool("Combo.UltTower") && knockedup.ServerPosition.To2D().PointUnderEnemyTurret())
-                    {
-                        continue;
-                    }
-                    var eneshit = knockedup.GetEnemiesInRange(350);
+                UltMode ultmode = GetUltMode();
 
-                    if (eneshit.Count >= amthit)
+                IOrderedEnumerable<Obj_AI_Hero> ordered = null;
+
+                if (ultmode == UltMode.Health)
+                {
+                     ordered = KnockedUp.OrderBy(x => x.Health).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenByDescending(x => x.CountEnemiesInRange(350));
+                }
+
+                if (ultmode == UltMode.Priority)
+                {
+                    ordered = KnockedUp.OrderBy(x => TargetSelector.GetPriority(x)).ThenByDescending(x => x.Health).ThenByDescending(x => x.CountEnemiesInRange(350));
+                }
+
+                if (ultmode == UltMode.EnemiesHit)
+                {
+                    ordered = KnockedUp.OrderBy(x => x.CountEnemiesInRange(350)).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenByDescending(x => x.Health);
+                }
+
+
+                if (GetBool("Combo.UltOnlyKillable"))
+                {
+                    var killable = ordered.FirstOrDefault(x => x.Health <= Yasuo.GetSpellDamage(x, SpellSlot.R) && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
+                    if (killable != null)
                     {
-                        BestHero = knockedup;
-                        amthit = eneshit.Count;
+                        Spells[R].CastOnUnit(killable);
+                        return;
                     }
                 }
 
-                if (BestHero != null && KnockedUp.Count() >= minhit)
+                if (GetBool("Combo.RPriority"))
                 {
-                    if (GetBool("Combo.UltLogic") && KnockedUp.Count() == 1 && BestHero.HealthPercent <= 25 && isHealthy)
+                    var best = ordered.Find(x => TargetSelector.GetPriority(x) == 5 && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
+                    if (best != null)
                     {
+                        Spells[R].CastOnUnit(best);
                         return;
                     }
-                    Spells[R].CastOnUnit(BestHero);
+                }
+
+                if (ordered.Count() >= minhit)
+                {
+                    var best2 = ordered.FirstOrDefault(x => (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
+                    Spells[R].CastOnUnit(best2);
+                    return;
                 }
             }
         }
+
 
         void Flee()
         {

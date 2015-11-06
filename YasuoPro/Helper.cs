@@ -95,7 +95,7 @@ namespace YasuoPro
         {
             get
             {
-                return HeroManager.Enemies.Where(x => x.IsInRange(Spells[R].Range) && (x.HasBuffOfType(BuffType.Knockup) || x.HasBuffOfType(BuffType.Knockback)));
+                return HeroManager.Enemies.Where(x => x.IsValidEnemy(Spells[R].Range) && (x.HasBuffOfType(BuffType.Knockup) || x.HasBuffOfType(BuffType.Knockback)));
             }
         }
 
@@ -202,6 +202,29 @@ namespace YasuoPro
             ToAllies,
             ToCursor,
         }
+
+        internal enum UltMode
+        {
+            Health,
+            Priority, 
+            EnemiesHit
+        }
+
+        internal UltMode GetUltMode()
+        {
+            switch (GetSL("Combo.UltMode"))
+            {
+                case 0:
+                    return UltMode.Health;
+                case 1:
+                    return UltMode.Priority;
+                case 2:
+                    return UltMode.EnemiesHit;
+            }
+            return UltMode.Priority;
+        }
+
+
 
         internal void InitItems()
         {

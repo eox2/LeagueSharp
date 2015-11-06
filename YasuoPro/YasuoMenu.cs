@@ -71,10 +71,13 @@ namespace YasuoPro
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
 
                 var ultmenu = menu.AddSubMenu("Ult Settings");
+                ultmenu.AddSList("Combo.UltMode", "Ult Prioritization", new string[] { "Lowest Health", "TS Priority", "Most enemies" }, 0);
                 ultmenu.AddBool("Combo.UseR", "Use R");
                 ultmenu.AddBool("Combo.UltTower", "Ult under Tower", false);
+                ultmenu.AddBool("Combo.UltKillable", "Ult Killable", false);
+                ultmenu.AddBool("Combo.RPriority", "Ult if priority 5 target is knocked up", true);
                 ultmenu.AddSlider("Combo.RMinHit", "Min Enemies for Ult", 1, 1, 5);
-                ultmenu.AddBool("Combo.UltLogic", "Some Ult Logic");
+                ultmenu.AddBool("Combo.UltLogic", "Some Ult Logic", false);
 
 
                 menu.AddBool("Combo.UseIgnite", "Use Ignite");
