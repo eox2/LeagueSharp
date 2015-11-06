@@ -366,7 +366,7 @@ namespace YasuoPro
                         var besttarget =
                             ObjectManager.Get<Obj_AI_Base>()
                                 .Where(x => x.IsDashable())
-                                .MinOrDefault(x => x.Distance(bestally));
+                                .MinOrDefault(x => GetDashPos(x).Distance(bestally));
                         if (besttarget != null)
                         {
                             Spells[E].Cast(besttarget);
@@ -578,7 +578,7 @@ namespace YasuoPro
                 var minion =
                     ObjectManager.Get<Obj_AI_Minion>()
                         .Where(x => x.Team != Yasuo.Team && x.IsInRange(Spells[E].Range))
-                        .OrderBy(x => x.Distance(target))
+                        .OrderBy(x => GetDashPos(x).Distance(target))
                         .FirstOrDefault();
 
                 if (minion != null && GetBool("Harass.UseEMinion"))

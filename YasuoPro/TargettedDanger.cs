@@ -49,6 +49,7 @@ namespace YasuoPro
             AddSpell("Baron", "BaronDeathBreathProj3", SpellSlot.Unknown);
             AddSpell("Baron", "BaronSpike", SpellSlot.Unknown);
             AddSpell("Leblanc", "LeblancChaosOrbM", SpellSlot.Q);
+            AddSpell("Annie", "disintegrate", SpellSlot.Q);
         }
 
         static void AddSpell(string champname, string spellname, SpellSlot  slot, float del = 0)
