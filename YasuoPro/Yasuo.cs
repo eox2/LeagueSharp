@@ -277,12 +277,12 @@ namespace YasuoPro
 
                 if (ultmode == UltMode.Priority)
                 {
-                    ordered = KnockedUp.OrderBy(x => TargetSelector.GetPriority(x)).ThenByDescending(x => x.Health).ThenByDescending(x => x.CountEnemiesInRange(350));
+                    ordered = KnockedUp.OrderByDescending(x => TargetSelector.GetPriority(x)).ThenBy(x => x.Health).ThenByDescending(x => x.CountEnemiesInRange(350));
                 }
 
                 if (ultmode == UltMode.EnemiesHit)
                 {
-                    ordered = KnockedUp.OrderBy(x => x.CountEnemiesInRange(350)).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenByDescending(x => x.Health);
+                    ordered = KnockedUp.OrderByDescending(x => x.CountEnemiesInRange(350)).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenBy(x => x.Health);
                 }
 
 
