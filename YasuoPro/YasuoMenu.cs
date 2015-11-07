@@ -71,6 +71,15 @@ namespace YasuoPro
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
 
                 var ultmenu = menu.AddSubMenu("Ult Settings");
+                var blacklist = new Menu("Ult Targets", "BlackList");
+
+                foreach (var hero in HeroManager.Enemies)
+                {
+                    blacklist.AddBool("ult" + hero.CharData.BaseSkinName, "Ult " + hero.CharData.BaseSkinName);
+                }
+
+                ultmenu.AddSubMenu(blacklist);
+
                 ultmenu.AddSList("Combo.UltMode", "Ult Prioritization", new string[] { "Lowest Health", "TS Priority", "Most enemies" }, 0);
                 ultmenu.AddBool("Combo.UseR", "Use R");
                 ultmenu.AddBool("Combo.UltTower", "Ult under Tower", false);

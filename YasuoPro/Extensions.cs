@@ -152,5 +152,10 @@ namespace YasuoPro
                 HealthPrediction.GetHealthPrediction(minion, 0, 500 + Game.Ping / 2);
            return hpred < 0.95 * Player.GetSpellDamage(minion, SpellSlot.Q) && hpred > 0;
         }
+
+        internal static bool isBlackListed(this Obj_AI_Hero unit)
+        {
+            return !Helper.GetBool("ult" + unit.CharData.BaseSkinName);
+        }
     }
 }

@@ -270,6 +270,11 @@ namespace YasuoPro
 
                 IOrderedEnumerable<Obj_AI_Hero> ordered = null;
 
+                if (KnockedUp.Count() == 1 && KnockedUp.FirstOrDefault().isBlackListed())
+                {
+                    return;
+                }
+
                 if (ultmode == UltMode.Health)
                 {
                      ordered = KnockedUp.OrderBy(x => x.Health).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenByDescending(x => x.CountEnemiesInRange(350));
@@ -288,7 +293,7 @@ namespace YasuoPro
 
                 if (GetBool("Combo.UltOnlyKillable"))
                 {
-                    var killable = ordered.FirstOrDefault(x => x.Health <= Yasuo.GetSpellDamage(x, SpellSlot.R) && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
+                    var killable = ordered.FirstOrDefault(x => !x.isBlackListed() && x.Health <= Yasuo.GetSpellDamage(x, SpellSlot.R) && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
                     if (killable != null)
                     {
                         Spells[R].CastOnUnit(killable);
@@ -298,7 +303,7 @@ namespace YasuoPro
 
                 if (GetBool("Combo.RPriority"))
                 {
-                    var best = ordered.Find(x => TargetSelector.GetPriority(x) == 5 && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
+                    var best = ordered.Find(x => !x.isBlackListed() && TargetSelector.GetPriority(x) == 5 && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
                     if (best != null)
                     {
                         Spells[R].CastOnUnit(best);
@@ -308,7 +313,7 @@ namespace YasuoPro
 
                 if (ordered.Count() >= minhit)
                 {
-                    var best2 = ordered.FirstOrDefault(x => (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
+                    var best2 = ordered.FirstOrDefault(x => !x.isBlackListed() && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
                     Spells[R].CastOnUnit(best2);
                     return;
                 }
@@ -516,7 +521,7 @@ namespace YasuoPro
 
             if (SpellSlot.R.IsReady() && GetBool("Killsteal.UseR"))
             {
-                var targ = KnockedUp.Find(x => x.CanKill(SpellSlot.R) && x.IsValidTarget(Spells[R].Range));
+                var targ = KnockedUp.Find(x => x.CanKill(SpellSlot.R) && x.IsValidTarget(Spells[R].Range) && !x.isBlackListed());
                 if (targ != null)
                 {
                     Spells[R].Cast(targ);
