@@ -272,7 +272,6 @@ namespace YasuoPro
 
                 if (KnockedUp.Count() == 1 && KnockedUp.FirstOrDefault().isBlackListed())
                 {
-                    Game.PrintChat("Blacklisted");
                     return;
                 }
 
@@ -312,10 +311,8 @@ namespace YasuoPro
                     }
                 }
 
-                Game.PrintChat("ord count " + ordered.Count() + " " + "min " + minhit);
                 if (ordered.Count() >= minhit)
                 {
-                    Game.PrintChat("over min");
                     var best2 = ordered.FirstOrDefault(x => !x.isBlackListed() && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
                     if (best2 != null)
                     {
@@ -324,7 +321,6 @@ namespace YasuoPro
                     return;
                 }
 
-                Game.PrintChat("nothing found" + " " + LeagueSharp.Common.Utils.TickCount);
             }
         }
 
