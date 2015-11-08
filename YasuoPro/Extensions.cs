@@ -30,7 +30,7 @@ namespace YasuoPro
 
         internal static bool IsValidEnemy(this Obj_AI_Base unit, float range = 50000)
         {
-            if (unit == null || unit.Distance(Player) > range || unit.Team == Player.Team || !unit.IsValid || unit.IsDead || !unit.IsVisible || unit.IsTargetable)
+            if (unit == null || unit.Distance(Player) > range || unit.Team == Player.Team || !unit.IsValid || unit.IsDead || !unit.IsVisible || !unit.IsTargetable)
             {
                 return false;
             }

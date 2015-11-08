@@ -264,7 +264,7 @@ namespace YasuoPro
 
         void CastR(int minhit = 1)
         {
-            if (Spells[R].IsReady())
+            if (SpellSlot.R.IsReady())
             {
                 UltMode ultmode = GetUltMode();
 
@@ -272,8 +272,10 @@ namespace YasuoPro
 
                 if (KnockedUp.Count() == 1 && KnockedUp.FirstOrDefault().isBlackListed())
                 {
+                    Game.PrintChat("Blacklisted");
                     return;
                 }
+
 
                 if (ultmode == UltMode.Health)
                 {
@@ -289,7 +291,6 @@ namespace YasuoPro
                 {
                     ordered = KnockedUp.OrderByDescending(x => x.CountEnemiesInRange(350)).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenBy(x => x.Health);
                 }
-
 
                 if (GetBool("Combo.UltOnlyKillable"))
                 {
@@ -311,12 +312,19 @@ namespace YasuoPro
                     }
                 }
 
+                Game.PrintChat("ord count " + ordered.Count() + " " + "min " + minhit);
                 if (ordered.Count() >= minhit)
                 {
+                    Game.PrintChat("over min");
                     var best2 = ordered.FirstOrDefault(x => !x.isBlackListed() && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
-                    Spells[R].CastOnUnit(best2);
+                    if (best2 != null)
+                    {
+                        Spells[R].CastOnUnit(best2);
+                    }
                     return;
                 }
+
+                Game.PrintChat("nothing found" + " " + LeagueSharp.Common.Utils.TickCount);
             }
         }
 
