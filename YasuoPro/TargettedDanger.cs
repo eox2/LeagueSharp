@@ -45,7 +45,6 @@ namespace YasuoPro
             AddSpell("Brand", "BrandWildfire", SpellSlot.R);
             AddSpell("Brand", "brandconflagrationmissile", SpellSlot.E);
             AddSpell("Kayle", "judicatorreckoning", SpellSlot.Q);
-            AddSpell("Malphite", "seismicshard", SpellSlot.Q);
             AddSpell("Pantheon", "PantheonQ", SpellSlot.Q);
             AddSpell("Taric", "Dazzle", SpellSlot.Q);
             AddSpell("TwistedFate", "GoldCardAttack", SpellSlot.W);

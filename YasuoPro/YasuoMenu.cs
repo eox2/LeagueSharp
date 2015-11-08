@@ -189,7 +189,7 @@ namespace YasuoPro
             {
                 menu.AddBool("Misc.AutoR", "Auto Ultimate").Permashow();
                 menu.AddSlider("Misc.RMinHit", "Min Enemies for Autoult", 1, 1, 5);
-
+                menu.AddKeyBind("Misc.TowerDive", "Tower Dive Key", KeyCode("T"), KeyBindType.Press).Permashow(true, "Tower Diving Override");
                 menu.AddSList("Hitchance.Q", "Q Hitchance", new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString() }, 1);
                 menu.AddSlider("Misc.Healthy", "Healthy Amount HP", 20, 0, 100);
                 menu.AddBool("Misc.AG", "Use Q (Tornado) on Gapcloser");

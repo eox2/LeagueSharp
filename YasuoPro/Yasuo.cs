@@ -111,6 +111,10 @@ namespace YasuoPro
                 return;
             }
 
+            var pos = Yasuo.Position.WTS();
+
+            Drawing.DrawText(pos.X - 25, pos.Y - 25, isHealthy ? System.Drawing.Color.Green : System.Drawing.Color.Red, "Healthy: " + isHealthy);
+
             var drawq = GetCircle("Drawing.DrawQ");
             var drawe = GetCircle("Drawing.DrawE");
             var drawr = GetCircle("Drawing.DrawR");
@@ -205,10 +209,10 @@ namespace YasuoPro
         {
             if (target != null)
             {
-                if (SpellSlot.E.IsReady())
+                if (SpellSlot.E.IsReady() && isHealthy)
                 {
-                    if (DashCount >= 1 && target.IsDashable() &&
-                        (GetBool("Combo.ETower") || !GetDashPos(target).PointUnderEnemyTurret()))
+                    if (DashCount >= 1 && GetDashPos(target).IsCloser(target) && target.IsDashable() &&
+                        (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(target).PointUnderEnemyTurret()))
                     {
                         Spells[E].CastOnUnit(target);
                         return;
@@ -224,7 +228,7 @@ namespace YasuoPro
                                     x =>
                                          x.IsDashable() 
                                          && target.Distance(GetDashPos(x)) < dist &&
-                                        (GetBool("Combo.ETower") || !GetDashPos(x).PointUnderEnemyTurret()))
+                                        (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()))
                                 .OrderBy(x => Vector2.Distance(GetDashPos(x), target.ServerPosition.To2D()))
                                 .FirstOrDefault();
                         if (bestminion != null)
@@ -236,7 +240,7 @@ namespace YasuoPro
                         {
                             var minion =
                               ObjectManager.Get<Obj_AI_Base>()
-                                  .Where(x => x.IsDashable() && !GetDashPos(x).PointUnderEnemyTurret())
+                                  .Where(x => x.IsDashable() && (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()))
                                   .OrderBy(x => GetDashPos(x).Distance(target)).FirstOrDefault();
 
                             if (minion != null && GetDashPos(minion).IsCloser(target))
@@ -250,7 +254,7 @@ namespace YasuoPro
                     {
                         var minion =
                             ObjectManager.Get<Obj_AI_Base>()
-                                .Where(x =>  x.IsDashable() && (GetBool("Combo.ETower") || !GetDashPos(x).PointUnderEnemyTurret()))
+                                .Where(x =>  x.IsDashable() && (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()))
                                 .OrderBy(x => GetDashPos(x).Distance(target)).FirstOrDefault();
 
                         if (minion != null && GetDashPos(minion).IsCloser(target))
@@ -293,7 +297,7 @@ namespace YasuoPro
 
                 if (GetBool("Combo.UltOnlyKillable"))
                 {
-                    var killable = ordered.FirstOrDefault(x => !x.isBlackListed() && x.Health <= Yasuo.GetSpellDamage(x, SpellSlot.R) && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
+                    var killable = ordered.FirstOrDefault(x => !x.isBlackListed() && x.Health <= Yasuo.GetSpellDamage(x, SpellSlot.R) && (GetBool("Combo.UltTower")  || GetKeyBind("Misc.TowerDive") || !x.Position.To2D().PointUnderEnemyTurret()));
                     if (killable != null)
                     {
                         Spells[R].CastOnUnit(killable);
@@ -303,7 +307,7 @@ namespace YasuoPro
 
                 if (GetBool("Combo.RPriority"))
                 {
-                    var best = ordered.Find(x => !x.isBlackListed() && TargetSelector.GetPriority(x) == 5 && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
+                    var best = ordered.Find(x => !x.isBlackListed() && TargetSelector.GetPriority(x) == 5 && (GetBool("Combo.UltTower") || GetKeyBind("Misc.TowerDive") || !x.Position.To2D().PointUnderEnemyTurret()));
                     if (best != null)
                     {
                         Spells[R].CastOnUnit(best);
@@ -313,7 +317,7 @@ namespace YasuoPro
 
                 if (ordered.Count() >= minhit)
                 {
-                    var best2 = ordered.FirstOrDefault(x => !x.isBlackListed() && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
+                    var best2 = ordered.FirstOrDefault(x => !x.isBlackListed() && (GetBool("Combo.UltTower") || GetKeyBind("Misc.TowerDive") || !x.Position.To2D().PointUnderEnemyTurret()));
                     if (best2 != null)
                     {
                         Spells[R].CastOnUnit(best2);
@@ -439,6 +443,7 @@ namespace YasuoPro
             }
         }
 
+        
         void Waveclear()
         {
 
@@ -448,7 +453,7 @@ namespace YasuoPro
                 {
                     var minion =
                         ObjectManager.Get<Obj_AI_Minion>()
-                            .Where(x => x.IsValidTarget(Spells[Q].Range)  && (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q)  >= 0.15 * x.MaxHealth || x.QCanKill())).MaxOrDefault(x => x.MaxHealth);
+                            .Where(x => x.IsValidTarget(Spells[Q].Range) && ((x.IsDashable() && (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q) >= GetProperEDamage(x))) || (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q)  >= 0.15 * x.MaxHealth || x.QCanKill()))).MaxOrDefault(x => x.MaxHealth);
                     if (minion != null)
                     {
                         Orbwalker.ForceTarget(minion);
@@ -458,7 +463,7 @@ namespace YasuoPro
 
                 else if (TornadoReady && GetBool("Waveclear.UseQ2"))
                 {
-                    var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Spells[Q2].Range) && (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q) >= 0.10 * x.MaxHealth || x.CanKill(SpellSlot.Q)));
+                    var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Spells[Q2].Range) && ((x.IsDashable() && x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q)  >= 0.85 * GetProperEDamage(x)) || (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q) >= 0.10 * x.MaxHealth) || x.CanKill(SpellSlot.Q)));
                     var pred =
                         MinionManager.GetBestLineFarmLocation(minions.Select(m => m.ServerPosition.To2D()).ToList(),
                             Spells[Q2].Width, Spells[Q2].Range);
@@ -472,7 +477,7 @@ namespace YasuoPro
 
             if (SpellSlot.E.IsReady() && GetBool("Waveclear.UseE"))
             {
-                var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsDashable() && ((GetBool("Waveclear.UseENK") && (!GetBool("Waveclear.Smart") || x.Health > GetProperEDamage(x) * 2f)) || x.Health < GetProperEDamage(x)) && (GetBool("Waveclear.ETower") || !GetDashPos(x).PointUnderEnemyTurret()));
+                var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsDashable() && ((GetBool("Waveclear.UseENK") && (!GetBool("Waveclear.Smart") || x.Health > GetProperEDamage(x) * 2.5f)) || x.Health < GetProperEDamage(x)) && (GetBool("Waveclear.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()));
                 if (minion != null)
                 {
                     Orbwalker.ForceTarget(minion);
@@ -499,6 +504,10 @@ namespace YasuoPro
                 }
             }
         }
+
+    
+
+      
 
 
         void Killsteal()
@@ -658,7 +667,7 @@ namespace YasuoPro
 
             if (Spells[E].IsReady() && GetBool("Farm.UseE"))
             {
-                var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsDashable() && x.CanKill(SpellSlot.E) && (GetBool("Waveclear.ETower") || !GetDashPos(x).PointUnderEnemyTurret()));
+                var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsDashable() && x.CanKill(SpellSlot.E) && (GetBool("Waveclear.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()));
                 if (minion != null)
                 {
                     Orbwalker.ForceTarget(minion);
