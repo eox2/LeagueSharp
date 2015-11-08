@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Linq;
 using LeagueSharp.Common;
 
 namespace YasuoPro
@@ -157,6 +158,16 @@ namespace YasuoPro
         {
             internal static void Attach(Menu menu)
             {
+                var targettedmenu = new Menu("Targetted Spells", "Targetted");
+
+                foreach (var spell in TargettedDanger.spellList.Where(x => HeroManager.Enemies.Any(e => e.CharData.BaseSkinName == x.championName)))
+                {
+                    Menu champmenu = targettedmenu.SubMenu(spell.championName);
+                    champmenu.AddBool("enabled." + spell.spellName, spell.spellName, true);
+                }
+
+                menu.AddSubMenu(targettedmenu);
+
                 menu.AddBool("Evade.Enabled", "Evade Enabled").Permashow(true, "Yasuo| Evade");
                 menu.AddBool("Evade.OnlyDangerous", "Evade only Dangerous", false).Permashow(true, "Yasuo| Only Dangerous");
                 // menu.AddKeyBind("Evade.OnlyDangerous", "Dodge only dangerous", 32, KeyBindType.Press).Permashow(true, "Yasuo| Only Dangerous");

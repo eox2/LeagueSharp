@@ -17,6 +17,13 @@ namespace YasuoPro
             internal string championName;
             internal SpellSlot spellSlot;
             internal float delay;
+            internal bool IsEnabled
+            {
+                get
+                {
+                    return Helper.GetBool("enabled." + spellName);
+                }
+            }
         }
 
         internal static List<SData> spellList = new List<SData>();
@@ -24,6 +31,11 @@ namespace YasuoPro
         //Credits to h3h3 for spellnames
 
         static TargettedDanger()
+        {
+            AddSpells();
+        }
+
+        static void AddSpells()
         {
             AddSpell("Syndra", "syndrar", SpellSlot.R);
             AddSpell("VeigarR", "veigarprimordialburst", SpellSlot.R);
@@ -50,6 +62,20 @@ namespace YasuoPro
             AddSpell("Baron", "BaronSpike", SpellSlot.Unknown);
             AddSpell("Leblanc", "LeblancChaosOrbM", SpellSlot.Q);
             AddSpell("Annie", "disintegrate", SpellSlot.Q);
+            AddSpell("Twisted Fate", "GoldCardAttack", SpellSlot.W);
+            AddSpell("Twisted Fate", "RedCardAttack", SpellSlot.W);
+            AddSpell("Twisted Fate", "RedCardAttack", SpellSlot.W);
+            AddSpell("Kassadin", "NullLance", SpellSlot.Q);
+            AddSpell("Teemo", "BlindingDart", SpellSlot.Q);
+            AddSpell("Malphite", "SeismicShard", SpellSlot.Q);
+            AddSpell("Vayne", "VayneCondemn", SpellSlot.E);
+            AddSpell("Nunu", "IceBlast", SpellSlot.E);
+            AddSpell("Tristana", "BusterShot", SpellSlot.R);
+            AddSpell("Cassiopeia", "CassiopeiaTwinFang", SpellSlot.E);
+            AddSpell("Pantheon", "Pantheon_Throw", SpellSlot.Q);
+            AddSpell("Akali", "AkaliMot", SpellSlot.Q);
+            AddSpell("Leblanc", "LeblancChaosOrbM", SpellSlot.Q);
+            AddSpell("Anivia", "Frostbite", SpellSlot.E);
         }
 
         static void AddSpell(string champname, string spellname, SpellSlot  slot, float del = 0)
@@ -72,7 +98,7 @@ namespace YasuoPro
                 return;
             }
                 var sdata = GetSpell(args.SData.Name);
-                if (sdata != null)
+                if (sdata != null && sdata.IsEnabled)
                 {
                     var castpos = Helper.Yasuo.ServerPosition.Extend(args.Start, 50);
                     Helper.Spells[Helper.W].Cast(castpos);
