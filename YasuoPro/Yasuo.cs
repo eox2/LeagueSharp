@@ -226,7 +226,7 @@ namespace YasuoPro
                             ObjectManager.Get<Obj_AI_Base>()
                                 .Where(
                                     x =>
-                                         x.IsDashable() 
+                                         x.IsDashable()
                                          && target.Distance(GetDashPos(x)) < dist &&
                                         (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()))
                                 .OrderBy(x => Vector2.Distance(GetDashPos(x), target.ServerPosition.To2D()))
@@ -236,25 +236,18 @@ namespace YasuoPro
                             Spells[E].CastOnUnit(bestminion);
                         }
 
-                        else
+                        else if (target.IsDashable() && GetDashPos(target).IsCloser(target) && (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(target).PointUnderEnemyTurret()))
                         {
-                            var minion =
-                              ObjectManager.Get<Obj_AI_Base>()
-                                  .Where(x => x.IsDashable() && (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()))
-                                  .OrderBy(x => GetDashPos(x).Distance(target)).FirstOrDefault();
-
-                            if (minion != null && GetDashPos(minion).IsCloser(target))
-                            {
-                                Spells[E].CastOnUnit(minion);
-                            }
+                            Spells[E].CastOnUnit(target);
                         }
                     }
+
 
                     else
                     {
                         var minion =
                             ObjectManager.Get<Obj_AI_Base>()
-                                .Where(x =>  x.IsDashable() && (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()))
+                                .Where(x => x.IsDashable() && (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()))
                                 .OrderBy(x => GetDashPos(x).Distance(target)).FirstOrDefault();
 
                         if (minion != null && GetDashPos(minion).IsCloser(target))
