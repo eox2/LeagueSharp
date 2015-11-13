@@ -33,7 +33,7 @@ namespace YasuoPro
             InitItems();
             InitSpells();
             YasuoMenu.Init(this);
-            Orbwalker.RegisterCustomMode("Flee", YasuoMenu.KeyCode("Z"));
+            Orbwalker.RegisterCustomMode("YasuoPro.FleeMode", "Flee", YasuoMenu.KeyCode("Z"));
             Program.Init();
             Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += OnDraw;
@@ -92,6 +92,7 @@ namespace YasuoPro
                     Flee();
                     break;
                 case Orbwalking.OrbwalkingMode.None:
+                    Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
                     break;
             }
         }
@@ -468,7 +469,7 @@ namespace YasuoPro
                 }
             }
 
-            if (SpellSlot.E.IsReady() && GetBool("Waveclear.UseE"))
+            if (SpellSlot.E.IsReady() && GetBool("Waveclear.UseE") && (!GetBool("Waveclear.Smart") || isHealthy))
             {
                 var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsDashable() && ((GetBool("Waveclear.UseENK") && (!GetBool("Waveclear.Smart") || x.Health > GetProperEDamage(x) * 2.5f)) || x.Health < GetProperEDamage(x)) && (GetBool("Waveclear.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()));
                 if (minion != null)
@@ -499,10 +500,6 @@ namespace YasuoPro
         }
 
     
-
-      
-
-
         void Killsteal()
         {
             if (SpellSlot.Q.IsReady() && GetBool("Killsteal.UseQ"))
@@ -600,7 +597,7 @@ namespace YasuoPro
                 UseQ(target, GetHitChance("Hitchance.Q"));
             }
 
-            if (target != null && isHealthy && GetBool("Harass.UseE") && Spells[E].IsReady() && target.IsInRange(Spells[E].Range*3))
+            if (target != null && isHealthy && GetBool("Harass.UseE") && Spells[E].IsReady() && target.IsInRange(Spells[E].Range*3) && !target.Position.To2D().PointUnderEnemyTurret())
             {
                 if (target.IsInRange(Spells[E].Range))
                 {
@@ -610,11 +607,11 @@ namespace YasuoPro
 
                 var minion =
                     ObjectManager.Get<Obj_AI_Minion>()
-                        .Where(x => x.Team != Yasuo.Team && x.IsInRange(Spells[E].Range))
+                        .Where(x => x.IsDashable() && !x.ServerPosition.To2D().PointUnderEnemyTurret())
                         .OrderBy(x => GetDashPos(x).Distance(target))
                         .FirstOrDefault();
 
-                if (minion != null && GetBool("Harass.UseEMinion"))
+                if (minion != null && GetBool("Harass.UseEMinion") && GetDashPos(minion).IsCloser(target))
                 {
                     Spells[E].Cast(minion);
                 }
@@ -658,7 +655,7 @@ namespace YasuoPro
                 }
             }
 
-            if (Spells[E].IsReady() && GetBool("Farm.UseE"))
+            if (Spells[E].IsReady() && GetBool("Farm.UseE") )
             {
                 var minion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(x => x.IsDashable() && x.CanKill(SpellSlot.E) && (GetBool("Waveclear.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()));
                 if (minion != null)
