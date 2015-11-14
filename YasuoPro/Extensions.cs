@@ -64,10 +64,13 @@ namespace YasuoPro
 
         internal static bool IsCloser(this Vector2 point, Obj_AI_Base target)
         {
-            var lastwp = target.GetWaypoints().LastOrDefault();
-            var midwpnum = target.GetWaypoints().Count() / 2;
-            var midwp = target.GetWaypoints()[midwpnum];
-            return point.Distance(lastwp) < Player.Distance(lastwp) || point.Distance(midwp) < Player.Distance(midwp);
+            var wp = target.GetWaypoints();
+            var lastwp = wp.LastOrDefault();
+            var wpc = wp.Count();
+            var midwpnum = wpc / 2;
+            var midwp = wp[midwpnum];
+            var plength = wp[0].Distance(lastwp);
+            return (point.Distance(target, true) <= Player.Distance(target, true)) || ((plength <= Player.Distance(target) * 1.2f && point.Distance(lastwp) < Player.Distance(lastwp) || point.Distance(midwp) < Player.Distance(midwp)));
         }
 
         internal static bool IsCloser(this Obj_AI_Base @base, Obj_AI_Base target)
@@ -148,14 +151,47 @@ namespace YasuoPro
 
         internal static bool QCanKill(this Obj_AI_Base minion, bool isQ2 = false)
         {
-            var hpred =
-                HealthPrediction.GetHealthPrediction(minion, 0, 500 + Game.Ping / 2);
-           return hpred < 0.95 * Player.GetSpellDamage(minion, SpellSlot.Q) && hpred > 0;
+            //var hpred =
+            //  HealthPrediction.GetHealthPrediction(minion, 0, 500 + Game.Ping / 2);
+            // return hpred < 0.95 * Player.GetSpellDamage(minion, SpellSlot.Q) && hpred > 0;
+            var qspell = isQ2 ? Helper.Spells[Helper.Q2] : Helper.Spells[Helper.Q];
+            var dmg = Player.GetSpellDamage(minion, SpellSlot.Q) / 1.3
+                            >= HealthPrediction.GetHealthPrediction(
+                                minion,
+                                (int)(Player.Distance(minion) / qspell.Speed) * 1000,
+                                (int)qspell.Delay * 1000);
+            return dmg;
+        }
+
+        internal static bool ECanKill(this Obj_AI_Base minion)
+        {
+            //var hpred =
+            //  HealthPrediction.GetHealthPrediction(minion, 0, 500 + Game.Ping / 2);
+            // return hpred < 0.95 * Player.GetSpellDamage(minion, SpellSlot.Q) && hpred > 0;
+            var espell = Helper.Spells[Helper.E];
+            var dmg = Helper.GetProperEDamage(minion) / 1.2
+                            >= HealthPrediction.GetHealthPrediction(
+                                minion,
+                                (int)(Player.Distance(minion) / espell.Speed) * 1000,
+                                (int)espell.Delay * 1000);
+            return dmg;
         }
 
         internal static bool isBlackListed(this Obj_AI_Hero unit)
         {
             return !Helper.GetBool("ult" + unit.CharData.BaseSkinName);
+        }
+
+        internal static int MinionsInRange(this Obj_AI_Base unit, float range)
+        {
+            var minions = ObjectManager.Get<Obj_AI_Minion>().Count(x => x.Distance(unit) <= range && x.NetworkId != unit.NetworkId && x.Team == unit.Team);
+            return minions;
+        }
+
+        internal static int MinionsInRange(this Vector2 pos, float range)
+        {
+            var minions = ObjectManager.Get<Obj_AI_Minion>().Count(x => x.Distance(pos) <= range && (x.IsEnemy || x.Team == GameObjectTeam.Neutral));
+            return minions;
         }
     }
 }

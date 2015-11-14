@@ -66,7 +66,7 @@ namespace YasuoPro
                 items.AddBool("Items.UseYMU", "Use Youmu");
 
                 menu.AddBool("Combo.UseQ", "Use Q");
-                menu.AddBool("Combo.StackQ", "Stack Q while moving to target", false);
+                menu.AddBool("Combo.StackQ", "Stack Q if not in Range");
                 menu.AddBool("Combo.UseW", "Use W");
                 menu.AddBool("Combo.UseE", "Use E");
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
@@ -166,6 +166,12 @@ namespace YasuoPro
                     champmenu.AddBool("enabled." + spell.spellName, spell.spellName, true);
                 }
 
+                foreach (var spell in TargettedDanger.spellList.Where(x => HeroManager.Enemies.Any(e => x.championName == "Baron")))
+                {
+                    Menu champmenu = targettedmenu.SubMenu(spell.championName + " [Experimental] ");
+                    champmenu.AddBool("enabled." + spell.spellName, spell.spellName, true);
+                }
+
                 menu.AddSubMenu(targettedmenu);
 
                 menu.AddBool("Evade.Enabled", "Evade Enabled").Permashow(true, "Yasuo| Evade");
@@ -194,6 +200,7 @@ namespace YasuoPro
                 menu.AddSlider("Misc.Healthy", "Healthy Amount HP", 20, 0, 100);
                 menu.AddBool("Misc.AG", "Use Q (Tornado) on Gapcloser");
                 menu.AddBool("Misc.Interrupter", "Use Q (Tornado) to Interrupt");
+                menu.AddBool("Misc.Walljump", "Use Walljump", false);
                 menu.AddBool("Misc.Debug", "Debug", false);
             }
         }
@@ -202,7 +209,7 @@ namespace YasuoPro
         {
             internal static void Attach(Menu menu)
             {
-                menu.AddBool("Drawing.Active", "Disable Drawings");
+                menu.AddBool("Drawing.Disable", "Disable Drawings", false);
                 menu.AddCircle("Drawing.DrawQ", "Draw Q", Yas.Qrange, System.Drawing.Color.Red);
                 menu.AddCircle("Drawing.DrawE", "Draw E", Yas.Erange, System.Drawing.Color.CornflowerBlue);
                 menu.AddCircle("Drawing.DrawR", "Draw R", Yas.Rrange, System.Drawing.Color.DarkOrange);

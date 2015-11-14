@@ -72,7 +72,7 @@ namespace YasuoPro
           
                         var evadetarget =
                             ObjectManager
-                                .Get<Obj_AI_Base>().FirstOrDefault(x => x.IsDashable() && Program.IsSafe(x.ServerPosition.To2D()).IsSafe && Program.IsSafePath(x.GeneratePathTo(), 0, 1200, 250).IsSafe);
+                                .Get<Obj_AI_Base>().Where(x => x.IsDashable() && Program.IsSafe(x.ServerPosition.To2D()).IsSafe && Program.IsSafePath(x.GeneratePathTo(), 0, 1200, 250).IsSafe).MinOrDefault(x => x.Distance(Helper.shop));
                      
 
                         if (evadetarget != null)

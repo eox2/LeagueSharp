@@ -12,6 +12,8 @@ namespace YasuoPro
 
         internal static Obj_AI_Hero Yasuo = ObjectManager.Player;
 
+        internal static Obj_Shop shop = ObjectManager.Get<Obj_Shop>().FirstOrDefault(x => x.IsAlly);
+
         internal static int Q = 1, Q2 = 2, W = 3, E = 4, R = 5, Ignite = 6;
 
         internal string[] DangerousSpell =
@@ -43,6 +45,7 @@ namespace YasuoPro
         {
             Spells[Q].SetSkillshot(0.250f, 55f, int.MaxValue, false, SkillshotType.SkillshotLine);
             Spells[Q2].SetSkillshot(0.250f, 90, 1500f, false, SkillshotType.SkillshotLine);
+            Spells[E].SetTargetted(0.075f, 1025);
         }
 
         internal float Qrange

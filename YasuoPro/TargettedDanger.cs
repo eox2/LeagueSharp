@@ -64,6 +64,7 @@ namespace YasuoPro
             AddSpell("Twisted Fate", "GoldCardAttack", SpellSlot.W);
             AddSpell("Twisted Fate", "RedCardAttack", SpellSlot.W);
             AddSpell("Twisted Fate", "RedCardAttack", SpellSlot.W);
+            AddSpell("Twisted Fate", "goldcardpreattack", SpellSlot.W);
             AddSpell("Kassadin", "NullLance", SpellSlot.Q);
             AddSpell("Teemo", "BlindingDart", SpellSlot.Q);
             AddSpell("Malphite", "SeismicShard", SpellSlot.Q);
@@ -75,6 +76,9 @@ namespace YasuoPro
             AddSpell("Akali", "AkaliMot", SpellSlot.Q);
             AddSpell("Leblanc", "LeblancChaosOrbM", SpellSlot.Q);
             AddSpell("Anivia", "Frostbite", SpellSlot.E);
+            AddSpell("Katarina", "KatarinaQ", SpellSlot.Q);
+            AddSpell("Katarina", "KatarinaRSound", SpellSlot.R);
+            AddSpell("Fiddlesticks", "FiddlesticksDarkWind", SpellSlot.E);
         }
 
         static void AddSpell(string champname, string spellname, SpellSlot  slot, float del = 0)
