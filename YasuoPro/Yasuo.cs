@@ -233,7 +233,7 @@ namespace YasuoPro
         {
             if (target != null)
             {
-                if (SpellSlot.E.IsReady() && isHealthy)
+                if (SpellSlot.E.IsReady() && !DontDash && isHealthy && target.Distance(Yasuo) >= 0.50 * Yasuo.AttackRange)
                 {
                     if (DashCount >= 1 && GetDashPos(target).IsCloser(target) && target.IsDashable() &&
                         (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(target).PointUnderEnemyTurret()))
@@ -295,7 +295,6 @@ namespace YasuoPro
                 {
                     return;
                 }
-
 
                 if (ultmode == UltMode.Health)
                 {
@@ -371,7 +370,7 @@ namespace YasuoPro
 
                     if (dashtarg != null && GetDashPos(dashtarg).Distance(Game.CursorPos) < Yasuo.Distance(Game.CursorPos))
                     {
-                        Spells[E].Cast(dashtarg);
+                        Spells[E].CastOnUnit(dashtarg);
 
                         if (SpellSlot.Q.IsReady() && !TornadoReady)
                         {
@@ -390,7 +389,7 @@ namespace YasuoPro
                     var bestminion = ObjectManager.Get<Obj_AI_Base>().Where(x => x.IsDashable()).MinOrDefault(x => GetDashPos(x).Distance(nexus.Position));
                     if (bestminion != null && GetDashPos(bestminion).Distance(nexus.Position) < Yasuo.Distance(nexus.Position))
                     {
-                        Spells[E].Cast(bestminion);
+                        Spells[E].CastOnUnit(bestminion);
                         if (SpellSlot.Q.IsReady() && !TornadoReady)
                         {
                             Spells[Q].Cast(bestminion.ServerPosition);
@@ -421,7 +420,7 @@ namespace YasuoPro
                                 .MinOrDefault(x => GetDashPos(x).Distance(bestally));
                         if (besttarget != null)
                         {
-                            Spells[E].Cast(besttarget);
+                            Spells[E].CastOnUnit(besttarget);
                             if (SpellSlot.Q.IsReady() && !TornadoReady)
                             {
                                 Spells[Q].Cast(besttarget.ServerPosition);
@@ -439,7 +438,7 @@ namespace YasuoPro
                         var bestminion = ObjectManager.Get<Obj_AI_Base>().Where(x => x.IsDashable()).MinOrDefault(x => GetDashPos(x).Distance(nexus.Position));
                         if (bestminion != null && GetDashPos(bestminion).Distance(nexus.Position) < Yasuo.Distance(nexus.Position))
                         {
-                            Spells[E].Cast(bestminion);
+                            Spells[E].CastOnUnit(bestminion);
                         }
                     }
                 }

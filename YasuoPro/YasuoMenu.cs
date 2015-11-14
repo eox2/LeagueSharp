@@ -82,6 +82,7 @@ namespace YasuoPro
                 ultmenu.AddSubMenu(blacklist);
 
                 ultmenu.AddSList("Combo.UltMode", "Ult Prioritization", new string[] { "Lowest Health", "TS Priority", "Most enemies" }, 0);
+                ultmenu.AddSlider("Combo.knockupremainingpct", "Knockup Remaining % for Ult", 95, 40, 100);
                 ultmenu.AddBool("Combo.UseR", "Use R");
                 ultmenu.AddBool("Combo.UltTower", "Ult under Tower", false);
                 ultmenu.AddBool("Combo.UltOnlyKillable", "Ult only Killable", false);

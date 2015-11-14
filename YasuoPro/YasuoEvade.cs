@@ -48,6 +48,7 @@ namespace YasuoPro
                       !Program.IsSafePath(Helper.Yasuo.GetWaypoints(), 250).IsSafe &&
                       !Program.IsSafe(Helper.Yasuo.Position.To2D()).IsSafe)))
                 {
+                    Helper.DontDash = true;
                     if (skillshot.IsAboutToHit(700, Helper.Yasuo) && skillshot.SpellData.Type != SkillShotType.SkillshotCircle && Helper.GetBool("Evade.UseW"))
                     {
                         if (skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall) && skillshot.Evade(SpellSlot.W)
@@ -69,7 +70,6 @@ namespace YasuoPro
                     }
                     if (skillshot.IsAboutToHit(500, Helper.Yasuo) && skillshot.Evade(SpellSlot.E) && !skillshot.Dodged && Helper.GetBool("Evade.UseE") && skillshot.SpellData.DangerValue >= Helper.GetSlider("Evade.MinDangerLevelE"))
                     {
-          
                         var evadetarget =
                             ObjectManager
                                 .Get<Obj_AI_Base>().Where(x => x.IsDashable() && Program.IsSafe(x.ServerPosition.To2D()).IsSafe && Program.IsSafePath(x.GeneratePathTo(), 0, 1200, 250).IsSafe).MinOrDefault(x => x.Distance(Helper.shop));
@@ -88,6 +88,8 @@ namespace YasuoPro
                     }
                 }
             }
+
+            Helper.DontDash = false;
         }
 
         static List<Vector2> GeneratePathTo(this Obj_AI_Base unit)

@@ -14,6 +14,8 @@ namespace YasuoPro
 
         internal static Obj_Shop shop = ObjectManager.Get<Obj_Shop>().FirstOrDefault(x => x.IsAlly);
 
+        internal static bool DontDash = false;
+
         internal static int Q = 1, Q2 = 2, W = 3, E = 4, R = 5, Ignite = 6;
 
         internal string[] DangerousSpell =
@@ -98,7 +100,19 @@ namespace YasuoPro
         {
             get
             {
-                return HeroManager.Enemies.Where(x => x.IsValidEnemy(Spells[R].Range) && (x.HasBuffOfType(BuffType.Knockup) || x.HasBuffOfType(BuffType.Knockback)));
+                List<Obj_AI_Hero> KnockedUpEnemies = new List<Obj_AI_Hero>();
+                foreach (var hero in HeroManager.Enemies)
+                {
+                    if (hero.IsValidEnemy(Spells[R].Range)) {
+                        var knockup = hero.Buffs.Where(x => x.Type == BuffType.Knockup && (x.EndTime - Game.Time) <= (GetSlider("Combo.knockupremainingpct") / 100) * (x.EndTime - x.StartTime));
+                        var knockback = hero.Buffs.Where(x => x.Type == BuffType.Knockback);
+                        if (knockup.Any() || knockback.Any())
+                        {
+                            KnockedUpEnemies.Add(hero);
+                        }
+                    }
+                }
+                return KnockedUpEnemies;
             }
         }
 
