@@ -165,16 +165,12 @@ namespace YasuoPro
 
         internal static bool ECanKill(this Obj_AI_Base minion)
         {
-            //var hpred =
-            //  HealthPrediction.GetHealthPrediction(minion, 0, 500 + Game.Ping / 2);
-            // return hpred < 0.95 * Player.GetSpellDamage(minion, SpellSlot.Q) && hpred > 0;
             var espell = Helper.Spells[Helper.E];
-            var dmg = Helper.GetProperEDamage(minion) / 1.2
+            return Helper.GetProperEDamage(minion) / 1.2
                             >= HealthPrediction.GetHealthPrediction(
                                 minion,
                                 (int)(Player.Distance(minion) / espell.Speed) * 1000,
                                 (int)espell.Delay * 1000);
-            return dmg;
         }
 
         internal static bool isBlackListed(this Obj_AI_Hero unit)
