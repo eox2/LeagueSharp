@@ -96,7 +96,7 @@ namespace YasuoPro
         {
             List<Vector2> path = new List<Vector2>();
             path.Add(Helper.Yasuo.ServerPosition.To2D());
-            path.Add(Helper.GetDashPos(unit));
+            path.Add(Helper.GetDashPos(unit).To2D());
             return path;
         }
 

@@ -49,7 +49,14 @@ namespace YasuoPro
         internal static bool PointUnderEnemyTurret(this Vector2 Point)
         {
             var EnemyTurrets =
-                ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsEnemy && Vector2.Distance(t.Position.To2D(), Point) < 900f + Helper.Yasuo.BoundingRadius);
+                ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsEnemy && Vector2.Distance(t.Position.To2D(), Point) < 950f);
+            return EnemyTurrets.Any();
+        }
+
+        internal static bool PointUnderEnemyTurret(this Vector3 Point)
+        {
+            var EnemyTurrets =
+                ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsEnemy && Vector3.Distance(t.Position, Point) < 900f + Helper.Yasuo.BoundingRadius);
             return EnemyTurrets.Any();
         }
 
@@ -62,7 +69,7 @@ namespace YasuoPro
             return Player.GetSpellDamage(@base, slot) >= @base.Health;
         }
 
-        internal static bool IsCloser(this Vector2 point, Obj_AI_Base target)
+        internal static bool IsCloserWP(this Vector3 point, Obj_AI_Base target)
         {
             var wp = target.GetWaypoints();
             var lastwp = wp.LastOrDefault();
@@ -70,12 +77,21 @@ namespace YasuoPro
             var midwpnum = wpc / 2;
             var midwp = wp[midwpnum];
             var plength = wp[0].Distance(lastwp);
-            return (point.Distance(target, true) <= Player.Distance(target, true)) || ((plength <= Player.Distance(target) * 1.2f && point.Distance(lastwp) < Player.Distance(lastwp) || point.Distance(midwp) < Player.Distance(midwp)));
+            return (point.Distance(target.ServerPosition, true) <= Player.Distance(target.ServerPosition, true)) || ((plength <= Player.Distance(target.ServerPosition) * 1.2f && point.Distance(lastwp.To3D()) < Player.Distance(lastwp.To3D()) || point.Distance(midwp.To3D()) < Player.Distance(midwp)));
+        }
+
+        internal static bool IsCloser(this Vector3 point, Obj_AI_Base target)
+        {
+            if (Helper.GetBool("Combo.EAdvanced"))
+            {
+                return IsCloserWP(point, target);
+            }
+            return (point.Distance(target.ServerPosition, true) <= Player.Distance(target.ServerPosition, true));
         }
 
         internal static bool IsCloser(this Obj_AI_Base @base, Obj_AI_Base target)
         {
-            return Helper.GetDashPos(@base).Distance(target) < Player.Distance(target);
+            return Helper.GetDashPos(@base).Distance(target.ServerPosition) < Player.Distance(target.ServerPosition);
         }
 
         internal static Vector3 WTS(this Vector3 vect)
@@ -175,7 +191,7 @@ namespace YasuoPro
 
         internal static bool isBlackListed(this Obj_AI_Hero unit)
         {
-            return !Helper.GetBool("ult" + unit.CharData.BaseSkinName);
+            return !Helper.GetBool("ult" + unit.ChampionName);
         }
 
         internal static int MinionsInRange(this Obj_AI_Base unit, float range)
@@ -185,6 +201,12 @@ namespace YasuoPro
         }
 
         internal static int MinionsInRange(this Vector2 pos, float range)
+        {
+            var minions = ObjectManager.Get<Obj_AI_Minion>().Count(x => x.Distance(pos) <= range && (x.IsEnemy || x.Team == GameObjectTeam.Neutral));
+            return minions;
+        }
+
+        internal static int MinionsInRange(this Vector3 pos, float range)
         {
             var minions = ObjectManager.Get<Obj_AI_Minion>().Count(x => x.Distance(pos) <= range && (x.IsEnemy || x.Team == GameObjectTeam.Neutral));
             return minions;

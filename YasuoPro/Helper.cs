@@ -118,7 +118,7 @@ namespace YasuoPro
 
         internal static bool isHealthy
         {
-            get { return Yasuo.HealthPercent > GetSlider("Misc.Healthy"); }
+            get { return Yasuo.IsInvulnerable || Yasuo.HasBuffOfType(BuffType.Invulnerability) || Yasuo.HasBuffOfType(BuffType.SpellShield) || Yasuo.HasBuffOfType(BuffType.SpellImmunity) || Yasuo.HealthPercent > GetSlider("Misc.Healthy") || Yasuo.HasBuff("yasuopassivemovementshield") && Yasuo.HealthPercent > 30; }
         }
 
         internal static bool GetBool(string name)
@@ -148,10 +148,10 @@ namespace YasuoPro
 
         internal static Vector2 DashPosition;
 
-        internal static Vector2 GetDashPos(Obj_AI_Base @base)
+        internal static Vector3 GetDashPos(Obj_AI_Base @base)
         {
-            var predictedposition = Yasuo.ServerPosition.Extend(@base.Position, Yasuo.Distance(@base) + 475 - Yasuo.Distance(@base)).To2D();
-            DashPosition = predictedposition;
+            var predictedposition = Yasuo.ServerPosition.Extend(@base.Position, Yasuo.Distance(@base) + 475 - Yasuo.Distance(@base));
+            //DashPosition = predictedposition;
             return predictedposition;
         }
 

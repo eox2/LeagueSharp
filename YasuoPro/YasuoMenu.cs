@@ -70,13 +70,14 @@ namespace YasuoPro
                 menu.AddBool("Combo.UseW", "Use W");
                 menu.AddBool("Combo.UseE", "Use E");
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
+                menu.AddBool("Combo.EAdvanced", "Predict E position with Waypoints", false);
 
                 var ultmenu = menu.AddSubMenu("Ult Settings");
                 var blacklist = new Menu("Ult Targets", "BlackList");
 
                 foreach (var hero in HeroManager.Enemies)
                 {
-                    blacklist.AddBool("ult" + hero.CharData.BaseSkinName, "Ult " + hero.CharData.BaseSkinName);
+                    blacklist.AddBool("ult" + hero.ChampionName, "Ult " + hero.ChampionName);
                 }
 
                 ultmenu.AddSubMenu(blacklist);
@@ -198,7 +199,7 @@ namespace YasuoPro
                 menu.AddSlider("Misc.RMinHit", "Min Enemies for Autoult", 1, 1, 5);
                 menu.AddKeyBind("Misc.TowerDive", "Tower Dive Key", KeyCode("T"), KeyBindType.Press).Permashow(true, "Tower Diving Override");
                 menu.AddSList("Hitchance.Q", "Q Hitchance", new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString() }, 1);
-                menu.AddSlider("Misc.Healthy", "Healthy Amount HP", 20, 0, 100);
+                menu.AddSlider("Misc.Healthy", "Healthy Amount HP", 5, 0, 100);
                 menu.AddBool("Misc.AG", "Use Q (Tornado) on Gapcloser");
                 menu.AddBool("Misc.Interrupter", "Use Q (Tornado) to Interrupt");
                 menu.AddBool("Misc.Walljump", "Use Walljump", false);
