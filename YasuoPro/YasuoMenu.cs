@@ -176,6 +176,13 @@ namespace YasuoPro
 
                 menu.AddSubMenu(targettedmenu);
 
+                Menu Flee = new Menu("Flee Settings", "Flee");
+                Flee.AddSList("Flee.Mode", "Flee Mode", new[] { "To Nexus", "To Allies", "To Cursor" }, 0);
+                Flee.AddBool("Flee.StackQ", "Stack Q during Flee");
+                Flee.AddBool("Flee.UseQ2", "Use Tornado");
+
+                menu.AddSubMenu(Flee);
+
                 menu.AddBool("Evade.Enabled", "Evade Enabled").Permashow(true, "Yasuo| Evade");
                 menu.AddBool("Evade.OnlyDangerous", "Evade only Dangerous", false).Permashow(true, "Yasuo| Only Dangerous");
                 // menu.AddKeyBind("Evade.OnlyDangerous", "Dodge only dangerous", 32, KeyBindType.Press).Permashow(true, "Yasuo| Only Dangerous");
@@ -185,8 +192,6 @@ namespace YasuoPro
                 menu.AddBool("Evade.WSS", "Windwall Skillshots");
                 menu.AddBool("Evade.UseW", "Evade with Windwall");
                 menu.AddBool("Evade.UseE", "Evade with E");
-                menu.AddSList("Flee.Mode", "Flee Mode", new[] { "To Nexus", "To Allies", "To Cursor" }, 0);
-
             }
         }
 
@@ -195,6 +200,7 @@ namespace YasuoPro
         {
             internal static void Attach(Menu menu)
             {
+                menu.AddBool("Misc.AutoStackQ", "Auto Stack Q", false);
                 menu.AddBool("Misc.AutoR", "Auto Ultimate").Permashow();
                 menu.AddSlider("Misc.RMinHit", "Min Enemies for Autoult", 1, 1, 5);
                 menu.AddKeyBind("Misc.TowerDive", "Tower Dive Key", KeyCode("T"), KeyBindType.Press).Permashow(true, "Tower Diving Override");

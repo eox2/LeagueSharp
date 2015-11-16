@@ -52,10 +52,10 @@ namespace YasuoPro
                 return;
             }
 
-            if (GetBool("Combo.StackQ") && !TornadoReady && !CurrentTarget.IsValidEnemy(Spells[Q].Range))
+            if (GetBool("Misc.AutoStackQ") && !TornadoReady && !CurrentTarget.IsValidEnemy(Spells[Q].Range))
             {
                 var closest =
-                    ObjectManager.Get<Obj_AI_Base>()
+                    ObjectManager.Get<Obj_AI_Minion>()
                         .Where(x => x.IsValidEnemy(Spells[Q].Range))
                         .MinOrDefault(x => x.Distance(Yasuo));
 
@@ -177,20 +177,6 @@ namespace YasuoPro
                 CastE(CurrentTarget);
             }
 
-            if (GetBool("Combo.StackQ") && !TornadoReady && !CurrentTarget.IsValidEnemy(Spells[Q].Range))
-            {
-                var closest =
-                    ObjectManager.Get<Obj_AI_Base>()
-                        .Where(x => x.IsValidEnemy(Spells[Q].Range))
-                        .MinOrDefault(x => x.Distance(Yasuo));
-
-                var pred = Spells[Q].GetPrediction(closest);
-                if (pred.Hitchance >= HitChance.Low)
-                {
-                    Spells[Q].Cast(closest.ServerPosition);
-                }
-            }
-
             if (GetBool("Combo.UseR"))
             {
                 CastR(GetSlider("Combo.RMinHit"));
@@ -235,10 +221,15 @@ namespace YasuoPro
 
             if (GetBool("Combo.StackQ") && !target.IsValidTarget(Qrange) && !TornadoReady)
             {
-                var bestmin = ObjectManager.Get<Obj_AI_Base>().Where(x => x.IsValidEnemy(Qrange)).MinOrDefault(x => x.Distance(Yasuo));
+                var bestmin = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidEnemy(Qrange)).MinOrDefault(x => x.Distance(Yasuo));
                 if (bestmin != null)
                 {
-                    Spells[Q].Cast(bestmin.ServerPosition);
+                    var pred = Spells[Q].GetPrediction(bestmin);
+
+                    if (pred.Hitchance >= HitChance.Medium)
+                    {
+                        Spells[Q].Cast(bestmin.ServerPosition);
+                    }
                 }
             }
         }
@@ -363,7 +354,7 @@ namespace YasuoPro
         void Flee()
         {
             Orbwalker.SetAttack(false);
-            if (SpellSlot.Q.IsReady() && TornadoReady)
+            if (GetBool("Flee.UseQ2") && SpellSlot.Q.IsReady() && TornadoReady)
             {
                 var qtarg = TargetSelector.GetTarget(Spells[Q2].Range, TargetSelector.DamageType.Physical);
                 if (qtarg != null)
@@ -387,7 +378,7 @@ namespace YasuoPro
                     {
                         Spells[E].CastOnUnit(dashtarg);
 
-                        if (SpellSlot.Q.IsReady() && !TornadoReady)
+                        if (GetBool("Flee.StackQ") && SpellSlot.Q.IsReady() && !TornadoReady)
                         {
                            Spells[Q].Cast(dashtarg.ServerPosition);
                         }
@@ -405,7 +396,7 @@ namespace YasuoPro
                     if (bestminion != null && GetDashPos(bestminion).Distance(nexus.Position) < Yasuo.Distance(nexus.Position))
                     {
                         Spells[E].CastOnUnit(bestminion);
-                        if (SpellSlot.Q.IsReady() && !TornadoReady)
+                        if (GetBool("Flee.StackQ") && SpellSlot.Q.IsReady() && !TornadoReady)
                         {
                             Spells[Q].Cast(bestminion.ServerPosition);
                         }
@@ -436,7 +427,7 @@ namespace YasuoPro
                         if (besttarget != null)
                         {
                             Spells[E].CastOnUnit(besttarget);
-                            if (SpellSlot.Q.IsReady() && !TornadoReady)
+                            if (GetBool("Flee.StackQ") && SpellSlot.Q.IsReady() && !TornadoReady)
                             {
                                 Spells[Q].Cast(besttarget.ServerPosition);
                             }
