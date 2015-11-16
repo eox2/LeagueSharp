@@ -79,6 +79,7 @@ namespace SephKayle
             Misc.AddItem(new MenuItem("UseElh", "Use E to lasthit").SetValue(true));
             Misc.AddItem(new MenuItem("Healingon", "Healing On").SetValue(true));
             Misc.AddItem(new MenuItem("Ultingon", "Ulting On").SetValue(true));
+            Misc.AddItem(new MenuItem("Recallcheck", "Recall check").SetValue(false));
             Misc.AddItem(new MenuItem("Debug", "Debug On").SetValue(true));
 
             Menu Drawing = new Menu("Drawing", "Drawing");
@@ -167,8 +168,6 @@ namespace SephKayle
                 Q.CastOnUnit(target);
                 Player.Spellbook.CastSpell(Ignite.Slot, target);
             }
-
-           
         }
 
         private static bool Eon
@@ -189,11 +188,6 @@ namespace SephKayle
 
         private static void Combo()
         {
-            if (Player.IsDead)
-            {
-                return;
-            }
-
             var qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var etarget = TargetSelector.GetTarget(incrange, TargetSelector.DamageType.Magical);
 
@@ -217,7 +211,6 @@ namespace SephKayle
                 E.CastOnUnit(Player);
             }
             
-
             List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
             if (Config.Item("UseQwc").GetValue<bool>() && Q.IsReady())
             {
@@ -248,12 +241,16 @@ namespace SephKayle
             {
                 return hero;
             }
-
             return null;
         }
 
         static void HealUltTrigger(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            if (GetBool("Recallcheck") && Player.IsRecalling())
+            {
+                return;
+            }
+
             var target = args.Target as Obj_AI_Hero;
             var senderhero = sender as Obj_AI_Hero;
             var senderturret = sender as Obj_AI_Turret;
@@ -324,7 +321,6 @@ namespace SephKayle
                     HealUltManager(false, true, target);
                 }
             }
-            
         }
 
 
@@ -418,10 +414,11 @@ namespace SephKayle
 
         static void GameTick(EventArgs args)
         {
-            if (Player.IsDead)
+            if (Player.IsDead || GetBool("Recallcheck") && Player.IsRecalling())
             {
                 return;
             }
+
             if (!Config.Item("onlyhincdmg").GetValue<bool>() || !Config.Item("onlyuincdmg").GetValue<bool>())
             {
                 HealUltManager();
@@ -447,24 +444,13 @@ namespace SephKayle
                 case Orbwalking.OrbwalkingMode.LastHit:
                     LHlogic();
                     break;
-                
             }
-             
-
         }
 
 
 
         private static void LHlogic()
         {
-            /*
-            var minio = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsEnemy && Player.Distance(m) <= incrange);
-            if (minio.Any())
-            {
-                E.CastOnUnit(Player);
-            }
-            */
-
             List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
             if (Config.Item("UseQfarm").GetValue<bool>() && Q.IsReady())
             {
@@ -547,8 +533,5 @@ namespace SephKayle
                Ignite = new Spell(ignite.Slot, 600);
            }
         }
-
-
     }
-
 }

@@ -161,9 +161,13 @@ namespace SephCassiopeia
                 CassiopeiaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 var targets = HeroManager.Enemies.Where(x => x.IsValidTarget(Spells[SpellSlot.R].Range) && !x.IsZombie).OrderBy(x => x.Health);
+                Vector3 bestpositionfacing = new Vector3(0, 0, 0);
+                Vector3 bestpositionnf = new Vector3(0, 0, 0);
+                int mosthitfacing = 0;
+                int mosthitnf = 0;
                 foreach (var targ in targets)
                 {
-                    var pred = Spells[SpellSlot.R].GetPrediction(targ);
+                    var pred = Spells[SpellSlot.R].GetPrediction(targ, true);
                     if (pred.Hitchance >= CassioUtils.GetHitChance("Hitchance.R"))
                     {
                         int enemhitpred = 0;
@@ -180,17 +184,29 @@ namespace SephCassiopeia
                             }
                         }
 
-                        if (enemfacingpred >= CassioUtils.GetSlider("Combo.Rcount"))
+                        if (enemfacingpred > mosthitfacing)
                         {
-                            Spells[SpellSlot.R].Cast(pred.CastPosition);
-                            return;
+                            mosthitfacing = enemfacingpred;
+                            bestpositionfacing = pred.CastPosition;
                         }
-                        if (enemhitpred >= CassioUtils.GetSlider("Combo.Rcountnf") && CassioUtils.Active("Combo.UseRNF"))
+
+                        if (enemhitpred > mosthitnf)
                         {
-                            Spells[SpellSlot.R].Cast(pred.CastPosition);
-                            return;
+                            mosthitnf = enemhitpred;
+                            bestpositionnf = pred.CastPosition;
                         }
                     }
+                }
+
+                if (mosthitfacing >= CassioUtils.GetSlider("Combo.Rcount"))
+                {
+                    Spells[SpellSlot.R].Cast(bestpositionfacing);
+                    return;
+                }
+                if (mosthitnf >= CassioUtils.GetSlider("Combo.Rcountnf") && CassioUtils.Active("Combo.UseRNF"))
+                {
+                    Spells[SpellSlot.R].Cast(bestpositionnf);
+                    return;
                 }
 
                 var easycheck = HeroManager.Enemies.FirstOrDefault(x =>
