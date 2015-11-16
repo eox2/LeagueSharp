@@ -47,7 +47,7 @@ namespace YasuoPro
 
         void OnUpdate(EventArgs args)
         {
-            if (Yasuo.IsDead)
+            if (Yasuo.IsDead || Yasuo.IsRecalling())
             {
                 return;
             }
