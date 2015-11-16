@@ -9,15 +9,13 @@ namespace YasuoPro
 {
     static class YasuoEvade
     {
-
         internal static void Evade()
         {
             if (!Helper.GetBool("Evade.Enabled"))
             {
                 return;
             }
-
-
+           
             foreach (var skillshot in Program.DetectedSkillshots.ToList())
             {
                 if (skillshot.Dodged)
@@ -96,7 +94,7 @@ namespace YasuoPro
         {
             List<Vector2> path = new List<Vector2>();
             path.Add(Helper.Yasuo.ServerPosition.To2D());
-            path.Add(Helper.GetDashPos(unit).To2D());
+            path.Add(Helper.GetDashPos(unit));
             return path;
         }
 

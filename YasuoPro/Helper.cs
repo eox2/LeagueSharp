@@ -148,10 +148,10 @@ namespace YasuoPro
 
         internal static Vector2 DashPosition;
 
-        internal static Vector3 GetDashPos(Obj_AI_Base @base)
+        internal static Vector2 GetDashPos(Obj_AI_Base @base)
         {
-            var predictedposition = Yasuo.ServerPosition.Extend(@base.Position, Yasuo.Distance(@base) + 475 - Yasuo.Distance(@base));
-            //DashPosition = predictedposition;
+            var predictedposition = Yasuo.ServerPosition.Extend(@base.Position, Yasuo.Distance(@base) + 475 - Yasuo.Distance(@base)).To2D();
+            DashPosition = predictedposition;
             return predictedposition;
         }
 

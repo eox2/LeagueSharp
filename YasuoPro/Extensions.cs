@@ -41,7 +41,7 @@ namespace YasuoPro
         {
             if (unit != null)
             {
-                return Vector3.Distance(unit.ServerPosition, Helper.Yasuo.ServerPosition) <= range;
+                return Vector2.Distance(unit.ServerPosition.To2D(), Helper.Yasuo.ServerPosition.To2D()) <= range;
             }
             return false;
         }
@@ -69,7 +69,7 @@ namespace YasuoPro
             return Player.GetSpellDamage(@base, slot) >= @base.Health;
         }
 
-        internal static bool IsCloserWP(this Vector3 point, Obj_AI_Base target)
+        internal static bool IsCloserWP(this Vector2 point, Obj_AI_Base target)
         {
             var wp = target.GetWaypoints();
             var lastwp = wp.LastOrDefault();
@@ -80,7 +80,7 @@ namespace YasuoPro
             return (point.Distance(target.ServerPosition, true) <= Player.Distance(target.ServerPosition, true)) || ((plength <= Player.Distance(target.ServerPosition) * 1.2f && point.Distance(lastwp.To3D()) < Player.Distance(lastwp.To3D()) || point.Distance(midwp.To3D()) < Player.Distance(midwp)));
         }
 
-        internal static bool IsCloser(this Vector3 point, Obj_AI_Base target)
+        internal static bool IsCloser(this Vector2 point, Obj_AI_Base target)
         {
             if (Helper.GetBool("Combo.EAdvanced"))
             {

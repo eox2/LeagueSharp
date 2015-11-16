@@ -52,6 +52,20 @@ namespace YasuoPro
                 return;
             }
 
+            if (GetBool("Combo.StackQ") && !TornadoReady && !CurrentTarget.IsValidEnemy(Spells[Q].Range))
+            {
+                var closest =
+                    ObjectManager.Get<Obj_AI_Base>()
+                        .Where(x => x.IsValidEnemy(Spells[Q].Range))
+                        .MinOrDefault(x => x.Distance(Yasuo));
+
+                var pred = Spells[Q].GetPrediction(closest);
+                if (pred.Hitchance >= HitChance.Low)
+                {
+                    Spells[Q].Cast(closest.ServerPosition);
+                }
+            }
+
             if (GetBool("Misc.Walljump") && Game.MapId == GameMapId.SummonersRift)
             {
                 WallJump.OnUpdate();
@@ -253,7 +267,7 @@ namespace YasuoPro
                                          x.IsDashable()
                                          && GetDashPos(x).IsCloser(target) &&
                                         (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()))
-                                .OrderBy(x => Vector3.Distance(GetDashPos(x), target.ServerPosition))
+                                .OrderBy(x => Vector2.Distance(GetDashPos(x), target.ServerPosition.To2D()))
                                 .FirstOrDefault();
                         if (bestminion != null)
                         {
