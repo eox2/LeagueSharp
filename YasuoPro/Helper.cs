@@ -81,21 +81,21 @@ namespace YasuoPro
 
         internal bool UseQ(Obj_AI_Hero target, HitChance minhc = HitChance.Medium)
         {
-            if (target == null)
+            var tready = TornadoReady;
+            if (target == null || tready && Yasuo.IsDashing())
             {
                 return false;
             }
-
             Spell sp = TornadoReady ? Spells[Q2] : Spells[Q];
             PredictionOutput pred = sp.GetPrediction(target);
+
             if (pred.Hitchance >= minhc)
             {
                 return sp.Cast(pred.CastPosition);
             }
             return false;
         }
-
- 
+        
         internal IEnumerable<Obj_AI_Hero> KnockedUp
         {
             get

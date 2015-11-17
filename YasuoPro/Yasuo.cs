@@ -354,7 +354,7 @@ namespace YasuoPro
         void Flee()
         {
             Orbwalker.SetAttack(false);
-            if (GetBool("Flee.UseQ2") && SpellSlot.Q.IsReady() && TornadoReady)
+            if (GetBool("Flee.UseQ2") && !Yasuo.IsDashing() && SpellSlot.Q.IsReady() && TornadoReady)
             {
                 var qtarg = TargetSelector.GetTarget(Spells[Q2].Range, TargetSelector.DamageType.Physical);
                 if (qtarg != null)
