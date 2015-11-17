@@ -15,7 +15,6 @@ namespace YasuoPro
     {
         public Obj_AI_Hero CurrentTarget;
 
-
         public Yasuo()
         {
             CustomEvents.Game.OnGameLoad += OnLoad;
@@ -243,6 +242,7 @@ namespace YasuoPro
                     if (DashCount >= 1 && GetDashPos(target).IsCloser(target) && target.IsDashable() &&
                         (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(target).PointUnderEnemyTurret()))
                     {
+                        ETarget = target;
                         Spells[E].CastOnUnit(target);
                         return;
                     }
@@ -262,11 +262,13 @@ namespace YasuoPro
                                 .FirstOrDefault();
                         if (bestminion != null)
                         {
+                            ETarget = bestminion;
                             Spells[E].CastOnUnit(bestminion);
                         }
 
                         else if (target.IsDashable() && GetDashPos(target).IsCloser(target) && (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(target).PointUnderEnemyTurret()))
                         {
+                            ETarget = target;
                             Spells[E].CastOnUnit(target);
                         }
                     }
@@ -281,6 +283,7 @@ namespace YasuoPro
 
                         if (minion != null && GetDashPos(minion).IsCloser(target))
                         {
+                            ETarget = minion;
                             Spells[E].CastOnUnit(minion);
                         }
                     }
@@ -468,7 +471,6 @@ namespace YasuoPro
         
         void Waveclear()
         {
-
             if (SpellSlot.Q.IsReady() && !Yasuo.IsDashing())
             {
                 if (!TornadoReady && GetBool("Waveclear.UseQ"))
@@ -628,6 +630,7 @@ namespace YasuoPro
             {
                 if (target.IsInRange(Spells[E].Range))
                 {
+                    ETarget = target;
                     Spells[E].CastOnUnit(target);
                     return;
                 }
@@ -640,6 +643,7 @@ namespace YasuoPro
 
                 if (minion != null && GetBool("Harass.UseEMinion") && GetBool("Combo.EAdvanced") && GetDashPos(minion).IsCloserWP(target) || GetDashPos(minion).IsCloser(target))
                 {
+                    ETarget = minion;
                     Spells[E].Cast(minion);
                 }
             }

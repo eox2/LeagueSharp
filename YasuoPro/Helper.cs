@@ -12,6 +12,8 @@ namespace YasuoPro
 
         internal static Obj_AI_Hero Yasuo = ObjectManager.Player;
 
+        public static Obj_AI_Base ETarget;
+
         internal static Obj_Shop shop = ObjectManager.Get<Obj_Shop>().FirstOrDefault(x => x.IsAlly);
 
         internal static bool DontDash = false;
@@ -81,18 +83,29 @@ namespace YasuoPro
 
         internal bool UseQ(Obj_AI_Hero target, HitChance minhc = HitChance.Medium)
         {
-            var tready = TornadoReady;
-            if (target == null || tready && Yasuo.IsDashing())
+            if (target == null)
             {
                 return false;
             }
-            Spell sp = TornadoReady ? Spells[Q2] : Spells[Q];
+
+            var tready = TornadoReady;
+
+            if (tready && Yasuo.IsDashing())
+            {
+                if (GetBool("Combo.NoQ2Dash") || ETarget == null || !(ETarget is Obj_AI_Hero) && ETarget.CountEnemiesInRange(350) < 1)
+                {
+                    return false;
+                }
+            }
+
+            Spell sp = tready ? Spells[Q2] : Spells[Q];
             PredictionOutput pred = sp.GetPrediction(target);
 
             if (pred.Hitchance >= minhc)
             {
                 return sp.Cast(pred.CastPosition);
             }
+
             return false;
         }
         

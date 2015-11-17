@@ -71,6 +71,7 @@ namespace YasuoPro
                 menu.AddBool("Combo.UseE", "Use E");
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
                 menu.AddBool("Combo.EAdvanced", "Predict E position with Waypoints", false);
+                menu.AddBool("Combo.NoQ2Dash", "Dont Q2 while dashing", false);
 
                 var ultmenu = menu.AddSubMenu("Ult Settings");
                 var blacklist = new Menu("Ult Targets", "BlackList");

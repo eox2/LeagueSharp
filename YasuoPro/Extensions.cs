@@ -16,8 +16,10 @@ namespace YasuoPro
             {
                 return false;
             }
-            return !unit.HasBuff("YasuoDashWrapper") && (unit is Obj_AI_Hero || unit is Obj_AI_Minion);
+            return !unit.HasBuff("YasuoDashWrapper") && (unit is Obj_AI_Hero || unit is Obj_AI_Minion && unit.IsMinion);
         }
+
+      
 
         internal static bool IsValidAlly(this Obj_AI_Base unit, float range = 50000)
         {
