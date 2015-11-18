@@ -16,7 +16,18 @@ namespace YasuoPro
             {
                 return false;
             }
-            return !unit.HasBuff("YasuoDashWrapper") && (unit is Obj_AI_Hero || unit is Obj_AI_Minion && unit.IsMinion);
+
+            if (Helper.GetBool("Misc.SafeE"))
+            {
+                var point = Helper.GetDashPos(unit);
+                if (!Evade.Program.IsSafe(point).IsSafe)
+                {
+                    return false;
+                }
+            }
+
+            var minion = unit as Obj_AI_Minion;
+            return !unit.HasBuff("YasuoDashWrapper") && (unit is Obj_AI_Hero || minion != null && MinionManager.IsMinion(minion, false));
         }
 
       

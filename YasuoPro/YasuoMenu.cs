@@ -201,6 +201,7 @@ namespace YasuoPro
         {
             internal static void Attach(Menu menu)
             {
+                menu.AddBool("Misc.SafeE", "Safety Check for E");
                 menu.AddBool("Misc.AutoStackQ", "Auto Stack Q", false);
                 menu.AddBool("Misc.AutoR", "Auto Ultimate").Permashow();
                 menu.AddSlider("Misc.RMinHit", "Min Enemies for Autoult", 1, 1, 5);

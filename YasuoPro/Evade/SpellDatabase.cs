@@ -2706,8 +2706,9 @@ namespace Evade
                     DangerValue = 5,
                     IsDangerous = true,
                     MultipleNumber = 3,
-                    MultipleAngle = 15*(float) Math.PI/180,
+                    MultipleAngle = 15 * (float)Math.PI / 180,
                     MissileSpellName = "RivenLightsaberMissile",
+                    CollisionObjects = new[] { CollisionObjectTypes.YasuoWall },
                     ExtraMissileNames = new[] {"RivenLightsaberMissileSide"}
                 });
 
