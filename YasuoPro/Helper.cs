@@ -81,7 +81,7 @@ namespace YasuoPro
             }
         }
 
-        internal bool UseQ(Obj_AI_Hero target, HitChance minhc = HitChance.Medium)
+        internal bool UseQ(Obj_AI_Hero target, HitChance minhc = HitChance.Medium, bool UseQ1 = true, bool UseQ2 = true)
         {
             if (target == null)
             {
@@ -89,6 +89,11 @@ namespace YasuoPro
             }
 
             var tready = TornadoReady;
+
+            if ((tready && !UseQ2) || !tready && !UseQ1)
+            {
+                return false;
+            }
 
             if (tready && Yasuo.IsDashing())
             {
@@ -108,7 +113,7 @@ namespace YasuoPro
 
             return false;
         }
-        
+
         internal IEnumerable<Obj_AI_Hero> KnockedUp
         {
             get
@@ -117,9 +122,8 @@ namespace YasuoPro
                 foreach (var hero in HeroManager.Enemies)
                 {
                     if (hero.IsValidEnemy(Spells[R].Range)) {
-                        var knockup = hero.Buffs.Where(x => x.Type == BuffType.Knockup && (x.EndTime - Game.Time) <= (GetSlider("Combo.knockupremainingpct") / 100) * (x.EndTime - x.StartTime));
-                        var knockback = hero.Buffs.Where(x => x.Type == BuffType.Knockback);
-                        if (knockup.Any() || knockback.Any())
+                        var knockup = hero.Buffs.Find(x => (x.Type == BuffType.Knockup && (x.EndTime - Game.Time) <= (GetSlider("Combo.knockupremainingpct") / 100) * (x.EndTime - x.StartTime)) || x.Type == BuffType.Knockback);
+                        if (knockup != null)
                         {
                             KnockedUpEnemies.Add(hero);
                         }

@@ -43,7 +43,7 @@ namespace YasuoPro
 
         internal static bool IsValidEnemy(this Obj_AI_Base unit, float range = 50000)
         {
-            if (unit == null || unit.Distance(Player) > range || unit.Team == Player.Team || !unit.IsValid || unit.IsDead || !unit.IsVisible || !unit.IsTargetable)
+            if (unit == null || !unit.IsHPBarRendered || unit.IsZombie || unit.Distance(Player) > range || unit.Team == Player.Team || !unit.IsValid || unit.IsDead || !unit.IsVisible || !unit.IsTargetable)
             {
                 return false;
             }
@@ -62,8 +62,8 @@ namespace YasuoPro
         internal static bool PointUnderEnemyTurret(this Vector2 Point)
         {
             var EnemyTurrets =
-                ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsEnemy && Vector2.Distance(t.Position.To2D(), Point) < 950f);
-            return EnemyTurrets.Any();
+                ObjectManager.Get<Obj_AI_Turret>().Find(t => t.IsEnemy && Vector2.Distance(t.Position.To2D(), Point) < 950f);
+            return EnemyTurrets != null;
         }
 
         internal static bool PointUnderEnemyTurret(this Vector3 Point)

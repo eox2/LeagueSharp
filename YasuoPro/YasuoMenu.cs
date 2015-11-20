@@ -66,11 +66,12 @@ namespace YasuoPro
                 items.AddBool("Items.UseYMU", "Use Youmu");
 
                 menu.AddBool("Combo.UseQ", "Use Q");
+                menu.AddBool("Combo.UseQ2", "Use Q2");
                 menu.AddBool("Combo.StackQ", "Stack Q if not in Range");
                 menu.AddBool("Combo.UseW", "Use W");
                 menu.AddBool("Combo.UseE", "Use E");
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
-                menu.AddBool("Combo.EAdvanced", "Predict E position with Waypoints", false);
+                menu.AddBool("Combo.EAdvanced", "Predict E position with Waypoints");
                 menu.AddBool("Combo.NoQ2Dash", "Dont Q2 while dashing", false);
 
                 var ultmenu = menu.AddSubMenu("Ult Settings");
@@ -104,6 +105,7 @@ namespace YasuoPro
                 menu.AddKeyBind("Harass.KB", "Harass Key", KeyCode("H"), KeyBindType.Toggle).Permashow(true, "Harass");
                 menu.AddBool("Harass.InMixed", "Harass in Mixed Mode", false);
                 menu.AddBool("Harass.UseQ", "Use Q");
+                menu.AddBool("Harass.UseQ2", "Use Q2");
                 menu.AddBool("Harass.UseE", "Use E");
                 menu.AddBool("Harass.UseEMinion", "Use E Minions");
             }
