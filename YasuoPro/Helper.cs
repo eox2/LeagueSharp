@@ -97,7 +97,7 @@ namespace YasuoPro
 
             if (tready && Yasuo.IsDashing())
             {
-                if (GetBool("Combo.NoQ2Dash") || ETarget == null || !(ETarget is Obj_AI_Hero) && ETarget.CountEnemiesInRange(350) < 1)
+                if (GetBool("Combo.NoQ2Dash") || ETarget == null || !(ETarget is Obj_AI_Hero) && ETarget.CountEnemiesInRange(120) < 1)
                 {
                     return false;
                 }

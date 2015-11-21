@@ -3,6 +3,7 @@ using System.Reflection;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using System;
 
 namespace YasuoPro
 {
@@ -25,12 +26,15 @@ namespace YasuoPro
                     return false;
                 }
             }
-
             var minion = unit as Obj_AI_Minion;
-            return !unit.HasBuff("YasuoDashWrapper") && (unit is Obj_AI_Hero || minion != null && MinionManager.IsMinion(minion, false));
+            return !unit.HasBuff("YasuoDashWrapper") && (unit is Obj_AI_Hero || minion.IsValidMinion());
         }
 
       
+        internal static bool IsValidMinion(this Obj_AI_Minion minion)
+        {
+            return (minion != null && minion.IsValid && minion.IsVisible && minion.Team != Player.Team && minion.IsHPBarRendered && !minion.CharData.BaseSkinName.ToLower().Contains("ward"));
+        }
 
         internal static bool IsValidAlly(this Obj_AI_Base unit, float range = 50000)
         {
