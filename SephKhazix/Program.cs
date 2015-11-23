@@ -188,7 +188,6 @@ namespace SephKhazix
 
         private static void CastWE(Obj_AI_Base unit, Vector2 unitPosition, int minTargets = 0)
         {
-            var usePacket = Config.Item("usePackets").GetValue<bool>();
             var points = new List<Vector2>();
             var hitBoxes = new List<int>();
 
@@ -250,7 +249,7 @@ namespace SephKhazix
             if (bestHit + 1 <= minTargets)
                 return;
 
-            W.Cast(bestPosition.To3D(), usePacket);
+            W.Cast(bestPosition.To3D());
         }
 
 
