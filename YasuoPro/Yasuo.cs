@@ -57,7 +57,7 @@ namespace YasuoPro
             {
                 var closest =
                     ObjectManager.Get<Obj_AI_Minion>()
-                        .Where(x => x.IsValidEnemy(Spells[Q].Range) && MinionManager.IsMinion(x))
+                        .Where(x => x.IsValidMinion(Spells[Q].Range) && MinionManager.IsMinion(x))
                         .MinOrDefault(x => x.Distance(Yasuo));
 
                 var pred = Spells[Q].GetPrediction(closest);
@@ -227,7 +227,7 @@ namespace YasuoPro
 
             if (GetBool("Combo.StackQ") && !target.IsValidEnemy(Qrange) && !TornadoReady)
             {
-                var bestmin = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidEnemy(Qrange) && MinionManager.IsMinion(x, false)).MinOrDefault(x => x.Distance(Yasuo));
+                var bestmin = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidMinion(Qrange) && MinionManager.IsMinion(x, false)).MinOrDefault(x => x.Distance(Yasuo));
                 if (bestmin != null)
                 {
                     var pred = Spells[Q].GetPrediction(bestmin);
@@ -480,7 +480,7 @@ namespace YasuoPro
                 {
                     var minion =
                         ObjectManager.Get<Obj_AI_Minion>()
-                            .Where(x => x.IsValidEnemy(Spells[Q].Range) && ((x.IsDashable() && (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q) >= GetProperEDamage(x))) || (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q)  >= 0.15 * x.MaxHealth || x.QCanKill()))).MaxOrDefault(x => x.MaxHealth);
+                            .Where(x => x.IsValidMinion(Spells[Q].Range) && ((x.IsDashable() && (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q) >= GetProperEDamage(x))) || (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q)  >= 0.15 * x.MaxHealth || x.QCanKill()))).MaxOrDefault(x => x.MaxHealth);
                     if (minion != null)
                     {
                         Spells[Q].Cast(minion.ServerPosition);
@@ -489,7 +489,7 @@ namespace YasuoPro
 
                 else if (TornadoReady && GetBool("Waveclear.UseQ2"))
                 {
-                    var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.Distance(Yasuo) > Yasuo.AttackRange && x.IsValidEnemy(Spells[Q2].Range) && ((x.IsDashable() && x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q)  >= 0.85 * GetProperEDamage(x)) || (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q) >= 0.10 * x.MaxHealth) || x.CanKill(SpellSlot.Q)));
+                    var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.Distance(Yasuo) > Yasuo.AttackRange && x.IsValidMinion(Spells[Q2].Range) && ((x.IsDashable() && x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q)  >= 0.85 * GetProperEDamage(x)) || (x.Health - Yasuo.GetSpellDamage(x, SpellSlot.Q) >= 0.10 * x.MaxHealth) || x.CanKill(SpellSlot.Q)));
                     var pred =
                         MinionManager.GetBestLineFarmLocation(minions.Select(m => m.ServerPosition.To2D()).ToList(),
                             Spells[Q2].Width, Spells[Q2].Range);
@@ -669,7 +669,7 @@ namespace YasuoPro
                 {
                     var minion =
                          ObjectManager.Get<Obj_AI_Minion>()
-                             .FirstOrDefault(x => x.IsValidEnemy(Spells[Q].Range) && x.QCanKill());
+                             .FirstOrDefault(x => x.IsValidMinion(Spells[Q].Range) && x.QCanKill());
                     if (minion != null)
                     {
                         Spells[Q].Cast(minion.ServerPosition);
@@ -678,7 +678,7 @@ namespace YasuoPro
 
                 else if (TornadoReady && GetBool("Farm.UseQ2"))
                 {
-                    var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.Distance(Yasuo) > Yasuo.AttackRange && x.IsValidEnemy(Spells[Q2].Range) && (x.QCanKill()));
+                    var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.Distance(Yasuo) > Yasuo.AttackRange && x.IsValidMinion(Spells[Q2].Range) && (x.QCanKill()));
                     var pred =
                         MinionManager.GetBestLineFarmLocation(minions.Select(m => m.ServerPosition.To2D()).ToList(),
                             Spells[Q2].Width, Spells[Q2].Range);

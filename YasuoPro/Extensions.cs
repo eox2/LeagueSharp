@@ -31,9 +31,9 @@ namespace YasuoPro
         }
 
       
-        internal static bool IsValidMinion(this Obj_AI_Minion minion)
+        internal static bool IsValidMinion(this Obj_AI_Minion minion, float range = 50000)
         {
-            return (minion != null && minion.IsValid && minion.IsVisible && minion.Team != Player.Team && minion.IsHPBarRendered && !minion.CharData.BaseSkinName.ToLower().Contains("ward"));
+            return (minion != null && Player.Distance(minion) <= range && minion.IsValid && minion.IsVisible && minion.Team != Player.Team && minion.IsHPBarRendered && !minion.CharData.BaseSkinName.ToLower().Contains("ward"));
         }
 
         internal static bool IsValidAlly(this Obj_AI_Base unit, float range = 50000)
