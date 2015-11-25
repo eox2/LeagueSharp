@@ -188,6 +188,7 @@ namespace YasuoPro
 
                 menu.AddBool("Evade.Enabled", "Evade Enabled").Permashow(true, "Yasuo| Evade");
                 menu.AddBool("Evade.OnlyDangerous", "Evade only Dangerous", false).Permashow(true, "Yasuo| Only Dangerous");
+                menu.AddBool("Evade.FOW", "Dodge FOW Skills");
                 // menu.AddKeyBind("Evade.OnlyDangerous", "Dodge only dangerous", 32, KeyBindType.Press).Permashow(true, "Yasuo| Only Dangerous");
                 menu.AddSlider("Evade.MinDangerLevelWW", "Min Danger Level WindWall", 1, 1 , 5);
                 menu.AddSlider("Evade.MinDangerLevelE", "Min Danger Level Dash", 1, 1, 5);

@@ -38,7 +38,7 @@ namespace YasuoPro
         static void AddSpells()
         {
             AddSpell("Syndra", "syndrar", SpellSlot.R);
-            AddSpell("VeigarR", "veigarprimordialburst", SpellSlot.R);
+            AddSpell("Veigar", "veigarprimordialburst", SpellSlot.R);
             AddSpell("Malzahar", "alzaharnethergrasp", SpellSlot.R);
             AddSpell("Caitlyn", "CaitlynAceintheHole", SpellSlot.R, 1000);
             AddSpell("Caitlyn", "CaitlynHeadshotMissile", SpellSlot.Unknown);
@@ -47,7 +47,6 @@ namespace YasuoPro
             AddSpell("Kayle", "judicatorreckoning", SpellSlot.Q);
             AddSpell("Pantheon", "PantheonQ", SpellSlot.Q);
             AddSpell("Taric", "Dazzle", SpellSlot.Q);
-            AddSpell("TwistedFate", "GoldCardAttack", SpellSlot.W);
             AddSpell("Viktor", "viktorpowertransfer", SpellSlot.Q);
             AddSpell("Ahri", "ahrifoxfiremissiletwo", SpellSlot.W);
             AddSpell("Elise", "EliseHumanQ", SpellSlot.Q);
@@ -64,7 +63,6 @@ namespace YasuoPro
             AddSpell("Twisted Fate", "GoldCardAttack", SpellSlot.W);
             AddSpell("Twisted Fate", "RedCardAttack", SpellSlot.W);
             AddSpell("Twisted Fate", "RedCardAttack", SpellSlot.W);
-            AddSpell("Twisted Fate", "goldcardpreattack", SpellSlot.W);
             AddSpell("Kassadin", "NullLance", SpellSlot.Q);
             AddSpell("Teemo", "BlindingDart", SpellSlot.Q);
             AddSpell("Malphite", "SeismicShard", SpellSlot.Q);
@@ -73,8 +71,7 @@ namespace YasuoPro
             AddSpell("Tristana", "BusterShot", SpellSlot.R);
             AddSpell("Cassiopeia", "CassiopeiaTwinFang", SpellSlot.E);
             AddSpell("Pantheon", "Pantheon_Throw", SpellSlot.Q);
-            AddSpell("Akali", "AkaliMot", SpellSlot.Q);
-            AddSpell("Leblanc", "LeblancChaosOrbM", SpellSlot.Q);
+            AddSpell("Akali", "AkaliMota", SpellSlot.Q);
             AddSpell("Anivia", "Frostbite", SpellSlot.E);
             AddSpell("Katarina", "KatarinaQ", SpellSlot.Q);
             AddSpell("Katarina", "KatarinaRSound", SpellSlot.R);
@@ -96,10 +93,10 @@ namespace YasuoPro
         {
             try
             {
-                if (sender.IsAlly || !args.Target.IsMe || !Helper.GetBool("Evade.WTS") && !SpellSlot.W.IsReady())
-            {
-                return;
-            }
+                if (sender.IsAlly || !args.Target.IsMe || !Helper.GetBool("Evade.WTS") || !SpellSlot.W.IsReady() || (!Helper.GetBool("Evade.FOW") && !sender.IsVisible))
+                {
+                    return;
+                }
                 var sdata = GetSpell(args.SData.Name);
                 if (sdata != null && sdata.IsEnabled)
                 {

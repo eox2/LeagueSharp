@@ -188,7 +188,7 @@ namespace Evade
             //Check if the skillshot is already added.
             var alreadyAdded = false;
 
-            if (Config.Menu.Item("DisableFow").GetValue<bool>() && !skillshot.Unit.IsVisible)
+            if (!Helper.GetBool("Evade.FOW") && !skillshot.Unit.IsVisible)
             {
                 return;
             }
@@ -415,7 +415,7 @@ namespace Evade
 
 
                 //Dont allow fow detection.
-                if (skillshot.SpellData.DisableFowDetection && skillshot.DetectionType == DetectionType.RecvPacket)
+                if (!Helper.GetBool("Evade.FOW") && skillshot.DetectionType == DetectionType.RecvPacket)
                 {
                     return;
                 }
