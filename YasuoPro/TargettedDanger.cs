@@ -60,9 +60,9 @@ namespace YasuoPro
             AddSpell("Baron", "BaronSpike", SpellSlot.Unknown);
             AddSpell("Leblanc", "LeblancChaosOrbM", SpellSlot.Q);
             AddSpell("Annie", "disintegrate", SpellSlot.Q);
-            AddSpell("Twisted Fate", "GoldCardAttack", SpellSlot.W);
-            AddSpell("Twisted Fate", "RedCardAttack", SpellSlot.W);
-            AddSpell("Twisted Fate", "RedCardAttack", SpellSlot.W);
+            AddSpell("TwistedFate", "goldcardpreattack", SpellSlot.W);
+            AddSpell("TwistedFate", "bluecardpreattack", SpellSlot.W);
+            AddSpell("TwistedFate", "redcardpreattack", SpellSlot.W);
             AddSpell("Kassadin", "NullLance", SpellSlot.Q);
             AddSpell("Teemo", "BlindingDart", SpellSlot.Q);
             AddSpell("Malphite", "SeismicShard", SpellSlot.Q);
@@ -76,6 +76,7 @@ namespace YasuoPro
             AddSpell("Katarina", "KatarinaQ", SpellSlot.Q);
             AddSpell("Katarina", "KatarinaRSound", SpellSlot.R);
             AddSpell("Fiddlesticks", "FiddlesticksDarkWind", SpellSlot.E);
+            AddSpell("MissFortune", "MissFortuneBulletTime", SpellSlot.E);
         }
 
         static void AddSpell(string champname, string spellname, SpellSlot  slot, float del = 0)
@@ -97,6 +98,7 @@ namespace YasuoPro
                 {
                     return;
                 }
+                //Console.WriteLine(args.SData.Name + " " + sender.BaseSkinName);
                 var sdata = GetSpell(args.SData.Name);
                 if (sdata != null && sdata.IsEnabled)
                 {
