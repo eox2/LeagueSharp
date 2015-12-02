@@ -1,11 +1,9 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Evade;
 using LeagueSharp;
 using LeagueSharp.Common;
-using static Evade.Geometry;
 using SharpDX;
 
 namespace YasuoPro
@@ -117,7 +115,7 @@ namespace YasuoPro
 
         struct LittleStruct
         {
-            public Polygon poly;
+            public Evade.Geometry.Polygon poly;
             public GameObjectProcessSpellCastEventArgs argss;
             public Vector2 RealEndPos;
             public float StartTick;
