@@ -5,7 +5,8 @@ using System.Linq;
 using Evade;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX.Win32;
+using static Evade.Geometry;
+using SharpDX;
 
 namespace YasuoPro
 {
@@ -16,7 +17,14 @@ namespace YasuoPro
             internal string spellName;
             internal string championName;
             internal SpellSlot spellSlot;
-            internal float delay;
+
+            internal float delay
+            {
+                get
+                {
+                    return Helper.GetSliderFloat("enabled." + spellName + ".delay");
+                }
+            }
             internal bool IsEnabled
             {
                 get
@@ -76,12 +84,13 @@ namespace YasuoPro
             AddSpell("Katarina", "KatarinaQ", SpellSlot.Q);
             AddSpell("Katarina", "KatarinaRSound", SpellSlot.R);
             AddSpell("Fiddlesticks", "FiddlesticksDarkWind", SpellSlot.E);
-            AddSpell("MissFortune", "MissFortuneBulletTime", SpellSlot.E);
+            AddSpell("MissFortune", "MissFortuneBulletTime", SpellSlot.R);
+            AddSpell("MissFortune", "MissFortuneRicochetShot", SpellSlot.Q);
         }
 
         static void AddSpell(string champname, string spellname, SpellSlot  slot, float del = 0)
         {
-            spellList.Add(new SData{ championName =  champname, spellName =  spellname, spellSlot =  slot, delay = del });
+            spellList.Add(new SData{ championName =  champname, spellName =  spellname, spellSlot =  slot });
         }
 
         public static SData GetSpell(string spellName)
@@ -89,12 +98,62 @@ namespace YasuoPro
             return spellList.FirstOrDefault(spell => string.Equals(spell.spellName, spellName, StringComparison.CurrentCultureIgnoreCase));
         }
 
+        public static void OnUpdate()
+        {
+            foreach (var ls in DetectedPolygons) {
+                if (YasuoEvade.TickCount - ls.StartTick >= ls.data.delay)
+                {
+                    if (ls.poly.PointInPolygon(Helper.Yasuo.ServerPosition.To2D()) == 1)
+                    {
+                        var pos = Helper.Yasuo.ServerPosition.Extend(ls.argss.Target.Position, 50);
+                        Helper.Spells[Helper.W].Cast(pos);
+                    }
+                }
+            }
+        }
+
+
+        static List<LittleStruct> DetectedPolygons = new List<LittleStruct>();
+
+        struct LittleStruct
+        {
+            public Polygon poly;
+            public GameObjectProcessSpellCastEventArgs argss;
+            public Vector2 RealEndPos;
+            public float StartTick;
+            public SData data;
+        }
+
+        public static void OnDraw(EventArgs args)
+        {
+            foreach (var d in DetectedPolygons)
+            {
+                d.poly.Draw(System.Drawing.Color.Red, 5);
+            }
+        }
 
         internal static void SpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             try
             {
-                if (sender.IsAlly || !args.Target.IsMe || !Helper.GetBool("Evade.WTS") || !SpellSlot.W.IsReady() || (!Helper.GetBool("Evade.FOW") && !sender.IsVisible))
+                if (!Helper.GetBool("Evade.WTS") || sender.IsAlly || !SpellSlot.W.IsReady() || (!Helper.GetBool("Evade.FOW") && !sender.IsVisible))
+                {
+                    return;
+                }
+                if (args.SData.Name.Equals("MissFortuneBulletTime"))
+                {
+                    var ssdata = GetSpell(args.SData.Name);
+                    if (ssdata.IsEnabled)
+                    {
+                        var end = args.Start.To2D().Extend(args.End.To2D(), 1400);
+                        Evade.Geometry.Rectangle rect = new Evade.Geometry.Rectangle(args.Start.To2D(), end, args.SData.LineWidth);
+                        var topoly = rect.ToPolygon();
+                        var newls = new LittleStruct { poly = topoly, argss = args, RealEndPos = end, StartTick = YasuoEvade.TickCount, data = ssdata };
+                        DetectedPolygons.Add(newls);
+                        Utility.DelayAction.Add(3000, () => DetectedPolygons.Clear());
+                    }
+                }
+                if (!args.Target.IsMe)
                 {
                     return;
                 }
@@ -103,7 +162,7 @@ namespace YasuoPro
                 if (sdata != null && sdata.IsEnabled)
                 {
                     var castpos = Helper.Yasuo.ServerPosition.Extend(args.Start, 50);
-                    Helper.Spells[Helper.W].Cast(castpos);
+                    Utility.DelayAction.Add((int) sdata.delay, () => Helper.Spells[Helper.W].Cast(castpos));
                 }
             }
             catch (Exception e)

@@ -106,8 +106,8 @@ namespace YasuoPro
                 menu.AddBool("Harass.InMixed", "Harass in Mixed Mode", false);
                 menu.AddBool("Harass.UseQ", "Use Q");
                 menu.AddBool("Harass.UseQ2", "Use Q2");
-                menu.AddBool("Harass.UseE", "Use E");
-                menu.AddBool("Harass.UseEMinion", "Use E Minions");
+                menu.AddBool("Harass.UseE", "Use E", false);
+                menu.AddBool("Harass.UseEMinion", "Use E Minions", false);
             }
         }
 
@@ -169,6 +169,7 @@ namespace YasuoPro
                 {
                     Menu champmenu = targettedmenu.SubMenu(spell.championName);
                     champmenu.AddBool("enabled." + spell.spellName, spell.spellName, true);
+                    champmenu.AddSlider("enabled." + spell.spellName + ".delay", spell.spellName + " Delay", 0, 0, 1000);
                 }
 
                 foreach (var spell in TargettedDanger.spellList.Where(x => HeroManager.Enemies.Any(e => x.championName == "Baron")))

@@ -122,7 +122,7 @@ namespace YasuoPro
                 foreach (var hero in HeroManager.Enemies)
                 {
                     if (hero.IsValidEnemy(Spells[R].Range)) {
-                        var knockup = hero.Buffs.Find(x => (x.Type == BuffType.Knockup && (x.EndTime - Game.Time) <= (GetSlider("Combo.knockupremainingpct") / 100) * (x.EndTime - x.StartTime)) || x.Type == BuffType.Knockback);
+                        var knockup = hero.Buffs.Find(x => (x.Type == BuffType.Knockup && (x.EndTime - Game.Time) <= (GetSliderFloat("Combo.knockupremainingpct") / 100) * (x.EndTime - x.StartTime)) || x.Type == BuffType.Knockback);
                         if (knockup != null)
                         {
                             KnockedUpEnemies.Add(hero);
@@ -135,7 +135,7 @@ namespace YasuoPro
 
         internal static bool isHealthy
         {
-            get { return Yasuo.IsInvulnerable || Yasuo.HasBuffOfType(BuffType.Invulnerability) || Yasuo.HasBuffOfType(BuffType.SpellShield) || Yasuo.HasBuffOfType(BuffType.SpellImmunity) || Yasuo.HealthPercent > GetSlider("Misc.Healthy") || Yasuo.HasBuff("yasuopassivemovementshield") && Yasuo.HealthPercent > 30; }
+            get { return Yasuo.IsInvulnerable || Yasuo.HasBuffOfType(BuffType.Invulnerability) || Yasuo.HasBuffOfType(BuffType.SpellShield) || Yasuo.HasBuffOfType(BuffType.SpellImmunity) || Yasuo.HealthPercent > GetSliderFloat("Misc.Healthy") || Yasuo.HasBuff("yasuopassivemovementshield") && Yasuo.HealthPercent > 30; }
         }
 
         internal static bool GetBool(string name)
@@ -148,10 +148,16 @@ namespace YasuoPro
             return YasuoMenu.Config.Item(name).GetValue<KeyBind>().Active;
         }
 
-        internal static int GetSlider(string name)
+        internal static int GetSliderInt(string name)
         {
             return YasuoMenu.Config.Item(name).GetValue<Slider>().Value;
         }
+
+        internal static float GetSliderFloat(string name)
+        {
+            return YasuoMenu.Config.Item(name).GetValue<Slider>().Value;
+        }
+
 
         internal static int GetSL(string name)
         {

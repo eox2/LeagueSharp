@@ -53,6 +53,11 @@ namespace YasuoPro
                 return;
             }
 
+            if (GetBool("Evade.WTS"))
+            {
+                TargettedDanger.OnUpdate();
+            }
+
             if (GetBool("Misc.AutoStackQ") && !TornadoReady && !CurrentTarget.IsValidEnemy(Spells[Q].Range))
             {
                 var closest =
@@ -123,12 +128,12 @@ namespace YasuoPro
             }
             if (GetBool("Combo.UseR") && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
-                CastR(GetSlider("Combo.RMinHit"));
+                CastR(GetSliderInt("Combo.RMinHit"));
             }
 
             if (GetBool("Misc.AutoR") && !Fleeing)
             {
-                CastR(GetSlider("Misc.RMinHit"));
+                CastR(GetSliderInt("Misc.RMinHit"));
             }
         }
 
@@ -146,6 +151,8 @@ namespace YasuoPro
             {
                 return;
             }
+
+            TargettedDanger.OnDraw(args);
 
             if (GetBool("Misc.Walljump") && Game.MapId == GameMapId.SummonersRift)
             {
@@ -298,7 +305,7 @@ namespace YasuoPro
             }
         }
 
-        void CastR(int minhit = 1)
+        void CastR(float minhit = 1)
         {
             UltMode ultmode = GetUltMode();
 
@@ -493,7 +500,7 @@ namespace YasuoPro
                     var pred =
                         MinionManager.GetBestLineFarmLocation(minions.Select(m => m.ServerPosition.To2D()).ToList(),
                             Spells[Q2].Width, Spells[Q2].Range);
-                    if (pred.MinionsHit >= GetSlider("Waveclear.Qcount"))
+                    if (pred.MinionsHit >= GetSliderInt("Waveclear.Qcount"))
                     {
                         Spells[Q2].Cast(pred.Position);
                     }
@@ -515,17 +522,17 @@ namespace YasuoPro
             {
                 if (GetBool("Waveclear.UseTIA"))
                 {
-                    Tiamat.minioncount = GetSlider("Waveclear.MinCountHDR");
+                    Tiamat.minioncount = GetSliderInt("Waveclear.MinCountHDR");
                     Tiamat.Cast(null, true);
                 }
                 if (GetBool("Waveclear.UseHDR"))
                 {
-                    Hydra.minioncount = GetSlider("Waveclear.MinCountHDR");
+                    Hydra.minioncount = GetSliderInt("Waveclear.MinCountHDR");
                     Hydra.Cast(null, true);
                 }
                 if (GetBool("Waveclear.UseYMU"))
                 {
-                    Youmu.minioncount = GetSlider("Waveclear.MinCountYOU");
+                    Youmu.minioncount = GetSliderInt("Waveclear.MinCountYOU");
                     Youmu.Cast(null, true);
                 }
             }
@@ -682,7 +689,7 @@ namespace YasuoPro
                     var pred =
                         MinionManager.GetBestLineFarmLocation(minions.Select(m => m.ServerPosition.To2D()).ToList(),
                             Spells[Q2].Width, Spells[Q2].Range);
-                    if (pred.MinionsHit >= GetSlider("Farm.Qcount"))
+                    if (pred.MinionsHit >= GetSliderInt("Farm.Qcount"))
                     {
                         Spells[Q2].Cast(pred.Position);
                     }

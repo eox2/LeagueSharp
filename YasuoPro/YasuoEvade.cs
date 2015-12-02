@@ -50,23 +50,26 @@ namespace YasuoPro
                     if (skillshot.IsAboutToHit(700, Helper.Yasuo) && skillshot.SpellData.Type != SkillShotType.SkillshotCircle && Helper.GetBool("Evade.UseW"))
                     {
                         if (skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall) && skillshot.Evade(SpellSlot.W)
-                             && skillshot.SpellData.DangerValue >= Helper.GetSlider("Evade.MinDangerLevelWW"))
+                             && skillshot.SpellData.DangerValue >= Helper.GetSliderInt("Evade.MinDangerLevelWW"))
                         {
                             var castpos = Helper.Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(), 50);
-                            bool WCasted = Helper.Spells[Helper.W].Cast(castpos);
-                            Program.DetectedSkillshots.Remove(skillshot);
-                            skillshot.Dodged = WCasted;
-                            if (WCasted)
+                            if (TickCount - skillshot.StartTick >= skillshot.SpellData.setdelay)
                             {
-                                if (Helper.Debug)
+                                bool WCasted = Helper.Spells[Helper.W].Cast(castpos);
+                                Program.DetectedSkillshots.Remove(skillshot);
+                                skillshot.Dodged = WCasted;
+                                if (WCasted)
                                 {
-                                    Game.PrintChat("Blocked " + skillshot.SpellData.SpellName + " with Windwall ");
+                                    if (Helper.Debug)
+                                    {
+                                        Game.PrintChat("Blocked " + skillshot.SpellData.SpellName + " with Windwall ");
+                                    }
+                                    continue;
                                 }
-                                continue;
                             }
                         }
                     }
-                    if (skillshot.IsAboutToHit(500, Helper.Yasuo) && skillshot.Evade(SpellSlot.E) && !skillshot.Dodged && Helper.GetBool("Evade.UseE") && skillshot.SpellData.DangerValue >= Helper.GetSlider("Evade.MinDangerLevelE"))
+                    if (skillshot.IsAboutToHit(500, Helper.Yasuo) && skillshot.Evade(SpellSlot.E) && !skillshot.Dodged && Helper.GetBool("Evade.UseE") && skillshot.SpellData.DangerValue >= Helper.GetSliderInt("Evade.MinDangerLevelE"))
                     {
                         var evadetarget =
                             ObjectManager
@@ -96,6 +99,11 @@ namespace YasuoPro
             path.Add(Helper.Yasuo.ServerPosition.To2D());
             path.Add(Helper.GetDashPos(unit));
             return path;
+        }
+
+        public static int TickCount
+        {
+            get { return (int)(Game.Time * 1000f); }
         }
 
     }

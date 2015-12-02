@@ -191,9 +191,12 @@ namespace Evade
                                 new MenuItem("IsDangerous" + spell.MenuItemName, "Is Dangerous").SetValue(
                                     spell.IsDangerous));
 
-                           // subMenu.AddItem(new MenuItem("Enabled" + spell.MenuItemName, "Enabled").SetValue(!spell.DisabledByDefault));
+                          subMenu.AddItem(
+                               new MenuItem("Delay" + spell.MenuItemName, "Windwall Delay").SetValue(new Slider(0, 0, 1000)));
 
-                            skillShots.AddSubMenu(subMenu);
+                        // subMenu.AddItem(new MenuItem("Enabled" + spell.MenuItemName, "Enabled").SetValue(!spell.DisabledByDefault));
+
+                        skillShots.AddSubMenu(subMenu);
                         }
                     }
             }

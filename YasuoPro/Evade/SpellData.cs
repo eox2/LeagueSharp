@@ -17,6 +17,7 @@
 #region
 
 using LeagueSharp;
+using YasuoPro;
 
 #endregion
 
@@ -67,7 +68,15 @@ namespace Evade
         public SkillShotType Type;
         private int _radius;
         private int _range;
-        
+
+        public float setdelay
+        {
+            get
+            {
+                return Helper.GetSliderFloat("Delay" + MenuItemName);
+            }
+        }
+
         public SpellData() { }
 
         public SpellData(string championName,
