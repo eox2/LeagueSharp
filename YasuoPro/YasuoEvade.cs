@@ -53,7 +53,7 @@ namespace YasuoPro
                              && skillshot.SpellData.DangerValue >= Helper.GetSliderInt("Evade.MinDangerLevelWW"))
                         {
                             var castpos = Helper.Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(), 50);
-                            if (TickCount - skillshot.StartTick >= skillshot.SpellData.setdelay)
+                            if (TickCount - skillshot.StartTick >= skillshot.SpellData.setdelay + Helper.GetSliderInt("Evade.Delay"))
                             {
                                 bool WCasted = Helper.Spells[Helper.W].Cast(castpos);
                                 Program.DetectedSkillshots.Remove(skillshot);

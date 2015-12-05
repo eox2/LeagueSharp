@@ -20,7 +20,7 @@ namespace YasuoPro
             {
                 get
                 {
-                    return Helper.GetSliderFloat("enabled." + spellName + ".delay");
+                    return Helper.GetSliderFloat("enabled." + spellName + ".delay") + Helper.GetSliderInt("Evade.Delay");
                 }
             }
             internal bool IsEnabled
@@ -99,7 +99,7 @@ namespace YasuoPro
         public static void OnUpdate()
         {
             foreach (var ls in DetectedPolygons) {
-                if (YasuoEvade.TickCount - ls.StartTick >= ls.data.delay)
+                if (YasuoEvade.TickCount - ls.StartTick >= ls.data.delay + Helper.GetSliderInt("Evade.Delay"))
                 {
                     if (ls.poly.PointInPolygon(Helper.Yasuo.ServerPosition.To2D()) == 1)
                     {

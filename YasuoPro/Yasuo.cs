@@ -311,8 +311,7 @@ namespace YasuoPro
 
             IOrderedEnumerable<Obj_AI_Hero> ordered = null;
 
-            var first = KnockedUp.FirstOrDefault();
-            if (KnockedUp.Count() == 1 && first != null && first.isBlackListed())
+            if ((GetBool("Combo.OnlyifMin") && KnockedUp.Count() < minhit) || (ordered.Count() == 1 && ordered.FirstOrDefault().HealthPercent <= GetSliderInt("Combo.MinHealthUlt")))
             {
                 return;
             }
@@ -332,22 +331,22 @@ namespace YasuoPro
                 ordered = KnockedUp.OrderByDescending(x => x.CountEnemiesInRange(350)).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenBy(x => x.Health);
             }
 
-            if (GetBool("Combo.UltOnlyKillable"))
+            if (GetBool("Combo.RPriority"))
             {
-                var killable = ordered.FirstOrDefault(x => !x.isBlackListed() && x.Health <= Yasuo.GetSpellDamage(x, SpellSlot.R) && (GetBool("Combo.UltTower") || GetKeyBind("Misc.TowerDive") || !x.Position.To2D().PointUnderEnemyTurret()));
-                if (killable != null)
+                var best = ordered.Find(x => !x.isBlackListed() && TargetSelector.GetPriority(x) == 5 && (GetBool("Combo.UltTower") || GetKeyBind("Misc.TowerDive") || !x.Position.To2D().PointUnderEnemyTurret()));
+                if (best != null && Yasuo.HealthPercent / best.HealthPercent <= 1)
                 {
-                    Spells[R].CastOnUnit(killable);
+                    Spells[R].CastOnUnit(best);
                     return;
                 }
             }
 
-            if (GetBool("Combo.RPriority"))
+            if (GetBool("Combo.UltOnlyKillable"))
             {
-                var best = ordered.Find(x => !x.isBlackListed() && TargetSelector.GetPriority(x) == 5 && (GetBool("Combo.UltTower") || GetKeyBind("Misc.TowerDive") || !x.Position.To2D().PointUnderEnemyTurret()));
-                if (best != null)
+                var killable = ordered.FirstOrDefault(x => !x.isBlackListed() && x.Health <= Yasuo.GetSpellDamage(x, SpellSlot.R) && x.HealthPercent >= GetSliderInt("Combo.MinHealthUlt") && (GetBool("Combo.UltTower") || GetKeyBind("Misc.TowerDive") || !x.Position.To2D().PointUnderEnemyTurret()));
+                if (killable != null && !killable.IsInRange(Spells[Q].Range))
                 {
-                    Spells[R].CastOnUnit(best);
+                    Spells[R].CastOnUnit(killable);
                     return;
                 }
             }

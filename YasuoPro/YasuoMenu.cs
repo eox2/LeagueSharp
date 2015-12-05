@@ -91,7 +91,8 @@ namespace YasuoPro
                 ultmenu.AddBool("Combo.UltOnlyKillable", "Ult only Killable", false);
                 ultmenu.AddBool("Combo.RPriority", "Ult if priority 5 target is knocked up", true);
                 ultmenu.AddSlider("Combo.RMinHit", "Min Enemies for Ult", 1, 1, 5);
-                ultmenu.AddBool("Combo.UltLogic", "Some Ult Logic", false);
+                ultmenu.AddBool("Combo.OnlyifMin", "Only Ult if minimum enemies met", false);
+                ultmenu.AddSlider("Combo.MinHealthUlt", "Minimum health to Ult %", 0, 0 , 100);
 
 
                 menu.AddBool("Combo.UseIgnite", "Use Ignite");
@@ -197,6 +198,7 @@ namespace YasuoPro
                 menu.AddBool("Evade.WSS", "Windwall Skillshots");
                 menu.AddBool("Evade.UseW", "Evade with Windwall");
                 menu.AddBool("Evade.UseE", "Evade with E");
+                menu.AddSlider("Evade.Delay", "Windwall Base Delay", 0, 0, 1000);
             }
         }
 
@@ -223,7 +225,7 @@ namespace YasuoPro
         {
             internal static void Attach(Menu menu)
             {
-                menu.AddBool("Drawing.Disable", "Disable Drawings", false);
+                menu.AddBool("Drawing.Disable", "Disable Drawings", true);
                 menu.AddCircle("Drawing.DrawQ", "Draw Q", Yas.Qrange, System.Drawing.Color.Red);
                 menu.AddCircle("Drawing.DrawE", "Draw E", Yas.Erange, System.Drawing.Color.CornflowerBlue);
                 menu.AddCircle("Drawing.DrawR", "Draw R", Yas.Rrange, System.Drawing.Color.DarkOrange);
