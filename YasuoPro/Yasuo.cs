@@ -311,11 +311,7 @@ namespace YasuoPro
 
             IOrderedEnumerable<Obj_AI_Hero> ordered = null;
 
-            if ((GetBool("Combo.OnlyifMin") && KnockedUp.Count() < minhit) || (ordered.Count() == 1 && ordered.FirstOrDefault().HealthPercent <= GetSliderInt("Combo.MinHealthUlt")))
-            {
-                return;
-            }
-
+  
             if (ultmode == UltMode.Health)
             {
                 ordered = KnockedUp.OrderBy(x => x.Health).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenByDescending(x => x.CountEnemiesInRange(350));
@@ -329,6 +325,11 @@ namespace YasuoPro
             if (ultmode == UltMode.EnemiesHit)
             {
                 ordered = KnockedUp.OrderByDescending(x => x.CountEnemiesInRange(350)).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenBy(x => x.Health);
+            }
+
+            if ((GetBool("Combo.OnlyifMin") && ordered.Count() < minhit) || (ordered.Count() == 1 && ordered.FirstOrDefault().HealthPercent < GetSliderInt("Combo.MinHealthUlt")))
+            {
+                return;
             }
 
             if (GetBool("Combo.RPriority"))
