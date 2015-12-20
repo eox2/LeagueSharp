@@ -47,14 +47,43 @@ namespace YasuoPro
 
         internal void InitSpells()
         {
-            Spells[Q].SetSkillshot(0.250f, 55f, int.MaxValue, false, SkillshotType.SkillshotLine);
-            Spells[Q2].SetSkillshot(0.250f, 90, 1500f, false, SkillshotType.SkillshotLine);
+            Spells[Q].SetSkillshot(Qdelay, 55f, int.MaxValue, false, SkillshotType.SkillshotLine);
+            Spells[Q2].SetSkillshot(Qdelay, 90, 1500f, false, SkillshotType.SkillshotLine);
             Spells[E].SetTargetted(0.075f, 1025);
         }
 
         internal float Qrange
         {
             get { return TornadoReady ? Spells[Q2].Range : Spells[Q].Range; }
+        }
+
+        internal float Qdelay
+        {
+            get
+            {
+                return 0.250f - (Math.Min(BonusAttackSpeed, 0.66f) * 0.250f);
+            }
+        }
+
+        internal void UpdateQDelay()
+        {
+            if (Spells[Q2].Delay != Qdelay)
+            {
+                Spells[Q2].Delay = Qdelay;
+            }
+            if (Spells[Q].Delay != Qdelay)
+            {
+                Spells[Q].Delay = Qdelay;
+            }
+
+        }
+
+        internal float BonusAttackSpeed
+        {
+            get
+            {
+                return (1 / Yasuo.AttackDelay) - 0.658f;
+            }
         }
 
         internal float Erange
