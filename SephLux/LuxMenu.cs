@@ -14,10 +14,6 @@ namespace SephLux
         {
             Config = new Menu("SephLux", "Lux", true);
 			SPrediction.Prediction.Initialize(Config);
-			LeagueSharp.Common.TargetSelector TargetSelector = new LeagueSharp.Common.TargetSelector();
-            Menu TSMenu = new Menu("Target Selector", "TS", false);
-            TargetSelector.AddToMenu(TSMenu);
-            Config.AddSubMenu(TSMenu);
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking", false));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
@@ -100,7 +96,7 @@ namespace SephLux
             Menu Misc = new Menu("Misc", "Misc");
             Misc.AddItem(new MenuItem("Misc.Debug", "Debug").SetValue(false));
             Misc.AddItem(new MenuItem("Misc.RKey", "Ult Key").SetValue(new KeyBind(114, KeyBindType.Press)));
-            Misc.AddItem(new MenuItem("Misc.Lkey", "Laugh key").SetValue(new KeyBind(115, KeyBindType.Press)));
+            Misc.AddItem(new MenuItem("Misc.LKey", "Laugh key").SetValue(new KeyBind(115, KeyBindType.Press)));
             Config.AddSubMenu(Misc);
 
             Menu HC = new Menu("Hit Chance Settings", "HC", false);

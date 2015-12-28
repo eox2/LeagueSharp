@@ -725,7 +725,7 @@ namespace SephLux
             }
             var sender = args.Sender;
 
-            if (sender != null && LuxUtils.Active("Interrupter.AntiGapClose") && sender.IsValidTarget())
+            if (sender != null && sender.IsValidTarget())
             {
                 if (LuxUtils.Active("Interrupter.AG.UseQ") && Vector3.Distance(sender.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.Q].Range)
                 {
@@ -758,10 +758,10 @@ namespace SephLux
             {
                 GameObject.OnCreate += (sender, args) =>
                 {
-                    if (sender.Name.Contains("LuxLightstrike_tar"))
+                    var miss = sender as MissileClient;
+                    if (miss != null && miss.IsValid && miss.SpellCaster.IsMe)
                     {
-                        var miss = sender as MissileClient;
-                        if (sender is MissileClient && sender.IsValid && miss.SpellCaster.IsMe)
+                        if (sender.Name.Contains("LuxLightStrikeKugel"))
                         {
                             LuxE = miss;
                         }
@@ -770,13 +770,10 @@ namespace SephLux
 
                 GameObject.OnDelete += (sender, args) =>
                 {
-                    if (sender.Name.Contains("LuxLightstrike_tar"))
+                    var miss = sender as MissileClient;
+                    if (miss != null && miss.SpellCaster.IsMe && miss.IsValid && miss.SData.Name.Contains("LuxLightStrikeKugel"))
                     {
-                        var miss = sender as MissileClient;
-                        if (sender is MissileClient && sender.IsValid && miss.SpellCaster.IsMe)
-                        {
-                            LuxE = null;
-                        }
+                        LuxE = null;
                     }
                 };
             }
