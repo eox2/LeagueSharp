@@ -151,22 +151,25 @@ namespace SephKayle
             var target = ObjectManager.Get<Obj_AI_Hero>()
                 .Where(x => x.IsInvulnerable && !x.IsDead && x.IsEnemy && !x.IsZombie && x.IsValidTarget() && x.Distance(Player.Position) <= 800)
                 .OrderBy(x => x.Health).FirstOrDefault();
-            double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
-            double QDmg = Player.GetSpellDamage(target, SpellSlot.Q);
-            var totalksdmg = igniteDmg + QDmg;
-            
-            if (target.Health <= QDmg && Player.Distance(target) <= Q.Range)
+            if (target != null)
             {
-                Q.CastOnUnit(target);
-            }
-            if (target.Health <= igniteDmg && Player.Distance(target) <= Ignite.Range)
-            {
-                Player.Spellbook.CastSpell(Ignite.Slot, target);
-            }
-            if (target.Health <= totalksdmg && Player.Distance(target) <= Q.Range)
-            {
-                Q.CastOnUnit(target);
-                Player.Spellbook.CastSpell(Ignite.Slot, target);
+                double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
+                double QDmg = Player.GetSpellDamage(target, SpellSlot.Q);
+                var totalksdmg = igniteDmg + QDmg;
+
+                if (target.Health <= QDmg && Player.Distance(target) <= Q.Range)
+                {
+                    Q.CastOnUnit(target);
+                }
+                if (target.Health <= igniteDmg && Player.Distance(target) <= Ignite.Range)
+                {
+                    Player.Spellbook.CastSpell(Ignite.Slot, target);
+                }
+                if (target.Health <= totalksdmg && Player.Distance(target) <= Q.Range)
+                {
+                    Q.CastOnUnit(target);
+                    Player.Spellbook.CastSpell(Ignite.Slot, target);
+                }
             }
         }
 
@@ -195,6 +198,7 @@ namespace SephKayle
             {
                 Q.Cast(qtarget);
             }
+
             if (GetBool("UseE") && etarget != null && E.IsReady() && !Eon)
             {
                 E.CastOnUnit(Player);
@@ -424,7 +428,7 @@ namespace SephKayle
                 HealUltManager();
             }
 
-            if (!Config.Item("killsteal").GetValue<bool>())
+            if (GetBool("killsteal"))
             {
                 KillSteal();
             }
