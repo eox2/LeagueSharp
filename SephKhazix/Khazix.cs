@@ -596,8 +596,10 @@ namespace SephKhazix
 
                     var ec = enemies.Count;
                     var ac = allies.Count;
-                    var setratio = Config.GetSlider("Safety.Ratio") / 5;
-                    if (!(ac / ec >= setratio))
+                    float setratio = Config.GetSlider("Safety.Ratio") / 5;
+
+
+                    if (ec != 0 && !(ac / ec >= setratio))
                     {
                         return false;
                     }
