@@ -254,7 +254,7 @@ namespace SephKhazix
                 }
             }
 
-            if (Config.GetBool("UseWFarm") && W.IsReady())
+            if (Config.GetBool("UseWFarm") && W.IsReady() && Khazix.HealthPercent <= Config.GetSlider("Farm.WHealth"))
             {
                 var wmins = EvolvedW ? allMinions.Where(x => x.IsValidTarget(WE.Range)) : allMinions.Where(x => x.IsValidTarget(W.Range));
                 MinionManager.FarmLocation farmLocation = MinionManager.GetBestCircularFarmLocation(wmins
@@ -455,7 +455,10 @@ namespace SephKhazix
                                     PredictionOutput pred = E.GetPrediction(target);
                                     if (target.IsValid && !target.IsDead)
                                     {
-                                        E.Cast(pred.CastPosition);
+                                        if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
+                                        {
+                                            E.Cast(pred.CastPosition);
+                                        }
                                     }
                                 });
                         }
@@ -517,7 +520,10 @@ namespace SephKhazix
                                 PredictionOutput pred = E.GetPrediction(target);
                                 if (target.IsValidTarget() && !target.IsZombie && ShouldJump(pred.CastPosition))
                                 {
-                                    E.Cast(pred.CastPosition);
+                                    if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
+                                    {
+                                        E.Cast(pred.CastPosition);
+                                    }
                                 }
                             });
                         }
@@ -537,12 +543,14 @@ namespace SephKhazix
                                 PredictionOutput pred = E.GetPrediction(target);
                                 if (target.IsValid && !target.IsDead && ShouldJump(pred.CastPosition))
                                 {
-                                    E.Cast(pred.CastPosition);
+                                    if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
+                                    {
+                                        E.Cast(pred.CastPosition);
+                                    }
                                 }
                             });
                         }
                     }
-
 
                     if (Tiamat.IsReady() &&
                         Vector2.Distance(Khazix.ServerPosition.To2D(), target.ServerPosition.To2D()) <= Tiamat.Range &&
@@ -576,7 +584,7 @@ namespace SephKhazix
             }
             else if (Config.GetBool("Safety.Enabled"))
             {
-                if (!(Khazix.HealthPercent >= Config.GetSlider("Safety.MinHealth")))
+                if (Khazix.HealthPercent < Config.GetSlider("Safety.MinHealth"))
                 {
                     return false;
                 }

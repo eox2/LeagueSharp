@@ -43,6 +43,7 @@ namespace SephKhazix
             farm.AddBool("UseQFarm", "Use Q");
             farm.AddBool("UseEFarm", "Use E");
             farm.AddBool("UseWFarm", "Use W");
+            farm.AddSlider("Farm.WHealth", "Health % to use W", 80, 0, 100);
             farm.AddBool("UseItemsFarm", "Use Items").SetValue(true);
 
             //Kill Steal
@@ -51,6 +52,7 @@ namespace SephKhazix
             ks.AddBool("UseQKs", "Use Q");
             ks.AddBool("UseWKs", "Use W");
             ks.AddBool("UseEKs", "Use E");
+            ks.AddBool("Ksbypass", "Bypass safety checks for E KS", false);
             ks.AddBool("UseEQKs", "Use EQ in KS");
             ks.AddBool("UseEWKs", "Use EW in KS");
             ks.AddBool("UseTiamatKs", "Use items");
