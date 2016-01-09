@@ -22,6 +22,10 @@ namespace SephKhazix
 
         void OnLoad(EventArgs args)
         {
+            if (ObjectManager.Player.ChampionName != "Khazix")
+            {
+                return;
+            }
             Game.PrintChat("<font color='#1d87f2'>SephKhazix Loaded </font>");
             Init();
             GenerateMenu();
