@@ -48,7 +48,6 @@ namespace YasuoPro
 
         void OnUpdate(EventArgs args)
         {
-            UpdateQDelay();
             if (Yasuo.IsDead || Yasuo.IsRecalling())
             {
                 return;

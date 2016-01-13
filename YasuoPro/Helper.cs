@@ -35,9 +35,10 @@ namespace YasuoPro
             get { return YasuoMenu.Orbwalker; }
         }
 
+        /* Credits to Brian for Q Skillshot values */
         internal static Dictionary<int, Spell> Spells = new Dictionary<int, Spell>
         {
-            { 1, new Spell(SpellSlot.Q, 450f) },
+            { 1, new Spell(SpellSlot.Q, 510f) },
             { 2, new Spell(SpellSlot.Q, 1150f) },
             { 3, new Spell(SpellSlot.W, 450f) },
             { 4, new Spell(SpellSlot.E, 475f) },
@@ -45,12 +46,20 @@ namespace YasuoPro
             { 6, new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 600) }
         };
 
+
         internal void InitSpells()
         {
-            Spells[Q].SetSkillshot(Qdelay, 55f, int.MaxValue, false, SkillshotType.SkillshotLine);
-            Spells[Q2].SetSkillshot(Qdelay, 90, 1500f, false, SkillshotType.SkillshotLine);
+            Spells[Q].SetSkillshot(GetQ1Delay, 20f, float.MaxValue, false, SkillshotType.SkillshotLine);
+            Spells[Q2].SetSkillshot(GetQ2Delay, 90, 1500, false, SkillshotType.SkillshotLine);
             Spells[E].SetTargetted(0.075f, 1025);
         }
+
+        private static float GetQDelay => 1 - Math.Min((Yasuo.AttackSpeedMod - 1) * 0.0058552631578947f, 0.6675f);
+
+        private static float GetQ1Delay { get { return 0.4f * GetQDelay; }  }
+
+        private static float GetQ2Delay { get { return 0.5f * GetQDelay; } }
+
 
         internal float Qrange
         {
@@ -65,18 +74,6 @@ namespace YasuoPro
             }
         }
 
-        internal void UpdateQDelay()
-        {
-            if (Spells[Q2].Delay != Qdelay)
-            {
-                Spells[Q2].Delay = Qdelay;
-            }
-            if (Spells[Q].Delay != Qdelay)
-            {
-                Spells[Q].Delay = Qdelay;
-            }
-
-        }
 
         internal float BonusAttackSpeed
         {
