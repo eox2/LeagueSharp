@@ -128,15 +128,12 @@ namespace SephKhazix
                             return;
                         }
                     }
-                    else if (EvolvedW && Khazix.Distance(target) <= WE.Range)
+                    else if (EvolvedW && target.IsValidTarget(W.Range + 200))
                     {
-                        if (target.IsValidTarget(WE.Range + 200))
-                        {
                             PredictionOutput pred = W.GetPrediction(target);
                             if ((pred.Hitchance == HitChance.Immobile && autoWI) || (pred.Hitchance == HitChance.Dashing && autoWD) || pred.Hitchance >= hitchance)
                             {
-                                CastWE(target, pred.UnitPosition.To2D());
-                            }
+                                CastWE(target, pred.UnitPosition.To2D(), 0, Config.GetHitChance("Harass.WHitchance"));
                         }
                     }
                 }
@@ -186,7 +183,7 @@ namespace SephKhazix
 
                     if (EvolvedW)
                     {
-                        if (Khazix.Distance(farmLocation.Position) <= WE.Range)
+                        if (Khazix.Distance(farmLocation.Position) <= W.Range)
                         {
                             W.Cast(farmLocation.Position);
                         }
@@ -234,7 +231,7 @@ namespace SephKhazix
 
         void Waveclear()
         {
-            List<Obj_AI_Minion> allMinions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(WE.Range)).ToList();
+            List<Obj_AI_Minion> allMinions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(W.Range)).ToList();
 
             if (Config.GetBool("UseQFarm") && Q.IsReady())
             {
@@ -368,7 +365,7 @@ namespace SephKhazix
                     PredictionOutput pred = WE.GetPrediction(target);
                     if (pred.Hitchance >= Config.GetHitChance("WHitchance"))
                     {
-                        CastWE(target, pred.UnitPosition.To2D());
+                        CastWE(target, pred.UnitPosition.To2D(), 0, Config.GetHitChance("WHitchance"));
                     }
                     if (pred.Hitchance >= HitChance.Collision)
                     {
@@ -491,7 +488,7 @@ namespace SephKhazix
                         PredictionOutput pred = W.GetPrediction(target);
                         if (target.Health <= WDmg && pred.Hitchance > HitChance.Medium)
                         {
-                            CastWE(target, pred.UnitPosition.To2D());
+                            CastWE(target, pred.UnitPosition.To2D(), 0, Config.GetHitChance("WHitchance"));
                             return;
                         }
 
@@ -615,7 +612,7 @@ namespace SephKhazix
 
 
 
-        internal void CastWE(Obj_AI_Base unit, Vector2 unitPosition, int minTargets = 0)
+        internal void CastWE(Obj_AI_Base unit, Vector2 unitPosition, int minTargets = 0, HitChance hc = HitChance.Medium)
         {
             var points = new List<Vector2>();
             var hitBoxes = new List<int>();
@@ -674,7 +671,7 @@ namespace SephKhazix
                 }
             }
 
-            if (bestHit + 1 <= minTargets)
+            if (bestHit <= minTargets)
                 return;
 
             W.Cast(bestPosition.To3D(), false);
@@ -685,7 +682,7 @@ namespace SephKhazix
             int result = 0;
 
             Vector2 startPoint = Khazix.ServerPosition.To2D();
-            Vector2 originalDirection = Q.Range * (position - startPoint).Normalized();
+            Vector2 originalDirection = W.Range * (position - startPoint).Normalized();
             Vector2 originalEndPoint = startPoint + originalDirection;
 
             for (int i = 0; i < points.Count; i++)
