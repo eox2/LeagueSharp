@@ -631,7 +631,7 @@ namespace SephKhazix
                     if (pos.Hitchance >= HitChance.Medium)
                     {
                         points.Add(pos.UnitPosition.To2D());
-                        hitBoxes.Add((int)enemy.BoundingRadius);
+                        hitBoxes.Add((int)enemy.BoundingRadius + 275);
                     }
                 }
             }
@@ -655,7 +655,7 @@ namespace SephKhazix
                 {
                     Vector2 pos = posiblePositions[i];
                     Vector2 direction = (pos - startPoint).Normalized().Perpendicular();
-                    float k = (2 / 3 * (unit.BoundingRadius + Q.Width));
+                    float k = (2 / 3 * (unit.BoundingRadius + W.Width));
                     posiblePositions.Add(startPoint - k * direction);
                     posiblePositions.Add(startPoint + k * direction);
                 }

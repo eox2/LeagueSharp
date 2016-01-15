@@ -40,7 +40,7 @@ namespace SephKhazix
             Q = new Spell(SpellSlot.Q, 325f);
             W = new Spell(SpellSlot.W, 1000f);
             WE = new Spell(SpellSlot.W, 1000f);
-            E = new Spell(SpellSlot.E, 600f);
+            E = new Spell(SpellSlot.E, 700f);
             R = new Spell(SpellSlot.R, 0);
             W.SetSkillshot(0.225f, 80f, 828.5f, true, SkillshotType.SkillshotLine);
             WE.SetSkillshot(0.225f, 100f, 828.5f, true, SkillshotType.SkillshotLine);
