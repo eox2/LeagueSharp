@@ -35,17 +35,17 @@ namespace SephLux
             CustomEvents.Game.OnGameLoad += LuxMain;
         }
 
-        private static readonly Dictionary<SpellSlot, Spell> Spells = new Dictionary<SpellSlot, Spell>
+        private static Dictionary<SpellSlot, Spell> Spells;
+
+        private static void InitializeSpells()
         {
+            Spells = new Dictionary<SpellSlot, Spell> { 
             {SpellSlot.Q, new Spell(SpellSlot.Q, 1300f, TargetSelector.DamageType.Magical)},
             {SpellSlot.W, new Spell(SpellSlot.W, 1150f)},
             {SpellSlot.E, new Spell(SpellSlot.E, 1100f, TargetSelector.DamageType.Magical)},
             {SpellSlot.R, new Spell(SpellSlot.R, 3500f, TargetSelector.DamageType.Magical)},
             {IgniteSlot, new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 550f)}
-        };
-
-        private static void InitializeSpells()
-        {
+            };
             Spells[SpellSlot.Q].SetSkillshot(0.250f, 70f, 1300f, false, SkillshotType.SkillshotLine);
             Spells[SpellSlot.W].SetSkillshot(0.25f, 150f, 1200f, false, SkillshotType.SkillshotLine);
             Spells[SpellSlot.E].SetSkillshot(0.250f, 275f, 1300f, false, SkillshotType.SkillshotCircle);

@@ -36,17 +36,17 @@ namespace SephCassiopeia
             CustomEvents.Game.OnGameLoad += CassMain;
         }
 
-        private static readonly Dictionary<SpellSlot, Spell> Spells = new Dictionary<SpellSlot, Spell>
+        private static Dictionary<SpellSlot, Spell> Spells;
+
+        private static void InitializeSpells()
         {
+            Spells = new Dictionary<SpellSlot, Spell> {
             { SpellSlot.Q, new Spell(SpellSlot.Q, 850f, TargetSelector.DamageType.Magical) },
             { SpellSlot.W, new Spell(SpellSlot.W, 850f, TargetSelector.DamageType.Magical) },
             { SpellSlot.E, new Spell(SpellSlot.E, 700f, TargetSelector.DamageType.Magical) },
             { SpellSlot.R, new Spell(SpellSlot.R, 825f, TargetSelector.DamageType.Magical) },
             { IgniteSlot, new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 550f) }
-        };
-
-        private static void InitializeSpells()
-        {
+                };
             Spells[SpellSlot.Q].SetSkillshot(0.6f, 70f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             Spells[SpellSlot.W].SetSkillshot(0.5f, 275f, 2500f, false, SkillshotType.SkillshotCircle);
             Spells[SpellSlot.R].SetSkillshot(0.3f, (float)(80 * Math.PI / 180), float.MaxValue, false, SkillshotType.SkillshotCone); //Credits to InjectionDev for Width Value

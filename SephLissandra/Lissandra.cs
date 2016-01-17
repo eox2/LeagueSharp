@@ -25,16 +25,7 @@ namespace SephLissandra
         private static Vector2 MissilePosition;
         private static MissileClient LissEMissile;
 
-        private static Dictionary<String, Spell> Spells = new Dictionary<String, Spell>
-        {
-            { "Q", new Spell(SpellSlot.Q, 715f) },
-            { "Qtest", new Spell(SpellSlot.Q, 715f) },
-            { "Q2", new Spell(SpellSlot.Q, 825f) },
-            { "W", new Spell(SpellSlot.W, 450f) },
-            { "E", new Spell(SpellSlot.E, 1050f) },
-            { "R", new Spell(SpellSlot.R, 550f) },
-            { "Ignite", new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 600) }
-        };
+        private static Dictionary<String, Spell> Spells;
 
 
         public static void LissandraMain()
@@ -66,6 +57,15 @@ namespace SephLissandra
 
         static void DefineSpells()
         {
+            Spells = new Dictionary<String, Spell> {
+            { "Q", new Spell(SpellSlot.Q, 715f) },
+            { "Qtest", new Spell(SpellSlot.Q, 715f) },
+            { "Q2", new Spell(SpellSlot.Q, 825f) },
+            { "W", new Spell(SpellSlot.W, 450f) },
+            { "E", new Spell(SpellSlot.E, 1050f) },
+            { "R", new Spell(SpellSlot.R, 550f) },
+            { "Ignite", new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 600) }
+                };
             Spells["Q"].SetSkillshot(0.250f, 75f, 2200f, false, SkillshotType.SkillshotLine);
             Spells["Qtest"].SetSkillshot(0.250f, 75f, 2200f, true, SkillshotType.SkillshotLine);
             Spells["Q2"].SetSkillshot(0.250f, 90f, 2200f, false, SkillshotType.SkillshotLine);
