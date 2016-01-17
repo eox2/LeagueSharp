@@ -36,7 +36,7 @@ namespace SkinsSharp
             {
                 foreach (var hero in HeroManager.AllHeroes)
                 {
-                    if (!menu.Item("forall").GetValue<bool>() && hero.Name != ObjectManager.Player.Name || hero.ChampionName.Equals("Ezreal"))
+                    if (!menu.Item("forall").GetValue<bool>() && hero.Name != ObjectManager.Player.Name)
                     {
                         continue;
                     }
@@ -80,7 +80,12 @@ namespace SkinsSharp
                     skinselect.ValueChanged += delegate (Object sender, OnValueChangeEventArgs args)
                     {
 						Enabled[hero.NetworkId] = true;
-						ChampSkins[currenthero.Name] = args.GetNewValue<StringList>().SelectedIndex;
+                        var skinid = args.GetNewValue<StringList>().SelectedIndex;
+                        if (hero.ChampionName == "Ezreal" && skinid == 5)
+                        {
+                            skinid += 1;
+                        }
+                        ChampSkins[currenthero.Name] = skinid;
                         currenthero.SetSkin(currenthero.ChampionName, ChampSkins[currenthero.Name]);
                     };
                 }
