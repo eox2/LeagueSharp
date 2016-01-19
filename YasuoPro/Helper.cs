@@ -54,7 +54,7 @@ namespace YasuoPro
             Spells[E].SetTargetted(0.075f, 1025);
         }
 
-        private static float GetQDelay => 1 - Math.Min((Yasuo.AttackSpeedMod - 1) * 0.0058552631578947f, 0.6675f);
+        private static float GetQDelay { get { return 1 - Math.Min((Yasuo.AttackSpeedMod - 1) * 0.0058552631578947f, 0.6675f); } }
 
         private static float GetQ1Delay { get { return 0.4f * GetQDelay; }  }
 
