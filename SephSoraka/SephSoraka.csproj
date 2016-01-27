@@ -39,18 +39,17 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="clipper_library, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Laptop\Desktop\L#\System\clipper_library.dll</HintPath>
+    <Reference Include="clipper_library">
+      <HintPath>..\..\..\..\Desktop\L#\System\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>C:\Users\Laptop\Desktop\L#\System\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Users\Seph\Desktop\L#\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>C:\Users\Laptop\Desktop\L#\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Users\Seph\Desktop\L#\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\Laptop\Desktop\L#\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\Seph\Desktop\L#\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

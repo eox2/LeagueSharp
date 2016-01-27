@@ -19,14 +19,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-namespace SephSorka.SPrediction
+//typedefs
+using Geometry = SephSoraka;
+namespace SephSoraka
 {
     /// <summary>
     /// SPrediction Collision class
@@ -115,12 +115,12 @@ namespace SephSorka.SPrediction
             var spellHitBox = ClipperWrapper.MakePaths(ClipperWrapper.DefineRectangle(from, to, width));
             if (isArc)
             {
-                spellHitBox = ClipperWrapper.MakePaths(new SPrediction.Geometry.Polygon(
+                spellHitBox = ClipperWrapper.MakePaths(new SephSoraka.Geometry.Polygon(
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 200 * (to.Distance(from) / 875f)),
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 320 * (to.Distance(from) / 875f))));
 
             }
-            return MinionManager.GetMinions(from.Distance(to) + 250, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(Prediction.GetFastUnitPosition(p, delay, missileSpeed), p.BoundingRadius + width / 2f)), spellHitBox));
+            return MinionManager.GetMinions(from.Distance(to) + 250, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(Prediction.GetFastUnitPosition(p, delay, missileSpeed), p.BoundingRadius * 2f + 10f)), spellHitBox));
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace SephSorka.SPrediction
             var spellHitBox = ClipperWrapper.MakePaths(ClipperWrapper.DefineRectangle(from, to, width));
             if (isArc)
             {
-                spellHitBox = ClipperWrapper.MakePaths(new SPrediction.Geometry.Polygon(
+                spellHitBox = ClipperWrapper.MakePaths(new SephSoraka.Geometry.Polygon(
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 200 * (to.Distance(from) / 875f)),
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 320 * (to.Distance(from) / 875f))));
             }
@@ -160,7 +160,7 @@ namespace SephSorka.SPrediction
             var spellHitBox = ClipperWrapper.MakePaths(ClipperWrapper.DefineRectangle(from, to, width));
             if (isArc)
             {
-                spellHitBox = ClipperWrapper.MakePaths(new SPrediction.Geometry.Polygon(
+                spellHitBox = ClipperWrapper.MakePaths(new SephSoraka.Geometry.Polygon(
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 200 * (to.Distance(from) / 875f)),
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 320 * (to.Distance(from) / 875f))));
             }
@@ -215,7 +215,7 @@ namespace SephSorka.SPrediction
 
             if (isArc)
             {
-                spellHitBox = new SPrediction.Geometry.Polygon(
+                spellHitBox = new SephSoraka.Geometry.Polygon(
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 200 * (to.Distance(from) / 875f)),
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 320 * (to.Distance(from) / 875f)));
             }
@@ -264,7 +264,7 @@ namespace SephSorka.SPrediction
             var spellHitBox = ClipperWrapper.MakePaths(ClipperWrapper.DefineRectangle(from, to, width));
             if (isArc)
             {
-                spellHitBox = ClipperWrapper.MakePaths(new SPrediction.Geometry.Polygon(
+                spellHitBox = ClipperWrapper.MakePaths(new SephSoraka.Geometry.Polygon(
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 200 * (to.Distance(from) / 875f)),
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 320 * (to.Distance(from) / 875f))));
             }

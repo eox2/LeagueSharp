@@ -22,7 +22,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-namespace SephSoraka
+namespace SephLux.SPrediction
 {
     /// <summary>
     /// Ring prediction class 

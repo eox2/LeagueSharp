@@ -73,6 +73,7 @@
     <Compile Include="SPrediction\Obj_AI_HeroExtensions.cs" />
     <Compile Include="SPrediction\PathTracker.cs" />
     <Compile Include="SPrediction\Prediction.cs" />
+    <Compile Include="SPrediction\RingPrediction.cs" />
     <Compile Include="SPrediction\SpellExtensions.cs" />
     <Compile Include="SPrediction\Utility.cs" />
     <Compile Include="SPrediction\VectorPrediction.cs" />

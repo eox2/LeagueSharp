@@ -5,7 +5,6 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using SephSorka.SPrediction;
 using Color = System.Drawing.Color;
 
 #endregion;

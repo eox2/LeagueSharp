@@ -17,10 +17,6 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SharpDX;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -29,7 +25,7 @@ using ClipperLib;
 using Path = System.Collections.Generic.List<ClipperLib.IntPoint>;
 using Paths = System.Collections.Generic.List<System.Collections.Generic.List<ClipperLib.IntPoint>>;
 
-namespace SephSorka.SPrediction
+namespace SephSoraka
 {
     /// <summary>
     /// SPrediciton Clipper wrapper class

@@ -19,13 +19,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
+//typedefs
+using Geometry = SephLux.SPrediction.Geometry;
 namespace SephLux.SPrediction
 {
     /// <summary>
@@ -93,7 +93,7 @@ namespace SephLux.SPrediction
         /// <returns>true if collision found</returns>
         public static bool CheckCollision(Vector2 from, Vector2 to, float width, float delay, float missileSpeed, bool checkMinion = true, bool checkEnemyHero = false, bool checkYasuoWall = true, bool checkAllyHero = false, bool checkWall = false, bool isArc = false)
         {
-            return  (checkMinion && CheckMinionCollision(from, to, width, delay, missileSpeed, isArc)) ||
+            return (checkMinion && CheckMinionCollision(from, to, width, delay, missileSpeed, isArc)) ||
                     (checkEnemyHero && CheckEnemyHeroCollision(from, to, width, delay, missileSpeed, isArc)) ||
                     (checkYasuoWall && CheckYasuoWallCollision(from, to, width, isArc)) ||
                     (checkAllyHero && CheckAllyHeroCollision(from, to, width, delay, missileSpeed, isArc)) ||
@@ -112,17 +112,15 @@ namespace SephLux.SPrediction
         /// <returns>true if collision found</returns>
         public static bool CheckMinionCollision(Vector2 from, Vector2 to, float width, float delay, float missileSpeed = 0, bool isArc = false)
         {
-            var spellBBox = new BoundingBox(from.To3D(), to.To3D());
+            var spellHitBox = ClipperWrapper.MakePaths(ClipperWrapper.DefineRectangle(from, to, width));
             if (isArc)
             {
-                var spellHitBox = ClipperWrapper.MakePaths(new SPrediction.Geometry.Polygon(
+                spellHitBox = ClipperWrapper.MakePaths(new SPrediction.Geometry.Polygon(
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 200 * (to.Distance(from) / 875f)),
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 320 * (to.Distance(from) / 875f))));
 
-                return MinionManager.GetMinions(from.Distance(to) + 100, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(Prediction.GetFastUnitPosition(p, delay, missileSpeed), p.BoundingRadius)), spellHitBox));
             }
-
-            return MinionManager.GetMinions(from.Distance(to) + 100, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => spellBBox.Intersects(new BoundingSphere(Prediction.GetFastUnitPosition(p, delay, missileSpeed).To3D(), p.BoundingRadius)));
+            return MinionManager.GetMinions(from.Distance(to) + 250, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(Prediction.GetFastUnitPosition(p, delay, missileSpeed), p.BoundingRadius * 2f + 10f)), spellHitBox));
         }
 
         /// <summary>
@@ -187,7 +185,7 @@ namespace SephLux.SPrediction
 
             return false;
         }
-        
+
         /// <summary>
         /// Check Yasuo wall collisions
         /// </summary>
@@ -264,7 +262,6 @@ namespace SephLux.SPrediction
         {
             List<Obj_AI_Base> collidedUnits = new List<Obj_AI_Base>();
             var spellHitBox = ClipperWrapper.MakePaths(ClipperWrapper.DefineRectangle(from, to, width));
-            var spellBBox = new BoundingBox(from.To3D(), to.To3D());
             if (isArc)
             {
                 spellHitBox = ClipperWrapper.MakePaths(new SPrediction.Geometry.Polygon(
@@ -272,9 +269,8 @@ namespace SephLux.SPrediction
                                 ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 875f), 410, 320 * (to.Distance(from) / 875f))));
             }
             Flags _colFlags = Flags.None;
-            
-            //var collidedMinions = MinionManager.GetMinions(from.Distance(to) + 250, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Where(p => ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(Prediction.GetFastUnitPosition(p, delay, missileSpeed), p.BoundingRadius + 10)), spellHitBox));
-            var collidedMinions = MinionManager.GetMinions(from.Distance(to) + 250, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Where(p => spellBBox.Intersects(new BoundingSphere(Prediction.GetFastUnitPosition(p, delay, missileSpeed).To3D(), p.BoundingRadius)));
+
+            var collidedMinions = MinionManager.GetMinions(from.Distance(to) + 250, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Where(p => ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(Prediction.GetFastUnitPosition(p, delay, missileSpeed), p.BoundingRadius + 10)), spellHitBox));
             var collidedEnemies = HeroManager.Enemies.AsParallel().Where(p => ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(Prediction.GetFastUnitPosition(p, delay, missileSpeed), p.BoundingRadius)), spellHitBox));
             var collidedAllies = HeroManager.Allies.AsParallel().Where(p => ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(Prediction.GetFastUnitPosition(p, delay, missileSpeed), p.BoundingRadius)), spellHitBox));
 

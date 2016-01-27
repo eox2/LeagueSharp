@@ -18,14 +18,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-namespace SephSorka.SPrediction
+namespace SephSoraka
 {
     /// <summary>
     /// SPrediction Geometry class
@@ -343,15 +340,26 @@ namespace SephSorka.SPrediction
         /// <param name="pointStart">Point start</param>
         /// <param name="pointEnd">Point end</param>
         /// <returns></returns>
-        internal static Vector2 ClosestCirclePoint(Vector2 center, float radius, Vector2 pointStart, Vector2 pointEnd)
+        internal static Vector2 ClosestCirclePoint(Vector2 center, float radius, Vector2 point)
         {
-            Vector2 point;
-            if (pointStart.Distance(center) < pointEnd.Distance(center))
-                point = pointStart;
-            else
-                point = pointEnd;
-            Vector2 v = (point - center);
-            return center + v / v.Length() * radius;
+            Vector2 v = (point - center).Normalized();
+            return center + v * radius;
+        }
+
+        internal static Vector2 Deviation(Vector2 point1, Vector2 point2, double angle)
+        {
+            angle *= Math.PI / 180.0;
+            Vector2 temp = Vector2.Subtract(point2, point1);
+            Vector2 result = new Vector2(0);
+            result.X = (float)(temp.X * Math.Cos(angle) - temp.Y * Math.Sin(angle)) / 4;
+            result.Y = (float)(temp.X * Math.Sin(angle) + temp.Y * Math.Cos(angle)) / 4;
+            result = Vector2.Add(result, point1);
+            return result;
+        }
+
+        internal static bool IsBetween(this Vector2 b, Vector2 a, Vector2 c)
+        {
+            return a.Distance(c) + c.Distance(b) - a.Distance(b) < float.Epsilon;
         }
     }
 }

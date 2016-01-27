@@ -19,13 +19,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-namespace SephSorka.SPrediction
+namespace SephSoraka
 {
     /// <summary>
     /// Path Tracker class for SPrediction
@@ -49,6 +47,7 @@ namespace SephSorka.SPrediction
             public bool IsWindupChecked;
             public int OrbwalkCount;
             public float AvgOrbwalkTime;
+            public float LastAngleDiff;
             public object m_lock;
 
             public EnemyData(List<Vector2> wp)
@@ -65,6 +64,7 @@ namespace SephSorka.SPrediction
                 IsWindupChecked = false;
                 OrbwalkCount = 0;
                 AvgOrbwalkTime = 0;
+                LastAngleDiff = 0;
                 m_lock = new object();
             }
         }
@@ -84,6 +84,7 @@ namespace SephSorka.SPrediction
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
         }
 
+        
         /// <summary>
         /// OnNewPath event for average reaction time calculations
         /// </summary>
@@ -106,11 +107,34 @@ namespace SephSorka.SPrediction
                         enemy.Count = 0;
                         enemy.AvgTick = 0;
                         enemy.AvgPathLenght = 0;
+                        enemy.LastAngleDiff = 360;
                     }
                 }
                 else
                 {
                     List<Vector2> wp = args.Path.Select(p => p.To2D()).ToList();
+                    List<Vector2> sample1 = new List<Vector2>();
+                    wp.Insert(0, sender.ServerPosition.To2D());
+
+                    for (int i = 0; i < wp.Count - 1; i++)
+                    {
+                        Vector2 direction = (wp[i + 1] - wp[i]).Normalized();
+                        sample1.Add(direction);
+                    }
+
+                    List<Vector2> sample2 = new List<Vector2>();
+                    for (int i = 0; i < enemy.LastWaypoints.Count - 1; i++)
+                    {
+                        Vector2 direction = (enemy.LastWaypoints[i + 1] - enemy.LastWaypoints[i]).Normalized();
+                        sample2.Add(direction);
+                    }
+
+                    if (sample1.Count() > 0 && sample2.Count() > 0)
+                    {
+                        float sample1_avg = sample1.Average(p => p.AngleBetween(Vector2.Zero));
+                        float sample2_avg = sample2.Average(p => p.AngleBetween(Vector2.Zero));
+                        enemy.LastAngleDiff = Math.Abs(sample2_avg - sample1_avg);
+                    }
                     if (!enemy.LastWaypoints.SequenceEqual(wp))
                     {
                         if (!enemy.IsStopped)
