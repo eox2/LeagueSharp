@@ -304,7 +304,7 @@ namespace SephSyndra
         {
             var candidates = HeroManager.Enemies.Where(x => x.IsValidTarget(SpellManager.R.Range)).OrderBy(x => TargetSelector.GetPriority(x));
             var orbcount = GetOrbcount();
-            foreach (var candidate in candidates)
+            foreach (var candidate in candidates.Where(x => !x.IsBlackListed()))
             {
                 if (candidate.HealthPercent < GetSliderFloat("c.rminh"))
                 {
@@ -388,9 +388,12 @@ namespace SephSyndra
 
             if (GetBool("ks.r") && SpellManager.R.IsReady() && target.IsValidTarget(SpellManager.R.Range))
             {
-                var rdmg = SpellManager.R.GetDamage(target);
-                dmg += rdmg;
-                spells.Add(SpellManager.R);
+                if (!target.IsBlackListed())
+                {
+                    var rdmg = SpellManager.R.GetDamage(target);
+                    dmg += rdmg;
+                    spells.Add(SpellManager.R);
+                }
             }
 
             if (GetBool("ks.ignite") && SpellManager.Ignite.IsReady() && target.IsValidTarget(SpellManager.Ignite.Range))

@@ -28,6 +28,12 @@ namespace SephSyndra
             combo.AddBool("c.r", "Use R");
             combo.AddSlider("c.rminh", "Min Target Health % for Ult", 10, 1, 100);
 
+            var blacklist = Config.AddSubMenu("Ult BlackList");
+            foreach (var h in HeroManager.Enemies)
+            {
+                blacklist.AddBool("noult." + h.ChampionName, h.ChampionName, false);
+            }
+
             var harass = Config.AddSubMenu("Harass");
             harass.AddKeyBind("h.enabled", "Harass", 'H', KeyBindType.Toggle).Permashow();
             harass.AddBool("h.inmixed", "In Mixed");

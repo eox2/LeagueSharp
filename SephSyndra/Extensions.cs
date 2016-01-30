@@ -72,5 +72,10 @@ namespace SephSyndra
         {
             return menu.AddItem(new MenuItem(name, displayname).SetValue(new StringList(stringlist, @default)));
         }
+
+        internal static bool IsBlackListed(this Obj_AI_Hero h)
+        {
+            return Helper.GetBool("noult." + h.ChampionName);
+        }
     }
 }
