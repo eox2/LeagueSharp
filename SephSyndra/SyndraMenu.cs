@@ -69,8 +69,8 @@ namespace SephSyndra
             var drawings = Config.AddSubMenu("Drawings");
             drawings.AddBool("d.enabled", "Enabled", false);
             drawings.AddCircle("d.q", "Draw Q", SpellManager.Q.Range, System.Drawing.Color.Blue);
-            drawings.AddCircle("d.w", "Draw W", SpellManager.Q.Range, System.Drawing.Color.Purple);
-            drawings.AddCircle("d.e", "Draw E", SpellManager.Q.Range, System.Drawing.Color.Blue);
+            drawings.AddCircle("d.w", "Draw W", SpellManager.Q.Range, System.Drawing.Color.Crimson);
+            drawings.AddCircle("d.e", "Draw E", SpellManager.Q.Range, System.Drawing.Color.Aqua);
             drawings.AddCircle("d.r", "Draw R", SpellManager.Q.Range, System.Drawing.Color.Red);
 
             var misc = Config.AddSubMenu("Misc");

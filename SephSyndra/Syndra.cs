@@ -47,6 +47,10 @@ namespace SephSyndra
 
         void Obj_AI_Base_OnPauseAnimation(Obj_AI_Base sender, Obj_AI_BasePauseAnimationEventArgs args)
         {
+            if (Syndra.IsRecalling() || Syndra.IsDead)
+            {
+                return;
+            }
             if (sender is Obj_AI_Minion && sender.Name == "Seed" && sender.Team == Syndra.Team)
             {
                 GrabbedObject = sender;
@@ -56,6 +60,11 @@ namespace SephSyndra
 
         private void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            if (Syndra.IsRecalling() || Syndra.IsDead)
+            {
+                return;
+            }
+
             if (!sender.IsMe)
             {
                 return;
@@ -66,7 +75,7 @@ namespace SephSyndra
                 var name = args.SData.Name;
                 var castpos = args.End;
 
-                if (name == "SyndraQ" || name == "SyndraW")
+                if (name == "SyndraQ" || name == "syndrawcast")
                 {
                     var radius = 48;
                     var predictedposition = castpos.Extend(Syndra.ServerPosition, -Math.Max((1200 - castpos.Distance(Syndra.ServerPosition)), 700)).To2D();
@@ -75,9 +84,11 @@ namespace SephSyndra
                     var enemies = HeroManager.Enemies.Where(x => x.IsValidTarget(1300));
                     foreach (var enemy in enemies)
                     {
-                        if (rect.PointInPolygon(enemy.ServerPosition.To2D()) == 1)
+                        var delay = Syndra.Distance(enemy) / SpellManager.E.Speed;
+                        var pos = LeagueSharp.Common.Prediction.GetPrediction(enemy, delay).CastPosition.To2D();
+                        if (rect.PointInPolygon(pos) == 1)
                         {
-                            SpellManager.E.Cast(castpos);
+                            LeagueSharp.Common.Utility.DelayAction.Add(100, () => SpellManager.E.Cast(castpos));
                         }
                     }
                 }
@@ -88,6 +99,11 @@ namespace SephSyndra
 
         void OnUpdate(EventArgs args)
         {
+            if(Syndra.IsRecalling() || Syndra.IsDead)
+            {
+                return;
+            }
+
             if (GetKeyBind("h.enabled"))
             {
                 Harass();
@@ -204,7 +220,7 @@ namespace SephSyndra
             }
             if (SpellManager.Q.IsReady() && SpellManager.E.IsReady())
             {
-                var targ = TargetSelector.GetTarget(1200, TargetSelector.DamageType.Magical);
+                var targ = HeroManager.Enemies.Where(x => x.IsValidTarget(1200)).MinOrDefault(x => x.Distance(Syndra));
                 if (targ != null)
                 {
                     var qpos = Syndra.ServerPosition.Extend(targ.ServerPosition, SpellManager.Q.Range / 1.4f);
@@ -292,9 +308,11 @@ namespace SephSyndra
                 var enemies = HeroManager.Enemies.Where(x => x.IsValidTarget(1300));
                 foreach (var enemy in enemies)
                 {
-                    if (rect.PointInPolygon(enemy.ServerPosition.To2D()) == 1)
+                    var delay = Syndra.Distance(enemy) / SpellManager.E.Speed;
+                    var pos = LeagueSharp.Common.Prediction.GetPrediction(enemy, delay).CastPosition.To2D();
+                    if (rect.PointInPolygon(pos) == 1)
                     {
-                        SpellManager.E.Cast(orb.ServerPosition);
+                        SpellManager.E.Cast(orb.Position);
                     }
                 }
             }
@@ -340,7 +358,7 @@ namespace SephSyndra
         {
             get
             {
-                return Utils.TickCount - LastWTick > 150;
+                return Utils.TickCount - LastWTick > 150 + Game.Ping;
             }
         }
         
@@ -581,6 +599,10 @@ namespace SephSyndra
 
         private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
+            if (Syndra.IsRecalling() || Syndra.IsDead)
+            {
+                return;
+            }
             if (GetBool("m.interrupter")) {
                 if (SpellSlot.Q.IsReady() && SpellSlot.E.IsReady())
                 {
@@ -628,6 +650,11 @@ namespace SephSyndra
 
         void OnDraw(EventArgs args)
         {
+            if (Syndra.IsRecalling() || Syndra.IsDead)
+            {
+                return;
+            }
+
             if (!GetBool("d.enabled"))
             {
                 return;
