@@ -42,8 +42,7 @@ namespace SephSyndra
 
         public int GetOrbcount()
         {
-            return ObjectManager.Get<Obj_AI_Minion>()
-                        .Where(obj => obj.IsValid && obj.Distance(Syndra) < 1200 && obj.IsOrb()).Count();
+            return SpellManager.R.Instance.Ammo;
         }
 
 

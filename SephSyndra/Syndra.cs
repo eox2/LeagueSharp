@@ -672,17 +672,17 @@ namespace SephSyndra
 
             if (draww.Active)
             {
-                Render.Circle.DrawCircle(Syndra.Position, SpellManager.W.Range, drawq.Color);
+                Render.Circle.DrawCircle(Syndra.Position, SpellManager.W.Range, draww.Color);
             }
 
             if (drawe.Active)
             {
-                Render.Circle.DrawCircle(Syndra.Position, SpellManager.E.Range, drawq.Color);
+                Render.Circle.DrawCircle(Syndra.Position, SpellManager.E.Range, drawe.Color);
             }
 
             if (drawr.Active)
             {
-                Render.Circle.DrawCircle(Syndra.Position, SpellManager.R.Range, drawq.Color);
+                Render.Circle.DrawCircle(Syndra.Position, SpellManager.R.Range, drawr.Color);
             }
 
             if (GetBool("m.dbg"))
