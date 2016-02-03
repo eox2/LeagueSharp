@@ -43,9 +43,7 @@ namespace SephSyndra
             Obj_AI_Base.OnPauseAnimation += Obj_AI_Base_OnPauseAnimation;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            CustomEvents.Unit.OnDash += Unit_OnDash;
         }
-
 
         void Obj_AI_Base_OnPauseAnimation(Obj_AI_Base sender, Obj_AI_BasePauseAnimationEventArgs args)
         {
@@ -220,14 +218,9 @@ namespace SephSyndra
             {
                 CastE();
             }
-            var mana = SpellManager.Q.ManaCost + SpellManager.E.ManaCost;
-            if (Syndra.Mana < mana * 1.5)
-            {
-                return;
-            }
             if (SpellManager.Q.IsReady() && SpellManager.E.IsReady())
             {
-                var targ = TargetSelector.GetTarget(1200, TargetSelector.DamageType.Magical);
+                var targ = HeroManager.Enemies.Where(x => x.IsValidTarget(1200)).MinOrDefault(x => x.Distance(Syndra));
                 if (targ != null)
                 {
                     var qpos = Syndra.ServerPosition.Extend(targ.ServerPosition, SpellManager.Q.Range / 1.4f);
@@ -575,28 +568,6 @@ namespace SephSyndra
                 if (ObjectManager.Player.Spellbook.CastSpell(SpellSlot.W, bestmin))
                 {
                     LastWTick = Utils.TickCount;
-                }
-            }
-        }
-
-        bool HarassEnabled
-        {
-            get
-            {
-                return (GetKeyBind("h.enabled") || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && GetBool("h.inmixed"))) && Syndra.Mana > GetSliderFloat("h.mana");
-            }
-        }
-
-        void Unit_OnDash(Obj_AI_Base sender, Dash.DashItem args)
-        {
-            if (sender.IsEnemy && sender.Type == GameObjectType.obj_AI_Hero)
-            {
-                if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && GetBool("c.q")) || HarassEnabled && GetBool("h.q"))
-                {
-                    if (SpellManager.Q.IsReady() && sender.IsValidTarget() && args.EndPos.Distance(Syndra) < SpellManager.Q.Range)
-                    {
-                        SpellManager.Q.Cast(args.EndPos);
-                    }
                 }
             }
         }
