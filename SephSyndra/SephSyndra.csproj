@@ -53,6 +53,9 @@
     <Reference Include="SharpDX.Direct3D9">
       <HintPath>C:\Users\Seph\Desktop\L#\System\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
+    <Reference Include="SPrediction">
+      <HintPath>..\..\..\..\Desktop\L#\System\SPrediction.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -66,20 +69,6 @@
   <ItemGroup>
     <Compile Include="Extensions.cs" />
     <Compile Include="PolyUtils.cs" />
-    <Compile Include="SPrediction\ArcPrediction.cs" />
-    <Compile Include="SPrediction\CirclePrediction.cs" />
-    <Compile Include="SPrediction\ClipperWrapper.cs" />
-    <Compile Include="SPrediction\Collision.cs" />
-    <Compile Include="SPrediction\ConePrediction.cs" />
-    <Compile Include="SPrediction\Geometry.cs" />
-    <Compile Include="SPrediction\LinePrediction.cs" />
-    <Compile Include="SPrediction\Obj_AI_HeroExtensions.cs" />
-    <Compile Include="SPrediction\PathTracker.cs" />
-    <Compile Include="SPrediction\Prediction.cs" />
-    <Compile Include="SPrediction\RingPrediction.cs" />
-    <Compile Include="SPrediction\SpellExtensions.cs" />
-    <Compile Include="SPrediction\Utility.cs" />
-    <Compile Include="SPrediction\VectorPrediction.cs" />
     <Compile Include="SyndraMenu.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
