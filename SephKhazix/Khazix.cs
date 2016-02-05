@@ -320,10 +320,13 @@ namespace SephKhazix
                     Q.Cast(target);
                 }
 
-                if (W.IsReady() && !EvolvedW && dist <= W.Range && Config.GetBool("UseWCombo") && W.GetPrediction(target).Hitchance >= Config.GetHitChance("WHitchance"))
+                if (W.IsReady() && !EvolvedW && dist <= W.Range && Config.GetBool("UseWCombo"))
                 {
-                    PredictionOutput pred = W.GetPrediction(target);
-                    W.Cast(pred.CastPosition);
+                    var pred = W.GetPrediction(target);
+                    if (pred.Hitchance >= Config.GetHitChance("WHitchance"))
+                    {
+                        W.Cast(pred.CastPosition);
+                    }
                 }
 
                 if (E.IsReady() && dist <= E.Range && Config.GetBool("UseECombo") && dist > Q.Range + (0.7 * Khazix.MoveSpeed))
@@ -582,6 +585,10 @@ namespace SephKhazix
             if (!Config.GetBool("Safety.Enabled") || Override)
             {
                 return true;
+            }
+            if (Config.GetBool("Safety.TowerJump") && position.PointUnderEnemyTurret())
+            {
+                return false;
             }
             else if (Config.GetBool("Safety.Enabled"))
             {
