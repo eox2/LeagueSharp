@@ -5,7 +5,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using SephLux.SPrediction;
+using SPrediction;
 using Prediction = LeagueSharp.Common.Prediction;
 using Utility = LeagueSharp.Common.Utility;
 
