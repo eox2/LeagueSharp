@@ -39,6 +39,14 @@ namespace SephKayle
             Combo.AddItem(new MenuItem("UseE", "Use E").SetValue(true));
             Combo.AddItem(new MenuItem("UseR", "Use R").SetValue(true));
 
+            // Harass
+            Menu harass = new Menu("Harass", "Harass");
+            harass.AddItem(new MenuItem("Harass.Enabled", "Harass").SetValue(new KeyBind('H', KeyBindType.Toggle, true))).Permashow();
+            harass.AddItem(new MenuItem("Harass.Mode", "Harass Mode").SetValue(new StringList(new string[] { "Only Mixed", "Always" }, 0)));
+            harass.AddItem(new MenuItem("Harass.Mana", "Min Mana %").SetValue(new Slider(30, 1, 100)));
+            harass.AddItem(new MenuItem("Harass.Q", "Use Q").SetValue(true));
+          
+
             // Waveclear Options
             Menu WaveClear = new Menu("Waveclear", "Waveclear");
             WaveClear.AddItem(new MenuItem("UseQwc", "Use Q").SetValue(true));
@@ -94,11 +102,33 @@ namespace SephKayle
             Config.AddSubMenu(Combo);
             Config.AddSubMenu(WaveClear);
             Config.AddSubMenu(Farm);
+            Config.AddSubMenu(harass);
             Config.AddSubMenu(HealManager);
             Config.AddSubMenu(UltimateManager);
             Config.AddSubMenu(Misc);
             Config.AddSubMenu(Drawing);
             Config.AddToMainMenu();
+        }
+
+        enum HarassMode
+        {
+            Mixed,
+            Always,
+            None
+        }
+
+        static HarassMode GetHMode()
+        {
+            if (!GetKeyBind("Harass.Enabled"))
+            {
+                return HarassMode.None;
+            }
+            var selindex = Config.Item("Harass.Mode").GetValue<StringList>().SelectedIndex;
+            if (selindex == 0)
+            {
+                return HarassMode.Mixed;
+            }
+            else { return HarassMode.Always; }
         }
 
         private static bool debug()
@@ -184,7 +214,16 @@ namespace SephKayle
             return Config.Item(itemname).GetValue<bool>();
         }
 
+        internal static bool GetKeyBind(string name)
+        {
+            return Config.Item(name).GetValue<KeyBind>().Active;
+        }
+
         private static int Getslider(String itemname)
+        {
+            return Config.Item(itemname).GetValue<Slider>().Value;
+        }
+        private static float Getsliderf(String itemname)
         {
             return Config.Item(itemname).GetValue<Slider>().Value;
         }
@@ -198,7 +237,6 @@ namespace SephKayle
             {
                 Q.Cast(qtarget);
             }
-
             if (GetBool("UseE") && etarget != null && E.IsReady() && !Eon)
             {
                 E.CastOnUnit(Player);
@@ -423,6 +461,11 @@ namespace SephKayle
                 return;
             }
 
+            if (GetHMode() == HarassMode.Always)
+            {
+                Harass();
+            }
+
             if (!Config.Item("onlyhincdmg").GetValue<bool>() || !Config.Item("onlyuincdmg").GetValue<bool>())
             {
                 HealUltManager();
@@ -494,10 +537,9 @@ namespace SephKayle
                 }
             }
 
-            var Targ = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            if (Targ != null && Q.IsReady() && GetBool("UseQ") && Player.Distance(Targ) <= Q.Range)
+            if (GetHMode() == HarassMode.Mixed)
             {
-                Q.Cast(Targ);
+                Harass();
             }
 
             List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
@@ -522,6 +564,22 @@ namespace SephKayle
             }
 
             //TODO Better Calculations + More Logic for E activation
+        }
+
+        private static void Harass()
+        {
+            if (Player.ManaPercent < Getslider("Harass.Mana"))
+            {
+                return;
+            }
+            if (GetBool("Harass.Q"))
+            {
+                var Targ = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                if (Targ != null && Q.IsReady() && Player.Distance(Targ) <= Q.Range)
+                {
+                    Q.Cast(Targ);
+                }
+            }
         }
 
 
