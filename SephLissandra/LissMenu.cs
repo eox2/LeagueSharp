@@ -50,7 +50,7 @@ namespace SephLissandra
 
 
             Menu Harass = new Menu("Harass", "Harass", false);
-            Harass.AddItem(new MenuItem("Keys.HarassT", "Harass Toggle", false).SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
+            Harass.AddItem(new MenuItem("Keys.HarassT", "Harass Toggle", false).SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle))).Permashow();
             Harass.AddItem(new MenuItem("Keys.Harass", "Harass Key", false).SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
             Harass.AddItem(new MenuItem("Harass.UseQ", "Use Q", false).SetValue(true));
             Harass.AddItem(new MenuItem("Harass.UseW", "Use W", false).SetValue(true));

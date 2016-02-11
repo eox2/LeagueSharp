@@ -155,7 +155,9 @@ namespace SephSoraka
 				return;
 			}
 
-			if (Misc.Active("Misc.AutoEStunned"))
+            Healing();
+
+            if (Misc.Active("Misc.AutoEStunned"))
 			{
 				AutoEStunned();
 			}
@@ -170,7 +172,6 @@ namespace SephSoraka
 				UseMikaels();
 			}
 
-			Healing();
 
 			Killsteal();
 
@@ -325,7 +326,7 @@ namespace SephSoraka
 								hero.HealthPercent <= Misc.GetSlider("wpct" + hero.ChampionName) && hero.HealthPercent >= Misc.GetSlider("Healing.MinHP"))
 						.ToList();
 
-				if (Misc.Active("wonlyadc") && alliesinneed.Contains(myADC) && Player.Distance(myADC) <= Spells[SpellSlot.W].Range)
+				if (Misc.Active("wonlyadc") && alliesinneed.Contains(myADC))
 				{
 					Spells[SpellSlot.W].CastOnUnit(myADC);
 				}

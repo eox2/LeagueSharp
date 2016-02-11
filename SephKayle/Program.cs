@@ -49,6 +49,7 @@ namespace SephKayle
 
             // Waveclear Options
             Menu WaveClear = new Menu("Waveclear", "Waveclear");
+            WaveClear.AddItem(new MenuItem("WC.Mana", "Min Mana %").SetValue(new Slider(30, 1, 100)));
             WaveClear.AddItem(new MenuItem("UseQwc", "Use Q").SetValue(true));
             WaveClear.AddItem(new MenuItem("UseEwc", "Use E").SetValue(true));
 
@@ -246,45 +247,37 @@ namespace SephKayle
 
         private static void WaveClear()
         {
-     
+            if (Player.ManaPercent < Getsliderf("WC.Mana"))
+            {
+                return;
+            }
+
             var minions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsEnemy && Player.Distance(m) <= incrange);
             if (minions.Any() && Config.Item("UseEwc").GetValue<bool>() && E.IsReady() && !Eon)
             {
                 E.CastOnUnit(Player);
             }
-            
-            List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
+
             if (Config.Item("UseQwc").GetValue<bool>() && Q.IsReady())
             {
-                foreach (Obj_AI_Base minion in
-                   allMinions.Where(
-               minion =>
-                   minion.IsValidTarget() &&
-                   HealthPrediction.GetHealthPrediction(minion, (int)((Player.Distance(minion) * 1000) / 1500) + 300 + Game.Ping / 2) <
-                   0.75 * Player.GetSpellDamage(minion, SpellSlot.Q)))
+
+                List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
+                var vminions = allMinions.Where(
+                   minion =>
+                       minion.IsValidTarget() && Player.Distance(minion) >
+                            Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) && Player.Distance(minion) <= Q.Range &&
+                       HealthPrediction.GetHealthPrediction(minion, (int)((Player.Distance(minion) * 1000) / 1500) + 300 + Game.Ping / 2) <
+                       0.75 * Player.GetSpellDamage(minion, SpellSlot.Q));
+                var bestminion = vminions.MaxOrDefault(x => x.MaxHealth);
+                if (bestminion != null)
                 {
-                    if (Vector3.Distance(minion.ServerPosition, ObjectManager.Player.ServerPosition) >
-                        Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) && Player.Distance(minion) <= Q.Range)
-                    {
-                        Orbwalker.SetAttack(false);
-                        Q.CastOnUnit(minion);
-                        Orbwalker.SetAttack(true);
-                        return;
-                    }
+                    Orbwalker.SetAttack(false);
+                    Q.CastOnUnit(bestminion, false);
+                    Orbwalker.SetAttack(true);
                 }
             }
         }
 
-
-        static Obj_AI_Hero GetHero(string Name)
-        {
-            var hero = ObjectManager.Get<Obj_AI_Hero>().First(h => h.Name == Name);
-            if (hero != null)
-            {
-                return hero;
-            }
-            return null;
-        }
 
         static void HealUltTrigger(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
@@ -499,67 +492,71 @@ namespace SephKayle
         private static void LHlogic()
         {
             List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
+            var vminions = allMinions.Where(
+               minion =>
+                   minion.IsValidTarget() && Player.Distance(minion) >
+                        Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) && Player.Distance(minion) <= Q.Range &&
+                   HealthPrediction.GetHealthPrediction(minion, (int)((Player.Distance(minion) * 1000) / 1500) + 300 + Game.Ping / 2) <
+                   0.75 * Player.GetSpellDamage(minion, SpellSlot.Q));
+
             if (Config.Item("UseQfarm").GetValue<bool>() && Q.IsReady())
             {
-                foreach (Obj_AI_Base minion in
-                    allMinions.Where(
-                        minion =>
-                            minion.IsValidTarget() &&
-                            HealthPrediction.GetHealthPrediction(minion, (int) ((Player.Distance(minion)*1000)/1500) + 300 + Game.Ping / 2) <
-                            0.75*Player.GetSpellDamage(minion, SpellSlot.Q)))
+                var bestminion = vminions.MaxOrDefault(x => x.MaxHealth);
+                if (bestminion != null)
                 {
-                    if (Vector3.Distance(minion.ServerPosition, ObjectManager.Player.ServerPosition) >
-                        Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) && Player.Distance(minion) <= Q.Range)
-                    {
-                        Orbwalker.SetAttack(false);
-                        Q.CastOnUnit(minion, false);
-                        Orbwalker.SetAttack(true);
-                        if (Config.Item("UseEfarm").GetValue<bool>() && E.IsReady() && !Eon)
-                        {
-                            E.CastOnUnit(Player);
-                        }
-                        return;
-                    }
+                    Orbwalker.SetAttack(false);
+                    Q.CastOnUnit(bestminion, false);
+                    Orbwalker.SetAttack(true);
                 }
-
-                //TODO Better Calculations + More Logic for E activation
             }
-        }
 
-        private static void MixedLogic()
-        {
-            if (Config.Item("UseEfarm").GetValue<bool>())
+
+            if (Config.Item("UseEfarm").GetValue<bool>() && E.IsReady() && !Eon)
             {
-                var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && Player.Distance(m) <= incrange);
-                if (minions.Any() && E.IsReady() && Config.Item("UseEfarm").GetValue<bool>() && !Eon)
+                var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsValidTarget() && m.Team != Player.Team && Player.Distance(m) <= incrange && HealthPrediction.GetHealthPrediction(m, (int)((Player.Distance(m) * 1000) / 1500) + 300 + Game.Ping / 2) <
+                   0.75 * Player.GetAutoAttackDamage(m));
+                if (minions.Any())
                 {
                     E.CastOnUnit(Player);
                 }
             }
+            //TODO Better Calculations + More Logic for E activation
+        }
+        
 
+        private static void MixedLogic()
+        {
             if (GetHMode() == HarassMode.Mixed)
             {
                 Harass();
             }
 
-            List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
+            if (Config.Item("UseEfarm").GetValue<bool>() && E.IsReady())
+            {
+                var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.Team != Player.Team && Player.Distance(m) <= incrange);
+                if (minions.Any() && Config.Item("UseEfarm").GetValue<bool>() && !Eon)
+                {
+                    E.CastOnUnit(Player);
+                }
+            }
+
             if (Config.Item("UseQfarm").GetValue<bool>() && Q.IsReady())
             {
-                foreach (Obj_AI_Base minion in
-                allMinions.Where(
-               minion =>
-                   minion.IsValidTarget() &&
-                   HealthPrediction.GetHealthPrediction(minion, (int)((Player.Distance(minion) * 1000) / 1500) + 300 + Game.Ping / 2) <
-                   0.75 * Player.GetSpellDamage(minion, SpellSlot.Q)))
+                List<Obj_AI_Base> allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
+                var vminions = allMinions.Where(
+                   minion =>
+                       minion.IsValidTarget() && Player.Distance(minion) >
+                            Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) && Player.Distance(minion) <= Q.Range &&
+                       HealthPrediction.GetHealthPrediction(minion, (int)((Player.Distance(minion) * 1000) / 1500) + 300 + Game.Ping / 2) <
+                       0.75 * Player.GetSpellDamage(minion, SpellSlot.Q));
+
+                var bestminion = vminions.MaxOrDefault(x => x.MaxHealth);
+                if (bestminion != null)
                 {
-                    if (Vector3.Distance(minion.ServerPosition, ObjectManager.Player.ServerPosition) >
-                        Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) && Player.Distance(minion) <= Q.Range)
-                    {
-                        Orbwalker.SetAttack(false);
-                        Q.CastOnUnit(minion, false);
-                        Orbwalker.SetAttack(true);
-                        return;
-                    }
+                    Orbwalker.SetAttack(false);
+                    Q.CastOnUnit(bestminion, false);
+                    Orbwalker.SetAttack(true);
+                    return;
                 }
             }
 
