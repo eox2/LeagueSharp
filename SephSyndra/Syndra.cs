@@ -106,6 +106,20 @@ namespace SephSyndra
                 return;
             }
 
+            if (GetKeyBind("qekey"))
+            {
+                var mode = GetQEMode;
+                if (mode == QEMode.Normal)
+                {
+                    CastQE();
+                } 
+
+                if (mode == QEMode.Fast)
+                {
+                    CastQEFast();
+                }
+            }
+
             if (GetKeyBind("h.enabled"))
             {
                 Harass();
@@ -207,7 +221,7 @@ namespace SephSyndra
                         SpellManager.Q.Cast(pred.CastPosition);
                     }
                 }
-                else if (!harass)
+                else if (!harass && GetBool("c.useq4e"))
                 {
                     CastQE();
                 }
@@ -239,6 +253,50 @@ namespace SephSyndra
                         SpellManager.Q.Cast(qpos);
                     }
                 }
+            }
+        }
+
+
+        void CastQEFast()
+        {
+            if (SpellManager.E.IsReady() && SpellManager.Q.IsReady())
+            {
+                var target = TargetSelector.GetTarget(1200, TargetSelector.DamageType.Magical);
+                if (target != null)
+                {
+                    var dist = Syndra.Distance(target);
+                    var pos = Syndra.ServerPosition.Extend(target.ServerPosition, 0.75f * dist);
+                    var pred = SpellManager.QE.GetPrediction(target);
+                    if (pred.Hitchance >= HitChance.Medium)
+                    {
+                        SpellManager.Q.Cast(pos);
+                        Utility.DelayAction.Add(150, () => SpellManager.E.Cast(pos));
+                    }
+                }
+            }
+        }
+
+        enum QEMode
+        {
+            Normal,
+            Fast
+        }
+
+        QEMode GetQEMode
+        {
+            get
+            {
+                var sl = GetSL("qemode");
+                if (sl == 0)
+                {
+                    return QEMode.Normal;
+                }
+
+                else 
+                {
+                    return QEMode.Fast;
+                }
+
             }
         }
 

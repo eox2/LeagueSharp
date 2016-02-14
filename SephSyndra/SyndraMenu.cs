@@ -26,6 +26,7 @@ namespace SephSyndra
             combo.AddBool("c.w", "Use W");
             combo.AddBool("c.e", "Use E");
             combo.AddBool("c.r", "Use R");
+            combo.AddBool("c.useq4e", "Use Q for E (Q won't hit)");
             combo.AddSlider("c.rminh", "Min Target Health % for Ult", 10, 1, 100);
 
             var blacklist = Config.AddSubMenu("Ult BlackList");
@@ -74,6 +75,8 @@ namespace SephSyndra
             drawings.AddCircle("d.r", "Draw R", SpellManager.Q.Range, System.Drawing.Color.Red);
 
             var misc = Config.AddSubMenu("Misc");
+            misc.AddKeyBind("qekey", "Q -> E Key", 'T', KeyBindType.Press);
+            misc.AddSList("qemode", "QE Mode", new string[] { "Normal", "Fast" }, 0);
             misc.AddBool("m.interrupter", "Interrupter");
             misc.AddBool("m.ag", "Anti Gapcloser");
             misc.AddBool("m.utilw", "Use W2 if noone in range");
