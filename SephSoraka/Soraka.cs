@@ -94,6 +94,7 @@ namespace SephSoraka
 
 			InitializeSpells();
 
+
 			AntiGapcloser.OnEnemyGapcloser += OnGapClose;
 			Interrupter2.OnInterruptableTarget += OnInterruptableTarget;
 
@@ -122,19 +123,30 @@ namespace SephSoraka
 			{
 				theadc = objAiHeroes.FirstOrDefault();
 				Game.PrintChat("ADC detected as " + theadc.ChampionName + ".");
+                return theadc;
 			}
 			if (objAiHeroes.Count() > 1)
 			{
 				Game.PrintChat("Found multiple ADCS in game. Please select the correct one in the priorities menu.");
 				PotentialADCS = objAiHeroes;
-				theadc = null;
+                theadc = objAiHeroes.FirstOrDefault();
+                return theadc;
 			}
+
+            var myadc = HeroManager.Allies.Find(x => adcs.Contains(x.ChampionName));
+
+            if (myadc != null)
+            {
+                Game.PrintChat("Adc Detected as " + myadc.ChampionName + ". If this is not correct, set it Priorities menu");
+                return myadc;
+            }
 
 			if (theadc == null)
 			{
 				Game.PrintChat("Could not detect ADC. Set ADC in the menu.");
 				return null;
 			}
+
 			return theadc;
 		}
 
@@ -321,13 +333,12 @@ namespace SephSoraka
 			{
 				var alliesinneed =
 					HeroManager.Allies.Where(
-						hero => !hero.IsMe &&
-								!hero.IsDead && (!Misc.Active("Misc.Nohealshop") || !hero.InShop()) && !hero.IsZombie && hero.Distance(Player) <= Spells[SpellSlot.W].Range &&
+						hero => !hero.IsMe && !hero.IsDead && (!Misc.Active("Misc.Nohealshop") || !hero.InShop()) && !hero.IsZombie && hero.Distance(Player) <= Spells[SpellSlot.W].Range &&
 								Misc.Active("w" + hero.ChampionName) &&
 								hero.HealthPercent <= Misc.GetSlider("wpct" + hero.ChampionName) && hero.HealthPercent >= Misc.GetSlider("Healing.MinHP"))
 						.ToList();
 
-				if (Misc.Active("wonlyadc") && alliesinneed.Contains(myADC))
+				if (Misc.Active("wonlyadc") && alliesinneed.Any(x => x.NetworkId == myADC.NetworkId))
 				{
 					Spells[SpellSlot.W].CastOnUnit(myADC);
 				}
@@ -372,7 +383,7 @@ namespace SephSoraka
 
 			if (alliesinneed.Count >= Misc.GetSlider("minallies"))
 			{
-				if (Misc.Active("ultonlyadc") && alliesinneed.Contains(myADC))
+				if (Misc.Active("ultonlyadc") && alliesinneed.Any(x => x.NetworkId == myADC.NetworkId))
 				{
 					Spells[SpellSlot.R].Cast();
 				}
@@ -395,7 +406,7 @@ namespace SephSoraka
 			var indanger = alliesinneed.Count(x => x.CountEnemiesInRange(600) > 0);
 			if (alliesinneed.Count >= Misc.GetSlider("minallies") && indanger >= 1)
 			{
-				if (Misc.Active("ultonlyadc") && alliesinneed.Contains(myADC))
+				if (Misc.Active("ultonlyadc") && alliesinneed.Any(x => x.NetworkId == myADC.NetworkId))
 				{
 					Spells[SpellSlot.R].Cast();
 				}
@@ -713,9 +724,10 @@ namespace SephSoraka
 				return;
 			}
 
-			var DrawQ = Config.Item("Drawing.DrawQ").GetValue<Circle>();
+            var DrawQ = Config.Item("Drawing.DrawQ").GetValue<Circle>();
 			var DrawW = Config.Item("Drawing.DrawW").GetValue<Circle>();
 			var DrawE = Config.Item("Drawing.DrawE").GetValue<Circle>();
+
 			if (DrawQ.Active)
 			{
 				Render.Circle.DrawCircle(Player.Position, Spells[SpellSlot.Q].Range, DrawQ.Color);

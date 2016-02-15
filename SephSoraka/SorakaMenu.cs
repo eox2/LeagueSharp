@@ -101,15 +101,18 @@ namespace SephSoraka
 				}
 
 				int iof = 0;
-				var detected = Soraka.DetectADC();
-				if (detected != null)
+
+                var detected = Soraka.DetectADC();
+				if (detected != null && !detected.IsMe)
 				{
 					iof = Array.IndexOf(allynames, allynames.FirstOrDefault(x => x == detected.ChampionName));
 				}
 
-				Priorities.AddItem((new MenuItem("adc", "ADC").SetValue(new StringList(allynames, iof)))).Permashow();
+                var adc = Priorities.AddItem(new MenuItem("adc", "ADC"));
+                adc.ValueSet = true;
+                adc.SetValue(new StringList(allynames, iof)).Permashow();
 
-				Priorities.AddItem(
+                Priorities.AddItem(
 					new MenuItem("Priorities.Mikaels", "Min priority for Mikaels").SetValue(new Slider(5, 1, 5)));
 
 				foreach (var ally in HeroManager.Allies)
