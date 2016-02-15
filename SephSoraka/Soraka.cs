@@ -49,18 +49,19 @@ namespace SephSoraka
 			CustomEvents.Game.OnGameLoad += SorakaMain;
 		}
 
-		private static readonly Dictionary<SpellSlot, Spell> Spells = new Dictionary<SpellSlot, Spell>
-		{
-			{SpellSlot.Q, new Spell(SpellSlot.Q, 950f, TargetSelector.DamageType.Magical)},
-			{SpellSlot.W, new Spell(SpellSlot.W, 550f)},
-			{SpellSlot.E, new Spell(SpellSlot.E, 920f, TargetSelector.DamageType.Magical)},
-			{SpellSlot.R, new Spell(SpellSlot.R) },
-			{IgniteSlot, new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 550f)}
-		};
+        private static Dictionary<SpellSlot, Spell> Spells;
 
 		private static void InitializeSpells()
 		{
-			Spells[SpellSlot.Q].SetSkillshot(0.500f, 300f, 1750f, false, SkillshotType.SkillshotCircle);
+            Spells = new Dictionary<SpellSlot, Spell> { 
+            {SpellSlot.Q, new Spell(SpellSlot.Q, 950f, TargetSelector.DamageType.Magical)},
+            {SpellSlot.W, new Spell(SpellSlot.W, 550f)},
+            {SpellSlot.E, new Spell(SpellSlot.E, 920f, TargetSelector.DamageType.Magical)},
+            {SpellSlot.R, new Spell(SpellSlot.R) },
+            {IgniteSlot, new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 550f) }
+            };
+
+            Spells[SpellSlot.Q].SetSkillshot(0.500f, 300f, 1750f, false, SkillshotType.SkillshotCircle);
 			Spells[SpellSlot.E].SetSkillshot(0.500f, 250f, 1300f, false, SkillshotType.SkillshotCircle);
 		}
 
@@ -247,7 +248,7 @@ namespace SephSoraka
 							    Misc.Active("wcheckdmgafter") && afterdmg < Misc.GetSlider("wpct" + ally.ChampionName))
 							{
 								if (Misc.Active("wonlyadc") &&
-								    (ally == myADC || myADC.HealthPercent <= Misc.GetSlider("wpct" + myADC.ChampionName)))
+								    (ally.NetworkId == myADC.NetworkId || myADC.HealthPercent <= Misc.GetSlider("wpct" + myADC.ChampionName)))
 								{
 									Spells[SpellSlot.W].CastOnUnit(myADC);
 								}
@@ -275,7 +276,7 @@ namespace SephSoraka
 							if (count >= Misc.GetSlider("minallies"))
 							{
 								if (Misc.Active("ultonlyadc") &&
-								    (ally == myADC || myADC.HealthPercent <= Misc.GetSlider("rpct" + myADC.ChampionName)))
+								    (ally.NetworkId == myADC.NetworkId || myADC.HealthPercent <= Misc.GetSlider("rpct" + myADC.ChampionName)))
 								{
 									Spells[SpellSlot.R].Cast();
 								}
@@ -408,7 +409,7 @@ namespace SephSoraka
 
 		private static void Combo(Obj_AI_Hero target)
 		{
-			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ"))
+			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ") && target.Distance(Player) <= Spells[SpellSlot.Q].Range)
 			{
 				Spells[SpellSlot.Q].SPredictionCast(target, Misc.GetHitChance("Hitchance.Q"));
 				/*
@@ -421,7 +422,7 @@ namespace SephSoraka
 			}
 			
 
-				if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE"))
+				if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE") && target.Distance(Player) <= Spells[SpellSlot.E].Range)
 				{
 					Spells[SpellSlot.E].SPredictionCast(target, Misc.GetHitChance("Hitchance.E"));
 					/*
