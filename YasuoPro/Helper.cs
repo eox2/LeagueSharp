@@ -36,19 +36,20 @@ namespace YasuoPro
         }
 
         /* Credits to Brian for Q Skillshot values */
-        internal static Dictionary<int, Spell> Spells = new Dictionary<int, Spell>
+        internal static Dictionary<int, Spell> Spells;
+
+
+        internal void InitSpells()
         {
-            { 1, new Spell(SpellSlot.Q, 510f) },
+            Spells =  new Dictionary<int, Spell> {
+            { 1, new Spell(SpellSlot.Q, 480f) },
             { 2, new Spell(SpellSlot.Q, 1150f) },
             { 3, new Spell(SpellSlot.W, 450f) },
             { 4, new Spell(SpellSlot.E, 475f) },
             { 5, new Spell(SpellSlot.R, 1250f) },
             { 6, new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 600) }
-        };
+            };
 
-
-        internal void InitSpells()
-        {
             Spells[Q].SetSkillshot(GetQ1Delay, 20f, float.MaxValue, false, SkillshotType.SkillshotLine);
             Spells[Q2].SetSkillshot(GetQ2Delay, 90, 1500, false, SkillshotType.SkillshotLine);
             Spells[E].SetTargetted(0.075f, 1025);

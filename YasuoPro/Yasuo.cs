@@ -39,7 +39,6 @@ namespace YasuoPro
                 WallJump.Initialize();
             }
             Game.OnUpdate += OnUpdate;
-            Game.OnUpdate += CastUlt;
             Drawing.OnDraw += OnDraw;
             AntiGapcloser.OnEnemyGapcloser += OnGapClose;
             Interrupter2.OnInterruptableTarget += OnInterruptable;
@@ -52,6 +51,8 @@ namespace YasuoPro
             {
                 return;
             }
+
+            CastUlt();
 
             if (GetBool("Evade.WTS"))
             {
@@ -120,7 +121,7 @@ namespace YasuoPro
             }
         }
 
-        void CastUlt(EventArgs args)
+        void CastUlt()
         {
             if (!SpellSlot.R.IsReady())
             {
