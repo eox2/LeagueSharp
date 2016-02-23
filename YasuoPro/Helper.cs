@@ -241,6 +241,8 @@ namespace YasuoPro
                     return HitChance.Medium;
                 case "High":
                     return HitChance.High;
+                case "VeryHigh":
+                    return HitChance.VeryHigh;
             }
             return HitChance.Medium;
         }

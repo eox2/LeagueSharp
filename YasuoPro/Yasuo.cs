@@ -717,6 +717,10 @@ namespace YasuoPro
 
         void OnGapClose(ActiveGapcloser args)
         {
+            if (Yasuo.ServerPosition.PointUnderEnemyTurret())
+            {
+                return;
+            }
             if (GetBool("Misc.AG") && TornadoReady && Yasuo.Distance(args.End) <= 500)
             {
                 var pred = Spells[Q2].GetPrediction(args.Sender);
@@ -729,6 +733,10 @@ namespace YasuoPro
 
         void OnInterruptable(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
+            if (Yasuo.ServerPosition.PointUnderEnemyTurret())
+            {
+                return;
+            }
             if (GetBool("Misc.Interrupter") && TornadoReady && Yasuo.Distance(sender.ServerPosition) <= 500)
             {
                 if (args.EndTime >= Spells[Q2].Delay)
