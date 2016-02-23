@@ -26,6 +26,7 @@ namespace YasuoPro
                     return false;
                 }
             }
+
             var minion = unit as Obj_AI_Minion;
             return !unit.HasBuff("YasuoDashWrapper") && (unit is Obj_AI_Hero || minion.IsValidMinion());
         }
@@ -33,7 +34,8 @@ namespace YasuoPro
       
         internal static bool IsValidMinion(this Obj_AI_Minion minion, float range = 50000)
         {
-            return (minion != null && Player.Distance(minion) <= range && minion.IsValid && minion.IsVisible && minion.Team != Player.Team && minion.IsHPBarRendered && MinionManager.IsMinion(minion));
+            var name = minion.CharData.BaseSkinName.ToLower();
+            return (minion != null && Player.Distance(minion) <= range && minion.IsValid && minion.IsVisible && minion.Team != Player.Team && minion.IsHPBarRendered && !name.Contains("ward") && !name.Contains("gangplankbarrel"));
         }
 
         internal static bool IsValidAlly(this Obj_AI_Base unit, float range = 50000)

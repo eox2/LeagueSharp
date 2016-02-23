@@ -631,6 +631,12 @@ namespace YasuoPro
 
         void Harass()
         {
+            //No harass under enemy turret to avoid aggro
+            if (Yasuo.ServerPosition.PointUnderEnemyTurret())
+            {
+                return;
+            }
+
             var target = TargetSelector.GetTarget(Spells[Q2].Range, TargetSelector.DamageType.Physical);
             if (SpellSlot.Q.IsReady() && target != null && target.IsInRange(Qrange))
             {
