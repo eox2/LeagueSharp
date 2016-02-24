@@ -184,7 +184,7 @@ namespace YasuoPro
                 Menu Flee = new Menu("Flee Settings", "Flee");
                 Flee.AddSList("Flee.Mode", "Flee Mode", new[] { "To Nexus", "To Allies", "To Cursor" }, 0);
                 Flee.AddBool("Flee.StackQ", "Stack Q during Flee");
-                Flee.AddBool("Flee.UseQ2", "Use Tornado");
+                Flee.AddBool("Flee.UseQ2", "Use Tornado", false);
 
                 menu.AddSubMenu(Flee);
 

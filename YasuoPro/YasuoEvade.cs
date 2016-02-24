@@ -21,7 +21,9 @@ namespace YasuoPro
                 if (skillshot.Dodged)
                 {
                     if (Helper.Debug)
+                    {
                         Game.PrintChat(skillshot.SpellData.SpellName + " Dodged already");
+                    }
                     continue;
                 }
 
@@ -73,9 +75,8 @@ namespace YasuoPro
                     {
                         var evadetarget =
                             ObjectManager
-                                .Get<Obj_AI_Base>().Where(x => x.IsDashable() && Program.IsSafe(x.ServerPosition.To2D()).IsSafe && Program.IsSafePath(x.GeneratePathTo(), 0, 1200, 250).IsSafe).MinOrDefault(x => x.Distance(Helper.shop));
+                                .Get<Obj_AI_Base>().Where(x => x.IsDashable() && !Helper.GetDashPos(x).PointUnderEnemyTurret() && Program.IsSafe(x.ServerPosition.To2D()).IsSafe && Program.IsSafePath(x.GeneratePathTo(), 0, 1200, 250).IsSafe).MinOrDefault(x => x.Distance(Helper.shop));
                      
-
                         if (evadetarget != null)
                         {
                             Helper.Spells[Helper.E].CastOnUnit(evadetarget);
