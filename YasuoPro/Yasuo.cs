@@ -23,13 +23,14 @@ namespace YasuoPro
         
         void OnLoad(EventArgs args)
         {
+            Yasuo = ObjectManager.Player;
+
             if (Yasuo.CharData.BaseSkinName != "Yasuo")
             {
                 return;
             }
 
-            Game.PrintChat("<font color='#1d87f2'>YasuoPro by Seph Loaded. Good Luck!</font>");
-
+            Game.PrintChat("<font color='#1d87f2'>YasuoPro by Seph Loaded. Good Luck!</font>"); 
             InitItems();
             InitSpells();
             YasuoMenu.Init(this);

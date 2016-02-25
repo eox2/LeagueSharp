@@ -10,7 +10,7 @@ namespace YasuoPro
     class Helper
     {
 
-        internal static Obj_AI_Hero Yasuo = ObjectManager.Player;
+        internal static Obj_AI_Hero Yasuo;
 
         public static Obj_AI_Base ETarget;
 
@@ -42,7 +42,7 @@ namespace YasuoPro
         internal void InitSpells()
         {
             Spells =  new Dictionary<int, Spell> {
-            { 1, new Spell(SpellSlot.Q, 480f) },
+            { 1, new Spell(SpellSlot.Q, 500f) },
             { 2, new Spell(SpellSlot.Q, 1150f) },
             { 3, new Spell(SpellSlot.W, 450f) },
             { 4, new Spell(SpellSlot.E, 475f) },
