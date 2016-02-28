@@ -402,10 +402,10 @@ namespace SephKhazix
          void KillSteal()
         {
                 Obj_AI_Hero target = HeroList
-                    .Where(x => x.IsValidTarget() && x.Distance(Khazix.Position) < 1000f && !x.IsZombie)
+                    .Where(x => x.IsValidTarget() && x.Distance(Khazix.Position) < 1375f && !x.IsZombie)
                     .MinOrDefault(x => x.Health);
 
-                if (target != null)
+                if (target != null && target.IsInRange(Ignite.Range))
                 {
                     if (Config.GetBool("UseIgnite") && IgniteSlot != SpellSlot.Unknown &&
                         Khazix.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
