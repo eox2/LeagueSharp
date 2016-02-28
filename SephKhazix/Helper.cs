@@ -45,6 +45,7 @@ namespace SephKhazix
             W.SetSkillshot(0.225f, 80f, 828.5f, true, SkillshotType.SkillshotLine);
             WE.SetSkillshot(0.225f, 100f, 828.5f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 100f, 1000f, false, SkillshotType.SkillshotCircle);
+            Ignite = new Spell(IgniteSlot, 550f);
 
             Hydra = new Items.Item(3074, 225f);
             Tiamat = new Items.Item(3077, 225f);
