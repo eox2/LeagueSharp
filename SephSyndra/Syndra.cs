@@ -216,7 +216,7 @@ namespace SephSyndra
                         SpellManager.Q.Cast(Syndra.ServerPosition);
                     }
                     var preds = SpellManager.Q.GetSPrediction(target);
-                    if (preds.HitChance >= HitChance.Medium)
+                    if (preds.HitChance >= HitChance.Low)
                     {
                         SpellManager.Q.Cast(pred.CastPosition);
                     }
@@ -323,7 +323,7 @@ namespace SephSyndra
                 else if (result.HitCount == 0)
                 {
                     var pred = SpellManager.W2.GetSPrediction(targ);
-                    if (pred.HitChance >= HitChance.Medium)
+                    if (pred.HitChance >= HitChance.Low)
                     {
                         SpellManager.W2.Cast(pred.CastPosition);
                         return;
@@ -346,7 +346,7 @@ namespace SephSyndra
             //if first W
             else if (WGood)
             {
-                var target = paramtarget == null ? TargetSelector.GetTarget(SpellManager.W.Range, TargetSelector.DamageType.Magical) : paramtarget;
+                var target = paramtarget == null ? TargetSelector.GetTarget(0.90f * SpellManager.W.Range, TargetSelector.DamageType.Magical) : paramtarget;
                 if (target != null)
                 {
                     var bestmin = GrabbableObjects.MaxOrDefault(x => x.priority).unit;
@@ -442,7 +442,7 @@ namespace SephSyndra
             if (GetBool("ks.q") && SpellManager.Q.IsReady() && target.IsValidTarget(SpellManager.Q.Range))
             {
                 var pred = SpellManager.Q.GetSPrediction(target);
-                if (pred.HitChance >= HitChance.Medium)
+                if (pred.HitChance >= HitChance.Low)
                 {
                     qres = pred;
                     var qdmg = SpellManager.Q.GetDamage(target);
