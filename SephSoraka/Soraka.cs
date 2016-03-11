@@ -262,7 +262,10 @@ namespace SephSoraka
 								if (Misc.Active("wonlyadc") &&
 								    (ally.NetworkId == myADC.NetworkId || myADC.HealthPercent <= Misc.GetSlider("wpct" + myADC.ChampionName)))
 								{
-									Spells[SpellSlot.W].CastOnUnit(myADC);
+                                    if (myADC.Distance(Player) <= Spells[SpellSlot.W].Range)
+                                    {
+                                        Spells[SpellSlot.W].CastOnUnit(myADC);
+                                    }
 								}
 								else if (!Misc.Active("wonlyadc"))
 								{
@@ -420,7 +423,7 @@ namespace SephSoraka
 
 		private static void Combo(Obj_AI_Hero target)
 		{
-			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ") && target.Distance(Player) <= Spells[SpellSlot.Q].Range)
+			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ") && target.Distance(Player) < Spells[SpellSlot.Q].Range)
 			{
 				Spells[SpellSlot.Q].SPredictionCast(target, Misc.GetHitChance("Hitchance.Q"));
 				/*
@@ -433,7 +436,7 @@ namespace SephSoraka
 			}
 			
 
-				if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE") && target.Distance(Player) <= Spells[SpellSlot.E].Range)
+				if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE") && target.Distance(Player) < Spells[SpellSlot.E].Range)
 				{
 					Spells[SpellSlot.E].SPredictionCast(target, Misc.GetHitChance("Hitchance.E"));
 					/*
@@ -496,7 +499,11 @@ namespace SephSoraka
 
 		static void Harass(Obj_AI_Hero target)
 		{
-			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Harass.UseQ") && Player.ManaPercent > Misc.GetSlider("Harass.Mana"))
+            if (SorakaMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            {
+                return;
+            }
+            if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Harass.UseQ") && Player.ManaPercent > Misc.GetSlider("Harass.Mana") && target.Distance(Player) < Spells[SpellSlot.Q].Range)
 			{
 				Spells[SpellSlot.Q].SPredictionCast(target, Misc.GetHitChance("Hitchance.Q"));
 				/*
@@ -507,7 +514,7 @@ namespace SephSoraka
 				}
 				*/
 			}
-			if (Spells[SpellSlot.E].IsReady() && Misc.Active("Harass.UseE"))
+			if (Spells[SpellSlot.E].IsReady() && Misc.Active("Harass.UseE") && target.Distance(Player) < Spells[SpellSlot.E].Range)
 			{
 				Spells[SpellSlot.E].SPredictionCast(target, Misc.GetHitChance("Hitchance.E"), (byte)Misc.GetSlider("Harass.Eminhit"));
 				/*
