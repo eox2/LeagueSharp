@@ -448,32 +448,25 @@ namespace SephSoraka
 					 */
 				}
 			}
-		
 
 
-		#endregion
 
-				#region Waveclear
+        #endregion
 
-			private static
-			void WaveClear()
+        #region Waveclear
+        private static void WaveClear()
 		{
-			var Minions =
+			var minions =
 				ObjectManager.Get<Obj_AI_Minion>()
 					.Where(
 						m =>
-							m.IsValidTarget() &&
-							(Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.R].Range));
+							m.IsValidTarget(Spells[SpellSlot.Q].Range) && m.IsMinion && MinionManager.IsMinion(m));
 
 			if (SpellSlot.Q.IsReady() && Misc.Active("Farm.UseQ"))
 			{
-				var qminions =
-					Minions.Where(
-						m =>
-							Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= Spells[SpellSlot.Q].Range);
 				MinionManager.FarmLocation QLocation =
 					MinionManager.GetBestCircularFarmLocation(
-						qminions.Select(m => m.ServerPosition.To2D()).ToList(), Spells[SpellSlot.Q].Width,
+						minions.Select(m => m.ServerPosition.To2D()).ToList(), Spells[SpellSlot.Q].Width,
 						Spells[SpellSlot.Q].Range);
 				if (QLocation.MinionsHit >= 1)
 				{
