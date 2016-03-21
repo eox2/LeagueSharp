@@ -168,10 +168,13 @@ namespace SephKhazix
             }
         }
 
-
-
-
-
+        internal bool IsInvisible
+        {
+            get
+            {
+                return Khazix.HasBuff("khazixrstealth");
+            }
+        }
 
     }
 }

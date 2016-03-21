@@ -67,6 +67,7 @@ namespace SephKhazix
             safety.AddItem(new MenuItem("Safety.Ratio", "Ally:Enemy Ratio (/5)").SetValue(new Slider(1, 0, 5)));
             safety.AddBool("Safety.TowerJump", "Avoid Tower Diving");
             safety.AddSlider("Safety.MinHealth", "Healthy %", 15, 0, 100);
+            safety.AddBool("Safety.noaainult", "No Autos while Stealth", false);
 
             //Double Jump
             var djump = menu.AddSubMenu("Double Jumping");

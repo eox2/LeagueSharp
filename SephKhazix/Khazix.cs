@@ -816,12 +816,20 @@ namespace SephKhazix
 
         void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (args.Target.Type == GameObjectType.obj_AI_Hero && Config.GetBool("djumpenabled") && Config.GetBool("noauto"))
+            if (args.Target.Type == GameObjectType.obj_AI_Hero)
             {
-                if (args.Target.Health < GetQDamage((Obj_AI_Hero)args.Target) &&
-                    Khazix.ManaPercent > 15)
+                if (Config.GetBool("Safety.noaainult") && IsInvisible)
                 {
                     args.Process = false;
+                    return;
+                }
+                if (Config.GetBool("djumpenabled") && Config.GetBool("noauto"))
+                {
+                    if (args.Target.Health < GetQDamage((Obj_AI_Hero)args.Target) &&
+                        Khazix.ManaPercent > 15)
+                    {
+                        args.Process = false;
+                    }
                 }
             }
         }
