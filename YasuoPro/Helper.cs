@@ -20,13 +20,9 @@ namespace YasuoPro
 
         internal static int Q = 1, Q2 = 2, W = 3, E = 4, R = 5, Ignite = 6;
 
-        internal string[] DangerousSpell =
-        {
-            "syndrar", "veigarprimordialburst", "dazzle", "leblancchaosorb",
-            "judicatorreckoning", "iceblast", "disintegrate"
-        };
-
         internal const float LaneClearWaitTimeMod = 2f;
+
+        internal static float WCLastE = 0f;
 
         internal static ItemManager.Item Hydra, Tiamat, Blade, Bilgewater, Youmu;
 
@@ -122,6 +118,12 @@ namespace YasuoPro
                 return false;
             }
 
+            //Avoid casting Q if E in range and Tornado ready :o
+            if (tready && Spells[E].IsReady() && target.IsDashable(Spells[E].Range * 0.85f))
+            {
+                return false;
+            }
+
             if (tready && Yasuo.IsDashing())
             {
                 if (GetBool("Combo.NoQ2Dash") || ETarget == null || !(ETarget is Obj_AI_Hero) && ETarget.CountEnemiesInRange(120) < 1)
@@ -129,6 +131,7 @@ namespace YasuoPro
                     return false;
                 }
             }
+            
 
             Spell sp = tready ? Spells[Q2] : Spells[Q];
             PredictionOutput pred = sp.GetPrediction(target);

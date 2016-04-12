@@ -329,6 +329,17 @@ namespace YasuoPro
                 ordered = KnockedUp.OrderByDescending(x => x.CountEnemiesInRange(350)).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenBy(x => x.Health);
             }
 
+            if (GetBool("Combo.UltOnlyKillable"))
+            {
+                var killable = ordered.FirstOrDefault(x => !x.isBlackListed() && x.Health <= Yasuo.GetSpellDamage(x, SpellSlot.R) && x.HealthPercent >= GetSliderInt("Combo.MinHealthUlt") && (GetBool("Combo.UltTower") || GetKeyBind("Misc.TowerDive") || !x.Position.To2D().PointUnderEnemyTurret()));
+                if (killable != null && !killable.IsInRange(Spells[Q].Range))
+                {
+                    Spells[R].CastOnUnit(killable);
+                    return;
+                }
+                return;
+            }
+
             if ((GetBool("Combo.OnlyifMin") && ordered.Count() < minhit) || (ordered.Count() == 1 && ordered.FirstOrDefault().HealthPercent < GetSliderInt("Combo.MinHealthUlt")))
             {
                 return;
@@ -340,16 +351,6 @@ namespace YasuoPro
                 if (best != null && Yasuo.HealthPercent / best.HealthPercent <= 1)
                 {
                     Spells[R].CastOnUnit(best);
-                    return;
-                }
-            }
-
-            if (GetBool("Combo.UltOnlyKillable"))
-            {
-                var killable = ordered.FirstOrDefault(x => !x.isBlackListed() && x.Health <= Yasuo.GetSpellDamage(x, SpellSlot.R) && x.HealthPercent >= GetSliderInt("Combo.MinHealthUlt") && (GetBool("Combo.UltTower") || GetKeyBind("Misc.TowerDive") || !x.Position.To2D().PointUnderEnemyTurret()));
-                if (killable != null && !killable.IsInRange(Spells[Q].Range))
-                {
-                    Spells[R].CastOnUnit(killable);
                     return;
                 }
             }
@@ -389,7 +390,7 @@ namespace YasuoPro
                             .Where(x => x.IsDashable())
                             .MinOrDefault(x => GetDashPos(x).Distance(Game.CursorPos));
 
-                    if (dashtarg != null && GetDashPos(dashtarg).Distance(Game.CursorPos) < Yasuo.Distance(Game.CursorPos))
+                    if (dashtarg != null && (!GetBool("Flee.Smart") || GetDashPos(dashtarg).Distance(Game.CursorPos) < Yasuo.Distance(Game.CursorPos)))
                     {
                         Spells[E].CastOnUnit(dashtarg);
 
@@ -408,7 +409,7 @@ namespace YasuoPro
                 {
                     Orbwalker.SetOrbwalkingPoint(nexus.Position);
                     var bestminion = ObjectManager.Get<Obj_AI_Base>().Where(x => x.IsDashable()).MinOrDefault(x => GetDashPos(x).Distance(nexus.Position));
-                    if (bestminion != null && GetDashPos(bestminion).Distance(nexus.Position) < Yasuo.Distance(nexus.Position))
+                    if (bestminion != null && (!GetBool("Flee.Smart")  || GetDashPos(bestminion).Distance(nexus.Position) < Yasuo.Distance(nexus.Position)))
                     {
                         Spells[E].CastOnUnit(bestminion);
                         if (GetBool("Flee.StackQ") && SpellSlot.Q.IsReady() && !TornadoReady)
@@ -509,7 +510,7 @@ namespace YasuoPro
                 }
             }
 
-            if (SpellSlot.E.IsReady() && GetBool("Waveclear.UseE") && (!GetBool("Waveclear.Smart") || isHealthy))
+            if (SpellSlot.E.IsReady() && GetBool("Waveclear.UseE") && (!GetBool("Waveclear.Smart") || isHealthy) && (YasuoEvade.TickCount - WCLastE) >= GetSliderInt("Waveclear.Edelay"))
             {
                 var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsDashable() && ((GetBool("Waveclear.UseENK") && (!GetBool("Waveclear.Smart") || x.Health - GetProperEDamage(x) > GetProperEDamage(x) * 3)) || x.ECanKill()) && (GetBool("Waveclear.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(x).PointUnderEnemyTurret()));
                 Obj_AI_Minion minion = null;
@@ -517,6 +518,7 @@ namespace YasuoPro
                 if (minion != null)
                 {
                     Spells[E].Cast(minion);
+                    WCLastE = YasuoEvade.TickCount;
                 }
             }
 

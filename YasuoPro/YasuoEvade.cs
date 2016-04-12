@@ -4,11 +4,14 @@ using Evade;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using System;
 
 namespace YasuoPro
 {
     static class YasuoEvade
     {
+        private static Random rand = new Random();
+
         internal static void Evade()
         {
             if (!Helper.GetBool("Evade.Enabled"))
@@ -55,7 +58,8 @@ namespace YasuoPro
                              && skillshot.SpellData.DangerValue >= Helper.GetSliderInt("Evade.MinDangerLevelWW"))
                         {
                             var castpos = Helper.Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(), 50);
-                            if (TickCount - skillshot.StartTick >= skillshot.SpellData.setdelay + Helper.GetSliderInt("Evade.Delay"))
+                            var delay = Helper.GetSliderInt("Evade.Delay");
+                            if (TickCount - skillshot.StartTick >= skillshot.SpellData.setdelay + rand.Next(delay - 77 > 0 ? delay - 77 : 0, delay + 65)) 
                             {
                                 bool WCasted = Helper.Spells[Helper.W].Cast(castpos);
                                 Program.DetectedSkillshots.Remove(skillshot);
@@ -106,6 +110,5 @@ namespace YasuoPro
         {
             get { return (int)(Game.Time * 1000f); }
         }
-
     }
 }

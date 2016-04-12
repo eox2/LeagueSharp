@@ -140,6 +140,7 @@ namespace YasuoPro
                 menu.AddBool("Waveclear.UseQ2", "Use Q - Tornado");
                 menu.AddSlider("Waveclear.Qcount", "Minions for Q (Tornado)", 1, 1, 10);
                 menu.AddBool("Waveclear.UseE", "Use E");
+                menu.AddSlider("Waveclear.Edelay", "Delay for E", 0, 0, 400);
                 menu.AddBool("Waveclear.ETower", "Use E under Tower", false);
                 menu.AddBool("Waveclear.UseENK", "Use E even if not killable");
                 menu.AddBool("Waveclear.Smart", "Smart Waveclear");
@@ -182,7 +183,8 @@ namespace YasuoPro
                 menu.AddSubMenu(targettedmenu);
 
                 Menu Flee = new Menu("Flee Settings", "Flee");
-                Flee.AddSList("Flee.Mode", "Flee Mode", new[] { "To Nexus", "To Allies", "To Cursor" }, 0);
+                Flee.AddSList("Flee.Mode", "Flee Mode", new[] { "To Nexus", "To Allies", "To Cursor" }, 2);
+                Flee.AddBool("Flee.Smart", "Smart Flee", true);
                 Flee.AddBool("Flee.StackQ", "Stack Q during Flee");
                 Flee.AddBool("Flee.UseQ2", "Use Tornado", false);
 
