@@ -308,16 +308,30 @@ namespace SephKhazix
 
         void Combo()
         {
-            var target = HeroManager.Enemies.FindAll(x => x.IsValidEnemy(W.Range) && !x.IsZombie).MaxOrDefault(x => TargetSelector.GetPriority(x));
+            Obj_AI_Hero target = null;
+
+            if (SpellSlot.E.IsReady() && SpellSlot.Q.IsReady())
+            {
+                target = TargetSelector.GetTarget((E.Range + Q.Range) * 0.95f, TargetSelector.DamageType.Physical);
+            }
+
+            if (target == null)
+            {
+                target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+            }
 
             if ((target != null))
             {
                 var dist = Khazix.Distance(target);
 
                 // Normal abilities
-                if (Q.IsReady() && dist <= Q.Range && Config.GetBool("UseQCombo"))
+
+                if (Q.IsReady() && Config.GetBool("UseQCombo"))
                 {
-                    Q.Cast(target);
+                    if (dist <= Q.Range)
+                    {
+                        Q.Cast(target);
+                    }
                 }
 
                 if (W.IsReady() && !EvolvedW && dist <= W.Range && Config.GetBool("UseWCombo"))
