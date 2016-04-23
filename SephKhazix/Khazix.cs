@@ -231,7 +231,7 @@ namespace SephKhazix
 
         void Waveclear()
         {
-            List<Obj_AI_Minion> allMinions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(W.Range)).ToList();
+            List<Obj_AI_Minion> allMinions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(W.Range) && !MinionManager.IsWard(x)).ToList();
 
             if (Config.GetBool("UseQFarm") && Q.IsReady())
             {
@@ -326,7 +326,7 @@ namespace SephKhazix
 
                 // Normal abilities
 
-                if (Q.IsReady() && Config.GetBool("UseQCombo"))
+                if (Q.IsReady() && !Jumping && Config.GetBool("UseQCombo"))
                 {
                     if (dist <= Q.Range)
                     {
@@ -343,7 +343,7 @@ namespace SephKhazix
                     }
                 }
 
-                if (E.IsReady() && dist <= E.Range && Config.GetBool("UseECombo") && dist > Q.Range + (0.7 * Khazix.MoveSpeed))
+                if (E.IsReady() && !Jumping && dist <= E.Range && Config.GetBool("UseECombo") && dist > Q.Range + (0.7 * Khazix.MoveSpeed))
                 {
                     PredictionOutput pred = E.GetPrediction(target);
                     if (target.IsValid && !target.IsDead && ShouldJump(pred.CastPosition))
@@ -461,7 +461,7 @@ namespace SephKhazix
                         }
                     }
 
-                    if (Config.GetBool("UseEKs") && E.IsReady() &&
+                    if (Config.GetBool("UseEKs") && E.IsReady() && !Jumping &&
                         Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= E.Range && Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) > Q.Range)
                     {
                         double EDmg = Khazix.GetSpellDamage(target, SpellSlot.E);
