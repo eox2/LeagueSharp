@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DamageIndicator.cs" />
     <Compile Include="Lissandra.cs" />
     <Compile Include="LissMenu.cs" />
     <Compile Include="LissUtils.cs" />

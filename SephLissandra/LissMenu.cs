@@ -102,10 +102,36 @@ namespace SephLissandra
             Config.AddSubMenu(Misc);
 
             Menu Drawings = new Menu("Drawings", "Drawing", false);
-            Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q").SetValue(new Circle(true, Color.White)));
-            Drawings.AddItem(new MenuItem("Drawing.DrawW", "Draw W").SetValue(new Circle(true, Color.Green)));
-            Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E").SetValue(new Circle(true, Color.RoyalBlue)));
-            Drawings.AddItem(new MenuItem("Drawing.DrawR", "Draw R").SetValue(new Circle(true, Color.Red)));
+
+            var dmgAfterE = new MenuItem("DrawComboDamage", "Draw combo damage").SetValue(true);
+            var drawFill =
+                new MenuItem("DrawColour", "Fill colour", true).SetValue(
+                    new Circle(true, Color.Goldenrod));
+            Drawings.AddItem(drawFill);
+            Drawings.AddItem(dmgAfterE);
+
+            DamageIndicator.DamageToUnit = Lissandra.GetAvailableDamage;
+            DamageIndicator.Enabled = dmgAfterE.GetValue<bool>();
+            DamageIndicator.Fill = drawFill.GetValue<Circle>().Active;
+            DamageIndicator.FillColor = drawFill.GetValue<Circle>().Color;
+
+            dmgAfterE.ValueChanged +=
+                delegate (object sender, OnValueChangeEventArgs eventArgs)
+                {
+                    DamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+                };
+
+            drawFill.ValueChanged += delegate (object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Fill = eventArgs.GetNewValue<Circle>().Active;
+                DamageIndicator.FillColor = eventArgs.GetNewValue<Circle>().Color;
+            };
+
+            Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q").SetValue(new Circle(false, Color.White)));
+            Drawings.AddItem(new MenuItem("Drawing.DrawW", "Draw W").SetValue(new Circle(false, Color.Green)));
+            Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E").SetValue(new Circle(false, Color.RoyalBlue)));
+            Drawings.AddItem(new MenuItem("Drawing.DrawR", "Draw R").SetValue(new Circle(false, Color.Red)));
+
             Config.AddSubMenu(Drawings);
 
             return Config;

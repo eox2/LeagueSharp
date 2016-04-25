@@ -12,12 +12,6 @@ namespace SephLissandra
 {
      static class Lissandra
         {
-
-        /* To Do
-         * Split into different classes
-         * April 12 2015
-         */
-
         public static Version version = Assembly.GetExecutingAssembly().GetName().Version;
         public static Menu Config;
         public static Obj_AI_Hero Player;
@@ -51,11 +45,10 @@ namespace SephLissandra
             GameObject.OnCreate += OnCreate;
             GameObject.OnDelete += OnDelete;
             Drawing.OnDraw += OnDraw;
+
         }
 
-
-
-        static void DefineSpells()
+            static void DefineSpells()
         {
             Spells = new Dictionary<String, Spell> {
             { "Q", new Spell(SpellSlot.Q, 715f) },
@@ -104,7 +97,6 @@ namespace SephLissandra
             {
                 WaveClearHandler();
             }
-            
         }
 
         private static void EToMouse(Vector3 Position)
@@ -349,6 +341,43 @@ namespace SephLissandra
                 
             }
             return totaldmgavailable > target.Health;
+        }
+
+
+        internal static float GetAvailableDamage(Obj_AI_Hero target)
+        {
+            if (ObjectManager.Player.Distance(target) > 3000) // save some fps
+            {
+                return 0;
+            }
+
+            bool ExcludeE = false;
+            double totaldmgavailable = 0;
+
+            if (SpellSlot.Q.IsReady() && LissUtils.Active("Combo.UseQ"))
+            {
+                totaldmgavailable += Player.GetSpellDamage(target, SpellSlot.Q);
+            }
+            if (SpellSlot.W.IsReady() && LissUtils.Active("Combo.UseW"))
+            {
+                totaldmgavailable += Player.GetSpellDamage(target, SpellSlot.W);
+            }
+            if (SpellSlot.E.IsReady() && LissUtils.Active("Combo.UseE") && !LissUtils.CanSecondE() && LissEMissile == null && !ExcludeE)
+            {
+                totaldmgavailable += Player.GetSpellDamage(target, SpellSlot.E);
+            }
+            if (SpellSlot.R.IsReady() && LissUtils.Active("Combo.UseR"))
+            {
+                totaldmgavailable += Player.GetSpellDamage(target, SpellSlot.R);
+            }
+
+            if (Spells["Ignite"].IsReady() && LissUtils.Active("Killsteal.UseIgnite"))
+            {
+                totaldmgavailable += Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
+            }
+
+            return (float) totaldmgavailable;
+
         }
 
 
@@ -737,12 +766,6 @@ namespace SephLissandra
                 Render.Circle.DrawCircle(Player.Position, Spells["R"].Range, DrawE.Color);
             }
         }
-
-     
-
-
     }
-
-
 }
 
