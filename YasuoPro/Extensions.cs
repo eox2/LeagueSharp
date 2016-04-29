@@ -68,14 +68,14 @@ namespace YasuoPro
         internal static bool PointUnderEnemyTurret(this Vector2 Point)
         {
             var EnemyTurrets =
-                ObjectManager.Get<Obj_AI_Turret>().Find(t => t.IsEnemy && Vector2.Distance(t.Position.To2D(), Point) < 950f);
+                ObjectManager.Get<Obj_AI_Turret>().Find(t => t.IsEnemy && Vector2.Distance(t.Position.To2D(), Point) < 910f);
             return EnemyTurrets != null;
         }
 
         internal static bool PointUnderEnemyTurret(this Vector3 Point)
         {
             var EnemyTurrets =
-                ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsEnemy && Vector3.Distance(t.Position, Point) < 900f + Helper.Yasuo.BoundingRadius);
+                ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsEnemy && Vector3.Distance(t.Position, Point) < 910f);
             return EnemyTurrets.Any();
         }
 
@@ -96,7 +96,7 @@ namespace YasuoPro
             var midwpnum = wpc / 2;
             var midwp = wp[midwpnum];
             var plength = wp[0].Distance(lastwp);
-            return (point.Distance(target.ServerPosition, true) <= Player.Distance(target.ServerPosition, true)) || ((plength <= Player.Distance(target.ServerPosition) * 1.2f && point.Distance(lastwp.To3D()) < Player.Distance(lastwp.To3D()) || point.Distance(midwp.To3D()) < Player.Distance(midwp)));
+            return (point.Distance(target.ServerPosition) <= Player.Distance(target.ServerPosition) - Helper.Yasuo.BoundingRadius) || ((plength <= Player.Distance(target.ServerPosition) * 1.2f && point.Distance(lastwp.To3D()) < Player.Distance(lastwp.To3D()) || point.Distance(midwp.To3D()) < Player.Distance(midwp)));
         }
 
         internal static bool IsCloser(this Vector2 point, Obj_AI_Base target)
@@ -105,7 +105,7 @@ namespace YasuoPro
             {
                 return IsCloserWP(point, target);
             }
-            return (point.Distance(target.ServerPosition, true) <= Player.Distance(target.ServerPosition, true));
+            return (point.Distance(target.ServerPosition) <= Player.Distance(target.ServerPosition) - Helper.Yasuo.BoundingRadius);
         }
 
         internal static bool IsCloser(this Obj_AI_Base @base, Obj_AI_Base target)

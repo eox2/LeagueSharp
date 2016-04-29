@@ -208,8 +208,8 @@ namespace Evade
             }
 
 #if DEBUG
-            Console.WriteLine(
-                "Missile deleted: " + missile.SData.Name + " D: " + missile.EndPosition.Distance(missile.Position));
+            //Console.WriteLine(
+                //"Missile deleted: " + missile.SData.Name + " D: " + missile.EndPosition.Distance(missile.Position));
 #endif
 
             Program.DetectedSkillshots.RemoveAll(

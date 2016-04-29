@@ -147,7 +147,6 @@ namespace YasuoPro
                 Drawing.DrawCircle(DashPosition.To3D(), Yasuo.BoundingRadius, System.Drawing
                     .Color.Chartreuse);
             }
-            
 
             if (Yasuo.IsDead || GetBool("Drawing.Disable"))
             {
@@ -383,22 +382,69 @@ namespace YasuoPro
             {
                 Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
 
+                var smart = GetBool("Flee.Smart");
+
                 if (Spells[E].IsReady())
                 {
-                    var dashtarg =
-                        ObjectManager.Get<Obj_AI_Base>()
+                    if (smart)
+                    {
+                        Obj_AI_Base dashTarg;
+
+                        if (Yasuo.ServerPosition.PointUnderEnemyTurret())
+                        {
+                            var closestturret =
+                                ObjectManager.Get<Obj_AI_Turret>()
+                                    .Where(x => x.IsEnemy)
+                                    .MinOrDefault(y => y.Distance(Yasuo));
+
+                            var potential =
+                                ObjectManager.Get<Obj_AI_Base>()
+                                    .Where(x => x.IsDashable())
+                                    .MaxOrDefault(x => GetDashPos(x).Distance(closestturret));
+
+                            var gdpos = GetDashPos(potential);
+                            if (potential != null && gdpos.Distance(Game.CursorPos) < Yasuo.Distance(Game.CursorPos) && gdpos.Distance(closestturret.Position) - closestturret.BoundingRadius > Yasuo.Distance(closestturret.Position) - Yasuo.BoundingRadius)
+                            {
+                                Spells[E].Cast(potential);
+                            }
+                        }
+
+                         dashTarg = ObjectManager.Get<Obj_AI_Base>()
                             .Where(x => x.IsDashable())
                             .MinOrDefault(x => GetDashPos(x).Distance(Game.CursorPos));
 
-                    if (dashtarg != null && (!GetBool("Flee.Smart") || GetDashPos(dashtarg).Distance(Game.CursorPos) < Yasuo.Distance(Game.CursorPos)))
-                    {
-                        Spells[E].CastOnUnit(dashtarg);
-
-                        if (GetBool("Flee.StackQ") && SpellSlot.Q.IsReady() && !TornadoReady)
+                        if (dashTarg != null)
                         {
-                           Spells[Q].Cast(dashtarg.ServerPosition);
+                            var posafdash = GetDashPos(dashTarg);
+
+                            if (posafdash.Distance(Game.CursorPos) < Yasuo.Distance(Game.CursorPos) &&
+                                !posafdash.PointUnderEnemyTurret())
+                            {
+                                Spells[E].CastOnUnit(dashTarg);
+                            }
                         }
                     }
+
+                    else
+                    {
+                        var dashtarg =
+                            ObjectManager.Get<Obj_AI_Minion>()
+                                .Where(x => x.IsDashable())
+                                .MinOrDefault(x => GetDashPos(x).Distance(Game.CursorPos));
+
+                        if (dashtarg != null)
+                        {
+                            Spells[E].CastOnUnit(dashtarg);
+                        }
+                    }
+                }
+
+                if (GetBool("Flee.StackQ") && SpellSlot.Q.IsReady() && !TornadoReady && !Yasuo.IsDashing())
+                {
+                    var qtarg =
+                        ObjectManager.Get<Obj_AI_Minion>()
+                            .Find(x => x.IsValidTarget(Spells[Q].Range) && MinionManager.IsMinion(x));
+                    Spells[Q].Cast(qtarg.ServerPosition);
                 }
             }
 

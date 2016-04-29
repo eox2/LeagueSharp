@@ -420,7 +420,7 @@ namespace Evade
                     return;
                 }
 #if DEBUG
-                Console.WriteLine(Utils.TickCount + "Adding new skillshot: " + skillshot.SpellData.SpellName);
+                //Console.WriteLine(Utils.TickCount + "Adding new skillshot: " + skillshot.SpellData.SpellName);
 #endif
 
                 DetectedSkillshots.Add(skillshot);
