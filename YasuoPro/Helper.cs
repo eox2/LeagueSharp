@@ -119,14 +119,16 @@ namespace YasuoPro
             }
 
             //Avoid casting Q if E in range and Tornado ready :o
-            if (tready && Spells[E].IsReady() && target.IsDashable(Spells[E].Range * 0.85f))
+            if (tready && Spells[E].IsReady() && target.IsDashable() && ((GetBool("Combo.UseE") && GetBool("Combo.ETower") && GetKeyBind("Misc.TowerDive")) || !GetDashPos(target).PointUnderEnemyTurret()))
             {
+                Initalization.Yasuo.CastE(target);
                 return false;
             }
 
+
             if (tready && Yasuo.IsDashing())
             {
-                if (GetBool("Combo.NoQ2Dash") || ETarget == null || !(ETarget is Obj_AI_Hero) && ETarget.CountEnemiesInRange(120) < 1)
+                if (GetBool("Combo.NoQ2Dash") || !(ETarget is Obj_AI_Hero))
                 {
                     return false;
                 }
