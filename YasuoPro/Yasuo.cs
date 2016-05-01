@@ -148,6 +148,7 @@ namespace YasuoPro
                     .Color.Chartreuse);
             }
 
+
             if (Yasuo.IsDead || GetBool("Drawing.Disable"))
             {
                 return;
@@ -250,6 +251,11 @@ namespace YasuoPro
 
         void CastE(Obj_AI_Hero target)
         {
+            if (!target.IsInRange(Spells[E].Range))
+            {
+                target = TargetSelector.GetTarget(Spells[E].Range, TargetSelector.DamageType.Physical);
+            }
+
             if (target != null)
             {
                 if (SpellSlot.E.IsReady() && isHealthy && target.Distance(Yasuo) >= 0.30 * Yasuo.AttackRange)
@@ -258,6 +264,12 @@ namespace YasuoPro
                         (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") || !GetDashPos(target).PointUnderEnemyTurret()))
                     {
                         ETarget = target;
+                        Spells[E].CastOnUnit(target);
+                        return;
+                    }
+
+                    if (TornadoReady)
+                    {
                         Spells[E].CastOnUnit(target);
                         return;
                     }
@@ -441,10 +453,32 @@ namespace YasuoPro
 
                 if (GetBool("Flee.StackQ") && SpellSlot.Q.IsReady() && !TornadoReady && !Yasuo.IsDashing())
                 {
-                    var qtarg =
-                        ObjectManager.Get<Obj_AI_Minion>()
-                            .Find(x => x.IsValidTarget(Spells[Q].Range) && MinionManager.IsMinion(x));
-                    Spells[Q].Cast(qtarg.ServerPosition);
+                    Obj_AI_Minion qtarg = null;
+                    if (!Spells[E].IsReady())
+                    {
+                        qtarg =
+                            ObjectManager.Get<Obj_AI_Minion>()
+                                .Find(x => x.IsValidTarget(Spells[Q].Range) && MinionManager.IsMinion(x));
+
+                    }
+                    else
+                    {
+                        var etargs =
+                            ObjectManager.Get<Obj_AI_Minion>()
+                                .Where(
+                                    x => x.IsValidTarget(Spells[E].Range) && MinionManager.IsMinion(x) && x.IsDashable());
+                        if (!etargs.Any())
+                        {
+                            qtarg =
+                           ObjectManager.Get<Obj_AI_Minion>()
+                               .Find(x => x.IsValidTarget(Spells[Q].Range) && MinionManager.IsMinion(x));
+                        }
+                    }
+
+                    if (qtarg != null)
+                    {
+                        Spells[Q].Cast(qtarg.ServerPosition);
+                    }
                 }
             }
 
@@ -532,7 +566,7 @@ namespace YasuoPro
         {
             if (SpellSlot.Q.IsReady() && !Yasuo.IsDashing())
             {
-                if (!TornadoReady && GetBool("Waveclear.UseQ"))
+                if (!TornadoReady && GetBool("Waveclear.UseQ") && Yasuo.IsWindingUp && !Yasuo.IsDashing())
                 {
                     var minion =
                         ObjectManager.Get<Obj_AI_Minion>()

@@ -68,14 +68,14 @@ namespace YasuoPro
         internal static bool PointUnderEnemyTurret(this Vector2 Point)
         {
             var EnemyTurrets =
-                ObjectManager.Get<Obj_AI_Turret>().Find(t => t.IsEnemy && Vector2.Distance(t.Position.To2D(), Point) < 910f);
+                ObjectManager.Get<Obj_AI_Turret>().Find(t => t.IsEnemy && Vector2.Distance(Point, t.Position.To2D()) < 910f + Helper.Yasuo.BoundingRadius);
             return EnemyTurrets != null;
         }
 
         internal static bool PointUnderEnemyTurret(this Vector3 Point)
         {
             var EnemyTurrets =
-                ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsEnemy && Vector3.Distance(t.Position, Point) < 910f);
+                ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsEnemy && Vector3.Distance(t.Position, Point) < 910f + Helper.Yasuo.BoundingRadius);
             return EnemyTurrets.Any();
         }
 
