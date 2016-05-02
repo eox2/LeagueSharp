@@ -577,7 +577,7 @@ namespace YasuoPro
         {
             if (SpellSlot.Q.IsReady() && !Yasuo.IsDashing())
             {
-                if (!TornadoReady && GetBool("Waveclear.UseQ") && Yasuo.IsWindingUp && !Yasuo.IsDashing())
+                if (!TornadoReady && GetBool("Waveclear.UseQ") && Yasuo.IsWindingUp)
                 {
                     var minion =
                         ObjectManager.Get<Obj_AI_Minion>()
