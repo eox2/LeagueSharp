@@ -44,6 +44,13 @@ namespace YasuoPro
             AntiGapcloser.OnEnemyGapcloser += OnGapClose;
             Interrupter2.OnInterruptableTarget += OnInterruptable;
             Obj_AI_Base.OnProcessSpellCast += TargettedDanger.SpellCast;
+            Spellbook.OnCastSpell += (sender, eventArgs) =>
+            {
+                if (sender.Owner.IsMe && eventArgs.Slot == SpellSlot.E)
+                {
+                    ETarget = (Obj_AI_Base) eventArgs.Target;
+                }
+            };
         }
 
         void OnUpdate(EventArgs args)
@@ -187,7 +194,29 @@ namespace YasuoPro
 
         void Combo()
         {
-            CurrentTarget = TargetSelector.GetTarget(Spells[R].Range, TargetSelector.DamageType.Physical);
+            float range = 0;
+            if (SpellSlot.R.IsReady())
+            {
+                range = Spells[R].Range;
+            }
+
+            else if (Spells[Q2].IsReady())
+            {
+                range = Spells[Q2].Range;
+            }
+
+            else if (Spells[E].IsReady())
+            {
+                range = Spells[E].Range;
+            }
+
+            CurrentTarget = TargetSelector.GetTarget(range, TargetSelector.DamageType.Physical);
+
+
+            if (GetBool("Combo.UseEQ"))
+            {
+                PerformEQ();
+            }
 
             CastQ(CurrentTarget);
 
@@ -329,6 +358,24 @@ namespace YasuoPro
             }
         }
 
+        internal void PerformEQ()
+        {
+            if (ETarget != null && Yasuo.IsDashing() && Spells[Q].IsReady())
+            {
+                if (!TornadoReady)
+                {
+                    Spells[Q].Cast(ETarget.ServerPosition);
+                }
+                else
+                {
+                    if (ETarget is Obj_AI_Hero)
+                    {
+                        Spells[Q].Cast(ETarget.ServerPosition);
+                    }
+                }
+            }
+        }
+
         void CastR(float minhit = 1)
         {
             UltMode ultmode = GetUltMode();
@@ -387,7 +434,6 @@ namespace YasuoPro
                 return;
             }
         }
-
 
         void Flee()
         {
@@ -768,6 +814,7 @@ namespace YasuoPro
             }
             LHSkills();
         }
+
 
         void LHSkills()
         {
