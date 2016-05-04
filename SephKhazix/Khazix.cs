@@ -93,7 +93,8 @@ namespace SephKhazix
         }
 
 
-        void Mixed() {
+        void Mixed()
+        {
             if (Config.GetBool("Harass.InMixed"))
             {
                 Harass();
@@ -125,15 +126,14 @@ namespace SephKhazix
                         if (predw.Hitchance == hitchance)
                         {
                             W.Cast(predw.CastPosition);
-                            return;
                         }
                     }
-                    else if (EvolvedW && target.IsValidTarget(W.Range + 200))
+                    else if (EvolvedW && target.IsValidTarget(W.Range))
                     {
-                            PredictionOutput pred = W.GetPrediction(target);
-                            if ((pred.Hitchance == HitChance.Immobile && autoWI) || (pred.Hitchance == HitChance.Dashing && autoWD) || pred.Hitchance >= hitchance)
-                            {
-                                CastWE(target, pred.UnitPosition.To2D(), 0, Config.GetHitChance("Harass.WHitchance"));
+                        PredictionOutput pred = WE.GetPrediction(target);
+                        if ((pred.Hitchance == HitChance.Immobile && autoWI) || (pred.Hitchance == HitChance.Dashing && autoWD) || pred.Hitchance >= hitchance)
+                        {
+                            CastWE(target, pred.UnitPosition.To2D(), 0, hitchance);
                         }
                     }
                 }
@@ -238,7 +238,8 @@ namespace SephKhazix
                 var minion = Orbwalker.GetTarget() as Obj_AI_Minion;
                 if (minion != null && HealthPrediction.GetHealthPrediction(
                                 minion, (int)(Khazix.Distance(minion) * 1000 / 1400)) >
-                            0.35f * Khazix.GetSpellDamage(minion, SpellSlot.Q) && Khazix.Distance(minion) <= Q.Range) {
+                            0.35f * Khazix.GetSpellDamage(minion, SpellSlot.Q) && Khazix.Distance(minion) <= Q.Range)
+                {
                     Q.Cast(minion);
                 }
                 else if (minion == null || !minion.IsValid)
@@ -247,7 +248,8 @@ namespace SephKhazix
                     {
                         if (HealthPrediction.GetHealthPrediction(
                                 min, (int)(Khazix.Distance(min) * 1000 / 1400)) >
-                            3 * Khazix.GetSpellDamage(min, SpellSlot.Q) && Khazix.Distance(min) <= Q.Range) {
+                            3 * Khazix.GetSpellDamage(min, SpellSlot.Q) && Khazix.Distance(min) <= Q.Range)
+                        {
                             Q.Cast(min);
                             break;
                         }
@@ -413,130 +415,65 @@ namespace SephKhazix
         }
 
 
-         void KillSteal()
+        void KillSteal()
         {
-                Obj_AI_Hero target = HeroList
-                    .Where(x => x.IsValidTarget() && x.Distance(Khazix.Position) < 1375f && !x.IsZombie)
-                    .MinOrDefault(x => x.Health);
+            Obj_AI_Hero target = HeroList
+                .Where(x => x.IsValidTarget() && x.Distance(Khazix.Position) < 1375f && !x.IsZombie)
+                .MinOrDefault(x => x.Health);
 
-                if (target != null && target.IsInRange(Ignite.Range))
+            if (target != null && target.IsInRange(Ignite.Range))
+            {
+                if (Config.GetBool("UseIgnite") && IgniteSlot != SpellSlot.Unknown &&
+                    Khazix.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 {
-                    if (Config.GetBool("UseIgnite") && IgniteSlot != SpellSlot.Unknown &&
-                        Khazix.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                    double igniteDmg = Khazix.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
+                    if (igniteDmg > target.Health)
                     {
-                        double igniteDmg = Khazix.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
-                        if (igniteDmg > target.Health)
-                        {
-                            Khazix.Spellbook.CastSpell(IgniteSlot, target);
-                            return;
-                        }
+                        Khazix.Spellbook.CastSpell(IgniteSlot, target);
+                        return;
                     }
+                }
 
-                    if (Config.GetBool("Safety.autoescape") && !IsHealthy)
+                if (Config.GetBool("Safety.autoescape") && !IsHealthy)
+                {
+                    var ally =
+                        HeroList.FirstOrDefault(h => h.HealthPercent > 40 && h.CountEnemiesInRange(400) == 0 && !h.ServerPosition.PointUnderEnemyTurret());
+                    if (ally != null && ally.IsValid)
                     {
-                        var ally =
-                            HeroList.FirstOrDefault(h => h.HealthPercent > 40 && h.CountEnemiesInRange(400) == 0 && !h.ServerPosition.PointUnderEnemyTurret());
-                        if (ally != null && ally.IsValid)
-                        {
-                            E.Cast(ally.ServerPosition);
-                            return;
-                        }
-                        var objAiturret = EnemyTurretPositions.Where(x => Vector3.Distance(Khazix.ServerPosition, x) <= 900f);
-                        if (objAiturret.Any() || Khazix.CountEnemiesInRange(500) >= 1)
-                        {
-                            var bestposition = Khazix.ServerPosition.Extend(NexusPosition, E.Range);
-                            E.Cast(bestposition);
-                            return;
-                        }
+                        E.Cast(ally.ServerPosition);
+                        return;
                     }
-
-                    if (Config.GetBool("UseQKs") && Q.IsReady() &&
-                        Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= Q.Range)
+                    var objAiturret = EnemyTurretPositions.Where(x => Vector3.Distance(Khazix.ServerPosition, x) <= 900f);
+                    if (objAiturret.Any() || Khazix.CountEnemiesInRange(500) >= 1)
                     {
-                        double QDmg = GetQDamage(target);
-                        if (!Jumping && target.Health <= QDmg)
-                        {
-                            Q.Cast(target);
-                            return;
-                        }
+                        var bestposition = Khazix.ServerPosition.Extend(NexusPosition, E.Range);
+                        E.Cast(bestposition);
+                        return;
                     }
+                }
 
-                    if (Config.GetBool("UseEKs") && E.IsReady() && !Jumping &&
-                        Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= E.Range && Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) > Q.Range)
+                if (Config.GetBool("UseQKs") && Q.IsReady() &&
+                    Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= Q.Range)
+                {
+                    double QDmg = GetQDamage(target);
+                    if (!Jumping && target.Health <= QDmg)
                     {
-                        double EDmg = Khazix.GetSpellDamage(target, SpellSlot.E);
-                        if (!Jumping && target.Health < EDmg)
-                        {
-                            Utility.DelayAction.Add(
-                                Game.Ping + Config.GetSlider("EDelay"), delegate
-                                {
-                                    PredictionOutput pred = E.GetPrediction(target);
-                                    if (target.IsValid && !target.IsDead)
-                                    {
-                                        if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
-                                        {
-                                            E.Cast(pred.CastPosition);
-                                        }
-                                    }
-                                });
-                        }
+                        Q.Cast(target);
+                        return;
                     }
+                }
 
-                    if (W.IsReady() && !EvolvedW && Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= W.Range &&
-                        Config.GetBool("UseWKs"))
+                if (Config.GetBool("UseEKs") && E.IsReady() && !Jumping &&
+                    Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= E.Range && Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) > Q.Range)
+                {
+                    double EDmg = Khazix.GetSpellDamage(target, SpellSlot.E);
+                    if (!Jumping && target.Health < EDmg)
                     {
-                        double WDmg = Khazix.GetSpellDamage(target, SpellSlot.W);
-                        if (target.Health <= WDmg)
-                        {
-                            var pred = W.GetPrediction(target);
-                            if (pred.Hitchance >= HitChance.Medium)
-                            {
-                                W.Cast(pred.CastPosition);
-                                return;
-                            }
-                        }
-                    }
-
-                    if (W.IsReady() && EvolvedW &&
-                            Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= W.Range &&
-                            Config.GetBool("UseWKs"))
-                    {
-                        double WDmg = Khazix.GetSpellDamage(target, SpellSlot.W);
-                        PredictionOutput pred = W.GetPrediction(target);
-                        if (target.Health <= WDmg && pred.Hitchance > HitChance.Medium)
-                        {
-                            CastWE(target, pred.UnitPosition.To2D(), 0, Config.GetHitChance("WHitchance"));
-                            return;
-                        }
-
-                        if (pred.Hitchance >= HitChance.Collision)
-                        {
-                            List<Obj_AI_Base> PCollision = pred.CollisionObjects;
-                            var x =
-                                PCollision
-                                    .FirstOrDefault(PredCollisionChar => Vector3.Distance(PredCollisionChar.ServerPosition, target.ServerPosition) <= 30);
-                            if (x != null)
-                            {
-                                W.Cast(x.Position);
-                                return;
-                            }
-                        }
-                    }
-
-
-                    // Mixed's EQ KS
-                    if (Q.IsReady() && E.IsReady() &&
-                        Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= E.Range + Q.Range
-                        && Config.GetBool("UseEQKs"))
-                    {
-                        double QDmg = GetQDamage(target);
-                        double EDmg = Khazix.GetSpellDamage(target, SpellSlot.E);
-                        if ((target.Health <= QDmg + EDmg))
-                        {
-                            Utility.DelayAction.Add(Config.GetSlider("EDelay"), delegate
+                        Utility.DelayAction.Add(
+                            Game.Ping + Config.GetSlider("EDelay"), delegate
                             {
                                 PredictionOutput pred = E.GetPrediction(target);
-                                if (target.IsValidTarget() && !target.IsZombie && ShouldJump(pred.CastPosition))
+                                if (target.IsValid && !target.IsDead)
                                 {
                                     if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
                                     {
@@ -544,55 +481,120 @@ namespace SephKhazix
                                     }
                                 }
                             });
-                        }
                     }
+                }
 
-                    // MIXED EW KS
-                    if (W.IsReady() && E.IsReady() && !EvolvedW &&
-                        Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= W.Range + E.Range
-                        && Config.GetBool("UseEWKs"))
+                if (W.IsReady() && !EvolvedW && Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= W.Range &&
+                    Config.GetBool("UseWKs"))
+                {
+                    double WDmg = Khazix.GetSpellDamage(target, SpellSlot.W);
+                    if (target.Health <= WDmg)
                     {
-                        double WDmg = Khazix.GetSpellDamage(target, SpellSlot.W);
-                        if (target.Health <= WDmg)
+                        var pred = W.GetPrediction(target);
+                        if (pred.Hitchance >= HitChance.Medium)
                         {
-
-                            Utility.DelayAction.Add(Config.GetSlider("EDelay"), delegate
-                            {
-                                PredictionOutput pred = E.GetPrediction(target);
-                                if (target.IsValid && !target.IsDead && ShouldJump(pred.CastPosition))
-                                {
-                                    if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
-                                    {
-                                        E.Cast(pred.CastPosition);
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    if (Tiamat.IsReady() &&
-                        Vector2.Distance(Khazix.ServerPosition.To2D(), target.ServerPosition.To2D()) <= Tiamat.Range &&
-                        Config.GetBool("UseTiamatKs"))
-                    {
-                        double Tiamatdmg = Khazix.GetItemDamage(target, Damage.DamageItems.Tiamat);
-                        if (target.Health <= Tiamatdmg)
-                        {
-                            Tiamat.Cast();
+                            W.Cast(pred.CastPosition);
                             return;
-                        }
-                    }
-                    if (Hydra.IsReady() &&
-                        Vector2.Distance(Khazix.ServerPosition.To2D(), target.ServerPosition.To2D()) <= Hydra.Range &&
-                        Config.GetBool("UseTiamatKs"))
-                    {
-                        double hydradmg = Khazix.GetItemDamage(target, Damage.DamageItems.Hydra);
-                        if (target.Health <= hydradmg)
-                        {
-                            Hydra.Cast();
                         }
                     }
                 }
+
+                if (W.IsReady() && EvolvedW &&
+                        Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= W.Range &&
+                        Config.GetBool("UseWKs"))
+                {
+                    double WDmg = Khazix.GetSpellDamage(target, SpellSlot.W);
+                    PredictionOutput pred = WE.GetPrediction(target);
+                    if (target.Health <= WDmg && pred.Hitchance >= HitChance.Medium)
+                    {
+                        CastWE(target, pred.UnitPosition.To2D(), 0, Config.GetHitChance("WHitchance"));
+                        return;
+                    }
+
+                    if (pred.Hitchance >= HitChance.Collision)
+                    {
+                        List<Obj_AI_Base> PCollision = pred.CollisionObjects;
+                        var x =
+                            PCollision
+                                .FirstOrDefault(PredCollisionChar => Vector3.Distance(PredCollisionChar.ServerPosition, target.ServerPosition) <= 30);
+                        if (x != null)
+                        {
+                            W.Cast(x.Position);
+                            return;
+                        }
+                    }
+                }
+
+
+                // Mixed's EQ KS
+                if (Q.IsReady() && E.IsReady() &&
+                    Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= E.Range + Q.Range
+                    && Config.GetBool("UseEQKs"))
+                {
+                    double QDmg = GetQDamage(target);
+                    double EDmg = Khazix.GetSpellDamage(target, SpellSlot.E);
+                    if ((target.Health <= QDmg + EDmg))
+                    {
+                        Utility.DelayAction.Add(Config.GetSlider("EDelay"), delegate
+                        {
+                            PredictionOutput pred = E.GetPrediction(target);
+                            if (target.IsValidTarget() && !target.IsZombie && ShouldJump(pred.CastPosition))
+                            {
+                                if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
+                                {
+                                    E.Cast(pred.CastPosition);
+                                }
+                            }
+                        });
+                    }
+                }
+
+                // MIXED EW KS
+                if (W.IsReady() && E.IsReady() && !EvolvedW &&
+                    Vector3.Distance(Khazix.ServerPosition, target.ServerPosition) <= W.Range + E.Range
+                    && Config.GetBool("UseEWKs"))
+                {
+                    double WDmg = Khazix.GetSpellDamage(target, SpellSlot.W);
+                    if (target.Health <= WDmg)
+                    {
+
+                        Utility.DelayAction.Add(Config.GetSlider("EDelay"), delegate
+                        {
+                            PredictionOutput pred = E.GetPrediction(target);
+                            if (target.IsValid && !target.IsDead && ShouldJump(pred.CastPosition))
+                            {
+                                if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
+                                {
+                                    E.Cast(pred.CastPosition);
+                                }
+                            }
+                        });
+                    }
+                }
+
+                if (Tiamat.IsReady() &&
+                    Vector2.Distance(Khazix.ServerPosition.To2D(), target.ServerPosition.To2D()) <= Tiamat.Range &&
+                    Config.GetBool("UseTiamatKs"))
+                {
+                    double Tiamatdmg = Khazix.GetItemDamage(target, Damage.DamageItems.Tiamat);
+                    if (target.Health <= Tiamatdmg)
+                    {
+                        Tiamat.Cast();
+                        return;
+                    }
+                }
+                if (Hydra.IsReady() &&
+                    Vector2.Distance(Khazix.ServerPosition.To2D(), target.ServerPosition.To2D()) <= Hydra.Range &&
+                    Config.GetBool("UseTiamatKs"))
+                {
+                    double hydradmg = Khazix.GetItemDamage(target, Damage.DamageItems.Hydra);
+                    if (target.Health <= hydradmg)
+                    {
+                        Hydra.Cast();
+                    }
+                }
             }
+        }
 
         internal bool ShouldJump(Vector3 position)
         {
@@ -645,8 +647,8 @@ namespace SephKhazix
             {
                 if (enemy.IsValidTarget() && enemy.NetworkId != unit.NetworkId)
                 {
-                    PredictionOutput pos = W.GetPrediction(enemy);
-                    if (pos.Hitchance >= HitChance.Medium)
+                    PredictionOutput pos = WE.GetPrediction(enemy);
+                    if (pos.Hitchance >= hc)
                     {
                         points.Add(pos.UnitPosition.To2D());
                         hitBoxes.Add((int)enemy.BoundingRadius + 275);
@@ -692,7 +694,7 @@ namespace SephKhazix
                 }
             }
 
-            if (bestHit <= minTargets)
+            if (bestHit + 1 <= minTargets)
                 return;
 
             W.Cast(bestPosition.To3D(), false);
@@ -896,5 +898,4 @@ namespace SephKhazix
         }
     }
 }
-
 
