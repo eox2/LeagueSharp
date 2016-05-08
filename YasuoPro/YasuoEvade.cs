@@ -57,7 +57,7 @@ namespace YasuoPro
                         if (skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall) && skillshot.Evade(SpellSlot.W)
                              && skillshot.SpellData.DangerValue >= Helper.GetSliderInt("Evade.MinDangerLevelWW"))
                         {
-                            var castpos = Helper.Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(), 0.25f * Helper.Yasuo.Distance(skillshot.MissilePosition));
+                            var castpos = Helper.Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(), Math.Min(50, 0.50f * Helper.Yasuo.Distance(skillshot.MissilePosition)));
                             var delay = Helper.GetSliderInt("Evade.Delay");
                             if (TickCount - skillshot.StartTick >= skillshot.SpellData.setdelay + rand.Next(delay - 77 > 0 ? delay - 77 : 0, delay + 65)) 
                             {

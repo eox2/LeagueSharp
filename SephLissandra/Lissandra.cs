@@ -172,7 +172,7 @@ namespace SephLissandra
              {
                  if (LissUtils.Active("Interrupter.AG.UseW") && Vector3.Distance(args.End, Player.ServerPosition) <= Spells["W"].Range)
                  {
-                     Spells["W"].CastOnUnit(Player);
+                    Utility.DelayAction.Add(300, () => Spells["W"].CastOnUnit(Player));
                      return;
                  }
                  if (LissUtils.Active("Interrupter.AG.UseR") && !LissUtils.Active("Blacklist." + sender.ChampionName) && Vector3.Distance(sender.ServerPosition, Player.ServerPosition) <= Spells["R"].Range)
@@ -386,31 +386,35 @@ namespace SephLissandra
             var Check =
                 HeroManager.Enemies
                     .Where(
-                        h => h.IsValidTarget(Spells["R"].Range) && h.CountEnemiesInRange(Spells["R"].Range) >= LissUtils.GetSlider("Combo.Rcount") && !LissUtils.Active("Blacklist." + h.ChampionName)).ToList();
+                        h => h.IsValidTarget(Spells["R"].Range) && h.CountEnemiesInRange(Spells["R"].Range) >= LissUtils.GetSlider("Combo.Rcount") && !LissUtils.Active("Blacklist." + h.ChampionName) && h.HealthPercent > LissUtils.GetSlider("Combo.MinRHealth")).ToList();
 
             if (Player.CountEnemiesInRange(Spells["R"].Range) >= LissUtils.GetSlider("Combo.Rcount"))
             {
                 Check.Add(Player);
             }
-            if (Check != null)
+
+            if (Check.Any())
             {
+
                 if (Check.Contains(Player) && !LissUtils.isHealthy())
                 {
                     Spells["R"].CastOnUnit(Player);
                     return;
                 }
-                var target = Check.FirstOrDefault();
+                var target = Check.MaxOrDefault(TargetSelector.GetPriority);
                 if (target != null)
                 {
                     Spells["R"].Cast(target);
                     return;
                 }
             }
+
             if (LissUtils.Active("Blacklist." + currenttarget.ChampionName))
             {
                 return;
             }
-            if (currenttarget.IsKillableFromPoint(Player.ServerPosition))
+
+            if (currenttarget.IsKillableFromPoint(Player.ServerPosition) && Player.Distance(currenttarget) < Spells["R"].Range)
             {
                     Spells["R"].Cast(currenttarget);
                     return;
@@ -443,8 +447,6 @@ namespace SephLissandra
             if (LissUtils.Active("Misc.PrioritizeUnderTurret"))
             {
                 var EnemyUnderTurret = arranged.Where(h => LissUtils.PointUnderAllyTurret(h.ServerPosition) && !h.IsInvulnerable);
-                if (EnemyUnderTurret != null)
-                {
                     var Enemytofocus = EnemyUnderTurret.MaxOrDefault(h => h.CountEnemiesInRange(Spells["R"].Range));
                     if (Enemytofocus != null)
                     {
@@ -452,8 +454,6 @@ namespace SephLissandra
                         return;
                     }
                 }
-            }
-
             var UltTarget = arranged.FirstOrDefault();
 
             if (UltTarget != null)

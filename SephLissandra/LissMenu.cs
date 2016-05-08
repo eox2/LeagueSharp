@@ -35,6 +35,7 @@ namespace SephLissandra
             Combo.AddItem((new MenuItem("Combo.ecountW", "Enemies count for 2nd E (W)").SetValue(new Slider(2, 0, 5))));
             Combo.AddItem((new MenuItem("Combo.ecountR", "Enemies count for 2nd E (R)").SetValue(new Slider(2, 0, 5))));
             Combo.AddItem((new MenuItem("Combo.Rcount", "Enemies count for self Ult").SetValue(new Slider(2, 0, 5))));
+            Combo.AddItem((new MenuItem("Combo.MinRHealth", "Min Enemy Health To Ult them").SetValue(new Slider(25, 1, 100))));
             Config.AddSubMenu(Combo);
 
 
