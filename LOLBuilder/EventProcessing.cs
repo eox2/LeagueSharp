@@ -136,6 +136,7 @@ namespace LolBuilder
 
         public static void CreateMenu(Menu Menu)
         {
+            string champname = ObjectManager.Player.ChampionName;
             Config = new Menu("ProBuilds", "ProBuilds", true);
             var settings = new Menu("Misc", "Misc");
             Config.AddItem(new MenuItem("leveler", "ProLeveler").SetValue(true));
@@ -166,22 +167,26 @@ namespace LolBuilder
 
                 foreach (var si in build.startingitems)
                 {
-                    starting.AddItem(new MenuItem(si + Random.Next(), si));
+                    starting.Item(si + "." + champname).ValueSet = true;
+                    starting.AddItem(new MenuItem(si + "." + champname, si));
                 }
 
                 foreach (var bo in build.buildorder)
                 {
-                    Buildorder.AddItem(new MenuItem(bo + Random.Next(), bo));
+                    Buildorder.Item(bo + "." + champname).ValueSet = true;
+                    Buildorder.AddItem(new MenuItem(bo + "." + champname, bo));
 
                 }
                 foreach (var finalitem in build.finalitems)
                 {
-                    Final.AddItem(new MenuItem(finalitem + Random.Next(), finalitem));
+                    Final.Item(finalitem + "." + champname).ValueSet = true;
+                    Final.AddItem(new MenuItem(finalitem + "." + champname, finalitem));
                 }
 
                 foreach (var summitem in build.buildsummary)
                 {
-                    Summary.AddItem(new MenuItem(summitem + Random.Next(), summitem));
+                    Summary.Item(summitem + "." + champname).ValueSet = true;
+                    Summary.AddItem(new MenuItem(summitem + "." + champname, summitem));
                 }
 
                 Config.AddSubMenu(BuildMenu);
