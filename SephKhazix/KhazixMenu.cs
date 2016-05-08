@@ -74,8 +74,8 @@ namespace SephKhazix
             djump.AddBool("djumpenabled", "Enabled");
             djump.AddSlider("JEDelay", "Delay between jumps", 250, 250, 500);
             djump.AddSList("jumpmode", "Jump Mode", new[] { "Default (jumps towards your nexus)", "Custom - Settings below" }, 0);
-            djump.AddBool("save", "Save Double Jump Abilities");
-            djump.AddBool("noauto", "Wait for Q instead of autos");
+            djump.AddBool("save", "Save Double Jump Abilities", false);
+            djump.AddBool("noauto", "Wait for Q instead of autos", false);
             djump.AddBool("jcursor", "Jump to Cursor (true) or false for script logic");
             djump.AddBool("secondjump", "Do second Jump");
             djump.AddBool("jcursor2", "Second Jump to Cursor (true) or false for script logic");
