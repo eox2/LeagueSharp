@@ -167,25 +167,41 @@ namespace LolBuilder
 
                 foreach (var si in build.startingitems)
                 {
-                    starting.Item(si + "." + champname).ValueSet = true;
+                    var s = starting.Item(si + "." + champname);
+                    if (s != null)
+                    {
+                        s.ValueSet = true;
+                    }
                     starting.AddItem(new MenuItem(si + "." + champname, si));
                 }
 
                 foreach (var bo in build.buildorder)
                 {
-                    Buildorder.Item(bo + "." + champname).ValueSet = true;
+                    var b = Buildorder.Item(bo + "." + champname);
+                    if (b != null)
+                    {
+                        b.ValueSet = true;
+                    }
                     Buildorder.AddItem(new MenuItem(bo + "." + champname, bo));
 
                 }
                 foreach (var finalitem in build.finalitems)
                 {
-                    Final.Item(finalitem + "." + champname).ValueSet = true;
+                    var f = Final.Item(finalitem + "." + champname);
+                    if (f != null)
+                    {
+                        f.ValueSet = true;
+                    }
                     Final.AddItem(new MenuItem(finalitem + "." + champname, finalitem));
                 }
 
                 foreach (var summitem in build.buildsummary)
                 {
-                    Summary.Item(summitem + "." + champname).ValueSet = true;
+                    var s = Summary.Item(summitem + "." + champname);
+                    if (s != null)
+                    {
+                        s.ValueSet = true;
+                    }
                     Summary.AddItem(new MenuItem(summitem + "." + champname, summitem));
                 }
 

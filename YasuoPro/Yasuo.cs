@@ -289,7 +289,7 @@ namespace YasuoPro
             }
         }
 
-        internal void CastE(Obj_AI_Hero target)
+        internal void CastE(Obj_AI_Hero target, bool force = false)
         {
             if (!target.IsInRange(Spells[E].Range))
             {

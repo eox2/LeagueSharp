@@ -193,7 +193,7 @@ namespace SephSoraka
 
 
 				Menu Drawings = new Menu("Drawings", "Drawing", false);
-				Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable All").SetValue(false));
+				Drawings.AddItem(new MenuItem("Drawing.Disable", "Disable All").SetValue(true));
 				Drawings.AddItem(new MenuItem("Drawing.DrawQ", "Draw Q").SetValue(new Circle(true, Color.White)));
 				Drawings.AddItem(new MenuItem("Drawing.DrawW", "Draw W").SetValue(new Circle(true, Color.DarkCyan)));
 				Drawings.AddItem(new MenuItem("Drawing.DrawE", "Draw E").SetValue(new Circle(true, Color.RoyalBlue)));

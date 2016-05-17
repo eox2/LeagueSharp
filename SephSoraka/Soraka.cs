@@ -242,16 +242,16 @@ namespace SephSoraka
 			try
 			{
 				var ally = args.Target as Obj_AI_Hero;
-				if (sender.IsChampion() && sender.Team != Player.Team && ally != null && ally.IsAlly &&
+				if (sender is Obj_AI_Hero && sender.Team != Player.Team && ally != null && ally.IsAlly &&
 				    (!Misc.Active("Misc.Nohealshop") || !ally.InShop()))
 				{
-					if (!(ally.HealthPercent >= Misc.GetSlider("Healing.MinHP")))
+					if (!(ally.HealthPercent >= Misc.GetSlider("Healing.MinHP")) || Player.HealthPercent <= Misc.GetSlider("Healing.MinHPME"))
 					{
 						return;
 					}
 						if (Misc.Active("Healing.UseW"))
 					{
-						if (Spells[SpellSlot.W].IsReady() && Player.HealthPercent <= Misc.GetSlider("Healing.MinHPME") &&  Misc.Active("w" + ally.ChampionName) && !ally.IsMe && !ally.IsZombie &&
+						if (Spells[SpellSlot.W].IsReady() && !ally.IsMe && Misc.Active("w" + ally.ChampionName) && !ally.IsZombie &&
 						    ally.Distance(Player) <= Spells[SpellSlot.W].Range) 
 						{
 							var damage = sender.GetSpellDamage(ally, args.SData.Name);
@@ -307,6 +307,7 @@ namespace SephSoraka
 			}
 			catch (Exception e)
 			{
+			    Console.WriteLine(e);
 			}
 		}
 		#region Combo
@@ -327,7 +328,7 @@ namespace SephSoraka
 
 		private static void UseW()
 		{
-			if (Player.HealthPercent <= Misc.GetSlider("Healing.MinHPME"))
+			if (Player.HealthPercent <= Misc.GetSlider("Healing.MinHPME") || Misc.Active("onlywincdmg"))
 			{
 				return;
 			}
