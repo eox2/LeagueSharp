@@ -291,9 +291,10 @@ namespace YasuoPro
 
         internal void CastE(Obj_AI_Hero target, bool force = false)
         {
-            if (!target.IsInRange(Spells[E].Range))
+            var minionsinrange = ObjectManager.Get<Obj_AI_Minion>().Any(x => x.IsDashable());
+            if (target == null || !target.IsInRange(minionsinrange ? Spells[E].Range * 2 : Spells[E].Range))
             {
-                target = TargetSelector.GetTarget(Spells[E].Range, TargetSelector.DamageType.Physical);
+                target = TargetSelector.GetTarget(minionsinrange ? Spells[E].Range * 2 : Spells[E].Range, TargetSelector.DamageType.Physical);
             }
 
             if (target != null)
