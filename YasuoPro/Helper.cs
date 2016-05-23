@@ -14,7 +14,7 @@ namespace YasuoPro
 
         public static Obj_AI_Base ETarget;
 
-        internal static Obj_Shop shop = ObjectManager.Get<Obj_Shop>().FirstOrDefault(x => x.IsAlly);
+        internal static Obj_Shop shop;
 
         internal static bool DontDash = false;
 

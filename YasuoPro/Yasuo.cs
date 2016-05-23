@@ -39,6 +39,7 @@ namespace YasuoPro
             if (GetBool("Misc.Walljump") && Game.MapId == GameMapId.SummonersRift) {
                 WallJump.Initialize();
             }
+            shop = ObjectManager.Get<Obj_Shop>().FirstOrDefault(x => x.IsAlly);
             Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += OnDraw;
             AntiGapcloser.OnEnemyGapcloser += OnGapClose;
