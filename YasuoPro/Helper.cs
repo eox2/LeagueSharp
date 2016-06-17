@@ -24,7 +24,14 @@ namespace YasuoPro
 
         internal static float WCLastE = 0f;
 
-        internal static ItemManager.Item Hydra, Tiamat, Blade, Bilgewater, Youmu;
+        internal static ItemManager.Item Hydra, Titanic, Tiamat, Blade, Bilgewater, Youmu;
+
+        internal float LastTornadoClearTick;
+
+        public static int TickCount
+        {
+            get { return (int)(Game.Time * 1000f); }
+        }
 
         internal Orbwalking.Orbwalker Orbwalker
         {
@@ -38,7 +45,7 @@ namespace YasuoPro
         internal void InitSpells()
         {
             Spells =  new Dictionary<int, Spell> {
-            { 1, new Spell(SpellSlot.Q, 500f) },
+            { 1, new Spell(SpellSlot.Q, 450f) },
             { 2, new Spell(SpellSlot.Q, 1150f) },
             { 3, new Spell(SpellSlot.W, 450f) },
             { 4, new Spell(SpellSlot.E, 475f) },
@@ -118,21 +125,26 @@ namespace YasuoPro
                 return false;
             }
 
-            //Avoid casting Q if E in range and Tornado ready :o
-            if (GetBool("Combo.UseEQ") && tready && Spells[E].IsReady() && target.IsDashable() && ((GetBool("Combo.UseE") && GetBool("Combo.ETower") && GetKeyBind("Misc.TowerDive")) || !GetDashPos(target).PointUnderEnemyTurret()))
+            if (tready)
             {
-                return Spells[E].CastOnUnit(target);
-            }
-
-
-            if (tready && Yasuo.IsDashing())
-            {
-                if (GetBool("Combo.NoQ2Dash") || !(ETarget is Obj_AI_Hero))
+                //Avoid casting Q if E in range and Tornado ready :o
+                if (Spells[E].IsReady() && target.IsDashable() && GetBool("Misc.saveQ4QE") && GetBool("Combo.UseEQ") &&
+                    isHealthy &&
+                    (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && GetBool("Combo.UseE") &&
+                     ((GetBool("Combo.ETower") && GetKeyBind("Misc.TowerDive")) ||
+                      !GetDashPos(target).PointUnderEnemyTurret())))
                 {
-                    return false;
+                    return Spells[E].CastOnUnit(target);
+                }
+
+                if (Yasuo.IsDashing())
+                {
+                    if (GetBool("Combo.NoQ2Dash") || !(ETarget is Obj_AI_Hero))
+                    {
+                        return false;
+                    }
                 }
             }
-            
 
             Spell sp = tready ? Spells[Q2] : Spells[Q];
             PredictionOutput pred = sp.GetPrediction(target);
@@ -297,15 +309,37 @@ namespace YasuoPro
             return UltMode.Priority;
         }
 
+        internal EMode GetEMode()
+        {
+            switch (GetSL("Combo.EMode"))
+            {
+                case 0:
+                    return EMode.Old;
+                case 1:
+                    return EMode.New;
+            }
+            return EMode.New;
+        }
+
+
+        internal enum EMode
+        {
+            Old,
+            New
+        }
 
 
         internal void InitItems()
         {
             Hydra = new ItemManager.Item(3074, 225f, ItemManager.ItemCastType.RangeCast, 1, 2);
             Tiamat = new ItemManager.Item(3077, 225f, ItemManager.ItemCastType.RangeCast, 1, 2);
+            Titanic = new ItemManager.Item(3053, 225f, ItemManager.ItemCastType.RangeCast, 1, 2);
             Blade = new ItemManager.Item(3153, 450f, ItemManager.ItemCastType.TargettedCast, 1);
             Bilgewater = new ItemManager.Item(3144, 450f, ItemManager.ItemCastType.TargettedCast, 1);
             Youmu = new ItemManager.Item(3142, 185f, ItemManager.ItemCastType.SelfCast, 1, 3);
         }
+
+
+
     }
 }

@@ -59,6 +59,7 @@ namespace YasuoPro
             {
                 var items = menu.AddSubMenu("Items");
                 items.AddBool("Items.Enabled", "Use Items");
+                items.AddBool("Items.UseTitanic", "Use Titanic");
                 items.AddBool("Items.UseTIA", "Use Tiamat");
                 items.AddBool("Items.UseHDR", "Use Hydra");
                 items.AddBool("Items.UseBRK", "Use BORK");
@@ -70,10 +71,12 @@ namespace YasuoPro
                 menu.AddBool("Combo.StackQ", "Stack Q if not in Range");
                 menu.AddBool("Combo.UseW", "Use W");
                 menu.AddBool("Combo.UseE", "Use E");
+                menu.AddSList("Combo.EMode", "E Mode", new[] { "Old", "Beta" }, 0);
                 menu.AddBool("Combo.UseEQ", "Use EQ");
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
                 menu.AddBool("Combo.EAdvanced", "Predict E position with Waypoints");
                 menu.AddBool("Combo.NoQ2Dash", "Dont Q2 while dashing", false);
+                menu.AddBool("Combo.EToSafety", "E towards base if unhealthy", false);
 
                 var ultmenu = menu.AddSubMenu("Ult Settings");
                 var blacklist = new Menu("Ult Targets", "BlackList");
@@ -133,6 +136,7 @@ namespace YasuoPro
                 items.AddBool("Waveclear.UseItems", "Use Items");
                 items.AddSlider("Waveclear.MinCountHDR", "Minion count for Cleave", 2, 1, 10);
                 items.AddSlider("Waveclear.MinCountYOU", "Minion count for Youmu", 2, 1, 10);
+                items.AddBool("Waveclear.UseTitanic", "Use Titanic");
                 items.AddBool("Waveclear.UseTIA", "Use Tiamat");
                 items.AddBool("Waveclear.UseHDR", "Use Hydra");
                 items.AddBool("Waveclear.UseYMU", "Use Youmu", false);
@@ -220,7 +224,9 @@ namespace YasuoPro
                 menu.AddBool("Misc.AG", "Use Q (Tornado) on Gapcloser");
                 menu.AddBool("Misc.Interrupter", "Use Q (Tornado) to Interrupt");
                 menu.AddBool("Misc.Walljump", "Use Walljump", false);
-                menu.AddBool("Misc.Debug", "Debug", false);
+                menu.AddKeyBind("Misc.DashMode", "Move to Mouse", '9', KeyBindType.Press);
+                menu.AddBool("Misc.saveQ4QE", "Save Q3 for QE") ;
+;               menu.AddBool("Misc.Debug", "Debug", false);
             }
         }
 

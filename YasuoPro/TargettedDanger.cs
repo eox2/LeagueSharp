@@ -99,7 +99,7 @@ namespace YasuoPro
         public static void OnUpdate()
         {
             foreach (var ls in DetectedPolygons) {
-                if (YasuoEvade.TickCount - ls.StartTick >= ls.data.delay + Helper.GetSliderInt("Evade.Delay"))
+                if (Helper.TickCount - ls.StartTick >= ls.data.delay + Helper.GetSliderInt("Evade.Delay"))
                 {
                     if (ls.poly.PointInPolygon(Helper.Yasuo.ServerPosition.To2D()) == 1)
                     {
@@ -146,7 +146,7 @@ namespace YasuoPro
                         var end = args.Start.To2D().Extend(args.End.To2D(), 1400);
                         Evade.Geometry.Rectangle rect = new Evade.Geometry.Rectangle(args.Start.To2D(), end, args.SData.LineWidth);
                         var topoly = rect.ToPolygon();
-                        var newls = new LittleStruct { poly = topoly, argss = args, RealEndPos = end, StartTick = YasuoEvade.TickCount, data = ssdata };
+                        var newls = new LittleStruct { poly = topoly, argss = args, RealEndPos = end, StartTick = Helper.TickCount, data = ssdata };
                         DetectedPolygons.Add(newls);
                         Utility.DelayAction.Add(3000, () => DetectedPolygons.Clear());
                     }

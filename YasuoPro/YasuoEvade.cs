@@ -18,18 +18,11 @@ namespace YasuoPro
             {
                 return;
             }
-           
-            foreach (var skillshot in Program.DetectedSkillshots.ToList())
-            {
-                if (skillshot.Dodged)
-                {
-                    if (Helper.Debug)
-                    {
-                        Game.PrintChat(skillshot.SpellData.SpellName + " Dodged already");
-                    }
-                    continue;
-                }
 
+            var skillshots = Program.DetectedSkillshots.Where(x => !x.Dodged).OrderBy(x => x.SpellData.DangerValue);
+           
+            foreach (var skillshot in skillshots)
+            {
                 //Avoid trying to evade while dashing
                 if (Helper.Yasuo.IsDashing())
                 {
@@ -52,14 +45,14 @@ namespace YasuoPro
                       !Program.IsSafe(Helper.Yasuo.Position.To2D()).IsSafe)))
                 {
                     Helper.DontDash = true;
-                    if (skillshot.IsAboutToHit(700, Helper.Yasuo) && skillshot.SpellData.Type != SkillShotType.SkillshotCircle && Helper.GetBool("Evade.UseW"))
+                    if (skillshot.IsAboutToHit(350, Helper.Yasuo) && skillshot.SpellData.Type != SkillShotType.SkillshotCircle && Helper.GetBool("Evade.UseW"))
                     {
                         if (skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall) && skillshot.Evade(SpellSlot.W)
                              && skillshot.SpellData.DangerValue >= Helper.GetSliderInt("Evade.MinDangerLevelWW"))
                         {
                             var castpos = Helper.Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(), Math.Min(50, 0.50f * Helper.Yasuo.Distance(skillshot.MissilePosition)));
                             var delay = Helper.GetSliderInt("Evade.Delay");
-                            if (TickCount - skillshot.StartTick >= skillshot.SpellData.setdelay + rand.Next(delay - 77 > 0 ? delay - 77 : 0, delay + 65)) 
+                            if (Helper.TickCount - skillshot.StartTick >= skillshot.SpellData.setdelay + rand.Next(delay - 77 > 0 ? delay - 77 : 0, delay + 65)) 
                             {
                                 bool WCasted = Helper.Spells[Helper.W].Cast(castpos);
                                 Program.DetectedSkillshots.Remove(skillshot);
@@ -106,9 +99,5 @@ namespace YasuoPro
             return path;
         }
 
-        public static int TickCount
-        {
-            get { return (int)(Game.Time * 1000f); }
-        }
     }
 }
