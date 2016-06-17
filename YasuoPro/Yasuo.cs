@@ -32,7 +32,7 @@ namespace YasuoPro
             }
 
             Game.PrintChat("<font color='#1d87f2'>YasuoPro by Seph Loaded. Good Luck!</font>");
-            Game.PrintChat("<font color='#1d87f2'>::::New E Mode - To try ---> Combo --> E ---> EMode --> Beta</font>");
+            Game.PrintChat("<font color='#1d87f2'>::::New E Mode - To try ---> Combo --> EMode --> Beta</font>");
             InitItems();
             InitSpells();
             YasuoMenu.Init(this);
@@ -785,6 +785,7 @@ namespace YasuoPro
                     ObjectManager.Get<Obj_AI_Base>()
                         .Where(x => x.IsDashable())
                         .MinOrDefault(x => GetDashPos(x).Distance(Game.CursorPos));
+
                 if (bestminion != null)
                 {
                     Spells[E].CastOnUnit(bestminion);
