@@ -32,7 +32,7 @@ namespace YasuoPro
             }
 
             Game.PrintChat("<font color='#1d87f2'>YasuoPro by Seph Loaded. Good Luck!</font>");
-            Game.PrintChat("<font color='#1d87f2'>::::New E Mode - To try ---> Combo --> EMode --> Beta</font>");
+            Game.PrintChat("<font color='#1d87f2'>::::Any Issues/Recommendations - Post On Topic</font>");
             InitItems();
             InitSpells();
             YasuoMenu.Init(this);
