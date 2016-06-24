@@ -19,77 +19,118 @@ namespace YasuoPro
                 return;
             }
 
+            if (!Helper.Spells[Helper.W].IsReady() && !Helper.Spells[Helper.E].IsReady())
+            {
+                return;
+            }
+
             var skillshots = Program.DetectedSkillshots.Where(x => !x.Dodged).OrderBy(x => x.SpellData.DangerValue);
-           
+
             foreach (var skillshot in skillshots)
             {
+                if (skillshot.Dodged)
+                {
+                    continue;
+                }
+
                 //Avoid trying to evade while dashing
                 if (Helper.Yasuo.IsDashing())
                 {
                     return;
                 }
 
+                //Avoid dodging the skillshot if it is not set as dangerous
                 if (Helper.GetBool("Evade.OnlyDangerous") && !skillshot.SpellData.IsDangerous)
                 {
                     continue;
                 }
 
-                if ((skillshot.SpellData.Type == SkillShotType.SkillshotCircle || (skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall)) && !SpellSlot.E.IsReady()))
+                //Avoid dodging the skillshot if there is no room/time to safely block it
+                if (skillshot.Start.Distance(Helper.Yasuo.ServerPosition) < Helper.Yasuo.BoundingRadius)
                 {
                     continue;
                 }
 
 
                 if (((Program.NoSolutionFound ||
-                      !Program.IsSafePath(Helper.Yasuo.GetWaypoints(), 250).IsSafe &&
-                      !Program.IsSafe(Helper.Yasuo.Position.To2D()).IsSafe)))
+                      !Program.IsSafePath(Helper.Yasuo.GetWaypoints(), 500).IsSafe &&
+                      !Program.IsSafe(Helper.Yasuo.ServerPosition.To2D()).IsSafe)))
                 {
                     Helper.DontDash = true;
-                    if (skillshot.IsAboutToHit(350, Helper.Yasuo) && skillshot.SpellData.Type != SkillShotType.SkillshotCircle && Helper.GetBool("Evade.UseW"))
+                    bool windWallable = true;
+                    if (skillshot.IsAboutToHit(500, Helper.Yasuo))
                     {
-                        if (skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall) && skillshot.Evade(SpellSlot.W)
-                             && skillshot.SpellData.DangerValue >= Helper.GetSliderInt("Evade.MinDangerLevelWW"))
+                        if (Helper.GetBool("Evade.WFilter"))
                         {
-                            var castpos = Helper.Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(), Math.Min(50, 0.50f * Helper.Yasuo.Distance(skillshot.MissilePosition)));
-                            var delay = Helper.GetSliderInt("Evade.Delay");
-                            if (Helper.TickCount - skillshot.StartTick >= skillshot.SpellData.setdelay + rand.Next(delay - 77 > 0 ? delay - 77 : 0, delay + 65)) 
+                            windWallable =
+                                skillshot.SpellData.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall) &&
+                                skillshot.SpellData.Type !=
+                                SkillShotType.SkillshotCircle;
+                        }
+
+                        if (Helper.GetBool("Evade.UseW") && windWallable)
+                        {
+                            if (skillshot.Evade(SpellSlot.W)
+                                && skillshot.SpellData.DangerValue >= Helper.GetSliderInt("Evade.MinDangerLevelWW"))
                             {
-                                bool WCasted = Helper.Spells[Helper.W].Cast(castpos);
-                                Program.DetectedSkillshots.Remove(skillshot);
-                                skillshot.Dodged = WCasted;
-                                if (WCasted)
+                                var castpos = Helper.Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(),
+                                    Math.Max(Helper.Yasuo.BoundingRadius,
+                                        Math.Min(Helper.Spells[Helper.W].Range,
+                                            0.15f*Helper.Yasuo.Distance(skillshot.MissilePosition))));
+                                var delay = Helper.GetSliderInt("Evade.Delay");
+                                if (Helper.TickCount - skillshot.StartTick >=
+                                    skillshot.SpellData.setdelay +
+                                    rand.Next(delay - 77 > 0 ? delay - 77 : 0, delay + 65))
                                 {
+                                    bool WCasted = Helper.Spells[Helper.W].Cast(castpos);
+                                    Program.DetectedSkillshots.Remove(skillshot);
+                                    skillshot.Dodged = WCasted;
+                                    if (WCasted)
+                                    {
+                                        if (Helper.Debug)
+                                        {
+                                            Game.PrintChat("Blocked " + skillshot.SpellData.SpellName +
+                                                           " with Windwall ");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                       else if (Helper.GetBool("Evade.UseE")) {
+                            if (skillshot.Evade(SpellSlot.E) && !skillshot.Dodged &&
+                                skillshot.SpellData.DangerValue >= Helper.GetSliderInt("Evade.MinDangerLevelE"))
+                            {
+                                var evadetarget =
+                                    ObjectManager
+                                        .Get<Obj_AI_Base>()
+                                        .Where(
+                                            x =>
+                                                x.IsDashable() && !Helper.GetDashPos(x).PointUnderEnemyTurret() &&
+                                                Program.IsSafe(x.ServerPosition.To2D()).IsSafe &&
+                                                Program.IsSafePath(x.GeneratePathTo(), 0, 1200, 250).IsSafe)
+                                        .MinOrDefault(x => x.Distance(Helper.shop));
+
+                                if (evadetarget != null)
+                                {
+                                    Helper.Spells[Helper.E].CastOnUnit(evadetarget);
+                                    Program.DetectedSkillshots.Remove(skillshot);
+                                    skillshot.Dodged = true;
                                     if (Helper.Debug)
                                     {
-                                        Game.PrintChat("Blocked " + skillshot.SpellData.SpellName + " with Windwall ");
+                                        Game.PrintChat("Evading " + skillshot.SpellData.SpellName + " " + "using E to " +
+                                                       evadetarget.BaseSkinName);
                                     }
-                                    continue;
                                 }
                             }
                         }
                     }
-                    if (skillshot.IsAboutToHit(500, Helper.Yasuo) && skillshot.Evade(SpellSlot.E) && !skillshot.Dodged && Helper.GetBool("Evade.UseE") && skillshot.SpellData.DangerValue >= Helper.GetSliderInt("Evade.MinDangerLevelE"))
-                    {
-                        var evadetarget =
-                            ObjectManager
-                                .Get<Obj_AI_Base>().Where(x => x.IsDashable() && !Helper.GetDashPos(x).PointUnderEnemyTurret() && Program.IsSafe(x.ServerPosition.To2D()).IsSafe && Program.IsSafePath(x.GeneratePathTo(), 0, 1200, 250).IsSafe).MinOrDefault(x => x.Distance(Helper.shop));
-                     
-                        if (evadetarget != null)
-                        {
-                            Helper.Spells[Helper.E].CastOnUnit(evadetarget);
-                            Program.DetectedSkillshots.Remove(skillshot);
-                            skillshot.Dodged = true;
-                            if (Helper.Debug)
-                            {
-                                Game.PrintChat("Evading " + skillshot.SpellData.SpellName + " " + "using E to " + evadetarget.BaseSkinName);
-                            }
-                        }
-                    }
+                    Helper.DontDash = false;
                 }
             }
-
-            Helper.DontDash = false;
         }
+
+
 
         static List<Vector2> GeneratePathTo(this Obj_AI_Base unit)
         {

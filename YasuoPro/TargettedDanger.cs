@@ -159,7 +159,7 @@ namespace YasuoPro
                 var sdata = GetSpell(args.SData.Name);
                 if (sdata != null && sdata.IsEnabled)
                 {
-                    var castpos = Helper.Yasuo.ServerPosition.Extend(args.Start, 50);
+                    var castpos = Helper.Yasuo.ServerPosition.Extend(args.Start, Helper.Yasuo.BoundingRadius * 1.2f);
                     Utility.DelayAction.Add((int) sdata.delay, () => Helper.Spells[Helper.W].Cast(castpos));
                 }
             }

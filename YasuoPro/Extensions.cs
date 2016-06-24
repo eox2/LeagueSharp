@@ -31,7 +31,27 @@ namespace YasuoPro
             return !unit.HasBuff("YasuoDashWrapper") && (unit is Obj_AI_Hero || minion.IsValidMinion());
         }
 
-      
+        internal static bool IsDashableFrom(this Obj_AI_Base unit, Vector2 fromPos, float range = 475)
+        {
+            if (unit == null || unit.Team == Player.Team || unit.Distance(fromPos) > range || !unit.IsValid || unit.IsDead || !unit.IsVisible || !unit.IsTargetable)
+            {
+                return false;
+            }
+
+            if (Helper.GetBool("Misc.SafeE"))
+            {
+                var point = Helper.GetDashPos(unit);
+                if (!Evade.Program.IsSafe(point).IsSafe)
+                {
+                    return false;
+                }
+            }
+
+            var minion = unit as Obj_AI_Minion;
+            return !unit.HasBuff("YasuoDashWrapper") && (unit is Obj_AI_Hero || minion.IsValidMinion());
+        }
+
+
         internal static bool IsValidMinion(this Obj_AI_Minion minion, float range = 50000)
         {
             if (minion == null)
@@ -235,5 +255,6 @@ namespace YasuoPro
             var minions = ObjectManager.Get<Obj_AI_Minion>().Count(x => x.Distance(pos) <= range && (x.IsEnemy || x.Team == GameObjectTeam.Neutral));
             return minions;
         }
+       
     }
 }

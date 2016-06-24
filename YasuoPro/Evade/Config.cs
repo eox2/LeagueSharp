@@ -179,10 +179,10 @@ namespace Evade
                                 new MenuItem("DangerLevel" + spell.MenuItemName, "Danger level").SetValue(
                                     new Slider(spell.DangerValue, 5, 1)));
 
-                            if (spell.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall))
-                            {
+                            //if (spell.CollisionObjects.Contains(CollisionObjectTypes.YasuoWall))
+                           // {
                                 subMenu.AddBool("EvadeW" + spell.MenuItemName, "Evade with W");
-                            }
+                           // }
 
                             subMenu.AddBool("EvadeE" + spell.MenuItemName, "Evade with E");
 

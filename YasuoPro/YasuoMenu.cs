@@ -71,7 +71,6 @@ namespace YasuoPro
                 menu.AddBool("Combo.StackQ", "Stack Q if not in Range");
                 menu.AddBool("Combo.UseW", "Use W");
                 menu.AddBool("Combo.UseE", "Use E");
-                menu.AddSList("Combo.EMode", "E Mode", new[] { "Old", "Beta" }, 0);
                 menu.AddBool("Combo.UseEQ", "Use EQ");
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
                 menu.AddBool("Combo.EAdvanced", "Predict E position with Waypoints");
@@ -198,6 +197,7 @@ namespace YasuoPro
                 menu.AddBool("Evade.Enabled", "Evade Enabled").Permashow(true, "Yasuo| Evade");
                 menu.AddBool("Evade.OnlyDangerous", "Evade only Dangerous", false).Permashow(true, "Yasuo| Only Dangerous");
                 menu.AddBool("Evade.FOW", "Dodge FOW Skills");
+                menu.AddBool("Evade.WFilter", "Filter Circular Spells");
                 // menu.AddKeyBind("Evade.OnlyDangerous", "Dodge only dangerous", 32, KeyBindType.Press).Permashow(true, "Yasuo| Only Dangerous");
                 menu.AddSlider("Evade.MinDangerLevelWW", "Min Danger Level WindWall", 1, 1 , 5);
                 menu.AddSlider("Evade.MinDangerLevelE", "Min Danger Level Dash", 1, 1, 5);
