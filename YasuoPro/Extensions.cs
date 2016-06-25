@@ -4,6 +4,8 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace YasuoPro
 {
@@ -13,7 +15,7 @@ namespace YasuoPro
 
         internal static bool IsDashable(this Obj_AI_Base unit, float range = 475)
         {
-            if (unit == null || unit.Team == Player.Team || unit.Distance(Player) > range || !unit.IsValid || unit.IsDead || !unit.IsVisible || !unit.IsTargetable)
+            if (!SpellSlot.E.IsReady() || unit == null || unit.Team == Player.Team || unit.Distance(Player) > range || !unit.IsValid || unit.IsDead || !unit.IsVisible || !unit.IsTargetable)
             {
                 return false;
             }
@@ -121,7 +123,7 @@ namespace YasuoPro
             var midwpnum = wpc / 2;
             var midwp = wp[midwpnum];
             var plength = wp[0].Distance(lastwp);
-            return (point.Distance(target.ServerPosition) <= Player.Distance(target.ServerPosition) - Helper.Yasuo.BoundingRadius) || ((plength <= Player.Distance(target.ServerPosition) * 1.2f && point.Distance(lastwp.To3D()) < Player.Distance(lastwp.To3D()) || point.Distance(midwp.To3D()) < Player.Distance(midwp)));
+            return (point.Distance(target.ServerPosition) < 0.90f * Player.Distance(target.ServerPosition) - Helper.Yasuo.BoundingRadius) || ((plength < Player.Distance(target.ServerPosition) * 1.2f && point.Distance(lastwp.To3D()) < Player.Distance(lastwp.To3D()) || point.Distance(midwp.To3D()) < Player.Distance(midwp)));
         }
 
         internal static bool IsCloser(this Vector2 point, Obj_AI_Base target)
@@ -130,7 +132,7 @@ namespace YasuoPro
             {
                 return IsCloserWP(point, target);
             }
-            return (point.Distance(target.ServerPosition) <= Player.Distance(target.ServerPosition) - Helper.Yasuo.BoundingRadius);
+            return (point.Distance(target.ServerPosition) < 0.90f * Player.Distance(target.ServerPosition) - Helper.Yasuo.BoundingRadius);
         }
 
         internal static bool IsCloser(this Obj_AI_Base @base, Obj_AI_Base target)
@@ -252,9 +254,18 @@ namespace YasuoPro
 
         internal static int MinionsInRange(this Vector3 pos, float range)
         {
-            var minions = ObjectManager.Get<Obj_AI_Minion>().Count(x => x.Distance(pos) <= range && (x.IsEnemy || x.Team == GameObjectTeam.Neutral));
+            var minions =
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .Count(x => x.Distance(pos) <= range && (x.IsEnemy || x.Team == GameObjectTeam.Neutral));
             return minions;
         }
-       
+
+
+        internal static IEnumerable<Obj_AI_Minion> GetMinionsInRange(this Vector2 pos, float range)
+        {
+            var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.Distance(pos) <= range && (x.IsEnemy || x.Team == GameObjectTeam.Neutral));
+            return minions;
+        }
+
     }
 }

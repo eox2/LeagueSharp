@@ -53,7 +53,7 @@ namespace YasuoPro
         {
             Spells =  new Dictionary<int, Spell> {
             { 1, new Spell(SpellSlot.Q, 450f) },
-            { 2, new Spell(SpellSlot.Q, 1150f) },
+            { 2, new Spell(SpellSlot.Q, 1100f) },
             { 3, new Spell(SpellSlot.W, 450f) },
             { 4, new Spell(SpellSlot.E, 475f) },
             { 5, new Spell(SpellSlot.R, 1250f) },
@@ -61,6 +61,7 @@ namespace YasuoPro
             };
 
             Spells[Q].SetSkillshot(GetQ1Delay, 20f, float.MaxValue, false, SkillshotType.SkillshotLine);
+           
             Spells[Q2].SetSkillshot(GetQ2Delay, 90, 1500, false, SkillshotType.SkillshotLine);
             Spells[E].SetTargetted(0.075f, 1025);
         }
@@ -134,6 +135,8 @@ namespace YasuoPro
                 return 0;
             }
         }
+
+
 
         internal bool ShouldNormalQ(Obj_AI_Hero target)
         {

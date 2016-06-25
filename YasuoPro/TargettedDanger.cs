@@ -10,6 +10,7 @@ namespace YasuoPro
 {
     class TargettedDanger
     {
+        private static Random rand = new Random();
         public class SData
         {
             internal string spellName;
@@ -157,9 +158,14 @@ namespace YasuoPro
                 }
                 //Console.WriteLine(args.SData.Name + " " + sender.BaseSkinName);
                 var sdata = GetSpell(args.SData.Name);
+                var dist = Helper.Yasuo.BoundingRadius + rand.Next(0, 20);
+                if (sender.Distance(Helper.Yasuo) < dist)
+                {
+                    return;
+                }
                 if (sdata != null && sdata.IsEnabled)
                 {
-                    var castpos = Helper.Yasuo.ServerPosition.Extend(args.Start, Helper.Yasuo.BoundingRadius * 1.2f);
+                    var castpos = Helper.Yasuo.ServerPosition.Extend(args.Start, dist);
                     Utility.DelayAction.Add((int) sdata.delay, () => Helper.Spells[Helper.W].Cast(castpos));
                 }
             }

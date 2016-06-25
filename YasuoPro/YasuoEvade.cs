@@ -45,8 +45,9 @@ namespace YasuoPro
                     continue;
                 }
 
+                var randDist = Helper.Yasuo.BoundingRadius + rand.Next(0, 20);
                 //Avoid dodging the skillshot if there is no room/time to safely block it
-                if (skillshot.Start.Distance(Helper.Yasuo.ServerPosition) < Helper.Yasuo.BoundingRadius)
+                if (skillshot.Start.Distance(Helper.Yasuo.ServerPosition) < randDist)
                 {
                     continue;
                 }
@@ -73,10 +74,7 @@ namespace YasuoPro
                             if (skillshot.Evade(SpellSlot.W)
                                 && skillshot.SpellData.DangerValue >= Helper.GetSliderInt("Evade.MinDangerLevelWW"))
                             {
-                                var castpos = Helper.Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(),
-                                    Math.Max(Helper.Yasuo.BoundingRadius,
-                                        Math.Min(Helper.Spells[Helper.W].Range,
-                                            0.15f*Helper.Yasuo.Distance(skillshot.MissilePosition))));
+                                var castpos = Helper.Yasuo.ServerPosition.Extend(skillshot.MissilePosition.To3D(), randDist);
                                 var delay = Helper.GetSliderInt("Evade.Delay");
                                 if (Helper.TickCount - skillshot.StartTick >=
                                     skillshot.SpellData.setdelay +
