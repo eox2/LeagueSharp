@@ -298,7 +298,7 @@ namespace YasuoPro
 
         internal void CastE(Obj_AI_Hero target)
         {
-            if (!SpellSlot.E.IsReady() || Yasuo.IsDashing() || InAir)
+            if (!SpellSlot.E.IsReady() || Yasuo.IsDashing() || InDash)
             {
                 return;
             }
@@ -423,7 +423,8 @@ namespace YasuoPro
                     var mode = Orbwalker.ActiveMode;
                     if (mode == Orbwalking.OrbwalkingMode.Combo || mode == Orbwalking.OrbwalkingMode.Mixed)
                     {
-                        if (endpos.To3D().CountEnemiesInRange(QRadius) >= 1)
+                        var ene = endpos.To3D().GetEnemiesInRange(QRadius).FirstOrDefault();
+                        if (ene != null)
                         {
                             Spells[Q].Cast(endpos);
                         }
@@ -1003,3 +1004,4 @@ namespace YasuoPro
     }
 
     }
+

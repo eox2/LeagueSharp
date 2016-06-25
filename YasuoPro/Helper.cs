@@ -12,7 +12,7 @@ namespace YasuoPro
 
         internal static Obj_AI_Hero Yasuo;
 
-        internal float QRadius = 160 * 2 + 1 + 1 - 162;
+        internal float QRadius = 170;
 
         internal static Obj_Shop shop;
 
@@ -40,9 +40,9 @@ namespace YasuoPro
             get { return YasuoMenu.Orbwalker; }
         }
 
-        internal bool InAir
+        internal bool InDash
         {
-            get { return TickCount - LastDashTick < 250; }
+            get { return TickCount - LastDashTick < 500; }
         }
 
         /* Credits to Brian for Q Skillshot values */
@@ -182,7 +182,7 @@ namespace YasuoPro
                 return false;
             }
 
-            if (Yasuo.IsDashing() || InAir)
+            if (Yasuo.IsDashing() || InDash)
             {
                 return false;
             }
