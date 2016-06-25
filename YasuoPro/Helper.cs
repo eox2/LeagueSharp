@@ -137,42 +137,9 @@ namespace YasuoPro
 
         internal bool ShouldNormalQ(Obj_AI_Hero target)
         {
-            return QLeftPCT <= 20 || !TowerCheck(target, true) || !target.IsDashable(Spells[E].Range * 3);
+            var pos = GetDashPos(target);
+            return QLeftPCT <= 30 || !TowerCheck(pos, true) || !target.IsDashable(Spells[E].Range * 3) || !targInKnockupRadius(pos.To3D());
         }
-
-
-        bool simulatePath(Vector2 startPoint, Obj_AI_Hero target, int jcount = 0)
-        {
-            if (startPoint.Distance(target) <= Spells[E].Range)
-            {
-                return true;
-            }
-
-            if (jcount > 3)
-            {
-                return false;
-            } 
-
-                var minion =
-                  ObjectManager.Get<Obj_AI_Minion>()
-                      .Where(
-                          x =>
-                              x.IsDashableFrom(startPoint) &&
-                              GetDashPosFrom(startPoint, x).Distance(target) < Yasuo.Distance(target))
-                      .MinOrDefault(x => GetDashPosFrom(startPoint, x).Distance(target));
-            
-
-           
-            if (minion != null)
-            {
-                var pos1 = GetDashPos(minion);
-                jcount++;
-                simulatePath(pos1, target, jcount);
-            }
-
-            return false;
-        }
-
 
 
         internal bool UseQ(Obj_AI_Hero target, HitChance minhc = HitChance.Medium, bool UseQ1 = true, bool UseQ2 = true)
@@ -203,7 +170,7 @@ namespace YasuoPro
                         var dashPos = GetDashPos(target);
                         if (dashPos.To3D().CountEnemiesInRange(QRadius) >= 1)
                         {
-                            //Cast E to trigger EQ
+                            //Cast E to trigger EQ 
                             if (GetBool("Misc.saveQ4QE") && isHealthy && GetBool("Combo.UseE") &&
                                 (GetBool("Combo.ETower") || GetKeyBind("Misc.TowerDive") ||
                                  !GetDashPos(target).PointUnderEnemyTurret()))
@@ -301,6 +268,7 @@ namespace YasuoPro
             DashPosition = predictedposition;
             return predictedposition;
         }
+
         internal static double GetProperEDamage(Obj_AI_Base target)
         {
             double dmg = Yasuo.GetSpellDamage(target, SpellSlot.E);
@@ -410,13 +378,23 @@ namespace YasuoPro
             return Helper.GetKeyBind("Misc.TowerDive") || !Helper.GetDashPos(unit).PointUnderEnemyTurret();
         }
 
-
+        internal bool TowerCheck(Vector2 pos, bool isCombo = false)
+        {
+            return (isCombo && Helper.GetBool("Combo.ETower") || Helper.GetKeyBind("Misc.TowerDive") ||
+                    pos.PointUnderEnemyTurret());
+        }
 
         internal bool targInKnockupRadius(Obj_AI_Hero targ)
         {
             var dpos = GetDashPos(targ).To3D();
             return dpos.CountEnemiesInRange(QRadius) > 0;
         }
+
+        internal bool targInKnockupRadius(Vector3 dpos)
+        {
+            return dpos.CountEnemiesInRange(QRadius) > 0;
+        }
+
 
 
 
