@@ -164,6 +164,7 @@ namespace YasuoPro
                 return false;
             }
 
+            /*
             if (!ShouldNormalQ(target))
             {
                 if (tready && GetBool("Combo.UseEQ"))
@@ -184,9 +185,9 @@ namespace YasuoPro
                     }
                 }
             }
+            */
 
-            else
-            {
+            
 
                 Spell sp = tready ? Spells[Q2] : Spells[Q];
                 PredictionOutput pred = sp.GetPrediction(target);
@@ -195,7 +196,6 @@ namespace YasuoPro
                 {
                     return sp.Cast(pred.CastPosition);
                 }
-            }
 
             return false;
         }
