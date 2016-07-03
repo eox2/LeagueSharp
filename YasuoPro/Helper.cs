@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -164,8 +165,7 @@ namespace YasuoPro
                 return false;
             }
 
-            /*
-            if (!ShouldNormalQ(target))
+            if (GetMode() == Modes.Beta && !ShouldNormalQ(target))
             {
                 if (tready && GetBool("Combo.UseEQ"))
                 {
@@ -185,9 +185,9 @@ namespace YasuoPro
                     }
                 }
             }
-            */
 
-            
+            else
+            {
 
                 Spell sp = tready ? Spells[Q2] : Spells[Q];
                 PredictionOutput pred = sp.GetPrediction(target);
@@ -196,6 +196,7 @@ namespace YasuoPro
                 {
                     return sp.Cast(pred.CastPosition);
                 }
+            }
 
             return false;
         }
@@ -398,8 +399,25 @@ namespace YasuoPro
             return dpos.CountEnemiesInRange(QRadius) > 0;
         }
 
+        internal Modes GetMode()
+        {
+            var mode = Helper.GetSL("Combo.Mode");
+            if (mode == 0)
+            {
+                return Modes.Old;
+            }
+            else
+            {
+                return Modes.Beta;
+            }
+        }
 
 
+        internal enum Modes
+        {
+            Old,
+            Beta    
+        }
 
     }
 }
