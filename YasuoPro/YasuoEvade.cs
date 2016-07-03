@@ -54,12 +54,12 @@ namespace YasuoPro
 
 
                 if (((Program.NoSolutionFound ||
-                      !Program.IsSafePath(Helper.Yasuo.GetWaypoints(), 500).IsSafe &&
+                      !Program.IsSafePath(Helper.Yasuo.GetWaypoints(), 1000).IsSafe &&
                       !Program.IsSafe(Helper.Yasuo.ServerPosition.To2D()).IsSafe)))
                 {
                     Helper.DontDash = true;
                     bool windWallable = true;
-                    if (skillshot.IsAboutToHit(500, Helper.Yasuo))
+                    if (skillshot.IsAboutToHit(1000, Helper.Yasuo))
                     {
                         if (Helper.GetBool("Evade.WFilter"))
                         {

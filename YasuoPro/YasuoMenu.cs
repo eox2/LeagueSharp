@@ -69,9 +69,9 @@ namespace YasuoPro
                 menu.AddBool("Combo.UseQ", "Use Q");
                 menu.AddBool("Combo.UseQ2", "Use Q2");
                 menu.AddBool("Combo.StackQ", "Stack Q if not in Range");
-                menu.AddBool("Combo.UseW", "Use W");
                 menu.AddBool("Combo.UseE", "Use E");
                 menu.AddBool("Combo.UseEQ", "Use EQ");
+                menu.AddSList("Combo.Mode", "Mode", new string[] { "Old", "Beta" }, 0);
                 menu.AddBool("Combo.ETower", "Use E under Tower", false);
                 menu.AddBool("Combo.EAdvanced", "Predict E position with Waypoints");
                 menu.AddBool("Combo.EToSafety", "E towards base if unhealthy", false);
