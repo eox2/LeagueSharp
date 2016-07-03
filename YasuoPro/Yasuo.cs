@@ -385,7 +385,7 @@ namespace YasuoPro
 
             if (target != null && TowerCheck(target, true))
             {
-                if (target.Distance(Yasuo) <= 0.30 * Yasuo.AttackRange)
+                if (target.Distance(Yasuo) <= 0.70 * Yasuo.AttackRange)
                 {
                     return;
                 }
@@ -516,20 +516,19 @@ namespace YasuoPro
 
             List<Obj_AI_Hero> ordered = new List<Obj_AI_Hero>();
 
-
             if (ultmode == UltMode.Health)
             {
-                ordered = KnockedUp.OrderBy(x => x.Health).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenByDescending(x => x.CountEnemiesInRange(350));
+                ordered = KnockedUp.OrderBy(x => x.Health).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenByDescending(x => x.CountEnemiesInRange(350)).ToList();
             }
 
             if (ultmode == UltMode.Priority)
             {
-                ordered = KnockedUp.OrderByDescending(x => TargetSelector.GetPriority(x)).ThenBy(x => x.Health).ThenByDescending(x => x.CountEnemiesInRange(350));
+                ordered = KnockedUp.OrderByDescending(x => TargetSelector.GetPriority(x)).ThenBy(x => x.Health).ThenByDescending(x => x.CountEnemiesInRange(350)).ToList();
             }
 
             if (ultmode == UltMode.EnemiesHit)
             {
-                ordered = KnockedUp.OrderByDescending(x => x.CountEnemiesInRange(350)).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenBy(x => x.Health);
+                ordered = KnockedUp.OrderByDescending(x => x.CountEnemiesInRange(350)).ThenByDescending(x => TargetSelector.GetPriority(x)).ThenBy(x => x.Health).ToList();
             }
 
             if (GetBool("Combo.UltOnlyKillable"))
