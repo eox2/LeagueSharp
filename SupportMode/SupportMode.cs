@@ -21,6 +21,9 @@ namespace SupportMode
 			menu.AddItem(new MenuItem("enabled", "Enabled").SetValue(true)).Permashow(true, "Support Mode");
 			menu.AddItem(new MenuItem("range", "Distance from allies").SetValue(new Slider(1400, 700, 2000)));
 			menu.AddItem(new MenuItem("drawenabled", "Enable Drawing").SetValue(new Circle(true, System.Drawing.Color.Red)));
+		    menu.AddItem(new MenuItem("xmode", "AA in LastHit Mode").SetValue(true));
+		    menu.AddItem(new MenuItem("noaahero", "No AA Champions").SetValue(true));
+		    menu.AddItem(new MenuItem("disableaa", "NO AA EVER")).SetValue(true);
 			menu.AddToMainMenu();
 
 			Game.PrintChat("Support Mode Loaded " + "Enabled: " + enabled);
@@ -34,14 +37,22 @@ namespace SupportMode
 		{
 			if (enabled)
 			{
-				var lhmode = Orbwalking.Orbwalker.Instances.Find(x => x.ActiveMode == Orbwalking.OrbwalkingMode.LastHit);
+			    if (menu.Item("disableaa").GetValue<bool>())
+			    {
+			        args.Process = false;
+			        return;
+			    }
+			    
+			    if (menu.Item("xmode").GetValue<bool>())
+			    {
+			        var lhmode = Orbwalking.Orbwalker.Instances.Any(x => x.ActiveMode == Orbwalking.OrbwalkingMode.LastHit);
+			        if (lhmode)
+			        {
+			            return;
+			        }
+			    }
 
-				if (lhmode != null)
-				{
-					return;
-				}
-
-				if (args.Target.Type == GameObjectType.obj_AI_Minion)
+			    if (args.Target is Obj_AI_Minion)
 				{
 					var alliesinrange = HeroManager.Allies.Count(x => !x.IsMe && x.Distance(Player) <= range);
 					if (alliesinrange > 0)
@@ -49,6 +60,14 @@ namespace SupportMode
 						args.Process = false;
 					}
 				}
+
+                else if (args.Target is Obj_AI_Hero)
+			    {
+			        if (menu.Item("noaahero").GetValue<bool>())
+			        {
+			            args.Process = false;
+			        }
+                }
             }
 		}
 
