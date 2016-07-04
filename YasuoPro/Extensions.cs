@@ -54,7 +54,7 @@ namespace YasuoPro
         }
 
 
-        internal static bool IsValidMinion(this Obj_AI_Minion minion, float range = 50000)
+        internal static bool IsValidMinion(this Obj_AI_Minion minion, float range = 2000)
         {
             if (minion == null)
             {
@@ -65,7 +65,7 @@ namespace YasuoPro
             return (Player.Distance(minion) <= range && minion.IsValid && minion.IsTargetable && !minion.IsInvulnerable && minion.IsVisible && minion.Team != Player.Team && minion.IsHPBarRendered && !MinionManager.IsWard(minion) && !name.Contains("gangplankbarrel"));
         }
 
-        internal static bool IsValidAlly(this Obj_AI_Base unit, float range = 50000)
+        internal static bool IsValidAlly(this Obj_AI_Base unit, float range = 2000)
         {
             if (unit == null || unit.Distance(Player) > range || unit.Team != Player.Team || !unit.IsValid || unit.IsDead || !unit.IsVisible || unit.IsTargetable)
             {
@@ -74,7 +74,7 @@ namespace YasuoPro
             return true;
         }
 
-        internal static bool IsValidEnemy(this Obj_AI_Base unit, float range = 50000)
+        internal static bool IsValidEnemy(this Obj_AI_Base unit, float range = 2000)
         {
             if (unit == null || !unit.IsHPBarRendered || unit.IsZombie || unit.Distance(Player) > range || unit.Team == Player.Team || !unit.IsValid || unit.IsDead || !unit.IsVisible || !unit.IsTargetable)
             {

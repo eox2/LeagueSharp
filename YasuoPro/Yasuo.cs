@@ -377,31 +377,33 @@ namespace YasuoPro
             }
 
             var minionsinrange = ObjectManager.Get<Obj_AI_Minion>().Any(x => x.IsDashable());
-            if (target == null || !target.IsInRange(minionsinrange ? Spells[E].Range * 2 : Spells[E].Range))
+            if (target == null || !target.IsInRange(minionsinrange ? Spells[E].Range*2 : Spells[E].Range))
             {
-                target = TargetSelector.GetTarget(minionsinrange ? Spells[E].Range * 2 : Spells[E].Range,
+                target = TargetSelector.GetTarget(minionsinrange ? Spells[E].Range*2 : Spells[E].Range,
                     TargetSelector.DamageType.Physical);
             }
 
             if (target != null && TowerCheck(target, true))
             {
-                if (target.Distance(Yasuo) <= 0.70 * Yasuo.AttackRange)
-                {
-                    return;
-                }
-
                 var dist = Yasuo.Distance(target);
-                var pctOutOfRange = dist / Spells[E].Range * 100;
-                if (target.IsDashable())
+                var pctOutOfRange = dist/Yasuo.AttackRange*100;
+
+                if (pctOutOfRange > 0.8f)
                 {
-                    //Stay in range
-                    if (pctOutOfRange > 0.8f)
+                    if (target.IsDashable())
                     {
-                        if (TornadoReady && target.IsDashable() && targInKnockupRadius(target))
+                        if (target.ECanKill())
+                        {
+                            return;
+                        }
+
+                        if (TornadoReady && target.IsInRange(Spells[E].Range) && targInKnockupRadius(target))
                         {
                             Spells[E].CastOnUnit(target);
                         }
-                        else
+
+                        //Stay in range
+                        else if (pctOutOfRange > 0.8f)
                         {
                             var bestminion = ObjectManager.Get<Obj_AI_Base>()
                                 .Where(x =>
@@ -409,47 +411,33 @@ namespace YasuoPro
                                     && GetDashPos(x).IsCloser(target) && TowerCheck(x, true))
                                 .MinOrDefault(x => GetDashPos(x).Distance(target));
 
-                            if (bestminion != null)
-                            {
-                                Spells[E].CastOnUnit(bestminion);
-                            }
-
-                            else if (target.IsDashable() && GetDashPos(target).IsCloser(target))
+                            var shouldETarget = bestminion == null || GetDashPos(target).Distance(target) <
+                                                GetDashPos(bestminion).Distance(target);
+                            if (shouldETarget && GetDashPos(target).IsCloser(target))
                             {
                                 Spells[E].CastOnUnit(target);
                             }
+
+                            else if (bestminion != null)
+                            {
+                                Spells[E].CastOnUnit(bestminion);
+                            }
                         }
                     }
 
-                    //Go for a EQ if target is well within range
-                    else if (Spells[Q].IsReady() && TornadoReady)
+                    else
                     {
-                        if (targInKnockupRadius(target))
-                        {
-                            Spells[E].CastOnUnit(target);
-                            return;
-                        }
-                    }
-                }
-
-                //Catch up using a minion
-                else
-                {
-                    if (pctOutOfRange > 0.8f)
-                    {
-                        var minion =
-                            ObjectManager.Get<Obj_AI_Minion>()
-                                .Where(x => x.IsDashable() && x.IsCloser(target) && TowerCheck(x, true))
-                                .MinOrDefault(x => GetDashPos(x).Distance(target));
+                        var minion = ObjectManager.Get<Obj_AI_Minion>()
+                            .Where(x => x.IsDashable() && x.IsCloser(target) && TowerCheck(x, true))
+                            .MinOrDefault(x => GetDashPos(x).Distance(target));
                         if (minion != null)
                         {
-                            Spells[E].CastOnUnit(target);
+                            Spells[E].CastOnUnit(minion);
                         }
                     }
                 }
             }
         }
-
 
 
 
