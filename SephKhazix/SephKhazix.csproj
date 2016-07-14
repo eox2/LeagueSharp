@@ -51,13 +51,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LeagueSharp">
-      <HintPath>C:\Users\Seph\Desktop\L#\System\LeagueSharp.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\PlaySharp\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>C:\Users\Seph\Desktop\L#\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\PlaySharp\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\Seph\Desktop\L#\System\SharpDX.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\PlaySharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

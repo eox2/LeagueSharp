@@ -23,7 +23,7 @@ namespace SephKhazix
 
         internal static SpellSlot IgniteSlot;
         internal static List<Obj_AI_Hero> HeroList;
-        internal static List<Vector3> EnemyTurretPositions = new List<Vector3>();
+        internal static List<Obj_AI_Turret> EnemyTurrets = new List<Obj_AI_Turret>();
         internal static Vector3 NexusPosition;
         internal static Vector3 Jumppoint1, Jumppoint2;
         internal static bool Jumping;

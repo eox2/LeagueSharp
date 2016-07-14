@@ -43,7 +43,7 @@ namespace SephKhazix
 
             foreach (var t in ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsEnemy))
             {
-                EnemyTurretPositions.Add(t.ServerPosition);
+                EnemyTurrets.Add(t);
             }
 
             var shop = ObjectManager.Get<Obj_Shop>().FirstOrDefault(o => o.IsAlly);
@@ -443,8 +443,8 @@ namespace SephKhazix
                         E.Cast(ally.ServerPosition);
                         return;
                     }
-                    var objAiturret = EnemyTurretPositions.Where(x => Vector3.Distance(Khazix.ServerPosition, x) <= 900f);
-                    if (objAiturret.Any() || Khazix.CountEnemiesInRange(500) >= 1)
+                    var underTurret = EnemyTurrets.Any(x => x.Distance(Khazix.ServerPosition) <= 900f && !x.IsDead && x.IsValid);
+                    if (underTurret || Khazix.CountEnemiesInRange(500) >= 1)
                     {
                         var bestposition = Khazix.ServerPosition.Extend(NexusPosition, E.Range);
                         E.Cast(bestposition);
