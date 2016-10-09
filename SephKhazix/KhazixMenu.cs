@@ -182,7 +182,7 @@ namespace SephKhazix
         internal AssasinationMode GetAssinationMode()
         {
             var mode = menu.Item("AssMode").GetValue<StringList>().SelectedIndex;
-            if (mode == 1)
+            if (mode == 0)
             {
                 return AssasinationMode.ToOldPos;
             }
