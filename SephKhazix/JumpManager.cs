@@ -38,11 +38,14 @@ namespace SephKhazix
 
                         if (SpellSlot.E.IsReady())
                         {
-                            if (PreJumpPos.Distance(ObjectManager.Player.ServerPosition) > K6.E.Range)
+                            var posmode = Helper.Config.GetAssinationMode();
+                            var point = posmode == KhazixMenu.AssasinationMode.ToOldPos ? PreJumpPos : Game.CursorPos;
+                            if (point.Distance(ObjectManager.Player.ServerPosition) > K6.E.Range)
                             {
-                                PreJumpPos = ObjectManager.Player.ServerPosition.Extend(PreJumpPos, K6.E.Range);
+                                PreJumpPos = ObjectManager.Player.ServerPosition.Extend(point, K6.E.Range);
                             }
-                            K6.E.Cast(PreJumpPos);
+
+                            K6.E.Cast(point);
                         }
                     }
 

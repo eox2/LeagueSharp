@@ -104,7 +104,11 @@ namespace SephKhazix
             {
                 Harass();
             }
-            LH();
+
+            if (Config.GetBool("Farm.InMixed"))
+            {
+                LH();
+            }
         }
 
         void Harass()
@@ -423,6 +427,12 @@ namespace SephKhazix
 
         void KillSteal()
         {
+            //Avoid interrupting our assasination attempt
+            if (jumpManager.MidAssasination)
+            {
+                return;
+            }
+
             Obj_AI_Hero target = HeroList
                 .Where(x => x.IsValidTarget() && x.Distance(Khazix.Position) < 1375f && !x.IsZombie)
                 .MinOrDefault(x => x.Health);

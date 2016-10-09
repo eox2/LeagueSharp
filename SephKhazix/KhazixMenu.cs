@@ -41,6 +41,10 @@ namespace SephKhazix
             combo.AddBool("UseRCombo", "Use R");
             combo.AddBool("UseItems", "Use Items");
 
+
+            var assasination = menu.AddSubMenu("Assasination");
+            assasination.AddSList("AssMode", "Return Point", new[] { "Old Position", "Mouse Pos" }, 0);
+
             //Farm
             var farm = menu.AddSubMenu("Farm");
             farm.AddBool("UseQFarm", "Use Q");
@@ -48,6 +52,7 @@ namespace SephKhazix
             farm.AddBool("UseWFarm", "Use W");
             farm.AddSlider("Farm.WHealth", "Health % to use W", 80, 0, 100);
             farm.AddBool("UseItemsFarm", "Use Items").SetValue(true);
+            harass.AddBool("Farm.InMixed", "Farm in Mixed Mode", true);
 
             //Kill Steal
             var ks = menu.AddSubMenu("KillSteal");
@@ -172,6 +177,26 @@ namespace SephKhazix
                     return HitChance.High;
             }
             return HitChance.Medium;
+        }
+
+        internal AssasinationMode GetAssinationMode()
+        {
+            var mode = menu.Item("AssMode").GetValue<StringList>().SelectedIndex;
+            if (mode == 1)
+            {
+                return AssasinationMode.ToOldPos;
+            }
+
+            else
+            {
+                return AssasinationMode.ToMousePos;
+            }
+        }
+
+        internal enum AssasinationMode
+        {
+            ToOldPos,
+            ToMousePos
         }
     }
 }
