@@ -67,6 +67,8 @@ namespace SephKhazix
 
             EvolutionCheck();
 
+            AutoEscape(); 
+
             if (Config.GetBool("Kson"))
             {
                 KillSteal();
@@ -424,6 +426,32 @@ namespace SephKhazix
             }
         }
 
+        void AutoEscape()
+        {
+            //Avoid interrupting our assasination attempt
+            if (jumpManager.MidAssasination)
+            {
+                return;
+            }
+
+            if (Config.GetBool("Safety.autoescape") && !IsHealthy)
+            {
+                var ally =
+                    HeroList.FirstOrDefault(h => h.HealthPercent > 40 && h.CountEnemiesInRange(400) == 0 && !h.ServerPosition.PointUnderEnemyTurret());
+                if (ally != null && ally.IsValid)
+                {
+                    E.Cast(ally.ServerPosition);
+                    return;
+                }
+                var underTurret = EnemyTurrets.Any(x => x.Distance(Khazix.ServerPosition) <= 900f && !x.IsDead && x.IsValid);
+                if (underTurret || Khazix.CountEnemiesInRange(500) >= 1)
+                {
+                    var bestposition = Khazix.ServerPosition.Extend(NexusPosition, E.Range);
+                    E.Cast(bestposition);
+                    return;
+                }
+            }
+        }
 
         void KillSteal()
         {
@@ -446,24 +474,6 @@ namespace SephKhazix
                     if (igniteDmg > target.Health)
                     {
                         Khazix.Spellbook.CastSpell(IgniteSlot, target);
-                        return;
-                    }
-                }
-
-                if (Config.GetBool("Safety.autoescape") && !IsHealthy)
-                {
-                    var ally =
-                        HeroList.FirstOrDefault(h => h.HealthPercent > 40 && h.CountEnemiesInRange(400) == 0 && !h.ServerPosition.PointUnderEnemyTurret());
-                    if (ally != null && ally.IsValid)
-                    {
-                        E.Cast(ally.ServerPosition);
-                        return;
-                    }
-                    var underTurret = EnemyTurrets.Any(x => x.Distance(Khazix.ServerPosition) <= 900f && !x.IsDead && x.IsValid);
-                    if (underTurret || Khazix.CountEnemiesInRange(500) >= 1)
-                    {
-                        var bestposition = Khazix.ServerPosition.Extend(NexusPosition, E.Range);
-                        E.Cast(bestposition);
                         return;
                     }
                 }
@@ -752,7 +762,7 @@ namespace SephKhazix
 
         void DoubleJump(EventArgs args)
         {
-            if (!E.IsReady() || !EvolvedE || !Config.GetBool("djumpenabled") || Khazix.IsDead || Khazix.IsRecalling())
+            if (!E.IsReady() || !EvolvedE || !Config.GetBool("djumpenabled") || Khazix.IsDead || Khazix.IsRecalling() || jumpManager.MidAssasination)
             {
                 return;
             }

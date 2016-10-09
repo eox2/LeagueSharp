@@ -67,6 +67,7 @@ namespace SephKhazix
                         AssasinationTarget = bestEnemy;
                         MidAssasination = true;
                         startAssasinationTick = Utils.TickCount;
+                        Utility.DelayAction.Add(2500, () => MidAssasination = false);
                     }
                 }
             }
