@@ -1,5 +1,6 @@
 ﻿using LeagueSharp;
 using LeagueSharp.Common;
+using System.Drawing;
 
 namespace SephKhazix
 {
@@ -7,9 +8,11 @@ namespace SephKhazix
     {
         internal Menu menu;
         internal Orbwalking.Orbwalker Orbwalker;
+        internal Khazix K6;
 
-        public KhazixMenu()
+        public KhazixMenu(Khazix k6)
         {
+            K6 = k6;
             menu = new Menu("SephKhazix", "SephKhazix", true);
 
             var ow = menu.AddSubMenu("Orbwalking");
@@ -56,7 +59,7 @@ namespace SephKhazix
             ks.AddBool("UseEQKs", "Use EQ in KS");
             ks.AddBool("UseEWKs", "Use EW in KS");
             ks.AddBool("UseTiamatKs", "Use items");
-            ks.AddSlider("Edelay", "E Delay (ms)", 0, 0, 300);
+            ks.AddSlider("EDelay", "E Delay (ms)", 0, 0, 300);
             ks.AddBool("UseIgnite", "Use Ignite");
 
             var safety = menu.AddSubMenu("Safety Menu");
@@ -88,6 +91,30 @@ namespace SephKhazix
             draw.AddCircle("DrawQ", "Draw Q", 0, System.Drawing.Color.White);
             draw.AddCircle("DrawW", "Draw W", 0, System.Drawing.Color.Red);
             draw.AddCircle("DrawE", "Draw E", 0, System.Drawing.Color.Green);
+
+            var dmgAfterE = new MenuItem("DrawComboDamage", "Draw combo damage").SetValue(true);
+            var drawFill =
+                new MenuItem("DrawColour", "Fill colour", true).SetValue(
+                    new Circle(true, Color.Goldenrod));
+            draw.AddItem(drawFill);
+            draw.AddItem(dmgAfterE);
+
+            DamageIndicator.DamageToUnit = K6.GetBurstDamage;
+            DamageIndicator.Enabled = dmgAfterE.GetValue<bool>();
+            DamageIndicator.Fill = drawFill.GetValue<Circle>().Active;
+            DamageIndicator.FillColor = drawFill.GetValue<Circle>().Color;
+
+            dmgAfterE.ValueChanged +=
+                delegate (object sender, OnValueChangeEventArgs eventArgs)
+                {
+                    DamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+                };
+
+            drawFill.ValueChanged += delegate (object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Fill = eventArgs.GetNewValue<Circle>().Active;
+                DamageIndicator.FillColor = eventArgs.GetNewValue<Circle>().Color;
+            };
 
 
             //Debug

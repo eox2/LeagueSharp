@@ -28,7 +28,7 @@ namespace SephKhazix
             }
             Game.PrintChat("<font color='#1d87f2'>SephKhazix Loaded </font>");
             Init();
-            GenerateMenu();
+            GenerateMenu(this);
             Game.OnUpdate += OnUpdate;
             Game.OnUpdate += DoubleJump;
             Drawing.OnDraw += OnDraw;
@@ -53,6 +53,8 @@ namespace SephKhazix
             }
 
             HeroList = HeroManager.AllHeroes;
+
+            jumpManager = new JumpManager(this);
         }
 
 
@@ -88,6 +90,9 @@ namespace SephKhazix
                     break;
                 case Orbwalking.OrbwalkingMode.LastHit:
                     LH();
+                    break;
+                case Orbwalking.OrbwalkingMode.Assasination:
+                    jumpManager.Assasinate();
                     break;
             }
         }
@@ -231,7 +236,7 @@ namespace SephKhazix
 
         void Waveclear()
         {
-            List<Obj_AI_Minion> allMinions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(W.Range) && !MinionManager.IsWard(x)).ToList();
+            List<Obj_AI_Minion> allMinions = ObjectManager.Get<Obj_AI_Minion>().OrderBy(x=>x.Health).Where(x => x.IsValidTarget(W.Range) && !MinionManager.IsWard(x)).ToList();
 
             if (Config.GetBool("UseQFarm") && Q.IsReady())
             {
@@ -321,6 +326,7 @@ namespace SephKhazix
             {
                 target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             }
+
 
             if ((target != null))
             {
@@ -849,6 +855,42 @@ namespace SephKhazix
                 }
             }
         }
+
+        internal void AssasinationCombo(Obj_AI_Hero target)
+        {
+            if ((target != null))
+            {
+                var dist = Khazix.Distance(target);
+
+                // Normal abilities
+
+                if (Q.IsReady() && dist <= Q.Range)
+                {
+                    Q.Cast(target);
+                }
+
+                if (W.IsReady() && !EvolvedW && dist <= W.Range)
+                {
+                    var pred = W.GetPrediction(target);
+                    if (pred.Hitchance >= Config.GetHitChance("WHitchance"))
+                    {
+                        W.Cast(pred.CastPosition);
+                    }
+                }
+
+                else if (W.IsReady() && EvolvedW && dist <= WE.Range)
+                {
+                    PredictionOutput pred = WE.GetPrediction(target);
+                    CastWE(target, pred.UnitPosition.To2D(), 0);
+                }
+
+                if (Config.GetBool("UseItems"))
+                {
+                    UseItems(target);
+                }
+            }
+        }
+
 
         void OnDraw(EventArgs args)
         {

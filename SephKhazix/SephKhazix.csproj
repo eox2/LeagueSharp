@@ -51,13 +51,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LeagueSharp">
-      <HintPath>..\..\..\..\Desktop\PlaySharp\System\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Users\Seph\Desktop\Psharp\References\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>..\..\..\..\Desktop\PlaySharp\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Users\Seph\Desktop\Psharp\References\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>..\..\..\..\Desktop\PlaySharp\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\Seph\Desktop\Psharp\References\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -70,10 +70,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DamageIndicator.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="JumpManager.cs" />
     <Compile Include="Khazix.cs" />
     <Compile Include="KhazixMenu.cs" />
+    <Compile Include="Orbwalking.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -19,7 +19,9 @@ namespace SephKhazix
 
         internal const float Wangle = 22 * (float) Math.PI / 180;
 
-        internal static bool EvolvedQ, EvolvedW, EvolvedE, EvolvedR;
+        internal bool EvolvedQ, EvolvedW, EvolvedE, EvolvedR;
+
+        internal JumpManager jumpManager;
 
         internal static SpellSlot IgniteSlot;
         internal static List<Obj_AI_Hero> HeroList;
@@ -125,6 +127,44 @@ namespace SephKhazix
             return 0;
         }
 
+        internal float GetBurstDamage(Obj_AI_Base target)
+        {
+            double totaldmg = 0;
+
+            if (SpellSlot.Q.IsReady())
+            {
+                totaldmg += GetQDamage(target);
+            }
+
+            if (SpellSlot.E.IsReady())
+            {
+                double EDmg = Khazix.GetSpellDamage(target, SpellSlot.E);
+                totaldmg += EDmg;
+            }
+
+            if (SpellSlot.W.IsReady())
+            {
+                double WDmg = Khazix.GetSpellDamage(target, SpellSlot.W);
+                totaldmg += WDmg;
+            }
+
+
+            if (Tiamat.IsReady())
+            {
+                double Tiamatdmg = Khazix.GetItemDamage(target, Damage.DamageItems.Tiamat);
+                totaldmg += Khazix.GetItemDamage(target, Damage.DamageItems.Tiamat);
+            }
+
+            else if (Hydra.IsReady())
+            {
+                double hydradmg = Khazix.GetItemDamage(target, Damage.DamageItems.Hydra);
+                totaldmg += hydradmg;
+            }
+
+            return (float) totaldmg;
+
+        }
+
         internal List<Obj_AI_Hero> GetIsolatedTargets()
         {
             var validtargets = HeroList.Where(h => h.IsValidTarget(E.Range) && h.IsIsolated()).ToList();
@@ -146,9 +186,9 @@ namespace SephKhazix
             return HitChance.Medium;
         }
 
-        internal KhazixMenu GenerateMenu()
+        internal KhazixMenu GenerateMenu(Khazix K6)
         {
-            Config = new KhazixMenu();
+            Config = new KhazixMenu(K6);
             return Config;
         }
 
