@@ -36,20 +36,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="clipper_library">
-      <HintPath>C:\Users\Seph\Desktop\L#\System\clipper_library.dll</HintPath>
-    </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>C:\Users\Seph\Desktop\L#\System\LeagueSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\Psharp\References\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>C:\Users\Seph\Desktop\L#\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\Psharp\References\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\Seph\Desktop\L#\System\SharpDX.dll</HintPath>
-    </Reference>
-    <Reference Include="SPrediction">
-      <HintPath>..\..\..\..\Desktop\L#\System\SPrediction.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\Psharp\References\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

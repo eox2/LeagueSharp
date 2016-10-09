@@ -6,7 +6,6 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
-using SPrediction;
 
 #endregion;
 
@@ -426,27 +425,25 @@ namespace SephSoraka
 		{
 			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ") && target.Distance(Player) < Spells[SpellSlot.Q].Range)
 			{
-				Spells[SpellSlot.Q].SPredictionCast(target, Misc.GetHitChance("Hitchance.Q"));
-				/*
+				
 				var pred = Spells[SpellSlot.Q].GetPrediction(target);
 				if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
 				{
 					Spells[SpellSlot.Q].Cast(pred.CastPosition);
                 }
-				*/
+				
 			}
 			
 
 				if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE") && target.Distance(Player) < Spells[SpellSlot.E].Range)
 				{
-					Spells[SpellSlot.E].SPredictionCast(target, Misc.GetHitChance("Hitchance.E"));
-					/*
+					
 					 var pred = Spells[SpellSlot.E].GetPrediction(target);
 					 if (pred.Hitchance >= Misc.GetHitChance("Hitchance.E"))
 					 {
 						 Spells[SpellSlot.E].Cast(pred.CastPosition);
 					 }
-					 */
+					 
 				}
 			}
 
@@ -499,25 +496,23 @@ namespace SephSoraka
             }
             if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Harass.UseQ") && Player.ManaPercent > Misc.GetSlider("Harass.Mana") && target.Distance(Player) < Spells[SpellSlot.Q].Range)
 			{
-				Spells[SpellSlot.Q].SPredictionCast(target, Misc.GetHitChance("Hitchance.Q"));
-				/*
+				
 				var pred = Spells[SpellSlot.Q].GetPrediction(target, true);
 				if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
 				{
 					Spells[SpellSlot.Q].Cast(pred.CastPosition);
 				}
-				*/
+				
 			}
 			if (Spells[SpellSlot.E].IsReady() && Misc.Active("Harass.UseE") && target.Distance(Player) < Spells[SpellSlot.E].Range)
 			{
-				Spells[SpellSlot.E].SPredictionCast(target, Misc.GetHitChance("Hitchance.E"), (byte)Misc.GetSlider("Harass.Eminhit"));
-				/*
+				
 				var pred = Spells[SpellSlot.E].GetPrediction(target, true);
 				if (pred.Hitchance >= Misc.GetHitChance("Hitchance.E"))
 				{
 					Spells[SpellSlot.E].Cast(pred.CastPosition);
 				}
-				*/
+				
 			}
 		}
 		#endregion
@@ -543,16 +538,14 @@ namespace SephSoraka
 					var qdmg = Player.GetSpellDamage(qtarget, SpellSlot.Q);
 					if (qtarget.Health < qdmg)
 					{
-						Spells[SpellSlot.Q].SPredictionCast(qtarget, Misc.GetHitChance("Hitchance.Q"));
-						return;
-						/*
+						
 						var pred = Spells[SpellSlot.Q].GetPrediction(qtarget);
 						if (pred != null && pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
 						{
 							Spells[SpellSlot.Q].Cast(pred.CastPosition);
 							return;
 						}
-						*/
+						
 					}
 				}
 
@@ -564,9 +557,13 @@ namespace SephSoraka
 					if (etarget != null)
 					{
 						var edmg = Player.GetSpellDamage(etarget, SpellSlot.E);
-						if (etarget.Health < edmg)
-						{
-							Spells[SpellSlot.E].SPredictionCast(qtarget, Misc.GetHitChance("Hitchance.E"));
+                        if (etarget.Health < edmg)
+                        {
+                            var prede = Spells[SpellSlot.E].GetPrediction(etarget);
+                            if (prede.Hitchance >= Misc.GetHitChance("Hitchance.E")) {
+                                Spells[SpellSlot.E].Cast(prede.CastPosition);
+                            }
+
 						}
 					}
 				}
@@ -579,8 +576,13 @@ namespace SephSoraka
 							.MinOrDefault(x => x.Health);
 					if (eqtarget != null)
 					{
-						Spells[SpellSlot.Q].SPredictionCast(qtarget, Misc.GetHitChance("Hitchance.Q"));
-						Spells[SpellSlot.E].SPredictionCast(qtarget, Misc.GetHitChance("Hitchance.E"));
+                        var prede = Spells[SpellSlot.E].GetPrediction(eqtarget);
+                        var predq = Spells[SpellSlot.Q].GetPrediction(eqtarget);
+                        if (prede.Hitchance >= HitChance.Medium && predq.Hitchance >= HitChance.Medium)
+                        {
+                            Spells[SpellSlot.E].Cast(prede.CastPosition);
+                            Spells[SpellSlot.Q].Cast(predq.CastPosition);
+                        }
 					}
 				}
 

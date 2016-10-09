@@ -30,7 +30,7 @@ namespace CCChainer.Data
 {
     internal static class SkillshotDetector
     {
-        public delegate void OnDeleteMissileH(Skillshot skillshot, Obj_SpellMissile missile);
+        public delegate void OnDeleteMissileH(Skillshot skillshot, MissileClient missile);
 
         public delegate void OnDetectSkillshotH(Skillshot skillshot);
 
@@ -80,58 +80,7 @@ namespace CCChainer.Data
 
         private static void ObjSpellMissileOnOnCreate(GameObject sender, EventArgs args)
         {
-            var missile = sender as Obj_SpellMissile;
-
-            if (missile == null || !missile.IsValid)
-            {
-                return;
-            }
-
-            var unit = missile.SpellCaster as Obj_AI_Hero;
-
-            if (unit == null || !unit.IsValid || (unit.Team == ObjectManager.Player.Team && !Config.TestOnAllies))
-            {
-                return;
-            }
-
-
-#if DEBUG
-            Console.WriteLine(
-                Utils.TickCount + " Projectile Created: " + missile.SData.Name + " distance: " +
-                missile.StartPosition.Distance(missile.EndPosition) + "Radius: " +
-                missile.SData.CastRadiusSecondary + " Speed: " + missile.SData.MissileSpeed);
-
-#endif
-
-            var spellData = SpellDatabase.GetByMissileName(missile.SData.Name);
-
-            if (spellData == null)
-            {
-                return;
-            }
-
-            var missilePosition = missile.Position.To2D();
-            var unitPosition = missile.StartPosition.To2D();
-            var endPos = missile.EndPosition.To2D();
-
-            //Calculate the real end Point:
-            var direction = (endPos - unitPosition).Normalized();
-            if (unitPosition.Distance(endPos) > spellData.Range || spellData.FixedRange)
-            {
-                endPos = unitPosition + direction * spellData.Range;
-            }
-
-            if (spellData.ExtraRange != -1)
-            {
-                endPos = endPos +
-                         Math.Min(spellData.ExtraRange, spellData.Range - endPos.Distance(unitPosition)) * direction;
-            }
-
-            var castTime = Utils.TickCount - Game.Ping / 2 - (spellData.MissileDelayed ? 0 : spellData.Delay) -
-                           (int)(1000 * missilePosition.Distance(unitPosition) / spellData.MissileSpeed);
-
-            //Trigger the skillshot detection callbacks.
-            TriggerOnDetectSkillshot(DetectionType.RecvPacket, spellData, castTime, unitPosition, endPos, unit);
+         
         }
 
         /// <summary>
@@ -139,49 +88,7 @@ namespace CCChainer.Data
         /// </summary>
         private static void ObjSpellMissileOnOnDelete(GameObject sender, EventArgs args)
         {
-            var missile = sender as Obj_SpellMissile;
-
-            if (missile == null || !missile.IsValid)
-            {
-                return;
-            }
-
-            var caster = missile.SpellCaster as Obj_AI_Hero;
-
-            if (caster == null || !caster.IsValid || (caster.Team == ObjectManager.Player.Team && !Config.TestOnAllies))
-            {
-                return;
-            }
-
-            var spellName = missile.SData.Name;
-
-            if (OnDeleteMissile != null)
-            {
-                foreach (var skillshot in Program.DetectedSkillshots)
-                {
-                    if (skillshot.SpellData.MissileSpellName == spellName &&
-                        (skillshot.Unit.NetworkId == caster.NetworkId &&
-                         (missile.EndPosition.To2D() - missile.StartPosition.To2D()).AngleBetween(skillshot.Direction) <
-                         10) && skillshot.SpellData.CanBeRemoved)
-                    {
-                        OnDeleteMissile(skillshot, missile);
-                        break;
-                    }
-                }
-            }
-
-#if DEBUG
-            Console.WriteLine(
-                "Missile deleted: " + missile.SData.Name + " D: " + missile.EndPosition.Distance(missile.Position));
-#endif
-
-            Program.DetectedSkillshots.RemoveAll(
-                skillshot =>
-                    (skillshot.SpellData.MissileSpellName == spellName ||
-                     skillshot.SpellData.ExtraMissileNames.Contains(spellName)) &&
-                    (skillshot.Unit.NetworkId == caster.NetworkId &&
-                     ((missile.EndPosition.To2D() - missile.StartPosition.To2D()).AngleBetween(skillshot.Direction) < 10) &&
-                     skillshot.SpellData.CanBeRemoved || skillshot.SpellData.ForceRemove)); // 
+        
         }
 
         /// <summary>

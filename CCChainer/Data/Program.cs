@@ -126,39 +126,13 @@ namespace CCChainer.Data
             return false;
         }
 
-        private static void Game_OnGameStart(EventArgs args)
-        {
-            //Add the game events.
-            Game.OnUpdate += Game_OnOnGameUpdate;
-            Obj_AI_Hero.OnIssueOrder += ObjAiHeroOnOnIssueOrder;
-            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
-            //Set up the OnDetectSkillshot Event.
-            SkillshotDetector.OnDetectSkillshot += OnDetectSkillshot;
-            SkillshotDetector.OnDeleteMissile += SkillshotDetectorOnOnDeleteMissile;
 
-            //For skillshot drawing.
-            Drawing.OnDraw += Drawing_OnDraw;
-
-            //Ondash event.
-            CustomEvents.Unit.OnDash += UnitOnOnDash;
-
-            DetectedSkillshots.OnAdd += DetectedSkillshots_OnAdd;
-
-            //Create the menu to allow the user to change the config.
-            Config.CreateMenu();
-
-            //Initialze the collision
-            Collision.Init();
-
-            Game.PrintChat("<font color=\"#00BFFF\">Evade# -</font> <font color=\"#FFFFFF\">Loaded</font>");
-
-        }
         private static void DetectedSkillshots_OnAdd(object sender, EventArgs e)
         {
             Evading = false;
         }
 
-        private static void SkillshotDetectorOnOnDeleteMissile(Skillshot skillshot, Obj_SpellMissile missile)
+        private static void SkillshotDetectorOnOnDeleteMissile(Skillshot skillshot, MissileClient missile)
         {
             if (skillshot.SpellData.SpellName == "VelkozQ")
             {

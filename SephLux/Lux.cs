@@ -5,7 +5,6 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using SPrediction;
 using Prediction = LeagueSharp.Common.Prediction;
 using Utility = LeagueSharp.Common.Utility;
 
@@ -266,14 +265,13 @@ namespace SephLux
             }
             if (Spells[SpellSlot.E].IsReady() && LuxE == null && LuxUtils.Active("Combo.UseE") && Player.Distance(target) <= Spells[SpellSlot.E].Range)
             {
-				Spells[SpellSlot.E].SPredictionCast(target, LuxUtils.GetHitChance("Hitchance.E"));
-				/*
+				
                 var pred = Spells[SpellSlot.E].GetPrediction(target, true);
                 if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.E"))
                 {
                     Spells[SpellSlot.E].Cast(pred.CastPosition);
                 }
-				*/
+				
 			}
             else if (LuxUtils.Active("Combo.UseE2") && LuxE != null &&
                      Vector3.Distance(LuxE.Position, target.ServerPosition) <=
@@ -530,14 +528,13 @@ namespace SephLux
             }
             if (Spells[SpellSlot.E].IsReady() && LuxE == null && LuxUtils.Active("Harass.UseE") && Player.Distance(target) <= Spells[SpellSlot.E].Range)
             {
-				Spells[SpellSlot.E].SPredictionCast(target, LuxUtils.GetHitChance("Hitchance.E"));
-				/*
+				
                 var pred = Spells[SpellSlot.E].GetPrediction(target, true);
                 if (pred.Hitchance >= LuxUtils.GetHitChance("Hitchance.E"))
                 {
                     Spells[SpellSlot.E].Cast(pred.CastPosition);
                 }
-				*/
+				
 			}
             else if (LuxUtils.Active("Harass.UseE") && LuxE != null &&
                      Vector3.Distance(LuxE.Position, target.ServerPosition) <=

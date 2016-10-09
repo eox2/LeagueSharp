@@ -13,7 +13,6 @@ namespace SephLux
         public static Menu CreateMenu()
         {
             Config = new Menu("SephLux", "Lux", true);
-			SPrediction.Prediction.Initialize(Config);
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking", false));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
