@@ -105,7 +105,7 @@ namespace SephKhazix
             draw.AddItem(dmgAfterE);
 
             DamageIndicator.DamageToUnit = K6.GetBurstDamage;
-            DamageIndicator.Enabled = dmgAfterE.GetValue<bool>();
+            DamageIndicator.Enabled = dmgAfterE.GetValue<bool>() && !GetBool("Drawings.Disable");
             DamageIndicator.Fill = drawFill.GetValue<Circle>().Active;
             DamageIndicator.FillColor = drawFill.GetValue<Circle>().Color;
 

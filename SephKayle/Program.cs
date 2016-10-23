@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp.Common;
 using LeagueSharp;
-using SharpDX;
 
 namespace SephKayle
 {
@@ -14,6 +13,8 @@ namespace SephKayle
         private static Obj_AI_Hero Player;
         private static float incrange = 525;
         private static Spell Q, W, E, R, Ignite;
+        private static Obj_AI_Hero HealTarget, UltTarget;
+        private static float LastHealDetection, LastUltDetection;
 
         static void Main(string[] args)
         {
@@ -22,7 +23,7 @@ namespace SephKayle
 
         private static void CreateMenu()
         {
-         
+
             Config = new Menu("SephKayle", "SephKayle", true);
             Menu OWMenu = Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             //OrbWalker
@@ -45,7 +46,7 @@ namespace SephKayle
             harass.AddItem(new MenuItem("Harass.Mode", "Harass Mode").SetValue(new StringList(new string[] { "Only Mixed", "Always" }, 0)));
             harass.AddItem(new MenuItem("Harass.Mana", "Min Mana %").SetValue(new Slider(30, 1, 100)));
             harass.AddItem(new MenuItem("Harass.Q", "Use Q").SetValue(true));
-          
+
 
             // Waveclear Options
             Menu WaveClear = new Menu("Waveclear", "Waveclear");
@@ -79,7 +80,7 @@ namespace SephKayle
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly))
             {
                 UltimateManager.AddItem(new MenuItem("ult" + hero.ChampionName, "Ultimate " + hero.ChampionName).SetValue(true));
-                UltimateManager.AddItem(new MenuItem("upct" + hero.ChampionName, "Health % " + hero.ChampionName).SetValue(new Slider(25, 0 , 100)));
+                UltimateManager.AddItem(new MenuItem("upct" + hero.ChampionName, "Health % " + hero.ChampionName).SetValue(new Slider(25, 0, 100)));
             }
 
             // Misc Options
@@ -89,7 +90,7 @@ namespace SephKayle
             Misc.AddItem(new MenuItem("Healingon", "Healing On").SetValue(true));
             Misc.AddItem(new MenuItem("Ultingon", "Ulting On").SetValue(true));
             Misc.AddItem(new MenuItem("Recallcheck", "Recall check").SetValue(false));
-            Misc.AddItem(new MenuItem("Debug", "Debug On").SetValue(true));
+            Misc.AddItem(new MenuItem("Debug", "Debug On").SetValue(false));
 
             Menu Drawing = new Menu("Drawing", "Drawing");
             Drawing.AddItem(new MenuItem("disableall", "Disable all").SetValue(true));
@@ -179,8 +180,8 @@ namespace SephKayle
 
         private static void KillSteal()
         {
-            var target = ObjectManager.Get<Obj_AI_Hero>()
-                .Where(x => x.IsInvulnerable && !x.IsDead && x.IsEnemy && !x.IsZombie && x.IsValidTarget() && x.Distance(Player.Position) <= 800)
+            var target = HeroManager.Allies
+                .Where(x => !x.IsInvulnerable && !x.IsZombie && x.IsValidTarget(800))
                 .OrderBy(x => x.Health).FirstOrDefault();
             if (target != null)
             {
@@ -290,10 +291,11 @@ namespace SephKayle
             var senderhero = sender as Obj_AI_Hero;
             var senderturret = sender as Obj_AI_Turret;
 
-            if (sender.IsAlly || (target == null) || !target.IsAlly)
+            if (sender.IsAlly || (target == null) || !target.IsAlly && !target.IsMe)
             {
                 return;
             }
+
             float setvaluehealth = Getslider("hpct" + target.ChampionName);
             float setvalueult = Getslider("upct" + target.ChampionName);
 
@@ -301,6 +303,8 @@ namespace SephKayle
 
             if (W.IsReady() && GetBool("heal" + target.ChampionName) && (target.HealthPercent <= setvaluehealth))
             {
+                HealTarget = target;
+                LastHealDetection = Utils.TickCount;
                 HealUltManager(true, false, target);
                 triggered = true;
             }
@@ -312,10 +316,13 @@ namespace SephKayle
                 }
                 if (debug())
                 {
-                    Game.PrintChat("Ult target: " + target.ChampionName +" Ult reason: Target hp percent below set value of: " + setvalueult + " Current value is: " + target.HealthPercent + " Triggered by: Incoming spell: + " + args.SData.Name);
+                    Game.PrintChat("Ult target: " + target.ChampionName + " Ult reason: Target hp percent below set value of: " + setvalueult + " Current value is: " + target.HealthPercent + " Triggered by: Incoming spell: + " + args.SData.Name);
                 }
+                UltTarget = target;
+                LastUltDetection = Utils.TickCount;
                 HealUltManager(false, true, target);
                 triggered = true;
+
             }
 
             if (triggered)
@@ -323,12 +330,15 @@ namespace SephKayle
                 return;
             }
 
-                var damage = sender.GetSpellDamage(target, args.SData.Name);
-                var afterdmg = ((target.Health - damage) / (target.MaxHealth)) * 100f;
+            var damage = sender.GetSpellDamage(target, args.SData.Name);
+            var afterdmg = ((target.Health - damage) / (target.MaxHealth)) * 100f;
 
-                if (W.IsReady() && Player.Distance(target) <= W.Range && GetBool("heal" + target.ChampionName) && (target.HealthPercent <= setvaluehealth || (GetBool("hcheckdmgafter") && afterdmg <= setvaluehealth)))
+            if (W.IsReady() && Player.Distance(target) <= W.Range && GetBool("heal" + target.ChampionName) && (target.HealthPercent <= setvaluehealth || (GetBool("hcheckdmgafter") && afterdmg <= setvaluehealth)))
             {
-                if (GetBool("hdamagedetection")) {
+                if (GetBool("hdamagedetection"))
+                {
+                    HealTarget = target;
+                    LastHealDetection = Utils.TickCount;
                     HealUltManager(true, false, target);
                 }
             }
@@ -350,9 +360,11 @@ namespace SephKayle
 
                         else
                         {
-                         Game.PrintChat("Ult target: " + target.ChampionName + " Ult reason: Incoming spell damage and health below set value of " + setvalueult + " Current value is: " + target.HealthPercent + " Triggered by: Incoming spell: + " + args.SData.Name);
+                            Game.PrintChat("Ult target: " + target.ChampionName + " Ult reason: Incoming spell damage and health below set value of " + setvalueult + " Current value is: " + target.HealthPercent + " Triggered by: Incoming spell: + " + args.SData.Name);
                         }
                     }
+                    UltTarget = target;
+                    LastUltDetection = Utils.TickCount;
                     HealUltManager(false, true, target);
                 }
             }
@@ -361,6 +373,29 @@ namespace SephKayle
 
         static void HealUltManager(bool forceheal = false, bool forceult = false, Obj_AI_Hero target = null)
         {
+            if (W.IsReady()) {
+                if (Utils.TickCount - LastHealDetection < 1000)
+                {
+                    var setvaluehealt = Getslider("hpct" + HealTarget.ChampionName);
+                    if (HealTarget.Health <= setvaluehealt)
+                    {
+                        W.Cast(HealTarget);
+                    }
+                }
+            }
+
+            if (R.IsReady())
+            {
+                if (Utils.TickCount - LastUltDetection < 1000)
+                {
+                    var setvalueult = Getslider("upct" + HealTarget.ChampionName);
+                    if (HealTarget.Health <= setvalueult)
+                    {
+                        R.Cast(HealTarget);
+                    }
+                }
+            }
+
             if (forceheal && target != null && W.IsReady() && Player.Distance(target) <= W.Range)
             {
                 W.CastOnUnit(target);
@@ -378,14 +413,14 @@ namespace SephKayle
 
             if (GetBool("Healingon") && !GetBool("onlyhincdmg"))
             {
-                var herolistheal = ObjectManager.Get<Obj_AI_Hero>()
+                var herolistheal = HeroManager.Allies
                     .Where(
                         h =>
-                            (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead && GetBool("heal" + h.ChampionName) &&
+                            !h.IsZombie && !h.IsDead && GetBool("heal" + h.ChampionName) &&
                             h.HealthPercent <= Getslider("hpct" + h.ChampionName) && Player.Distance(h) <= R.Range)
                     .OrderByDescending(i => i.IsMe)
                     .ThenBy(i => i.HealthPercent);
-                
+
                 if (W.IsReady())
                 {
                     if (herolistheal.Contains(Player) && !Player.IsRecalling() && !Player.InFountain())
@@ -407,45 +442,45 @@ namespace SephKayle
             }
 
             if (GetBool("Ultingon") && !GetBool("onlyuincdmg"))
-                {
-                    Console.WriteLine(Player.HealthPercent);
-                    var herolist = ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(
-                            h =>
-                                (h.IsAlly || h.IsMe) && !h.IsZombie && !h.IsDead &&
-                                 GetBool("ult" + h.ChampionName) &&
-                                h.HealthPercent <= Getslider("upct" + h.ChampionName) &&
-                                Player.Distance(h) <= R.Range && Player.CountEnemiesInRange(500) > 0).OrderByDescending(i => i.IsMe).ThenBy(i => i.HealthPercent);
+            {
+                Console.WriteLine(Player.HealthPercent);
+                var herolist = HeroManager.Allies
+                    .Where(
+                        h =>
+                            !h.IsZombie && !h.IsDead &&
+                             GetBool("ult" + h.ChampionName) &&
+                            h.HealthPercent <= Getslider("upct" + h.ChampionName) &&
+                            Player.Distance(h) <= R.Range && Player.CountEnemiesInRange(500) > 0).OrderByDescending(i => i.IsMe).ThenBy(i => i.HealthPercent);
 
-                    if (R.IsReady())
+                if (R.IsReady())
+                {
+                    if (herolist.Contains(Player))
                     {
-                        if (herolist.Contains(Player))
-                        {
                         if (debug())
                         {
                             Game.PrintChat("regultself");
                         }
                         R.CastOnUnit(Player);
-                            return;
-                        }
+                        return;
+                    }
 
-                        else if (herolist.Any())
+                    else if (herolist.Any())
+                    {
+                        var hero = herolist.FirstOrDefault();
+
+                        if (Player.Distance(hero) <= R.Range)
                         {
-                            var hero = herolist.FirstOrDefault();
-
-                            if (Player.Distance(hero) <= R.Range)
-                            {
                             if (debug())
                             {
                                 Game.PrintChat("regultotherorself");
                             }
                             R.CastOnUnit(hero);
-                                return;
-                            }
+                            return;
                         }
                     }
                 }
             }
+        }
 
         static void GameTick(EventArgs args)
         {
@@ -470,7 +505,7 @@ namespace SephKayle
             }
 
             var Orbwalkmode = Orbwalker.ActiveMode;
-            switch(Orbwalkmode)
+            switch (Orbwalkmode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
                     Combo();
@@ -513,7 +548,7 @@ namespace SephKayle
 
             if (Config.Item("UseEfarm").GetValue<bool>() && E.IsReady() && !Eon)
             {
-                var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsValidTarget() && m.Team != Player.Team && Player.Distance(m) <= incrange && HealthPrediction.GetHealthPrediction(m, (int)((Player.Distance(m) * 1000) / 1500) + 300 + Game.Ping / 2) <
+                var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsValidTarget(incrange) && HealthPrediction.GetHealthPrediction(m, (int)((Player.Distance(m) * 1000) / 1500) + 300 + Game.Ping / 2) <
                    0.75 * Player.GetAutoAttackDamage(m));
                 if (minions.Any())
                 {
@@ -522,7 +557,7 @@ namespace SephKayle
             }
             //TODO Better Calculations + More Logic for E activation
         }
-        
+
 
         private static void MixedLogic()
         {
@@ -533,7 +568,7 @@ namespace SephKayle
 
             if (Config.Item("UseEfarm").GetValue<bool>() && E.IsReady())
             {
-                var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.Team != Player.Team && Player.Distance(m) <= incrange);
+                var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsValidTarget(incrange));
                 if (minions.Any() && Config.Item("UseEfarm").GetValue<bool>() && !Eon)
                 {
                     E.CastOnUnit(Player);
@@ -582,15 +617,15 @@ namespace SephKayle
 
         static void DefineSpells()
         {
-           Q = new Spell(SpellSlot.Q, 650);
-           W = new Spell(SpellSlot.W, 900);
-           E = new Spell(SpellSlot.E, 0);
-           R = new Spell(SpellSlot.R, 900);
-           SpellDataInst ignite = ObjectManager.Player.Spellbook.GetSpell(ObjectManager.Player.GetSpellSlot("summonerdot"));
-           if (ignite.Slot != SpellSlot.Unknown)
-           {
-               Ignite = new Spell(ignite.Slot, 600);
-           }
+            Q = new Spell(SpellSlot.Q, 650);
+            W = new Spell(SpellSlot.W, 900);
+            E = new Spell(SpellSlot.E, 0);
+            R = new Spell(SpellSlot.R, 900);
+            SpellDataInst ignite = ObjectManager.Player.Spellbook.GetSpell(ObjectManager.Player.GetSpellSlot("summonerdot"));
+            if (ignite.Slot != SpellSlot.Unknown)
+            {
+                Ignite = new Spell(ignite.Slot, 600);
+            }
         }
     }
 }
