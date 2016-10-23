@@ -374,7 +374,7 @@ namespace SephKayle
         static void HealUltManager(bool forceheal = false, bool forceult = false, Obj_AI_Hero target = null)
         {
             if (W.IsReady()) {
-                if (Utils.TickCount - LastHealDetection < 1000)
+                if (Utils.TickCount - LastHealDetection < 1000 && HealTarget.IsValidTarget(W.Range, false))
                 {
                     var setvaluehealt = Getslider("hpct" + HealTarget.ChampionName);
                     if (HealTarget.Health <= setvaluehealt)
@@ -386,12 +386,12 @@ namespace SephKayle
 
             if (R.IsReady())
             {
-                if (Utils.TickCount - LastUltDetection < 1000)
+                if (Utils.TickCount - LastUltDetection < 1000 && UltTarget.IsValidTarget(R.Range, false))
                 {
-                    var setvalueult = Getslider("upct" + HealTarget.ChampionName);
-                    if (HealTarget.Health <= setvalueult)
+                    var setvalueult = Getslider("upct" + UltTarget.ChampionName);
+                    if (UltTarget.Health <= setvalueult)
                     {
-                        R.Cast(HealTarget);
+                        R.Cast(UltTarget);
                     }
                 }
             }
