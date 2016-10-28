@@ -633,9 +633,9 @@ namespace SephKayle
             if (GetBool("Harass.E"))
             {
                 var Targ = TargetSelector.GetTarget(incrange, TargetSelector.DamageType.Magical);
-                if (Targ != null && Q.IsReady() && Player.Distance(Targ) <= Q.Range)
+                if (Targ != null && E.IsReady() && Player.Distance(Targ) > normrange)
                 {
-                    Q.Cast(Targ);
+                    E.Cast(Player);
                 }
             }
         }
