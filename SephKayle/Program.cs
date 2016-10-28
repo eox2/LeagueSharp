@@ -11,6 +11,7 @@ namespace SephKayle
         private static Menu Config;
         private static Orbwalking.Orbwalker Orbwalker;
         private static Obj_AI_Hero Player;
+        private static float normrange = 150;
         private static float incrange = 525;
         private static Spell Q, W, E, R, Ignite;
         private static Obj_AI_Hero HealTarget, UltTarget;
@@ -46,6 +47,7 @@ namespace SephKayle
             harass.AddItem(new MenuItem("Harass.Mode", "Harass Mode").SetValue(new StringList(new string[] { "Only Mixed", "Always" }, 0)));
             harass.AddItem(new MenuItem("Harass.Mana", "Min Mana %").SetValue(new Slider(30, 1, 100)));
             harass.AddItem(new MenuItem("Harass.Q", "Use Q").SetValue(true));
+            harass.AddItem(new MenuItem("Harass.E", "Use E").SetValue(true));
 
 
             // Waveclear Options
@@ -76,7 +78,7 @@ namespace SephKayle
             UltimateManager.AddItem(new MenuItem("onlyuincdmg", "Only ult if incoming damage").SetValue(true));
             UltimateManager.AddItem(new MenuItem("udamagedetection", "Disable damage detection").SetValue(false));
             UltimateManager.AddItem(new MenuItem("ucheckdmgafter", "Take HP after damage into consideration").SetValue(true));
-
+            
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly))
             {
                 UltimateManager.AddItem(new MenuItem("ult" + hero.ChampionName, "Ultimate " + hero.ChampionName).SetValue(true));
@@ -232,18 +234,32 @@ namespace SephKayle
 
         private static void Combo()
         {
-            var qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            var etarget = TargetSelector.GetTarget(incrange, TargetSelector.DamageType.Magical);
 
-            if (GetBool("UseQ") && qtarget != null && Q.IsReady())
+            if (GetBool("UseQ") && Q.IsReady())
             {
-                Q.Cast(qtarget);
-            }
-            if (GetBool("UseE") && etarget != null && E.IsReady() && !Eon)
-            {
-                E.CastOnUnit(Player);
+                var qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                if (qtarget != null)
+                {
+                    Q.Cast(qtarget);
+                    if (GetBool("UseE") && E.IsReady() && !Eon)
+                    {
+                        E.Cast(Player);
+                    }
+                }
             }
 
+            else
+            {
+                if (GetBool("UseE") && E.IsReady())
+                {
+                    var etarget = TargetSelector.GetTarget(incrange, TargetSelector.DamageType.Magical);
+                    var dist = etarget.Distance(Player);
+                    if (etarget != null && dist >= normrange && dist <= incrange * 1.2)
+                    {
+                        E.Cast(Player);
+                    }
+                }
+            }
         }
 
         private static void WaveClear()
@@ -531,7 +547,7 @@ namespace SephKayle
                minion =>
                    minion.IsValidTarget() && Player.Distance(minion) >
                         Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) && Player.Distance(minion) <= Q.Range &&
-                   HealthPrediction.GetHealthPrediction(minion, (int)((Player.Distance(minion) * 1000) / 1500) + 300 + Game.Ping / 2) <
+                   HealthPrediction.GetHealthPrediction(minion, (int)(Player.Distance(minion) / Q.Instance.SData.MissileSpeed) + Game.Ping / 2) <
                    0.75 * Player.GetSpellDamage(minion, SpellSlot.Q));
 
             if (Config.Item("UseQfarm").GetValue<bool>() && Q.IsReady())
@@ -548,7 +564,7 @@ namespace SephKayle
 
             if (Config.Item("UseEfarm").GetValue<bool>() && E.IsReady() && !Eon)
             {
-                var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsValidTarget(incrange) && HealthPrediction.GetHealthPrediction(m, (int)((Player.Distance(m) * 1000) / 1500) + 300 + Game.Ping / 2) <
+                var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsValidTarget(incrange) && HealthPrediction.GetHealthPrediction(m, (int)Player.Distance(m) + 300 + Game.Ping / 2) <
                    0.75 * Player.GetAutoAttackDamage(m));
                 if (minions.Any())
                 {
@@ -568,7 +584,8 @@ namespace SephKayle
 
             if (Config.Item("UseEfarm").GetValue<bool>() && E.IsReady())
             {
-                var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsValidTarget(incrange));
+                var minions = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsValidTarget(incrange) && HealthPrediction.GetHealthPrediction(m, (int)(Player.Distance(m)) + 300 + Game.Ping / 2) <
+                0.75 * Player.GetAutoAttackDamage(m));
                 if (minions.Any() && Config.Item("UseEfarm").GetValue<bool>() && !Eon)
                 {
                     E.CastOnUnit(Player);
@@ -607,6 +624,15 @@ namespace SephKayle
             if (GetBool("Harass.Q"))
             {
                 var Targ = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                if (Targ != null && Q.IsReady() && Player.Distance(Targ) <= Q.Range)
+                {
+                    Q.Cast(Targ);
+                }
+            }
+
+            if (GetBool("Harass.E"))
+            {
+                var Targ = TargetSelector.GetTarget(incrange, TargetSelector.DamageType.Magical);
                 if (Targ != null && Q.IsReady() && Player.Distance(Targ) <= Q.Range)
                 {
                     Q.Cast(Targ);
