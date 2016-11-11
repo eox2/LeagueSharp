@@ -323,17 +323,35 @@ namespace SephKhazix
         {
             Obj_AI_Hero target = null;
 
-            if (SpellSlot.E.IsReady() && SpellSlot.Q.IsReady())
+            TargetSelector.TargetSelectionConditionDelegate conditions = targ => targ.IsIsolated() || target.Health <= GetBurstDamage(target);
+
+            float targetSelectionRange = Khazix.AttackRange;
+
+            if (SpellSlot.Q.IsReady())
             {
-                target = TargetSelector.GetTarget((E.Range + Q.Range) * 0.95f, TargetSelector.DamageType.Physical);
+                targetSelectionRange += Q.Range;
             }
 
+            if (SpellSlot.E.IsReady())
+            {
+                targetSelectionRange += E.Range;
+            }
+
+            else if (SpellSlot.W.IsReady())
+            {
+                targetSelectionRange += W.Range;
+            }
+
+            //Get Optimal target if available
+            target = TargetSelector.GetTarget(targetSelectionRange, TargetSelector.DamageType.Physical, true, null, null, conditions);
+
+            //If could not find then settle for anything
             if (target == null)
             {
-                target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                target = TargetSelector.GetTarget(targetSelectionRange, TargetSelector.DamageType.Physical, true, null, null);
             }
 
-
+            //If a target has been found
             if ((target != null))
             {
                 var dist = Khazix.Distance(target);

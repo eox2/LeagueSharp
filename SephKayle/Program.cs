@@ -254,7 +254,7 @@ namespace SephKayle
                 {
                     var etarget = TargetSelector.GetTarget(incrange, TargetSelector.DamageType.Magical);
                     var dist = etarget.Distance(Player);
-                    if (etarget != null && dist >= normrange && dist <= incrange * 1.2)
+                    if (etarget != null && dist <= incrange * 1.2)
                     {
                         E.Cast(Player);
                     }

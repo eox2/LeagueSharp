@@ -111,20 +111,7 @@ namespace SephKhazix
 
         internal double GetQDamage(Obj_AI_Base target)
         {
-            if (Q.Range < 326)
-            {
-                return 0.984 * Khazix.GetSpellDamage(target, SpellSlot.Q, target.IsIsolated() ? 1 : 0);
-            }
-            if (Q.Range > 325)
-            {
-                var isolated = target.IsIsolated();
-                if (isolated)
-                {
-                    return 0.984 * Khazix.GetSpellDamage(target, SpellSlot.Q, 3);
-                }
-                return Khazix.GetSpellDamage(target, SpellSlot.Q, 0);
-            }
-            return 0;
+            return Khazix.GetSpellDamage(target, SpellSlot.Q, target.IsIsolated() ? 1 : 0);
         }
 
         internal float GetBurstDamage(Obj_AI_Base target)
