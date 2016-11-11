@@ -385,7 +385,7 @@ namespace SephKhazix
                 }
 
                 // Use EQ AND EW Synergy
-                if ((dist <= E.Range + Q.Range + (0.7 * Khazix.MoveSpeed) && dist > Q.Range && E.IsReady() &&
+                if ((dist <= E.Range + (Q.Range * 0.80f) && dist > Q.Range && E.IsReady() &&
                     Config.GetBool("UseEGapclose")) || (dist <= E.Range + W.Range && dist > Q.Range && E.IsReady() && W.IsReady() &&
                     Config.GetBool("UseEGapcloseW")))
                 {
@@ -403,10 +403,11 @@ namespace SephKhazix
 
                 // Ult Usage
                 if (R.IsReady() && !Q.IsReady() && !W.IsReady() && !E.IsReady() &&
-                    Config.GetBool("UseRCombo"))
+                    Config.GetBool("UseRCombo") && Khazix.CountEnemiesInRange(500) > 0)
                 {
                     R.Cast();
                 }
+
                 // Evolved
 
                 if (W.IsReady() && EvolvedW && dist <= WE.Range && Config.GetBool("UseWCombo"))
@@ -427,11 +428,11 @@ namespace SephKhazix
                     }
                 }
 
-                if (dist <= E.Range + (0.7 * Khazix.MoveSpeed) && dist > Q.Range &&
+                if (dist <= E.Range && dist > Q.Range + (0.5 * Khazix.MoveSpeed) &&
                     Config.GetBool("UseECombo") && E.IsReady())
                 {
                     PredictionOutput pred = E.GetPrediction(target);
-                    if (target.IsValid && !target.IsDead && ShouldJump(pred.CastPosition))
+                    if (target.IsValidTarget() && ShouldJump(pred.CastPosition))
                     {
                         E.Cast(pred.CastPosition);
                     }

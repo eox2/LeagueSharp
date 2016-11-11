@@ -42,11 +42,11 @@ namespace SephKhazix
             Q = new Spell(SpellSlot.Q, 325f);
             W = new Spell(SpellSlot.W, 1000f);
             WE = new Spell(SpellSlot.W, 1000f);
-            E = new Spell(SpellSlot.E, 700f);
+            E = new Spell(SpellSlot.E, 600f);
             R = new Spell(SpellSlot.R, 0);
             W.SetSkillshot(0.225f, 80f, 828.5f, true, SkillshotType.SkillshotLine);
             WE.SetSkillshot(0.225f, 100f, 828.5f, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.25f, 100f, 1000f, false, SkillshotType.SkillshotCircle);
+            E.SetSkillshot(0.25f, 300f, 1500f, false, SkillshotType.SkillshotCircle);
             Ignite = new Spell(IgniteSlot, 550f);
 
             Hydra = new Items.Item(3074, 225f);

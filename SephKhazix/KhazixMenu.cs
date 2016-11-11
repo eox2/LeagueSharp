@@ -36,7 +36,7 @@ namespace SephKhazix
             combo.AddSList("WHitchance", "W Hit Chance", new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString() }, 1);
             combo.AddBool("UseECombo", "Use E");
             combo.AddBool("UseEGapclose", "Use E To Gapclose for Q");
-            combo.AddBool("UseEGapcloseW", "Use E To Gapclose For W");
+            combo.AddBool("UseEGapcloseW", "Use E To Gapclose For W", false);
             combo.AddBool("UseRGapcloseW", "Use R after long gapcloses");
             combo.AddBool("UseRCombo", "Use R");
             combo.AddBool("UseItems", "Use Items");
