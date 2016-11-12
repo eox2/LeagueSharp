@@ -380,7 +380,7 @@ namespace SephKhazix
                     PredictionOutput pred = E.GetPrediction(target);
                     if (target.IsValid && !target.IsDead && ShouldJump(pred.CastPosition))
                     {
-                        E.Cast(pred.CastPosition);
+                        E.Cast(pred.CastPosition.To2D());
                     }
                 }
 
@@ -392,7 +392,7 @@ namespace SephKhazix
                     PredictionOutput pred = E.GetPrediction(target);
                     if (target.IsValid && !target.IsDead && ShouldJump(pred.CastPosition))
                     {
-                        E.Cast(pred.CastPosition);
+                        E.Cast(pred.CastPosition.To2D());
                     }
                     if (Config.GetBool("UseRGapcloseW") && R.IsReady())
                     {
@@ -434,7 +434,7 @@ namespace SephKhazix
                     PredictionOutput pred = E.GetPrediction(target);
                     if (target.IsValidTarget() && ShouldJump(pred.CastPosition))
                     {
-                        E.Cast(pred.CastPosition);
+                        E.Cast(pred.CastPosition.To2D());
                     }
                 }
 
@@ -455,17 +455,22 @@ namespace SephKhazix
 
             if (Config.GetBool("Safety.autoescape") && !IsHealthy)
             {
-                var ally =
-                    HeroList.FirstOrDefault(h => h.HealthPercent > 40 && h.CountEnemiesInRange(400) == 0 && !h.ServerPosition.PointUnderEnemyTurret());
-                if (ally != null && ally.IsValid)
+                if (Khazix.CountEnemiesInRange(500) > 0)
                 {
-                    E.Cast(ally.ServerPosition);
-                    return;
+                    var ally =
+                        HeroList.FirstOrDefault(h => h.HealthPercent > 40 && h.CountEnemiesInRange(400) == 0 && !h.ServerPosition.PointUnderEnemyTurret());
+
+                    if (ally != null && ally.IsValid)
+                    {
+                        E.Cast(ally.ServerPosition.To2D());
+                        return;
+                    }
                 }
+
                 var underTurret = EnemyTurrets.Any(x => x.Distance(Khazix.ServerPosition) <= 900f && !x.IsDead && x.IsValid);
                 if (underTurret || Khazix.CountEnemiesInRange(500) >= 1)
                 {
-                    var bestposition = Khazix.ServerPosition.Extend(NexusPosition, E.Range);
+                    var bestposition = Khazix.ServerPosition.Extend(NexusPosition, E.Range).To2D();
                     E.Cast(bestposition);
                     return;
                 }
@@ -484,9 +489,9 @@ namespace SephKhazix
                 .Where(x => x.IsValidTarget() && x.Distance(Khazix.Position) < 1375f && !x.IsZombie)
                 .MinOrDefault(x => x.Health);
 
-            if (target != null && target.IsInRange(Ignite.Range))
+            if (target != null)
             {
-                if (Config.GetBool("UseIgnite") && IgniteSlot != SpellSlot.Unknown &&
+                if (Config.GetBool("UseIgnite") && target.IsInRange(Ignite.Range) && IgniteSlot != SpellSlot.Unknown &&
                     Khazix.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 {
                     double igniteDmg = Khazix.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
@@ -522,7 +527,7 @@ namespace SephKhazix
                                 {
                                     if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
                                     {
-                                        E.Cast(pred.CastPosition);
+                                        E.Cast(pred.CastPosition.To2D());
                                     }
                                 }
                             });
@@ -587,7 +592,7 @@ namespace SephKhazix
                             {
                                 if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
                                 {
-                                    E.Cast(pred.CastPosition);
+                                    E.Cast(pred.CastPosition.To2D());
                                 }
                             }
                         });
@@ -610,7 +615,7 @@ namespace SephKhazix
                             {
                                 if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
                                 {
-                                    E.Cast(pred.CastPosition);
+                                    E.Cast(pred.CastPosition.To2D());
                                 }
                             }
                         });
@@ -796,7 +801,7 @@ namespace SephKhazix
                 {
                     Jumping = true;
                     Jumppoint1 = GetJumpPoint(CheckQKillable);
-                    E.Cast(Jumppoint1);
+                    E.Cast(Jumppoint1.To2D());
                     Q.Cast(CheckQKillable);
                     var oldpos = Khazix.ServerPosition;
                     Utility.DelayAction.Add(Config.GetSlider("JEDelay") + Game.Ping, () =>
@@ -804,7 +809,7 @@ namespace SephKhazix
                         if (E.IsReady())
                         {
                             Jumppoint2 = GetJumpPoint(CheckQKillable, false);
-                            E.Cast(Jumppoint2);
+                            E.Cast(Jumppoint2.To2D());
                         }
                         Jumping = false;
                     });
