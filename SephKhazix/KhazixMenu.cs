@@ -35,10 +35,11 @@ namespace SephKhazix
             combo.AddBool("UseWCombo", "Use W");
             combo.AddSList("WHitchance", "W Hit Chance", new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString() }, 1);
             combo.AddBool("UseECombo", "Use E");
-            combo.AddBool("UseEGapclose", "Use E To Gapclose for Q");
+            combo.AddBool("UseEGapcloseQ", "Use E To Gapclose for Q");
             combo.AddBool("UseEGapcloseW", "Use E To Gapclose For W", false);
-            combo.AddBool("UseRGapcloseW", "Use R after long gapcloses");
+            combo.AddBool("UseRGapcloseL", "Use R after long gapcloses");
             combo.AddBool("UseRCombo", "Use R");
+            combo.AddBool("Combo.Smite", "Use Smite");
             combo.AddBool("UseItems", "Use Items");
 
 
@@ -64,12 +65,13 @@ namespace SephKhazix
             ks.AddBool("UseEQKs", "Use EQ in KS");
             ks.AddBool("UseEWKs", "Use EW in KS");
             ks.AddBool("UseTiamatKs", "Use items");
+            ks.AddBool("UseSmiteKs", "Use Smite");
             ks.AddSlider("EDelay", "E Delay (ms)", 0, 0, 300);
             ks.AddBool("UseIgnite", "Use Ignite");
 
             var safety = menu.AddSubMenu("Safety Menu");
             safety.AddBool("Safety.Enabled", "Enable Safety Checks");
-            safety.AddKeyBind("Safety.Override", "Safety Override Key", 'T', KeyBindType.Press).Permashow();
+            safety.AddKeyBind("Safety.Override", "Safety Override Key", 'T', KeyBindType.Toggle).Permashow();
             safety.AddBool("Safety.autoescape", "Use E to get out when low");
             safety.AddBool("Safety.CountCheck", "Min Ally ratio to Enemies to jump");
             safety.AddItem(new MenuItem("Safety.Ratio", "Ally:Enemy Ratio (/5)").SetValue(new Slider(1, 0, 5)));

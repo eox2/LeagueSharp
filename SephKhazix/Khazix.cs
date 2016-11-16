@@ -9,7 +9,6 @@ namespace SephKhazix
 {
     class Khazix : Helper
     {
-
         static void Main(string[] args)
         {
             Khazix K6 = new Khazix();
@@ -38,6 +37,8 @@ namespace SephKhazix
 
         void Init()
         {
+            SmiteManager = new SmiteManager();
+
             InitSkills();
             Khazix = ObjectManager.Player;
 
@@ -67,7 +68,7 @@ namespace SephKhazix
 
             EvolutionCheck();
 
-            AutoEscape(); 
+            AutoEscape();
 
             if (Config.GetBool("Kson"))
             {
@@ -154,7 +155,7 @@ namespace SephKhazix
 
         void LH()
         {
-            List<Obj_AI_Base> allMinions = MinionManager.GetMinions(Khazix.ServerPosition, Q.Range);
+            List<Obj_AI_Base> allMinions = MinionManager.GetMinions(Khazix.ServerPosition, Q.Range).OrderBy(x => x.MaxHealth).ToList();
             if (Config.GetBool("UseQFarm") && Q.IsReady())
             {
                 foreach (Obj_AI_Base minion in
@@ -242,27 +243,42 @@ namespace SephKhazix
 
         void Waveclear()
         {
-            List<Obj_AI_Minion> allMinions = ObjectManager.Get<Obj_AI_Minion>().OrderBy(x=>x.Health).Where(x => x.IsValidTarget(W.Range) && !MinionManager.IsWard(x)).ToList();
+            List<Obj_AI_Minion> allMinions = ObjectManager.Get<Obj_AI_Minion>().OrderBy(x => x.MaxHealth).Where(x => x.IsValidTarget(W.Range) && !MinionManager.IsWard(x)).ToList();
 
-            if (Config.GetBool("UseQFarm") && Q.IsReady())
+            if (Config.GetBool("UseQFarm") && Q.IsReady() && !Orbwalking.CanAttack())
             {
+                bool UsedQ = false;
                 var minion = Orbwalker.GetTarget() as Obj_AI_Minion;
-                if (minion != null && HealthPrediction.GetHealthPrediction(
-                                minion, (int)(Khazix.Distance(minion) * 1000 / 1400)) >
-                            0.35f * Khazix.GetSpellDamage(minion, SpellSlot.Q) && Khazix.Distance(minion) <= Q.Range)
+                if (minion != null)
                 {
-                    Q.Cast(minion);
-                }
-                else if (minion == null || !minion.IsValid)
-                {
-                    foreach (var min in allMinions.Where(x => x.IsValidTarget(Q.Range)))
+                    var hpred = HealthPrediction.GetHealthPrediction(minion, (int)(Khazix.Distance(minion) * 1000 / 1400));
+                    var qdmg = Khazix.GetSpellDamage(minion, SpellSlot.Q);
+                    if ((hpred <= qdmg || hpred >= qdmg * 3) && Khazix.Distance(minion) <= Q.Range)
                     {
-                        if (HealthPrediction.GetHealthPrediction(
-                                min, (int)(Khazix.Distance(min) * 1000 / 1400)) >
-                            3 * Khazix.GetSpellDamage(min, SpellSlot.Q) && Khazix.Distance(min) <= Q.Range)
+                        Q.Cast(minion);
+                        UsedQ = true;
+                    }
+                }
+
+                if (!UsedQ)
+                {
+                    var killable = allMinions.Find(x => x.IsInRange(Q.Range) && HealthPrediction.GetHealthPrediction(x, (int)(Khazix.Distance(x) * 1000 / 1400)) <= Khazix.GetSpellDamage(x, SpellSlot.Q));
+                    if (killable != null)
+                    {
+                        Q.Cast(killable);
+                    }
+
+                    else
+                    {
+                        foreach (var min in allMinions.Where(x => x.IsValidTarget(Q.Range)))
                         {
-                            Q.Cast(min);
-                            break;
+                            if (HealthPrediction.GetHealthPrediction(
+                                    min, (int)(Khazix.Distance(min) * 1000 / 1400)) >
+                                3 * Khazix.GetSpellDamage(min, SpellSlot.Q) && Khazix.Distance(min) <= Q.Range)
+                            {
+                                Q.Cast(min);
+                                break;
+                            }
                         }
                     }
                 }
@@ -295,7 +311,7 @@ namespace SephKhazix
             }
 
 
-            if (Config.GetBool("UseItemsFarm"))
+            if (Config.GetBool("UseItemsFarm") && !Orbwalking.CanAttack())
             {
                 MinionManager.FarmLocation farmLocation =
                     MinionManager.GetBestCircularFarmLocation(
@@ -323,7 +339,7 @@ namespace SephKhazix
         {
             Obj_AI_Hero target = null;
 
-            TargetSelector.TargetSelectionConditionDelegate conditions = targ => targ.IsIsolated() || target.Health <= GetBurstDamage(target);
+            TargetSelector.TargetSelectionConditionDelegate conditions = targ => targ.IsIsolated() || targ.Health <= GetBurstDamage(targ);
 
             float targetSelectionRange = Khazix.AttackRange;
 
@@ -354,7 +370,7 @@ namespace SephKhazix
             //If a target has been found
             if ((target != null))
             {
-                var dist = Khazix.Distance(target);
+                var dist = Khazix.Distance(target.ServerPosition);
 
                 // Normal abilities
 
@@ -375,26 +391,26 @@ namespace SephKhazix
                     }
                 }
 
-                if (E.IsReady() && !Jumping && dist <= E.Range && Config.GetBool("UseECombo") && dist > Q.Range + (0.7 * Khazix.MoveSpeed))
+                if (E.IsReady() && !Jumping && dist <= E.Range && Config.GetBool("UseECombo") && dist > Q.Range + (0.4 * Khazix.MoveSpeed))
                 {
-                    PredictionOutput pred = E.GetPrediction(target);
-                    if (target.IsValid && !target.IsDead && ShouldJump(pred.CastPosition))
+                    //PredictionOutput pred = E.GetPrediction(target);
+                    if (target.IsValid && !target.IsDead && ShouldJump(target.ServerPosition))
                     {
-                        E.Cast(pred.CastPosition.To2D());
+                        E.Cast(target.ServerPosition);
                     }
                 }
 
                 // Use EQ AND EW Synergy
-                if ((dist <= E.Range + (Q.Range * 0.80f) && dist > Q.Range && E.IsReady() &&
-                    Config.GetBool("UseEGapclose")) || (dist <= E.Range + W.Range && dist > Q.Range && E.IsReady() && W.IsReady() &&
+                if ((dist <= E.Range + Q.Range + (0.4 * Khazix.MoveSpeed) && dist > Q.Range && E.IsReady() &&
+                    Config.GetBool("UseEGapcloseQ")) || (dist <= E.Range + W.Range && dist > Q.Range + (0.4 * Khazix.MoveSpeed) && E.IsReady() && W.IsReady() &&
                     Config.GetBool("UseEGapcloseW")))
                 {
-                    PredictionOutput pred = E.GetPrediction(target);
-                    if (target.IsValid && !target.IsDead && ShouldJump(pred.CastPosition))
+                   // PredictionOutput pred = E.GetPrediction(target);
+                    if (target.IsValid && !target.IsDead && ShouldJump(target.ServerPosition))
                     {
-                        E.Cast(pred.CastPosition.To2D());
+                        E.Cast(target.ServerPosition);
                     }
-                    if (Config.GetBool("UseRGapcloseW") && R.IsReady())
+                    if (Config.GetBool("UseRGapcloseL") && R.IsReady())
                     {
                         R.CastOnUnit(Khazix);
                     }
@@ -431,10 +447,17 @@ namespace SephKhazix
                 if (dist <= E.Range && dist > Q.Range + (0.5 * Khazix.MoveSpeed) &&
                     Config.GetBool("UseECombo") && E.IsReady())
                 {
-                    PredictionOutput pred = E.GetPrediction(target);
-                    if (target.IsValidTarget() && ShouldJump(pred.CastPosition))
+                   // PredictionOutput pred = E.GetPrediction(target);
+                    if (target.IsValidTarget() && ShouldJump(target.ServerPosition))
                     {
-                        E.Cast(pred.CastPosition.To2D());
+                        E.Cast(target.ServerPosition);
+                    }
+                }
+
+                if (Config.GetBool("Combo.Smite"))
+                {
+                    if (SmiteManager.CanCast(target)) {
+                        SmiteManager.Cast(target);
                     }
                 }
 
@@ -467,13 +490,15 @@ namespace SephKhazix
                     }
                 }
 
-                var underTurret = EnemyTurrets.Any(x => x.Distance(Khazix.ServerPosition) <= 900f && !x.IsDead && x.IsValid);
-                if (underTurret || Khazix.CountEnemiesInRange(500) >= 1)
-                {
-                    var bestposition = Khazix.ServerPosition.Extend(NexusPosition, E.Range).To2D();
-                    E.Cast(bestposition);
-                    return;
-                }
+         
+                    var underTurret = EnemyTurrets.Any(x => !x.IsDead && x.IsValid && Khazix.Distance(x.Position) <= 900f);
+                    if (underTurret || Khazix.CountEnemiesInRange(500) >= 1)
+                    {
+                        var bestposition = Khazix.ServerPosition.Extend(NexusPosition, E.Range).To2D();
+                        E.Cast(bestposition);
+                        return;
+                    }
+                
             }
         }
 
@@ -491,13 +516,12 @@ namespace SephKhazix
 
             if (target != null)
             {
-                if (Config.GetBool("UseIgnite") && target.IsInRange(Ignite.Range) && IgniteSlot != SpellSlot.Unknown &&
-                    Khazix.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                if (Config.GetBool("UseIgnite") && Ignite.IsReady() && target.IsInRange(Ignite.Range))
                 {
                     double igniteDmg = Khazix.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
                     if (igniteDmg > target.Health)
                     {
-                        Khazix.Spellbook.CastSpell(IgniteSlot, target);
+                        Ignite.Cast(target);
                         return;
                     }
                 }
@@ -522,12 +546,12 @@ namespace SephKhazix
                         Utility.DelayAction.Add(
                             Game.Ping + Config.GetSlider("EDelay"), delegate
                             {
-                                PredictionOutput pred = E.GetPrediction(target);
+                               // PredictionOutput pred = E.GetPrediction(target);
                                 if (target.IsValid && !target.IsDead)
                                 {
-                                    if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
+                                    if (Config.GetBool("Ksbypass") || ShouldJump(target.ServerPosition))
                                     {
-                                        E.Cast(pred.CastPosition.To2D());
+                                        E.Cast(target.ServerPosition);
                                     }
                                 }
                             });
@@ -587,12 +611,12 @@ namespace SephKhazix
                     {
                         Utility.DelayAction.Add(Config.GetSlider("EDelay"), delegate
                         {
-                            PredictionOutput pred = E.GetPrediction(target);
-                            if (target.IsValidTarget() && !target.IsZombie && ShouldJump(pred.CastPosition))
+                           // PredictionOutput pred = E.GetPrediction(target);
+                            if (target.IsValidTarget() && !target.IsZombie)
                             {
-                                if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
+                                if (Config.GetBool("Ksbypass") || ShouldJump(target.ServerPosition))
                                 {
-                                    E.Cast(pred.CastPosition.To2D());
+                                    E.Cast(target.ServerPosition);
                                 }
                             }
                         });
@@ -610,12 +634,12 @@ namespace SephKhazix
 
                         Utility.DelayAction.Add(Config.GetSlider("EDelay"), delegate
                         {
-                            PredictionOutput pred = E.GetPrediction(target);
-                            if (target.IsValid && !target.IsDead && ShouldJump(pred.CastPosition))
+                           // PredictionOutput pred = E.GetPrediction(target);
+                            if (target.IsValid && !target.IsDead && ShouldJump(target.ServerPosition))
                             {
-                                if (Config.GetBool("Ksbypass") || ShouldJump(pred.CastPosition))
+                                if (Config.GetBool("Ksbypass") || ShouldJump(target.ServerPosition))
                                 {
-                                    E.Cast(pred.CastPosition.To2D());
+                                    E.Cast(target.ServerPosition);
                                 }
                             }
                         });
@@ -633,6 +657,19 @@ namespace SephKhazix
                         return;
                     }
                 }
+
+                if (Config.GetBool("UseSmiteKs"))
+                {
+                    if (SmiteManager.CanCast(target))
+                    {
+                        var dmg = SmiteManager.GetSmiteDamage(target);
+                        if (dmg >= target.Health)
+                        {
+                            SmiteManager.Cast(target);
+                        }
+                    }
+                }
+
                 if (Hydra.IsReady() &&
                     Vector2.Distance(Khazix.ServerPosition.To2D(), target.ServerPosition.To2D()) <= Hydra.Range &&
                     Config.GetBool("UseTiamatKs"))
@@ -882,7 +919,8 @@ namespace SephKhazix
 
         void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (args.Target.Type == GameObjectType.obj_AI_Hero)
+            var target = args.Target as Obj_AI_Hero;
+            if (target != null)
             {
                 if (Config.GetBool("Safety.noaainult") && IsInvisible)
                 {
@@ -896,6 +934,11 @@ namespace SephKhazix
                     {
                         args.Process = false;
                     }
+                }
+
+                if (Config.GetBool("UseItems") && Titanic.IsReady() && Vector2.Distance(Khazix.ServerPosition.To2D(), target.ServerPosition.To2D()) <= Khazix.AttackRange)
+                {
+                    Titanic.Cast();
                 }
             }
         }
