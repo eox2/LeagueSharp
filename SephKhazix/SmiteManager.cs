@@ -16,7 +16,7 @@ namespace SephKhazix
           { "s5_summonersmiteduel", SmiteType.ChallengingSmite},
         };
 
-        public SmiteType CurrentSmiteType = SmiteType.RegularSmite;
+        public SmiteType CurrentSmiteType = SmiteType.NotChosen;
 
         public Spell Smite = null;
 
@@ -34,7 +34,6 @@ namespace SephKhazix
             //Smite is not chosen
             if (SmiteInstance == null)
             {
-                CurrentSmiteType = SmiteType.NotChosen;
                 return;
             }
 
