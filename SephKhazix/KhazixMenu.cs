@@ -35,7 +35,8 @@ namespace SephKhazix
             combo.AddBool("UseWCombo", "Use W");
             combo.AddSList("WHitchance", "W Hit Chance", new[] { HitChance.Low.ToString(), HitChance.Medium.ToString(), HitChance.High.ToString() }, 1);
             combo.AddBool("UseECombo", "Use E");
-            combo.AddBool("UseEGapcloseQ", "Use E To Gapclose for Q");
+            combo.AddSList("JumpMode", "Jump Mode", new[] { "CurrentPosition", "Prediction" }, 0);
+            combo.AddBool("UseEGapcloseQ", "Use E To Gapclose for Q", false);
             combo.AddBool("UseEGapcloseW", "Use E To Gapclose For W", false);
             combo.AddBool("UseRGapcloseL", "Use R after long gapcloses");
             combo.AddBool("UseRCombo", "Use R");
@@ -49,7 +50,7 @@ namespace SephKhazix
             //Farm
             var farm = menu.AddSubMenu("Farm");
             farm.AddBool("UseQFarm", "Use Q");
-            farm.AddBool("UseEFarm", "Use E");
+            farm.AddBool("UseEFarm", "Use E", false);
             farm.AddBool("UseWFarm", "Use W");
             farm.AddSlider("Farm.WHealth", "Health % to use W", 80, 0, 100);
             farm.AddBool("UseItemsFarm", "Use Items").SetValue(true);
@@ -63,7 +64,7 @@ namespace SephKhazix
             ks.AddBool("UseEKs", "Use E");
             ks.AddBool("Ksbypass", "Bypass safety checks for E KS", false);
             ks.AddBool("UseEQKs", "Use EQ in KS");
-            ks.AddBool("UseEWKs", "Use EW in KS");
+            ks.AddBool("UseEWKs", "Use EW in KS", false);
             ks.AddBool("UseTiamatKs", "Use items");
             ks.AddBool("UseSmiteKs", "Use Smite");
             ks.AddSlider("EDelay", "E Delay (ms)", 0, 0, 300);
@@ -71,12 +72,12 @@ namespace SephKhazix
 
             var safety = menu.AddSubMenu("Safety Menu");
             safety.AddBool("Safety.Enabled", "Enable Safety Checks");
-            safety.AddKeyBind("Safety.Override", "Safety Override Key", 'T', KeyBindType.Toggle).Permashow();
+            safety.AddKeyBind("Safety.Override", "Safety Override Key", 'T', KeyBindType.Press).Permashow();
             safety.AddBool("Safety.autoescape", "Use E to get out when low");
             safety.AddBool("Safety.CountCheck", "Min Ally ratio to Enemies to jump");
             safety.AddItem(new MenuItem("Safety.Ratio", "Ally:Enemy Ratio (/5)").SetValue(new Slider(1, 0, 5)));
             safety.AddBool("Safety.TowerJump", "Avoid Tower Diving");
-            safety.AddSlider("Safety.MinHealth", "Healthy %", 15, 0, 100);
+            safety.AddSlider("Safety.MinHealth", "Healthy %", 35, 0, 100);
             safety.AddBool("Safety.noaainult", "No Autos while Stealth", false);
 
             //Double Jump
@@ -200,5 +201,27 @@ namespace SephKhazix
             ToOldPos,
             ToMousePos
         }
+
+        internal enum JumpMode
+        {
+            ToServerPos,
+            ToPredPos
+        }
+
+
+        internal JumpMode GetJumpMode()
+        {
+            var mode = menu.Item("JumpMode").GetValue<StringList>().SelectedIndex;
+            if (mode == 0)
+            {
+                return JumpMode.ToServerPos;
+            }
+
+            else
+            {
+                return JumpMode.ToPredPos;
+            }
+        }
+
     }
 }
