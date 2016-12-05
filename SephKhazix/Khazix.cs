@@ -374,7 +374,7 @@ namespace SephKhazix
 
                 // Normal abilities
 
-                if (Q.IsReady() && !Jumping && Config.GetBool("UseQCombo"))
+                if (Config.GetBool("UseQCombo") && Q.IsReady() && !Jumping)
                 {
                     if (dist <= Q.Range)
                     {
@@ -382,7 +382,7 @@ namespace SephKhazix
                     }
                 }
 
-                if (W.IsReady() && !EvolvedW && dist <= W.Range && Config.GetBool("UseWCombo"))
+                if (Config.GetBool("UseWCombo") && W.IsReady() && !EvolvedW && dist <= W.Range)
                 {
                     var pred = W.GetPrediction(target);
                     if (pred.Hitchance >= Config.GetHitChance("WHitchance"))
@@ -391,7 +391,7 @@ namespace SephKhazix
                     }
                 }
 
-                if (E.IsReady() && !Jumping && dist <= E.Range && Config.GetBool("UseECombo") && dist > Q.Range + (0.3 * Khazix.MoveSpeed))
+                if (Config.GetBool("UseECombo") && E.IsReady() && !Jumping && dist <= E.Range && dist > Q.Range + (0.4 * Khazix.MoveSpeed))
                 {
                     var jump = GetJumpPosition(target);
                     if (jump.shouldJump)
@@ -400,10 +400,8 @@ namespace SephKhazix
                     }
                 }
 
-                // Use EQ AND EW Synergy
-                if ((dist <= E.Range + Q.Range + (0.4 * Khazix.MoveSpeed) && dist > Q.Range && E.IsReady() &&
-                    Config.GetBool("UseEGapcloseQ")) || (dist <= E.Range + W.Range && dist > Q.Range + (0.4 * Khazix.MoveSpeed) && E.IsReady() && W.IsReady() &&
-                    Config.GetBool("UseEGapcloseW")))
+                // Use EQ
+                if ((Config.GetBool("UseEGapcloseQ") && Q.IsReady() && E.IsReady() && dist > Q.Range + (0.4 * Khazix.MoveSpeed) && dist <= E.Range + Q.Range))
                 {
                     var jump = GetJumpPosition(target);
                     if (jump.shouldJump)
@@ -444,15 +442,6 @@ namespace SephKhazix
                     }
                 }
 
-                if (dist <= E.Range && dist > Q.Range + (0.5 * Khazix.MoveSpeed) &&
-                    Config.GetBool("UseECombo") && E.IsReady())
-                {
-                    var jump = GetJumpPosition(target);
-                    if (jump.shouldJump)
-                    {
-                        E.Cast(jump.position);
-                    }
-                }
 
                 if (Config.GetBool("Combo.Smite"))
                 {
@@ -675,7 +664,7 @@ namespace SephKhazix
             }
         }
 
-        internal bool ShouldJump(Vector3 position)
+        internal bool ShouldJump(Vector3 position, Obj_AI_Hero target = null)
         {
             if (!Config.GetBool("Safety.Enabled") || Override)
             {
@@ -689,10 +678,11 @@ namespace SephKhazix
 
             else if (Config.GetBool("Safety.Enabled"))
             {
-                if (Khazix.HealthPercent < Config.GetSlider("Safety.MinHealth"))
+                if (Khazix.HealthPercent < Config.GetSlider("Safety.MinHealth") && GetBurstDamage(target) < target.HealthPercent)
                 {
                     return false;
                 }
+                
 
                 if (Config.GetBool("Safety.CountCheck"))
                 {
@@ -701,14 +691,25 @@ namespace SephKhazix
 
                     var ec = enemies.Count;
                     var ac = allies.Count;
-                    float setratio = Config.GetSlider("Safety.Ratio") / 5;
 
-
-                    if (ec != 0 && !(ac / ec >= setratio))
+                    //if no enemies within 400 radius of jumping position then dont jump
+                    if (ec == 0)
                     {
                         return false;
                     }
+
+                    float ratio = ac / ec;
+                    float setratio = Config.GetSlider("Safety.Ratio") / 5;
+
+                    //Ratio of allies:enemies
+                    //if < allies then enemies
+                    if (ratio < setratio)
+                    {
+                        return false;
+                    }
+
                 }
+
                 return true;
             }
             return true;
@@ -907,12 +908,12 @@ namespace SephKhazix
             if (mode == KhazixMenu.JumpMode.ToPredPos)
             {
                 var pred = E.GetPrediction(target);
-                return new JumpResult { position = pred.CastPosition, hitChance = pred.Hitchance, shouldJump = ksMode ? (Config.GetBool("Ksbypass") || pred.Hitchance >= HitChance.Medium && ShouldJump(pred.CastPosition)) : pred.Hitchance >= HitChance.Medium && ShouldJump(pred.CastPosition) };
+                return new JumpResult { position = pred.CastPosition, hitChance = pred.Hitchance, shouldJump = ksMode ? (Config.GetBool("Ksbypass") || pred.Hitchance >= HitChance.Medium && ShouldJump(pred.CastPosition)) : pred.Hitchance >= HitChance.Medium && ShouldJump(pred.CastPosition, target) };
             }
 
             else if (mode == KhazixMenu.JumpMode.ToServerPos)
             {
-                return new JumpResult { position = target.ServerPosition, hitChance = HitChance.Medium, shouldJump = ksMode ? ((Config.GetBool("Ksbypass") || ShouldJump(target.ServerPosition))) : ShouldJump(target.ServerPosition) };
+                return new JumpResult { position = target.ServerPosition, hitChance = HitChance.Medium, shouldJump = ksMode ? ((Config.GetBool("Ksbypass") || ShouldJump(target.ServerPosition, target))) : ShouldJump(target.ServerPosition, target) };
             }
 
             return new JumpResult { position = target.ServerPosition, hitChance = HitChance.Impossible, shouldJump = false };

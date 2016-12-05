@@ -75,7 +75,7 @@ namespace SephKhazix
             safety.AddKeyBind("Safety.Override", "Safety Override Key", 'T', KeyBindType.Press).Permashow();
             safety.AddBool("Safety.autoescape", "Use E to get out when low");
             safety.AddBool("Safety.CountCheck", "Min Ally ratio to Enemies to jump");
-            safety.AddItem(new MenuItem("Safety.Ratio", "Ally:Enemy Ratio (/5)").SetValue(new Slider(1, 0, 5)));
+            safety.AddItem(new MenuItem("Safety.Ratio", "Ally:Enemy Ratio (/5)").SetValue(new Slider(2, 0, 5)));
             safety.AddBool("Safety.TowerJump", "Avoid Tower Diving");
             safety.AddSlider("Safety.MinHealth", "Healthy %", 35, 0, 100);
             safety.AddBool("Safety.noaainult", "No Autos while Stealth", false);
