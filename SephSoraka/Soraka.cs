@@ -420,30 +420,28 @@ namespace SephSoraka
 				}
 			}
 		}
-
-				private static void Combo(Obj_AI_Hero target)
-		{
-			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ") && target.Distance(Player) < Spells[SpellSlot.Q].Range) 
+   
+	        private static void Combo(Obj_AI_Hero target) 
                 {
-			    var pred = Misc.GetQPrediction(target);
-				if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
-				{
-					Spells[SpellSlot.Q].Cast(pred.CastPosition);
-                }
-				
-			}
+	        if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ") && target.Distance(Player) < Spells[SpellSlot.Q].Range) 
+                {
+	            var pred = Misc.GetQPrediction(target);
+			
+	            if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q")) 
+                    {
+	                Spells[SpellSlot.Q].Cast(pred.CastPosition);
+	            }
+	        }
 
-				if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE") && target.Distance(Player) < Spells[SpellSlot.E].Range)
-				{
-					
-					 var pred = Spells[SpellSlot.E].GetPrediction(target);
-					 if (pred.Hitchance >= Misc.GetHitChance("Hitchance.E"))
-					 {
-						 Spells[SpellSlot.E].Cast(pred.CastPosition);
-					 }
-					 
-				}
-			}
+	        if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE") && target.Distance(Player) < Spells[SpellSlot.E].Range) 
+                {
+	            var pred = Spells[SpellSlot.E].GetPrediction(target);
+	            if (pred.Hitchance >= Misc.GetHitChance("Hitchance.E")) 
+                    {
+	                Spells[SpellSlot.E].Cast(pred.CastPosition);
+	            }
+	        }
+	    }
 
 
 
