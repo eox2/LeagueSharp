@@ -185,6 +185,7 @@ namespace SephKayle
             var target = HeroManager.Allies
                 .Where(x => !x.IsInvulnerable && !x.IsZombie && x.IsValidTarget(800))
                 .OrderBy(x => x.Health).FirstOrDefault();
+
             if (target != null)
             {
                 double igniteDmg = Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
@@ -253,10 +254,13 @@ namespace SephKayle
                 if (GetBool("UseE") && E.IsReady())
                 {
                     var etarget = TargetSelector.GetTarget(incrange, TargetSelector.DamageType.Magical);
-                    var dist = etarget.Distance(Player);
-                    if (etarget != null && dist <= incrange * 1.2)
+                    if (etarget != null)
                     {
-                        E.Cast(Player);
+                        var dist = etarget.Distance(Player);
+                        if (dist <= incrange * 1.2)
+                        {
+                            E.Cast(Player);
+                        }
                     }
                 }
             }
