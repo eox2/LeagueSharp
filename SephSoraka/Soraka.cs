@@ -48,7 +48,7 @@ namespace SephSoraka
 			CustomEvents.Game.OnGameLoad += SorakaMain;
 		}
 
-        private static Dictionary<SpellSlot, Spell> Spells;
+        public static Dictionary<SpellSlot, Spell> Spells;
 
 		private static void InitializeSpells()
 		{
@@ -60,8 +60,8 @@ namespace SephSoraka
             {IgniteSlot, new Spell(ObjectManager.Player.GetSpellSlot("summonerdot"), 550f) }
             };
 
-            Spells[SpellSlot.Q].SetSkillshot(0.500f, 300f, 1750f, false, SkillshotType.SkillshotCircle);
-			Spells[SpellSlot.E].SetSkillshot(0.500f, 250f, 1300f, false, SkillshotType.SkillshotCircle);
+             Spells[SpellSlot.Q].SetSkillshot(0.283f, 210, 1100, false, SkillshotType.SkillshotCircle);
+             Spells[SpellSlot.E].SetSkillshot(0.500f, 250f, 1300f, false, SkillshotType.SkillshotCircle);
 		}
 
 		//private static bool done;
@@ -420,32 +420,28 @@ namespace SephSoraka
 				}
 			}
 		}
-
-		private static void Combo(Obj_AI_Hero target)
-		{
-			if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ") && target.Distance(Player) < Spells[SpellSlot.Q].Range)
-			{
-				
-				var pred = Spells[SpellSlot.Q].GetPrediction(target);
-				if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q"))
-				{
-					Spells[SpellSlot.Q].Cast(pred.CastPosition);
-                }
-				
-			}
+   
+	        private static void Combo(Obj_AI_Hero target) 
+                {
+	        if (Spells[SpellSlot.Q].IsReady() && Misc.Active("Combo.UseQ") && target.Distance(Player) < Spells[SpellSlot.Q].Range) 
+                {
+	            var pred = Misc.GetQPrediction(target);
 			
+	            if (pred.Hitchance >= Misc.GetHitChance("Hitchance.Q")) 
+                    {
+	                Spells[SpellSlot.Q].Cast(pred.CastPosition);
+	            }
+	        }
 
-				if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE") && target.Distance(Player) < Spells[SpellSlot.E].Range)
-				{
-					
-					 var pred = Spells[SpellSlot.E].GetPrediction(target);
-					 if (pred.Hitchance >= Misc.GetHitChance("Hitchance.E"))
-					 {
-						 Spells[SpellSlot.E].Cast(pred.CastPosition);
-					 }
-					 
-				}
-			}
+	        if (Spells[SpellSlot.E].IsReady() && Misc.Active("Combo.UseE") && target.Distance(Player) < Spells[SpellSlot.E].Range) 
+                {
+	            var pred = Spells[SpellSlot.E].GetPrediction(target);
+	            if (pred.Hitchance >= Misc.GetHitChance("Hitchance.E")) 
+                    {
+	                Spells[SpellSlot.E].Cast(pred.CastPosition);
+	            }
+	        }
+	    }
 
 
 
