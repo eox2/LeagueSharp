@@ -62,7 +62,7 @@ namespace YasuoPro
             }
 
             var name = minion.CharData.BaseSkinName.ToLower();
-            return (Player.Distance(minion) <= range && minion.IsValid && minion.IsTargetable && !minion.IsInvulnerable && minion.IsVisible && minion.Team != Player.Team && minion.IsHPBarRendered && !MinionManager.IsWard(minion) && !name.Contains("gangplankbarrel"));
+            return (Player.Distance(minion) <= range && minion.IsValid && minion.IsTargetable && !minion.IsInvulnerable && minion.IsVisible && minion.Team != Player.Team && minion.IsHPBarRendered && MinionManager.IsMinion(minion) && !name.Contains("gangplankbarrel"));
         }
 
         internal static bool IsValidAlly(this Obj_AI_Base unit, float range = 2000)

@@ -32,6 +32,7 @@ namespace YasuoPro
             }
 
             Game.PrintChat("<font color='#1d87f2'>YasuoPro by Seph Loaded. Good Luck!</font>");
+            Game.PrintChat("<font color='#12FA54'>::::Latest Update: Updated Evade spells & Added very beta Beyblade mode (Enable in Combo) - need feedback. also some bugfixes!</font>");
             Game.PrintChat("<font color='#1d87f2'>::::Any Issues/Recommendations - Post On Topic</font>");
             InitItems();
             InitSpells();
@@ -222,6 +223,11 @@ namespace YasuoPro
 
 
             CastQ(CurrentTarget);
+
+            if (GetBool("Combo.UseBeyBlade") && GetBool("Combo.UseE"))
+            {
+                Beyblade();
+            }
 
             if (GetBool("Combo.UseE") && !Helper.DontDash)
             {
@@ -439,6 +445,30 @@ namespace YasuoPro
             }
         }
 
+        
+        void Beyblade()
+        {
+            if (TornadoReady && Spells[Q].IsReady() && Spells[Flash].IsReady() && Spells[R].IsReady())
+            {
+                var delay = GetSliderInt("Combo.BeyBladeDelay");
+                var targ = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
+                if (targ != null && (GetKeyBind("Misc.TowerDive") || !targ.ServerPosition.To2D().PointUnderEnemyTurret() || GetBool("Combo.ETower")))
+                {
+                    var minion = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsDashable() && x.IsInRange(Spells[E].Range)).MinOrDefault(x => GetDashPos(x).Distance(targ) <= 0.85 * Spells[Flash].Range);
+                    if (minion != null)
+                    {
+                        Game.PrintChat("BeyBlade 1");
+                        Helper.DontDash = true;
+                        Spells[E].Cast(minion);
+                        Utility.DelayAction.Add(delay, () => {
+                            Spells[Q].Cast(minion);
+                            Spells[Flash].Cast(targ.ServerPosition);
+                            Helper.DontDash = false;
+                        });
+                    }
+                }
+            }
+        }
 
 
         private void UnitOnOnDash(Obj_AI_Base sender, Dash.DashItem args)
@@ -462,34 +492,45 @@ namespace YasuoPro
                                 {
                                     Spells[Q].Cast(endpos);
                                 }
-                            }
 
-                            else if (!TornadoReady)
-                            {
-                                var targ = endpos.To3D().GetEnemiesInRange(QRadius).Any(x => !x.ECanKill());
-                                if (targ)
+                                else if (GetBool("Combo.BeyBlade") && Spells[Flash].IsReady() && Spells[R].IsReady())
                                 {
-                                    Spells[Q].Cast(endpos);
+                                    var targ = TargetSelector.GetTarget(Yasuo.Distance(endpos) + Spells[Flash].Range, TargetSelector.DamageType.Physical);
+                                    if (targ != null && (ShouldDive(targ) || GetBool("Combo.ETower")) && endpos.Distance(targ.ServerPosition) <= 0.85f * Spells[Flash].Range )
+                                    {
+                                        Game.PrintChat("Beyblade 2");
+                                        Spells[Q].Cast(endpos);
+                                        Spells[Flash].Cast(targ.ServerPosition);
+                                    }
                                 }
 
-                                if (GetBool("Combo.StackQ"))
+                                else if (!TornadoReady)
                                 {
-                                    var nonkillableMin = endpos.GetMinionsInRange(QRadius).Any(x => !x.ECanKill());
-                                    if (nonkillableMin)
+                                    var targ = endpos.To3D().GetEnemiesInRange(QRadius).Any(x => !x.ECanKill());
+                                    if (targ)
                                     {
                                         Spells[Q].Cast(endpos);
-                                        return;
+                                    }
+
+                                    if (GetBool("Combo.StackQ"))
+                                    {
+                                        var nonkillableMin = endpos.GetMinionsInRange(QRadius).Any(x => !x.ECanKill());
+                                        if (nonkillableMin)
+                                        {
+                                            Spells[Q].Cast(endpos);
+                                            return;
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        else if (mode != Orbwalking.OrbwalkingMode.None)
-                        {
-                            if (endpos.To3D().MinionsInRange(QRadius) >= 1 ||
-                                endpos.To3D().CountEnemiesInRange(QRadius) >= 1)
+                            else if (mode != Orbwalking.OrbwalkingMode.None)
                             {
-                                Spells[Q].Cast(endpos);
+                                if (endpos.To3D().MinionsInRange(QRadius) >= 1 ||
+                                    endpos.To3D().CountEnemiesInRange(QRadius) >= 1)
+                                {
+                                    Spells[Q].Cast(endpos);
+                                }
                             }
                         }
                     }
@@ -546,7 +587,7 @@ namespace YasuoPro
 
             if (ordered.Count() >= minhit)
             {
-                var best2 = ordered.FirstOrDefault(x => !x.isBlackListed() && (GetBool("Combo.UltTower") || ShouldDive(x)));
+                var best2 = ordered.FirstOrDefault(x => !x.isBlackListed() && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
                 if (best2 != null)
                 {
                     Spells[R].CastOnUnit(best2);

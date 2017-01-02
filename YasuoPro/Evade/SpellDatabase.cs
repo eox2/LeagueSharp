@@ -521,10 +521,10 @@ namespace Evade
                     Type = SkillShotType.SkillshotCircle,
                     Delay = 850,
                     Range = 900,
-                    Radius = 240,
+                    Radius = 260,
                     MissileSpeed = int.MaxValue,
                     FixedRange = false,
-                    AddHitbox = true,
+                    AddHitbox = false,
                     DangerValue = 2,
                     IsDangerous = false,
                     MissileSpellName = "",
@@ -1123,18 +1123,18 @@ namespace Evade
                 new SpellData
                 {
                     ChampionName = "Fizz",
-                    SpellName = "FizzMarinerDoom",
+                    SpellName = "FizzR",
                     Slot = SpellSlot.R,
                     Type = SkillShotType.SkillshotMissileLine,
                     Delay = 250,
-                    Range = 1300,
-                    Radius = 120,
-                    MissileSpeed = 1350,
+                    Range = 1275,
+                    Radius = 110,
+                    MissileSpeed = 1300,
                     FixedRange = false,
                     AddHitbox = true,
                     DangerValue = 5,
                     IsDangerous = true,
-                    MissileSpellName = "FizzMarinerDoomMissile",
+                    MissileSpellName = "FizzRMissile",
                     EarlyEvade = new[] { EarlyObjects.Allies },
                     CollisionObjects = new[] { CollisionObjectTypes.Champions, CollisionObjectTypes.YasuoWall },
                     CanBeRemoved = true,
@@ -1583,26 +1583,49 @@ namespace Evade
 
             #endregion Irelia
 
-            #region Janna
+            #region Ivern
 
             Spells.Add(
                 new SpellData
                 {
-                    ChampionName = "Janna",
-                    SpellName = "JannaQ",
+                    ChampionName = "Ivern",
+                    SpellName = "IvernQ",
                     Slot = SpellSlot.Q,
                     Type = SkillShotType.SkillshotMissileLine,
                     Delay = 250,
-                    Range = 1700,
-                    Radius = 120,
-                    MissileSpeed = 900,
-                    FixedRange = false,
+                    Range = 1100,
+                    Radius = 65,
+                    MissileSpeed = 1300,
+                    FixedRange = true,
                     AddHitbox = true,
-                    DangerValue = 2,
-                    IsDangerous = false,
-                    MissileSpellName = "HowlingGaleSpell",
-                    CollisionObjects = new[] { CollisionObjectTypes.YasuoWall },
+                    DangerValue = 3,
+                    IsDangerous = true,
+                    MissileSpellName = "IvernQ",
+                    CollisionObjects = new[] { CollisionObjectTypes.YasuoWall, CollisionObjectTypes.Minion, CollisionObjectTypes.Champions, },
                 });
+
+            #endregion Ivern
+
+            #region Janna
+
+            Spells.Add(
+            new SpellData
+            {
+                ChampionName = "Janna",
+                SpellName = "JannaQ",
+                Slot = SpellSlot.Q,
+                Type = SkillShotType.SkillshotMissileLine,
+                Delay = 250,
+                Range = 1700,
+                Radius = 120,
+                MissileSpeed = 900,
+                FixedRange = false,
+                AddHitbox = true,
+                DangerValue = 2,
+                IsDangerous = false,
+                MissileSpellName = "HowlingGaleSpell",
+                CollisionObjects = new[] { CollisionObjectTypes.YasuoWall },
+            });
 
             #endregion Janna
 
@@ -1730,10 +1753,10 @@ namespace Evade
                     DangerValue = 3,
                     IsDangerous = true,
                     MissileSpellName = "JhinWMissile",
-                    EarlyEvade = new[] { EarlyObjects.Allies, EarlyObjects.Minions, EarlyObjects.AllyObjects },
+                    EarlyEvade = new[] { EarlyObjects.Allies, EarlyObjects.AllyObjects },
                     CanBeRemoved = true,
                     CollisionObjects =
-                        new[] { CollisionObjectTypes.Champions, CollisionObjectTypes.Minion, CollisionObjectTypes.YasuoWall },
+                        new[] { CollisionObjectTypes.Champions, CollisionObjectTypes.YasuoWall },
                 });
 
             Spells.Add(
@@ -1752,11 +1775,13 @@ namespace Evade
                     DangerValue = 3,
                     IsDangerous = true,
                     MissileSpellName = "JhinRShotMis",
+                    ExtraMissileNames = new[] { "JhinRShotMis4" },
                     EarlyEvade = new[] { EarlyObjects.Allies, EarlyObjects.Minions, EarlyObjects.AllyObjects },
                     CanBeRemoved = true,
                     CollisionObjects =
-                        new[] { CollisionObjectTypes.Champions, CollisionObjectTypes.Minion, CollisionObjectTypes.YasuoWall },
+                        new[] { CollisionObjectTypes.Champions, CollisionObjectTypes.YasuoWall },
                 });
+
             #endregion Jhin
 
             #region Jinx
@@ -2012,6 +2037,74 @@ namespace Evade
 
             #endregion Khazix
 
+            #region Kled
+
+            Spells.Add(
+                new SpellData
+                {
+                    ChampionName = "Kled",
+                    SpellName = "KledQ",
+                    Slot = SpellSlot.Q,
+                    Type = SkillShotType.SkillshotMissileLine,
+                    Delay = 250,
+                    Range = 800,
+                    Radius = 45,
+                    MissileSpeed = 1600,
+                    FixedRange = true,
+                    AddHitbox = true,
+                    DangerValue = 2,
+                    IsDangerous = true,
+                    MissileSpellName = "KledQMissile",
+                    CanBeRemoved = true,
+                    CollisionObjects =
+                        new[] { CollisionObjectTypes.Champions, CollisionObjectTypes.YasuoWall },
+                });
+
+            Spells.Add(
+                new SpellData
+                {
+                    ChampionName = "Kled",
+                    SpellName = "KledE",
+                    Slot = SpellSlot.E,
+                    Type = SkillShotType.SkillshotMissileLine,
+                    Delay = 0,
+                    Range = 750,
+                    Radius = 125,
+                    MissileSpeed = 945,
+                    FixedRange = true,
+                    AddHitbox = true,
+                    DangerValue = 2,
+                    IsDangerous = true,
+                    MissileSpellName = "",
+                    CanBeRemoved = true,
+                    CollisionObjects =
+                        new[] { CollisionObjectTypes.Champions, CollisionObjectTypes.YasuoWall },
+                });
+
+            Spells.Add(
+                new SpellData
+                {
+                    ChampionName = "Kled",
+                    SpellName = "KledRiderQ",
+                    Slot = SpellSlot.Q,
+                    Type = SkillShotType.SkillshotMissileLine,
+                    Delay = 250,
+                    Range = 700,
+                    Radius = 40,
+                    MissileSpeed = 3000,
+                    FixedRange = true,
+                    AddHitbox = true,
+                    DangerValue = 2,
+                    IsDangerous = false,
+                    MissileSpellName = "KledRiderQMissile",
+                    MultipleNumber = 5,
+                    MultipleAngle = 5 * (float)Math.PI / 180,
+                    CanBeRemoved = true,
+                    CollisionObjects = new[] { CollisionObjectTypes.YasuoWall },
+                });
+
+            #endregion Kled
+
             #region Kogmaw
 
             Spells.Add(
@@ -2123,7 +2216,7 @@ namespace Evade
                     Type = SkillShotType.SkillshotMissileLine,
                     Delay = 250,
                     Range = 950,
-                    Radius = 70,
+                    Radius = 55,
                     MissileSpeed = 1750,
                     FixedRange = true,
                     AddHitbox = true,
@@ -2146,7 +2239,7 @@ namespace Evade
                     Type = SkillShotType.SkillshotMissileLine,
                     Delay = 250,
                     Range = 950,
-                    Radius = 70,
+                    Radius = 55,
                     MissileSpeed = 1750,
                     FixedRange = true,
                     AddHitbox = true,
@@ -2461,6 +2554,7 @@ namespace Evade
                     DangerValue = 5,
                     IsDangerous = true,
                     MissileSpellName = "LuxMaliceCannon",
+                    CollisionObjects = new[] { CollisionObjectTypes.YasuoWall },
                 });
 
             #endregion Lux
@@ -2483,6 +2577,7 @@ namespace Evade
                     DangerValue = 5,
                     IsDangerous = true,
                     MissileSpellName = "UFSlash",
+                    CollisionObjects = new[] { CollisionObjectTypes.YasuoWall },
                 });
 
             #endregion Malphite
@@ -2736,6 +2831,7 @@ namespace Evade
                     IsDangerous = false,
                     MissileSpellName = "OrianaDissonanceCommand-",
                     FromObject = "yomu_ring_",
+                 //   SourceObjectName = "w_dissonance_ball" //Orianna_Base_W_Dissonance_ball_green.troy & Orianna_Base_W_Dissonance_cas_green.troy
                 });
 
             Spells.Add(
@@ -2774,6 +2870,7 @@ namespace Evade
                     IsDangerous = true,
                     MissileSpellName = "OrianaDetonateCommand-",
                     FromObject = "yomu_ring_",
+                   // SourceObjectName = "r_vacuumindicator", //Orianna_Base_R_VacuumIndicator.troy
                 });
 
             #endregion Orianna
@@ -2985,37 +3082,14 @@ namespace Evade
                     Slot = SpellSlot.Q,
                     Type = SkillShotType.SkillshotMissileLine,
                     Delay = 250,
-                    Range = 900,
-                    Radius = 50,
+                    Range = 1000,
+                    Radius = 55,
                     MissileSpeed = 1700,
                     FixedRange = true,
                     AddHitbox = true,
                     DangerValue = 2,
                     IsDangerous = false,
                     MissileSpellName = "RyzeQ",
-                    EarlyEvade = new[] { EarlyObjects.Allies, EarlyObjects.Minions, EarlyObjects.AllyObjects },
-                    CanBeRemoved = true,
-                    CollisionObjects =
-                        new[]
-                        {CollisionObjectTypes.Champions, CollisionObjectTypes.Minion, CollisionObjectTypes.YasuoWall},
-                });
-
-            Spells.Add(
-                new SpellData
-                {
-                    ChampionName = "Ryze",
-                    SpellName = "ryzerq",
-                    Slot = SpellSlot.Q,
-                    Type = SkillShotType.SkillshotMissileLine,
-                    Delay = 250,
-                    Range = 900,
-                    Radius = 50,
-                    MissileSpeed = 1700,
-                    FixedRange = true,
-                    AddHitbox = true,
-                    DangerValue = 2,
-                    IsDangerous = false,
-                    MissileSpellName = "ryzerq",
                     EarlyEvade = new[] { EarlyObjects.Allies, EarlyObjects.Minions, EarlyObjects.AllyObjects },
                     CanBeRemoved = true,
                     CollisionObjects =
@@ -3440,6 +3514,7 @@ namespace Evade
                     IsDangerous = false,
                     MissileSpellName = "TaliyahQMis",
                     CollisionObjects = new[] { CollisionObjectTypes.YasuoWall, CollisionObjectTypes.Minion, CollisionObjectTypes.Champions },
+                    DisabledByDefault = true,
                 });
 
             Spells.Add(
@@ -4398,7 +4473,7 @@ namespace Evade
             //Console.WriteLine("Added " + Spells.Count + " spells.");
         }
 
-   
+
 
         public static SpellData GetByName(string spellName)
         {
