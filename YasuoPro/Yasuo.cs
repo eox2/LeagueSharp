@@ -587,7 +587,7 @@ namespace YasuoPro
 
             if (ordered.Count() >= minhit)
             {
-                var best2 = ordered.FirstOrDefault(x => !x.isBlackListed() && (GetBool("Combo.UltTower") || !x.Position.To2D().PointUnderEnemyTurret()));
+                var best2 = ordered.FirstOrDefault(x => !x.isBlackListed() && (GetBool("Combo.UltTower") || GetKeyBind("Misc.TowerDive")  || !x.Position.To2D().PointUnderEnemyTurret()));
                 if (best2 != null)
                 {
                     Spells[R].CastOnUnit(best2);
