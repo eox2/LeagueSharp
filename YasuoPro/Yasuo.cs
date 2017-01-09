@@ -278,7 +278,7 @@ namespace YasuoPro
                         }
                     }
 
-                    if (GetBool("Combo.UseBeyBlade") && target.IsInRange(FlashRange) && ShouldDive(target))
+                    if (GetBool("Combo.UseBeyBlade") && Spells[Q].IsReady() && Spells[R].IsReady() && Spells[Flash].IsReady() && target.IsInRange(FlashRange) && ShouldDive(target))
                     {
                         var minion = ObjectManager.Get<Obj_AI_Base>().Where(x => x.IsValidTarget(Qrange) && x.Distance(target) <= Yasuo.Distance(target)).FirstOrDefault();
                         if (minion != null)
@@ -286,8 +286,8 @@ namespace YasuoPro
                             var pred = Spells[Q].GetPrediction(minion);
                             if (pred.Hitchance >= HitChance.Medium)
                             {
-                                Spells[Q].Cast(pred.CastPosition);
-                                Spells[Flash].Cast(target.ServerPosition);
+                                Spells[Q2].Cast(pred.CastPosition);
+                                Utility.DelayAction.Add(300, () => Spells[Flash].Cast(target.ServerPosition));
                             }
 
                         }
