@@ -13,7 +13,7 @@ namespace YasuoPro
 
         internal static Obj_AI_Hero Yasuo;
 
-        internal float QRadius = 170;
+        internal float QRadius = 150;
 
         internal static Obj_Shop shop;
 
