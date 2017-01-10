@@ -217,8 +217,8 @@ namespace YasuoPro
             //  HealthPrediction.GetHealthPrediction(minion, 0, 500 + Game.Ping / 2);
             // return hpred < 0.95 * Player.GetSpellDamage(minion, SpellSlot.Q) && hpred > 0;
             var qspell = isQ2 ? Helper.Spells[Helper.Q2] : Helper.Spells[Helper.Q];
-            var dmg = Player.GetSpellDamage(minion, SpellSlot.Q) / 1.3
-                            >= HealthPrediction.GetHealthPrediction(
+            var dmg = Player.GetSpellDamage(minion, SpellSlot.Q) 
+                            >= 1.1 * HealthPrediction.GetHealthPrediction(
                                 minion,
                                 (int)(Player.Distance(minion) / qspell.Speed) * 1000,
                                 (int)qspell.Delay * 1000);
@@ -228,8 +228,8 @@ namespace YasuoPro
         internal static bool ECanKill(this Obj_AI_Base minion)
         {
             var espell = Helper.Spells[Helper.E];
-            return Helper.GetProperEDamage(minion) / 1.2
-                            >= HealthPrediction.GetHealthPrediction(
+            return Helper.GetProperEDamage(minion) 
+                            >= 1.1 * HealthPrediction.GetHealthPrediction(
                                 minion,
                                 (int)(Player.Distance(minion) / espell.Speed) * 1000,
                                 (int)espell.Delay * 1000);
