@@ -5,8 +5,8 @@ using LeagueSharp.Common;
 
 namespace AutoZhonya
 {
-    /*
-     * To do
+    
+     /* To do
      * Add Buffs for not detectable spells
      */
     class Program
@@ -14,6 +14,7 @@ namespace AutoZhonya
 
         private static Obj_AI_Hero Player;
         private static readonly Items.Item Zhonya = new Items.Item(3157, 0);
+        private static readonly Items.Item Wooglets = new Items.Item(3090, 0);
         private static readonly Items.Item Seraph = new Items.Item(3040, 0);
         private static readonly string Version = "1.0";
         public static Menu Menu;
@@ -75,6 +76,7 @@ namespace AutoZhonya
                 BuffDetector();
                 if (Player.Health < Player.MaxHealth * 0.35 && Player.CountEnemiesInRange(300) >= 1 && (!SpellSlot.Q.IsReady() || !SpellSlot.W.IsReady() || !SpellSlot.E.IsReady() || !SpellSlot.R.IsReady()) && Player.Mana < Player.MaxMana * 80) {
                     Zhonya.Cast();
+                    Wooglets.Cast();
                 }
             }
         }
@@ -186,7 +188,8 @@ namespace AutoZhonya
 
         public static bool zhonyaready()
         {
-            return Zhonya.IsReady();
+            return (Zhonya.IsReady() || Wooglets.IsReady());
+            //   return Wooglets.IsReady();
         }
 
         public static bool seraphready()
